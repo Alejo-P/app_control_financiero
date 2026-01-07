@@ -1,5 +1,6 @@
 import 'package:control_financiero/features/home/widgets/detail_card.dart';
 import 'package:control_financiero/features/home/widgets/icon_button_custom.dart';
+import 'package:control_financiero/features/home/widgets/total_balance_card.dart';
 import 'package:control_financiero/features/shared/widgets/budget_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,9 +35,8 @@ class HomePage extends StatelessWidget {
                   Divider(),
                   SizedBox(
                     height: 210, // ajusta a gusto
-                    child: BudgetSummaryCard(
-                      totalBudget: 150,
-                      spentAmount: 80,
+                    child: TotalBalanceCard(
+                      totalBalance: 150,
                       icon: Icons.account_balance_wallet,
                     ),
                   ),
