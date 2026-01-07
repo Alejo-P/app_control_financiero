@@ -65,9 +65,11 @@ class _MovimientosPageState extends State<MovimientosPage> {
                         return CategoryChip(
                           label: _labelFromFiltro(filtro),
                           selected: filtro == selectedFilter,
+                          icon: _iconFromFiltro(filtro),
+                          iconColor: _colorFromFiltro(filtro),
                           onTap: () {
                             if (filtro == selectedFilter) return;
-                            
+
                             setState(() {
                               selectedFilter = filtro;
                             });
@@ -95,6 +97,30 @@ class _MovimientosPageState extends State<MovimientosPage> {
       case MovimientoFiltro.todos:
       default:
         return 'Todos';
+    }
+  }
+
+  IconData _iconFromFiltro(MovimientoFiltro filtro) {
+    switch (filtro) {
+      case MovimientoFiltro.ingresos:
+        return Icons.arrow_downward;
+      case MovimientoFiltro.gastos:
+        return Icons.arrow_upward;
+      case MovimientoFiltro.todos:
+      default:
+        return Icons.list;
+    }
+  }
+
+  Color _colorFromFiltro(MovimientoFiltro filtro) {
+    switch (filtro) {
+      case MovimientoFiltro.ingresos:
+        return Colors.green;
+      case MovimientoFiltro.gastos:
+        return Colors.red;
+      case MovimientoFiltro.todos:
+      default:
+        return Colors.grey;
     }
   }
 }

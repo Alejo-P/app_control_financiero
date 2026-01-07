@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class CategoryChip extends StatelessWidget {
   final String label;
+  final IconData icon;
+  final Color iconColor;
   final bool selected;
   final VoidCallback onTap;
 
@@ -10,6 +12,8 @@ class CategoryChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.icon = Icons.category,
+    this.iconColor = Colors.black54,
   });
 
   @override
@@ -29,12 +33,24 @@ class CategoryChip extends StatelessWidget {
             color: selected ? Colors.black : Colors.grey.shade400,
           ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: selected ? Colors.white : iconColor,
+              size: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.white : Colors.black87,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
         ),
       ),
     );
