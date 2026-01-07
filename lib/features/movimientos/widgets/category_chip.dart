@@ -27,10 +27,10 @@ class CategoryChip extends StatelessWidget {
           vertical: 8,
         ),
         decoration: BoxDecoration(
-          color: selected ? Colors.black : Colors.grey.shade300,
+          color: selected ? Colors.black : Colors.white,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
-            color: selected ? Colors.black : Colors.grey.shade400,
+            color: selected ? Colors.black : Colors.grey.shade300,
           ),
         ),
         child: Row(
