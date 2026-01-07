@@ -22,7 +22,6 @@ class MovimientosPage extends StatelessWidget {
                   icon: Icons.account_balance,
                   backgroundColor: Colors.blue,
                   content: BalanceSummaryCard(
-                    ammountBalance: 300,
                     ammountIncome: 1200,
                     ammountExpense: 900,
                   )

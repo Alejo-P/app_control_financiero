@@ -2,19 +2,20 @@ import 'package:control_financiero/features/movimientos/widgets/transaction_card
 import 'package:flutter/material.dart';
 
 class BalanceSummaryCard extends StatelessWidget {
-  final double ammountBalance;
   final double ammountIncome;
   final double ammountExpense;
 
   const BalanceSummaryCard({
     super.key,
-    required this.ammountBalance,
     required this.ammountIncome,
     required this.ammountExpense,
   });
 
   @override
   Widget build(BuildContext context) {
+    final ammountBalance = ammountIncome - ammountExpense;
+    final balanceColor = ammountBalance >= 0 ? Colors.green[100] : Colors.red[100];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,7 +24,7 @@ class BalanceSummaryCard extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 32,
-                color: Colors.white,
+                color: balanceColor,
               ),
         ),
         SizedBox(height: 4),
