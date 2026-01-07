@@ -1,14 +1,12 @@
-import 'package:control_financiero/features/shared/widgets/budget_summary_card.dart';
+import 'package:control_financiero/features/presupuestos/widgets/total_budget_summary_card.dart';
+import 'package:control_financiero/features/shared/widgets/summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
 import '../widgets/month_selection.dart';
-
 import '../widgets/category_card.dart';
-
 class PresupuestoPage extends StatelessWidget {
   const PresupuestoPage({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +27,14 @@ class PresupuestoPage extends StatelessWidget {
               children: [
                 SizedBox(
                   height: 210, // ajusta a gusto
-                  child: BudgetSummaryCard(
-                    totalBudget: 2000,
-                    spentAmount: 1234.56,
+                  child: SummaryCard(
+                    title: 'Resumen de Presupuesto',
                     icon: Icons.calendar_month,
+                    backgroundColor: Colors.teal,
+                    content: TotalBudgetSummaryCard(
+                      totalBudget: 2000,
+                      spentAmount: 1766.50,
+                    ),
                   ),
                 ),
                 SizedBox(height: 20),

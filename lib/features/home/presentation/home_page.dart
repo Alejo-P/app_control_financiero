@@ -1,7 +1,7 @@
 import 'package:control_financiero/features/home/widgets/detail_card.dart';
 import 'package:control_financiero/features/home/widgets/icon_button_custom.dart';
-import 'package:control_financiero/features/home/widgets/total_balance_card.dart';
-import 'package:control_financiero/features/shared/widgets/budget_summary_card.dart';
+import 'package:control_financiero/features/home/widgets/total_balance_summary_card.dart';
+import 'package:control_financiero/features/shared/widgets/summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
@@ -25,20 +25,16 @@ class HomePage extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: double.infinity,
-                    child: Text(
-                      'Resumen Mensual',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Divider(),
-                  SizedBox(
                     height: 210, // ajusta a gusto
-                    child: TotalBalanceCard(
-                      totalBalance: 150,
+                    child: SummaryCard(
+                      title: 'Balance Total',
                       icon: Icons.account_balance_wallet,
-                    ),
+                      backgroundColor: Colors.purple,
+                      content: TotalBalanceSummaryCard(
+                        total: 150,
+                        variationPercent: 5.0,
+                      )
+                    )
                   ),
                   SizedBox(height: 8),
                   GridView(
