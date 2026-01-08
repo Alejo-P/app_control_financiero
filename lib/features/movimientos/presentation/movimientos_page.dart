@@ -1,30 +1,26 @@
 import 'package:control_financiero/features/movimientos/widgets/balance_summary_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/category_chip.dart';
+import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/shared/widgets/summary_card.dart';
+import 'package:control_financiero/app/app_state.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
 
-enum MovimientoFiltro {
-  todos,
-  ingresos,
-  gastos,
-}
-
-class MovimientosPage extends StatefulWidget {
-  const MovimientosPage({super.key});
-
-  @override
-  State<MovimientosPage> createState() => _MovimientosPageState();
-}
-
-class _MovimientosPageState extends State<MovimientosPage> {
-  MovimientoFiltro selectedFilter = MovimientoFiltro.todos;
+class MovimientosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+    MovimientoFiltro selectedFilter = appState.movimientoFiltro;
+
+    // Lista de fechas de movimientos únicos para agrupar (mas reciente a más antiguo)
+    final fechasMovimientos = appState.uniqueMovementDates;
+
     final categories = [
       MovimientoFiltro.todos,
       MovimientoFiltro.ingresos,
-      MovimientoFiltro.gastos
+      MovimientoFiltro.gastos,
     ];
 
     return Padding(
@@ -68,17 +64,31 @@ class _MovimientosPageState extends State<MovimientosPage> {
                           icon: _iconFromFiltro(filtro),
                           iconColor: _colorFromFiltro(filtro),
                           onTap: () {
-                            if (filtro == selectedFilter) return;
-
-                            setState(() {
-                              selectedFilter = filtro;
-                            });
-                            print('Filtrar por $filtro');
+                            appState.changeMovimientoFiltro(filtro);
                           },
                         );
                       },
                     ),
                   ),
+                  SizedBox(height: 16),
+                  ...fechasMovimientos.map((fecha) {
+                    // Filtrar movimientos por fecha y filtro seleccionado
+                    final movimientosFiltrados = appState.getMovimientosByDateAndFilter(
+                      fecha,
+                      selectedFilter,
+                    );
+                    print("Movimientos filtrados para $fecha: ${movimientosFiltrados.length} movimientos");
+                    print(movimientosFiltrados);
+
+                    if (movimientosFiltrados.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return TransactionsContainer(
+                      date: fecha,
+                      movimientos: movimientosFiltrados,
+                    );
+                  }),
                 ],
               ),
             ),
@@ -94,7 +104,6 @@ class _MovimientosPageState extends State<MovimientosPage> {
         return 'Ingresos';
       case MovimientoFiltro.gastos:
         return 'Gastos';
-      case MovimientoFiltro.todos:
       default:
         return 'Todos';
     }
@@ -106,7 +115,6 @@ class _MovimientosPageState extends State<MovimientosPage> {
         return Icons.arrow_downward;
       case MovimientoFiltro.gastos:
         return Icons.arrow_upward;
-      case MovimientoFiltro.todos:
       default:
         return Icons.list;
     }
@@ -118,7 +126,6 @@ class _MovimientosPageState extends State<MovimientosPage> {
         return Colors.green;
       case MovimientoFiltro.gastos:
         return Colors.red;
-      case MovimientoFiltro.todos:
       default:
         return Colors.grey;
     }

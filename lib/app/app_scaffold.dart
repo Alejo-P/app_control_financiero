@@ -18,7 +18,7 @@ class AppScaffold extends StatelessWidget {
 
     final pages = [
       const HomePage(),
-      const MovimientosPage(),
+      MovimientosPage(),
       const PresupuestoPage(),
       const HistorialPage(),
       const AjustesPage(),
