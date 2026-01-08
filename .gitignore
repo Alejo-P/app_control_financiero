@@ -46,3 +46,4 @@ app.*.map.json
 
 # Extra files
 *.ps1
+*/**/mock_*.dart
