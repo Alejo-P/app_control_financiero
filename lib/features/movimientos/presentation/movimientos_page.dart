@@ -12,6 +12,18 @@ class MovimientosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+
+    // Obtener totales de ingresos y gastos del mes seleccionado
+    final totalMesActual = appState.getTotalesMensuales(
+      appState.selectedMonth,
+    );
+
+    // Obtener el porcentaje de variación respecto al mes anterior
+    final variationPercent = appState.calcularVariacionAhorro(
+      appState.selectedMonth,
+      appState.selectedMonth.subtract(const Duration(days: 30)),
+    );
+    
     MovimientoFiltro selectedFilter = appState.movimientoFiltro;
 
     // Lista de fechas de movimientos únicos para agrupar (mas reciente a más antiguo)
@@ -41,9 +53,9 @@ class MovimientosPage extends StatelessWidget {
                       icon: Icons.account_balance,
                       backgroundColor: Colors.blue,
                       content: BalanceSummaryCard(
-                        ammountIncome: 1200,
-                        ammountExpense: 900,
-                        variationPercent: 10.0,
+                        ammountIncome: totalMesActual.ingresos,
+                        ammountExpense: totalMesActual.gastos,
+                        variationPercent: variationPercent ?? 0.0,
                       ),
                     ),
                   ),
@@ -77,8 +89,6 @@ class MovimientosPage extends StatelessWidget {
                       fecha,
                       selectedFilter,
                     );
-                    print("Movimientos filtrados para $fecha: ${movimientosFiltrados.length} movimientos");
-                    print(movimientosFiltrados);
 
                     if (movimientosFiltrados.isEmpty) {
                       return const SizedBox.shrink();

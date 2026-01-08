@@ -54,10 +54,12 @@ class TransactionsContainer extends StatelessWidget {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
+              child: ListView.separated(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: movimientos.length,
+                separatorBuilder: (context, index) =>
+                    const Divider(height: 16),
                 itemBuilder: (context, index) {
                   final movimiento = movimientos[index];
                   final categoria = appState.getCategoriaById(

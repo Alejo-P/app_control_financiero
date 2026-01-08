@@ -25,8 +25,8 @@ final mockCategorias = <Categoria>[
     name: 'Alimentos',
     description: 'Gastos en comida y supermercado',
     categoryTypeID: 'gastos_escenciales',
-    iconName: 'shopping_cart',
-    iconColorValue: 0xFF2196F3,
+    iconName: 'restaurant',
+    iconColorValue: 0xFFEF5350,
   ),
   Categoria(
     id: 'transporte',

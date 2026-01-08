@@ -61,7 +61,7 @@ class TransactionDetailCard extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: type == 'ingreso' ? Colors.green : Colors.red,
+                color: type == 'Ingreso' ? Colors.green : Colors.red,
               ),
             ),
             const SizedBox(height: 3),

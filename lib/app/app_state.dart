@@ -2,6 +2,7 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/features/movimientos/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/category_type.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:flutter/material.dart';
 
 // Importacion de los datos mock
@@ -106,6 +107,37 @@ class AppState extends ChangeNotifier {
     }).toList();
   }
 
+  // Obtener Ingresos y gastos totales para el mes seleccionado
+  TotalesMensuales getTotalesMensuales(DateTime date) {
+    double ingresos = 0.0;
+    double gastos = 0.0;
+
+    for (final mov in _movimientos) {
+      if (mov.date.year == date.year &&
+          mov.date.month == date.month) {
+        if (mov.type == TipoMovimiento.ingreso) {
+          ingresos += mov.ammount;
+        } else {
+          gastos += mov.ammount;
+        }
+      }
+    }
+
+    return TotalesMensuales(
+      ingresos: ingresos,
+      gastos: gastos,
+    );
+  }
+
+  // Calcular la variacion de ahorro entre dos meses
+  double? calcularVariacionAhorro(DateTime mesActual, DateTime mesAnterior) {
+    final actual = getTotalesMensuales(mesActual);
+    final anterior = getTotalesMensuales(mesAnterior);
+
+    if (anterior.ahorro == 0) return null;
+
+    return ((actual.ahorro - anterior.ahorro) / anterior.ahorro) * 100;
+  }
 
   void changeTab(int index) {
     if (currentTab == index) return;
