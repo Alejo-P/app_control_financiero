@@ -2,6 +2,7 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MovimientosLocalDataSource {
@@ -60,6 +61,34 @@ class MovimientosLocalDataSource {
     );
 
     return maps.map(Movimiento.fromMap).toList();
+  }
+
+  // Obtener ingresos y gastos totales para una fecha dada
+  Future<TotalesMensuales> fetchTotalesMensuales(DateTime date) async {
+    double ingresos = 0.0;
+    double gastos = 0.0;
+
+    final db = await _dbHelper.database;
+    final String dateString = date.toIso8601String().split('T')[0];
+    final List<Map<String, dynamic>> maps = await db.query(
+      MovimientosTable.table,
+      where: "strftime('%Y-%m', ${MovimientosTable.date}) = ?",
+      whereArgs: [dateString.substring(0, 7)],
+    );
+
+    for (final map in maps) {
+      final movimiento = Movimiento.fromMap(map);
+      if (movimiento.type == TipoMovimiento.ingreso) {
+        ingresos += movimiento.ammount;
+      } else {
+        gastos += movimiento.ammount;
+      }
+    }
+
+    return TotalesMensuales(
+      ingresos: ingresos,
+      gastos: gastos,
+    );
   }
 
   // Agregar un nuevo movimiento

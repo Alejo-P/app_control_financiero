@@ -41,10 +41,21 @@ class AppState extends ChangeNotifier {
 
   final List<TipoCategoria> _tiposCategorias = mockTipoCategorias;
   final List<Categoria> _categorias = mockCategorias;
-  final List<Movimiento> _movimientos = mockMovimientos;
+  //final List<Movimiento> _movimientos = mockMovimientos;
+
 
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
   MovimientoFiltro get movimientoFiltro => _movimientoFiltro;
+
+  TotalesMensuales? _totalesMensuales;
+  double? _variacionAhorro;
+  List<DateTime> _uniqueMovementDates = [];
+  Map<DateTime, List<Movimiento>> _movimientosPorFecha = {};
+
+  TotalesMensuales? get totalesMensuales => _totalesMensuales;
+  double? get variacionAhorro => _variacionAhorro;
+  List<DateTime> get uniqueMovementDates => _uniqueMovementDates;
+
 
   // Cargar datos iniciales de los repositorios
   Future<void> loadInitialData() async {
@@ -52,6 +63,23 @@ class AppState extends ChangeNotifier {
     await _categoriasRepository.fetchCategorias();
     await _tipoCategoriaRepository.fetchTipoCategorias();
   }
+
+  Future<void> loadMovementsData() async {
+    _totalesMensuales =
+        await _movimientosRepository.fetchTotalesMensuales(selectedMonth);
+
+    _variacionAhorro = await calcularVariacionAhorro(
+      selectedMonth,
+      DateTime(selectedMonth.year, selectedMonth.month - 1),
+    );
+
+    _movimientosPorFecha = await _fetchMovimientosPorFecha();
+
+    _uniqueMovementDates = await _fetchUniqueMovementDates();
+
+    notifyListeners();
+  }
+
 
   void changeMovimientoFiltro(MovimientoFiltro filtro) {
     if (_movimientoFiltro == filtro) return;
@@ -84,21 +112,62 @@ class AppState extends ChangeNotifier {
     );
   }
 
-  List<Movimiento> get movimientos => _movimientos;
-
   // Obtener todas las fechas únicas de movimientos
-  List<DateTime> get uniqueMovementDates {
-    final dates = _movimientos.map(
-      (mov) => DateTime(mov.date.year, mov.date.month, mov.date.day)
-    ).toSet().toList();
-    dates.sort((a, b) => b.compareTo(a)); // Ordenar de más reciente a más antiguo
+  Future<List<DateTime>> _fetchUniqueMovementDates() async {
+    final movimientos = await _movimientosRepository.fetchMovimientos();
+    final dates = movimientos
+        .map((m) => DateTime(m.date.year, m.date.month, m.date.day))
+        .toSet()
+        .toList();
+
+    dates.sort((a, b) => b.compareTo(a));
     return dates;
   }
 
+  // Obtener movimientos agrupados por fecha
+  Future<Map<DateTime, List<Movimiento>>> _fetchMovimientosPorFecha() async {
+    final movimientos = await _movimientosRepository.fetchMovimientos();
+    final Map<DateTime, List<Movimiento>> groupedMovements = {};
+
+    for (var movimiento in movimientos) {
+      final dateKey = DateTime(
+        movimiento.date.year,
+        movimiento.date.month,
+        movimiento.date.day,
+      );
+
+      if (!groupedMovements.containsKey(dateKey)) {
+        groupedMovements[dateKey] = [];
+      }
+      groupedMovements[dateKey]!.add(movimiento);
+    }
+
+    // Ordenar las fechas de más reciente a más antigua
+    final sortedKeys = groupedMovements.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    final sortedMap = <DateTime, List<Movimiento>>{};
+    for (var key in sortedKeys) {
+      sortedMap[key] = groupedMovements[key]!;
+    }
+
+    return sortedMap;
+  }
+
+
   // Obtener movimientos filtrados por fecha (mes y año)
-  List<Movimiento> getMovimientosByDate(DateTime date) {
-    return _movimientos.where((mov) =>
-      mov.date.month == date.month && mov.date.year == date.year
+  List<Movimiento> getMovimientosByDateAndFilter(
+    DateTime fecha,
+    MovimientoFiltro filtro,
+  ) {
+    final movimientos = _movimientosPorFecha[fecha] ?? [];
+
+    if (filtro == MovimientoFiltro.todos) return movimientos;
+
+    return movimientos.where((m) =>
+      filtro == MovimientoFiltro.ingresos
+        ? m.type == TipoMovimiento.ingreso
+        : m.type == TipoMovimiento.gasto
     ).toList();
   }
 
@@ -108,54 +177,18 @@ class AppState extends ChangeNotifier {
       a.day == b.day;
   }
 
-
-  // Obtener movimientos filtrados por fecha y filtro de tipo
-  List<Movimiento> getMovimientosByDateAndFilter(
-    DateTime fecha,
-    MovimientoFiltro selectedFilter,
-  ) {
-    return movimientos.where((movimiento) {
-      final sameDay = isSameDay(movimiento.date, fecha);
-
-      if (!sameDay) return false;
-
-      switch (selectedFilter) {
-        case MovimientoFiltro.todos:
-          return true;
-        case MovimientoFiltro.ingresos:
-          return movimiento.type == TipoMovimiento.ingreso;
-        case MovimientoFiltro.gastos:
-          return movimiento.type == TipoMovimiento.gasto;
-      }
-    }).toList();
-  }
-
   // Obtener Ingresos y gastos totales para el mes seleccionado
-  TotalesMensuales getTotalesMensuales(DateTime date) {
-    double ingresos = 0.0;
-    double gastos = 0.0;
+  Future<TotalesMensuales> getTotalesMensuales(DateTime date) async {
+    final totales = await _movimientosRepository.fetchTotalesMensuales(date);
 
-    for (final mov in _movimientos) {
-      if (mov.date.year == date.year &&
-          mov.date.month == date.month) {
-        if (mov.type == TipoMovimiento.ingreso) {
-          ingresos += mov.ammount;
-        } else {
-          gastos += mov.ammount;
-        }
-      }
-    }
+    return totales;
 
-    return TotalesMensuales(
-      ingresos: ingresos,
-      gastos: gastos,
-    );
   }
 
   // Calcular la variacion de ahorro entre dos meses
-  double? calcularVariacionAhorro(DateTime mesActual, DateTime mesAnterior) {
-    final actual = getTotalesMensuales(mesActual);
-    final anterior = getTotalesMensuales(mesAnterior);
+  Future<double?> calcularVariacionAhorro(DateTime mesActual, DateTime mesAnterior) async {
+    final actual = await _movimientosRepository.fetchTotalesMensuales(mesActual);
+    final anterior = await _movimientosRepository.fetchTotalesMensuales(mesAnterior);
 
     if (anterior.ahorro == 0) return null;
 

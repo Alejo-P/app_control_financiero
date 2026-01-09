@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/features/movimientos/data/movimentos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 
 abstract class _MovimientosRepository {
   ///Obtiene la lista de movimientos financieros.
@@ -25,6 +26,11 @@ abstract class _MovimientosRepository {
     DateTime date,
     TipoMovimiento type
   );
+
+  /// Obtener totales mensuales (ingresos y gastos) para una fecha dada
+  /// @param date La fecha para la cual se desean los totales.
+  /// @return Un objeto TotalesMensuales con los totales de ingresos y gastos.
+  Future<TotalesMensuales> fetchTotalesMensuales(DateTime date);
 
   /// Agrega un nuevo movimiento financiero.
   /// @param movimiento El objeto Movimiento a agregar.
@@ -68,6 +74,11 @@ class MovimientosRepository implements _MovimientosRepository {
     TipoMovimiento type
   ) async {
     return localDataSource.fetchMovimientosByDateAndType(date, type);
+  }
+
+  @override
+  Future<TotalesMensuales> fetchTotalesMensuales(DateTime date) async {
+    return localDataSource.fetchTotalesMensuales(date);
   }
 
   @override

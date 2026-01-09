@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/models/app_bar_action.dart';
+import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/movimientos/widgets/balance_summary_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/category_chip.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
@@ -42,19 +43,16 @@ class _MovimientosPageState extends State<MovimientosPage> {
     final appState = context.watch<AppState>();
 
     // Obtener totales de ingresos y gastos del mes seleccionado
-    final totalMesActual = appState.getTotalesMensuales(
-      appState.selectedMonth,
-    );
+    final totalMesActual = appState.totalesMensuales ??
+        TotalesMensuales(ingresos: 0.0, gastos: 0.0);
 
     // Obtener el porcentaje de variación respecto al mes anterior
-    final variationPercent = appState.calcularVariacionAhorro(
-      appState.selectedMonth,
-      appState.selectedMonth.subtract(const Duration(days: 30)),
-    );
+    final variationPercent = appState.variacionAhorro;
     
+    // Filtro de movimientos seleccionado
     MovimientoFiltro selectedFilter = appState.movimientoFiltro;
 
-    // Lista de fechas de movimientos únicos para agrupar (mas reciente a más antiguo)
+    // Movimientos agrupados por fecha
     final fechasMovimientos = appState.uniqueMovementDates;
 
     final categories = [
@@ -69,7 +67,9 @@ class _MovimientosPageState extends State<MovimientosPage> {
         // permite desplazamiento si el contenido es mayor que el espacio.
         children: [
           Expanded(
-            child: SingleChildScrollView(
+            child: fechasMovimientos.isEmpty
+                ? _EmptyMovimientos()
+                : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -111,6 +111,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
                     ),
                   ),
                   SizedBox(height: 16),
+                  // Lista de movimientos agrupados por fecha
                   ...fechasMovimientos.map((fecha) {
                     // Filtrar movimientos por fecha y filtro seleccionado
                     final movimientosFiltrados = appState.getMovimientosByDateAndFilter(
@@ -167,5 +168,36 @@ class _MovimientosPageState extends State<MovimientosPage> {
       default:
         return Colors.grey;
     }
+  }
+}
+
+class _EmptyMovimientos extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.receipt_long,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'No hay movimientos para mostrar.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            'Agrega nuevos movimientos para empezar a llevar el control de tus finanzas.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.grey[500],
+            ),
+            textAlign: TextAlign.center,
+          )
+        ],
+      ),
+    );
   }
 }
