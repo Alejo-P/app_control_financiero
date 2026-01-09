@@ -64,7 +64,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
     ];
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Column(
         // permite desplazamiento si el contenido es mayor que el espacio.
         children: [

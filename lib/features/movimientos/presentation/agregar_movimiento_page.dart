@@ -13,7 +13,7 @@ class AgregarMovimientoPage extends StatelessWidget {
             icon: const Icon(Icons.save),
             tooltip: 'Guardar',
             onPressed: () {
-              // Lógica para guardar el movimiento
+              Navigator.pop(context, true);
             },
           ),
         ],
