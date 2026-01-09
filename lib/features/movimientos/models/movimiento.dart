@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 
 class Movimiento {
@@ -24,37 +25,34 @@ class Movimiento {
   });
 
   // Factory constructor to create a Movimiento from JSON
-  factory Movimiento.fromJson(Map<String, dynamic> json) {
+  factory Movimiento.fromMap(Map<String, dynamic> map) {
     return Movimiento(
-      id: json['id'],
-      title: json['title'],
-      categoryID: json['categoryID'],
-      type: json['type'] == 'ingreso'
+      id: map['id'],
+      title: map['title'],
+      categoryID: map['categoryID'],
+      type: map['type'] == 'ingreso'
           ? TipoMovimiento.ingreso
           : TipoMovimiento.gasto,
-      ammount: json['ammount'],
-      date: DateTime.parse(json['date']),
+      ammount: map['ammount'],
+      date: DateTime.parse(map['date']),
       time: TimeOfDay(
-        hour: json['time']['hour'],
-        minute: json['time']['minute'],
+        hour: int.parse(map['time'].split(':')[0]),
+        minute: int.parse(map['time'].split(':')[1]),
       ),
-      note: json['note'],
+      note: map['note'],
     );
   }
 
   // Method to convert a Movimiento to JSON
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'title': title,
       'categoryID': categoryID,
       'type': type == TipoMovimiento.ingreso ? 'ingreso' : 'gasto',
       'ammount': ammount,
-      'date': date.toIso8601String(),
-      'time': {
-        'hour': time.hour,
-        'minute': time.minute,
-      },
+      'date': DateFormat('yyyy-MM-dd').format(date),
+      'time': '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
       'note': note,
     };
   }

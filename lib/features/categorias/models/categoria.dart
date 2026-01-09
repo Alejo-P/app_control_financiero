@@ -18,21 +18,20 @@ class Categoria {
     required this.iconColorValue,
   });
 
-
   // Factory constructor to create a Categoria from JSON
-  factory Categoria.fromJson(Map<String, dynamic> json) {
+  factory Categoria.fromMap(Map<String, dynamic> map) {
     return Categoria(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      categoryTypeID: json['categoryTypeID'],
-      iconName: json['iconName'],
-      iconColorValue: json['iconColorValue'],
+      id: map['id'],
+      name: map['name'],
+      description: map['description'],
+      categoryTypeID: map['categoryTypeID'],
+      iconName: map['iconName'],
+      iconColorValue: map['iconColorValue'],
     );
   }
 
   // Method to convert a Categoria to JSON
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,

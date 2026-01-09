@@ -1,8 +1,12 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
-import 'package:control_financiero/features/movimientos/models/categoria.dart';
-import 'package:control_financiero/features/movimientos/models/category_type.dart';
+import 'package:control_financiero/core/models/app_bar_action.dart';
+import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
+import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
+import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
+import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:flutter/material.dart';
 
 // Importacion de los datos mock
@@ -14,20 +18,6 @@ class AppState extends ChangeNotifier {
   String currentPageName = 'Inicio';
   DateTime selectedMonth = DateTime.now();
 
-  final List<CategoryType> _tiposCategorias = mockTipoCategorias;
-  final List<Categoria> _categorias = mockCategorias;
-  final List<Movimiento> _movimientos = mockMovimientos;
-
-  MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
-
-  MovimientoFiltro get movimientoFiltro => _movimientoFiltro;
-
-  void changeMovimientoFiltro(MovimientoFiltro filtro) {
-    if (_movimientoFiltro == filtro) return;
-    _movimientoFiltro = filtro;
-    notifyListeners();
-  }
-
   final List<String> pageNames = [
     'Inicio',
     'Movimientos',
@@ -35,6 +25,39 @@ class AppState extends ChangeNotifier {
     'Historial',
     'Ajustes',
   ];
+
+  List<AppBarAction> _appBarActions = [];
+  List<AppBarAction> get appBarActions => _appBarActions;
+
+  final MovimientosRepository _movimientosRepository;
+  final CategoriasRepository _categoriasRepository;
+  final TipoCategoriaRepository _tipoCategoriaRepository;
+
+  AppState(
+    this._movimientosRepository,
+    this._categoriasRepository,
+    this._tipoCategoriaRepository
+  );
+
+  final List<TipoCategoria> _tiposCategorias = mockTipoCategorias;
+  final List<Categoria> _categorias = mockCategorias;
+  final List<Movimiento> _movimientos = mockMovimientos;
+
+  MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
+  MovimientoFiltro get movimientoFiltro => _movimientoFiltro;
+
+  // Cargar datos iniciales de los repositorios
+  Future<void> loadInitialData() async {
+    await _movimientosRepository.fetchMovimientos();
+    await _categoriasRepository.fetchCategorias();
+    await _tipoCategoriaRepository.fetchTipoCategorias();
+  }
+
+  void changeMovimientoFiltro(MovimientoFiltro filtro) {
+    if (_movimientoFiltro == filtro) return;
+    _movimientoFiltro = filtro;
+    notifyListeners();
+  }
 
   Categoria? getCategoriaById(String id) {
     return _categorias.firstWhere(
@@ -50,10 +73,10 @@ class AppState extends ChangeNotifier {
     );
   }
 
-  CategoryType? getCategoryTypeById(String id) {
+  TipoCategoria? getCategoryTypeById(String id) {
     return _tiposCategorias.firstWhere(
       (type) => type.id == id,
-      orElse: () => CategoryType(
+      orElse: () => TipoCategoria(
         id: 'unknown',
         name: 'Desconocido',
         description: 'Tipo de categoría no encontrado',
@@ -149,6 +172,16 @@ class AppState extends ChangeNotifier {
 
   void changeMonth(DateTime month) {
     selectedMonth = month;
+    notifyListeners();
+  }
+
+  void setAppBarActions(List<AppBarAction> actions) {
+    _appBarActions = actions;
+    notifyListeners();
+  }
+
+  void clearAppBarActions() {
+    _appBarActions = [];
     notifyListeners();
   }
 }

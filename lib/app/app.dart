@@ -1,3 +1,10 @@
+import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
+import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
+import 'package:control_financiero/features/movimientos/data/movimentos_local_datasource.dart';
+import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
+import 'package:control_financiero/features/movimientos/presentation/agregar_movimiento_page.dart';
+import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
+import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/core/constants/app_strings.dart';
@@ -10,13 +17,34 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final movimientosRepository = MovimientosRepository(
+      MovimientosLocalDataSource()
+    );
+
+    final categoriasRepository = CategoriasRepository(
+      CategoriasLocalDataSource()
+    );
+
+    final tipoCategoriasRepository = TipoCategoriaRepository(
+      TipoCategoriaLocalDataSource()
+    );
+
     return ChangeNotifierProvider(
-      create: (_) => AppState(),
+      create: (_) => AppState(
+        movimientosRepository,
+        categoriasRepository,
+        tipoCategoriasRepository,
+      )..loadInitialData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: appName,
         theme: AppTheme.light,
-        home: const AppScaffold(),
+        initialRoute: '/',
+        routes: {
+          '/': (_) => const AppScaffold(), // navegación principal
+          '/agregar_movimiento': (_) => const AgregarMovimientoPage(),
+        },
+        //home: const AppScaffold(),
       ),
     );
   }

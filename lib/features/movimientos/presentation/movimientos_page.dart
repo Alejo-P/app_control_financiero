@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/features/movimientos/widgets/balance_summary_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/category_chip.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
@@ -7,9 +8,34 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 
-class MovimientosPage extends StatelessWidget {
+class MovimientosPage extends StatefulWidget {
   const MovimientosPage({super.key});
 
+  @override
+  State<MovimientosPage> createState() => _MovimientosPageState();
+}
+
+class _MovimientosPageState extends State<MovimientosPage> {
+  late AppState _appState;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _appState = context.read<AppState>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _appState.setAppBarActions([
+        AppBarAction(
+          icon: Icons.add,
+          tooltip: 'Nuevo movimiento',
+          onPressed: () {
+            Navigator.pushNamed(context, '/agregar_movimiento');
+          },
+        ),
+      ]);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

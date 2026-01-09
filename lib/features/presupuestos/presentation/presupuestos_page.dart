@@ -5,8 +5,26 @@ import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
 import '../widgets/month_selection.dart';
 import '../widgets/category_card.dart';
-class PresupuestoPage extends StatelessWidget {
+class PresupuestoPage extends StatefulWidget {
   const PresupuestoPage({super.key});
+
+  @override
+  State<PresupuestoPage> createState() => _PresupuestoPageState();
+}
+
+class _PresupuestoPageState extends State<PresupuestoPage> {
+  late AppState _appState;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _appState = context.read<AppState>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _appState.clearAppBarActions();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -8,12 +8,22 @@ class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final actions = appState.appBarActions;
 
     return AppBar(
       title: Text(
         appState.currentPageName
       ),
       centerTitle: false,
+      actions: actions
+          .map(
+            (action) => IconButton(
+              icon: Icon(action.icon),
+              onPressed: action.onPressed,
+              tooltip: action.tooltip,
+            ),
+          )
+          .toList(),
     );
   }
 

@@ -6,8 +6,26 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late AppState _appState;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _appState = context.read<AppState>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _appState.clearAppBarActions();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
