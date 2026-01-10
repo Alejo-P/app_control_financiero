@@ -1,5 +1,6 @@
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
+import 'package:control_financiero/features/categorias/presentation/agregar_categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimentos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/presentation/agregar_movimiento_page.dart';
@@ -43,6 +44,7 @@ class App extends StatelessWidget {
         routes: {
           '/': (_) => const AppScaffold(), // navegación principal
           '/agregar_movimiento': (_) => const AgregarMovimientoPage(),
+          '/agregar_categoria': (_) => const AgregarCategoria(),
         },
         //home: const AppScaffold(),
       ),

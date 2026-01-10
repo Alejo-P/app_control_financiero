@@ -77,10 +77,16 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            DetailCategoryCard(
-                              categoryName: 'Categoría',
-                              categoryIcon: Icons.category,
-                              iconColor: Colors.blue,
+                            InkWell(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/agregar_categoria');
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: DetailCategoryCard(
+                                categoryName: 'Categoría',
+                                categoryIcon: Icons.category,
+                                iconColor: Colors.blue,
+                              ),
                             ),
                             Divider(
                               color: Colors.grey[300],
