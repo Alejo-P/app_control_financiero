@@ -17,7 +17,14 @@ class AgregarMovimientoPage extends StatefulWidget {
 class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
   String category = 'Sin categoría';
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
+  late DateTime selectedDate;
   
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = getCurrentDateWithoutTime();
+  }
+
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
     setState(() {
       tipoMovimiento = newTipoMovimiento;
@@ -28,7 +35,6 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
   Widget build(BuildContext context) {
     final _amountController = TextEditingController();
     final _noteController = TextEditingController();
-    final date = getCurrentDateWithoutTime();
 
     return Scaffold(
       appBar: AppBar(
@@ -79,11 +85,15 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                             Divider(
                               color: Colors.grey[300],
                             ),
-                            DetailCategoryCard(
-                              categoryName: 'Fecha',
-                              categoryIcon: Icons.calendar_today,
-                              iconColor: Colors.purple,
-                              currentValue: formatDate(date),
+                            InkWell(
+                              onTap: () => _selectDate(context),
+                              borderRadius: BorderRadius.circular(12),
+                              child: DetailCategoryCard(
+                                categoryName: 'Fecha',
+                                categoryIcon: Icons.calendar_today,
+                                iconColor: Colors.purple,
+                                currentValue: formatDate(selectedDate),
+                              ),
                             ),
                             Divider(
                               color: Colors.grey[300],
@@ -104,5 +114,20 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
   }
 }

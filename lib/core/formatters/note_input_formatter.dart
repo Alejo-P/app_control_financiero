@@ -17,6 +17,12 @@ class NoteInputFormatter extends TextInputFormatter  {
       return oldValue;
     }
 
+    // Permitir unicamente caracteres alfanumericos y espacios
+    final regex = RegExp(r'^[a-zA-Z0-9 áéíóúÁÉÍÓÚüÜñÑ.,!?()-]*$');
+    if (!regex.hasMatch(text)) {
+      return oldValue;
+    }
+
     // Si inicia con un punto, eliminarlo
     if (text.startsWith('.')) {
       String modifiedText = text.substring(1);
@@ -26,6 +32,12 @@ class NoteInputFormatter extends TextInputFormatter  {
       );
     }
 
-    return newValue;
+    // Convertir la primera letra en mayúscula
+    String modifiedText = text[0].toUpperCase() + text.substring(1);
+
+    return TextEditingValue(
+      text: modifiedText,
+      selection: TextSelection.collapsed(offset: modifiedText.length),
+    );
   }
 }
