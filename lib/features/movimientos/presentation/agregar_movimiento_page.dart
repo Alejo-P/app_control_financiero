@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/widgets/add_note_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
@@ -13,12 +14,20 @@ class AgregarMovimientoPage extends StatefulWidget {
 }
 
 class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
+  String category = 'Sin categoría';
+  TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
+  
+  void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
+    setState(() {
+      tipoMovimiento = newTipoMovimiento;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final _amountController = TextEditingController();
     final _noteController = TextEditingController();
     final date = getCurrentDateWithoutTime();
-    final category = 'Sin categoría';
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +46,9 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children:[
-            TipoMovimientoSelector(),
+            TipoMovimientoSelector(
+              onChanged: _onChangeTipoMovimiento,
+            ),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -87,7 +98,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                           width: 170,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(50),
-                            color: Colors.red[100],
+                            color: tipoMovimiento == TipoMovimiento.gasto ? Colors.red.shade100 : Colors.green.shade100,
                           ),
                           alignment: Alignment.center,
                           margin: const EdgeInsets.only(top: 20),
@@ -101,14 +112,14 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                             children: [
                               Icon(
                                 Icons.circle,
-                                color: Colors.red.shade700,
+                                color: tipoMovimiento == TipoMovimiento.gasto ? Colors.red.shade700 : Colors.green.shade700,
                                 size: 14,
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Registrando como gasto',
+                                'Registrando como ${tipoMovimiento == TipoMovimiento.gasto ? 'gasto' : 'ingreso'}',
                                 style: TextStyle(
-                                  color: Colors.red.shade700,
+                                  color: tipoMovimiento == TipoMovimiento.gasto ? Colors.red.shade700 : Colors.green.shade700,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),

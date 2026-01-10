@@ -1,15 +1,16 @@
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:flutter/material.dart';
 
 class TipoMovimientoSelector extends StatefulWidget {
-  const TipoMovimientoSelector({super.key});
+  final ValueChanged<TipoMovimiento>? onChanged;
+  const TipoMovimientoSelector({super.key, this.onChanged});
 
   @override
-  State<TipoMovimientoSelector> createState() =>
-      _TipoMovimientoSelectorState();
+  State<TipoMovimientoSelector> createState() => _TipoMovimientoSelectorState();
 }
 
 class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
-  bool esGasto = true;
+  TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
   double borderRadiusValue = 10;
 
   @override
@@ -32,20 +33,24 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
         children: [
           _buildOption(
             text: 'Gasto',
-            selected: esGasto,
+            selected: tipoMovimiento == TipoMovimiento.gasto,
             color: Colors.red,
             onTap: () {
-              setState(() => esGasto = true);
-              debugPrint('Seleccionó Gasto');
+              setState(() {
+                tipoMovimiento = TipoMovimiento.gasto;
+              });
+              widget.onChanged?.call(TipoMovimiento.gasto);
             },
           ),
           _buildOption(
             text: 'Ingreso',
-            selected: !esGasto,
+            selected: tipoMovimiento == TipoMovimiento.ingreso,
             color: Colors.green,
             onTap: () {
-              setState(() => esGasto = false);
-              debugPrint('Seleccionó Ingreso');
+              setState(() {
+                tipoMovimiento = TipoMovimiento.ingreso;
+              });
+              widget.onChanged?.call(TipoMovimiento.ingreso);
             },
           ),
         ],
