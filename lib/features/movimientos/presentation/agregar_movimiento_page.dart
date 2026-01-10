@@ -150,6 +150,16 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) {
+        // Si la lista de categorías está vacía, mostrar un mensaje
+        if (categorias.isEmpty) {
+          return const Center(
+            child: Text(
+              'No hay categorías disponibles.',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          );
+        }
+
         return ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: categorias.length,
