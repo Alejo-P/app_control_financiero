@@ -3,6 +3,7 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/widgets/add_note_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/movimientos/widgets/detail_category_card.dart';
+import 'package:control_financiero/features/movimientos/widgets/info_tipe_movement_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/tipo_movimiento_selector.dart';
 import 'package:flutter/material.dart';
 
@@ -93,41 +94,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                           ],
                         )
                       ),
-                      Center(
-                        child: Container(
-                          width: 170,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            color: tipoMovimiento == TipoMovimiento.gasto ? Colors.red.shade100 : Colors.green.shade100,
-                          ),
-                          alignment: Alignment.center,
-                          margin: const EdgeInsets.only(top: 20),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 2,
-                            horizontal: 0,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.circle,
-                                color: tipoMovimiento == TipoMovimiento.gasto ? Colors.red.shade700 : Colors.green.shade700,
-                                size: 14,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Registrando como ${tipoMovimiento == TipoMovimiento.gasto ? 'gasto' : 'ingreso'}',
-                                style: TextStyle(
-                                  color: tipoMovimiento == TipoMovimiento.gasto ? Colors.red.shade700 : Colors.green.shade700,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      InfoTipeMovementCard(tipoMovimiento:  tipoMovimiento),
                     ],
                   ),
                 ),
