@@ -109,7 +109,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                                 'Registrando como gasto',
                                 style: TextStyle(
                                   color: Colors.red.shade700,
-                                  //fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
                               ),
