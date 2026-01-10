@@ -1,3 +1,5 @@
+import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
+import 'package:control_financiero/features/movimientos/widgets/tipo_movimiento_selector.dart';
 import 'package:flutter/material.dart';
 
 class AgregarMovimientoPage extends StatelessWidget {
@@ -5,6 +7,8 @@ class AgregarMovimientoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _amountController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Agregar Movimiento'),
@@ -18,22 +22,25 @@ class AgregarMovimientoPage extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Agregar Movimiento',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+      body: Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children:[
+            TipoMovimientoSelector(),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AmountInput(controller: _amountController),
+                    ],
+                  ),
                 ),
               ),
-              // Aquí puedes agregar más widgets para el formulario de agregar movimiento
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );

@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 
 // Importacion de los datos mock
 import 'package:control_financiero/features/movimientos/data/mock_categorias.dart';
-import 'package:control_financiero/features/movimientos/data/mock_movimientos.dart';
 
 class AppState extends ChangeNotifier {
   int currentTab = 0;
@@ -55,6 +54,10 @@ class AppState extends ChangeNotifier {
   TotalesMensuales? get totalesMensuales => _totalesMensuales;
   double? get variacionAhorro => _variacionAhorro;
   List<DateTime> get uniqueMovementDates => _uniqueMovementDates;
+
+
+  List<Categoria> get categorias => _categorias;
+  List<TipoCategoria> get tiposCategorias => _tiposCategorias;
 
 
   // Cargar datos iniciales de los repositorios
@@ -175,14 +178,6 @@ class AppState extends ChangeNotifier {
   return a.year == b.year &&
       a.month == b.month &&
       a.day == b.day;
-  }
-
-  // Obtener Ingresos y gastos totales para el mes seleccionado
-  Future<TotalesMensuales> getTotalesMensuales(DateTime date) async {
-    final totales = await _movimientosRepository.fetchTotalesMensuales(date);
-
-    return totales;
-
   }
 
   // Calcular la variacion de ahorro entre dos meses
