@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
 class TransactionDetailCard extends StatelessWidget {
@@ -22,10 +23,7 @@ class TransactionDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Convert Color components (0..1) to 0..255 ints to avoid deprecated accessors
-    final int r = ((iconColor.r * 255.0).round().clamp(0, 255)).toInt();
-    final int g = ((iconColor.g * 255.0).round().clamp(0, 255)).toInt();
-    final int b = ((iconColor.b * 255.0).round().clamp(0, 255)).toInt();
+    final [r, g, b] = getRGBFromColor(iconColor);
 
     return Row(
       children: [
