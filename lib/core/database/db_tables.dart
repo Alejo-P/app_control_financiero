@@ -12,6 +12,7 @@ class CategoriasTable {
   static const id = 'id';
   static const name = 'name';
   static const description = 'description';
+  static const movementType = 'movement_type';
   static const categoryTypeId = 'category_type_id';
   static const iconName = 'icon_name';
   static const iconColorValue = 'icon_color_value';

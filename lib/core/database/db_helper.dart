@@ -46,6 +46,7 @@ class DBHelper {
         ${CategoriasTable.id} TEXT PRIMARY KEY,
         ${CategoriasTable.name} TEXT NOT NULL,
         ${CategoriasTable.description} TEXT,
+        ${CategoriasTable.movementType} TEXT NOT NULL,
         ${CategoriasTable.categoryTypeId} TEXT NOT NULL,
         ${CategoriasTable.iconName} TEXT NOT NULL,
         ${CategoriasTable.iconColorValue} INTEGER NOT NULL,

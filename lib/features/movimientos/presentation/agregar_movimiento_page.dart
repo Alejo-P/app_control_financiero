@@ -22,17 +22,32 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
   late DateTime selectedDate;
   late List<Categoria> categorias;
+  late List<Categoria> categoriasFiltradas;
+  final _amountController = TextEditingController();
+  final _noteController = TextEditingController();
   
   @override
   void initState() {
     super.initState();
     selectedDate = getCurrentDateWithoutTime();
     categorias = [];
+    categoriasFiltradas = [];
   }
+
+  @override
+  void dispose() {
+    // Limpiar los controladores al desechar el widget
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
 
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
     setState(() {
+      category = 'Sin categoría';
       tipoMovimiento = newTipoMovimiento;
+      categoriasFiltradas = categorias.where((categoria) => categoria.movementType == tipoMovimiento).toList();
     });
   }
 
@@ -40,8 +55,6 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
     categorias = appState.categorias;
-    final _amountController = TextEditingController();
-    final _noteController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -51,6 +64,30 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
             icon: const Icon(Icons.save),
             tooltip: 'Guardar',
             onPressed: () {
+              final amountText = _amountController.text;
+              final noteText = _noteController.text;
+
+              if (amountText.isEmpty || double.tryParse(amountText.replaceAll(',', '.')) == null || double.parse(amountText.replaceAll(',', '.')) <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ingrese un monto válido')),
+                );
+                return;
+              }
+
+              if (category.isEmpty || category == 'Sin categoría') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Seleccione una categoría')),
+                );
+                return;
+              }
+
+              final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+              debugPrint('Monto: $amount');
+              debugPrint('Tipo de Movimiento: $tipoMovimiento');
+              debugPrint('Categoría: $category');
+              debugPrint('Fecha: ${formatDate(selectedDate)}');
+              debugPrint('Nota: $noteText');
+
               Navigator.pop(context, true);
             },
           ),
@@ -151,7 +188,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
       ),
       builder: (_) {
         // Si la lista de categorías está vacía, mostrar un mensaje
-        if (categorias.isEmpty) {
+        if (categoriasFiltradas.isEmpty) {
           return const Center(
             child: Text(
               'No hay categorías disponibles.',
@@ -162,10 +199,10 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
 
         return ListView.separated(
           padding: const EdgeInsets.all(16),
-          itemCount: categorias.length,
+          itemCount: categoriasFiltradas.length,
           separatorBuilder: (_, __) => const Divider(),
           itemBuilder: (context, index) {
-            final categoria = categorias[index];
+            final categoria = categoriasFiltradas[index];
 
             return ListTile(
               leading: CircleAvatar(

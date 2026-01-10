@@ -97,6 +97,7 @@ class AppState extends ChangeNotifier {
         id: 'unknown',
         name: 'Desconocida',
         description: 'Categoría no encontrada',
+        movementType: TipoMovimiento.gasto,
         categoryTypeID: 'unknown',
         iconName: 'help_outline',
         iconColorValue: 0xFF9E9E9E,
