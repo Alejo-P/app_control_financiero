@@ -1,5 +1,5 @@
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:flutter/material.dart';
-import '../../../core/utils/date_utils.dart';
 
 class MonthSelection extends StatefulWidget {
   const MonthSelection({super.key});
@@ -12,8 +12,7 @@ class _MonthSelectionState extends State<MonthSelection> {
   DateTime selectedDate = DateTime.now();
 
   String get monthYearLabel {
-    final monthName = monthNames[selectedDate.month - 1];
-    return '$monthName ${selectedDate.year}';
+    return formatMonthYear(selectedDate);
   }
 
   void changeMonth(int offset) {

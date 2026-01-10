@@ -1,6 +1,5 @@
-import 'package:control_financiero/features/movimientos/widgets/money_input_formatter.dart';
+import 'package:control_financiero/core/formatters/money_input_formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class AmountInput extends StatelessWidget {
   final TextEditingController controller;
@@ -12,6 +11,7 @@ class AmountInput extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        const SizedBox(height: 15),
         // Label
         Text(
           'Monto',
@@ -19,8 +19,7 @@ class AmountInput extends StatelessWidget {
             context,
           ).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),
         ),
-        const SizedBox(height: 8),
-
+        const SizedBox(height: 5),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,

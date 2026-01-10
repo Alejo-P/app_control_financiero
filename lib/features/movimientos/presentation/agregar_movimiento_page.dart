@@ -1,13 +1,24 @@
+import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/movimientos/widgets/add_note_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
+import 'package:control_financiero/features/movimientos/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/tipo_movimiento_selector.dart';
 import 'package:flutter/material.dart';
 
-class AgregarMovimientoPage extends StatelessWidget {
+class AgregarMovimientoPage extends StatefulWidget {
   const AgregarMovimientoPage({super.key});
 
   @override
+  State<AgregarMovimientoPage> createState() => _AgregarMovimientoPageState();
+}
+
+class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
+  @override
   Widget build(BuildContext context) {
     final _amountController = TextEditingController();
+    final _noteController = TextEditingController();
+    final date = getCurrentDateWithoutTime();
+    final category = 'Sin categoría';
 
     return Scaffold(
       appBar: AppBar(
@@ -34,7 +45,78 @@ class AgregarMovimientoPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AmountInput(controller: _amountController),
+                      AmountInput(
+                        controller: _amountController
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 20),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.white
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            DetailCategoryCard(
+                              categoryName: 'Categoría',
+                              categoryIcon: Icons.category,
+                              iconColor: Colors.blue,
+                            ),
+                            Divider(
+                              color: Colors.grey[300],
+                            ),
+                            DetailCategoryCard(
+                              categoryName: 'Fecha',
+                              categoryIcon: Icons.calendar_today,
+                              iconColor: Colors.purple,
+                              currentValue: formatDate(date),
+                            ),
+                            Divider(
+                              color: Colors.grey[300],
+                            ),
+                            AddNoteCard(
+                              noteController: _noteController,
+                            ),
+                          ],
+                        )
+                      ),
+                      Center(
+                        child: Container(
+                          width: 170,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: Colors.red[100],
+                          ),
+                          alignment: Alignment.center,
+                          margin: const EdgeInsets.only(top: 20),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 0,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                color: Colors.red.shade700,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Registrando como gasto',
+                                style: TextStyle(
+                                  color: Colors.red.shade700,
+                                  //fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

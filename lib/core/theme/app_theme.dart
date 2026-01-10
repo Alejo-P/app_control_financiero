@@ -25,6 +25,10 @@ class AppTheme {
       bodyMedium: TextStyle(fontSize: 16.0),
       bodySmall: TextStyle(fontSize: 14.0),
 
+      labelLarge: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+      labelMedium: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+      labelSmall: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400),
+
       headlineLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
       headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
       headlineSmall: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
