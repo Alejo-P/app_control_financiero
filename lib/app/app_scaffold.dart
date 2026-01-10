@@ -1,6 +1,6 @@
 import 'package:control_financiero/app/app_appbar.dart';
 import 'package:control_financiero/app/app_bottom_nav.dart';
-import 'package:control_financiero/features/historial/presentation/historial_page.dart';
+import 'package:control_financiero/features/categorias/presentation/categorias_page.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimientos_page.dart';
 import 'package:control_financiero/features/presupuestos/presentation/presupuestos_page.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class AppScaffold extends StatelessWidget {
       const HomePage(),
       MovimientosPage(),
       const PresupuestoPage(),
-      const HistorialPage(),
+      const CategoriasPage(),
       const AjustesPage(),
     ];
 

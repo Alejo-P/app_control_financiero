@@ -38,10 +38,10 @@ class AppBottomNav extends StatelessWidget {
           tooltip: 'Pestaña de Presupuesto',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.history_outlined),
-          activeIcon: Icon(Icons.history, size: 30),
-          label: 'Historial',
-          tooltip: 'Pestaña de Historial',
+          icon: Icon(Icons.category_outlined),
+          activeIcon: Icon(Icons.category, size: 30),
+          label: 'Categorías',
+          tooltip: 'Pestaña de Categorías',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.settings_outlined),

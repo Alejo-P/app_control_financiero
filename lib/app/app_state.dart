@@ -21,7 +21,7 @@ class AppState extends ChangeNotifier {
     'Inicio',
     'Movimientos',
     'Presupuesto',
-    'Historial',
+    'Categorías',
     'Ajustes',
   ];
 
