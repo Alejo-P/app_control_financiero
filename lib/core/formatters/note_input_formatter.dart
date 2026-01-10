@@ -17,8 +17,12 @@ class NoteInputFormatter extends TextInputFormatter  {
       return oldValue;
     }
 
-    // Permitir unicamente caracteres alfanumericos y espacios
-    final regex = RegExp(r'^[a-zA-Z0-9 áéíóúÁÉÍÓÚüÜñÑ.,!?()-]*$');
+    // Permitir letras, números, espacios y puntuación básica
+    final regex = RegExp(
+      r'^[\p{L}\p{N} .,!?()\-]*$',
+      unicode: true,
+    );
+
     if (!regex.hasMatch(text)) {
       return oldValue;
     }
