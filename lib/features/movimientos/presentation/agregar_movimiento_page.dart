@@ -7,6 +7,7 @@ import 'package:control_financiero/features/movimientos/widgets/ammount_input.da
 import 'package:control_financiero/features/movimientos/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/info_tipe_movement_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/tipo_movimiento_selector.dart';
+import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -55,6 +56,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
     categorias = appState.categorias;
+    categoriasFiltradas = categorias.where((categoria) => categoria.movementType == tipoMovimiento).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -63,9 +65,8 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
           IconButton(
             icon: const Icon(Icons.save),
             tooltip: 'Guardar',
-            onPressed: () {
+            onPressed: () async {
               final amountText = _amountController.text;
-              final noteText = _noteController.text;
 
               if (amountText.isEmpty || double.tryParse(amountText.replaceAll(',', '.')) == null || double.parse(amountText.replaceAll(',', '.')) <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -81,14 +82,20 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                 return;
               }
 
-              final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
-              debugPrint('Monto: $amount');
-              debugPrint('Tipo de Movimiento: $tipoMovimiento');
-              debugPrint('Categoría: $category');
-              debugPrint('Fecha: ${formatDate(selectedDate)}');
-              debugPrint('Nota: $noteText');
 
-              Navigator.pop(context, true);
+              final confirmed = await showConfirmDialog(
+                context,
+                title: 'Confirmar movimiento',
+                category: category,
+                tipoMovimiento: tipoMovimiento,
+                amount: amountText,
+                date: selectedDate,
+                note: _noteController.text.trim(),
+              );
+
+              if (confirmed == true) {
+                _guardarMovimiento();
+              }
             },
           ),
         ],
@@ -231,5 +238,19 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
         });
       }
     });
+  }
+
+  void _guardarMovimiento() {
+    final amountText = _amountController.text.trim();
+    final noteText = _noteController.text.trim();
+    final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+
+    debugPrint('Monto: $amount');
+    debugPrint('Tipo de Movimiento: $tipoMovimiento');
+    debugPrint('Categoría: $category');
+    debugPrint('Fecha: ${formatDate(selectedDate)}');
+    debugPrint('Nota: $noteText');
+
+    Navigator.pop(context, true);
   }
 }
