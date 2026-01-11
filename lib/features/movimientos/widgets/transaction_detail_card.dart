@@ -47,14 +47,16 @@ class TransactionDetailCard extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-              Text(category, style: const TextStyle(color: Colors.grey)),
+              Text(category, style: const TextStyle(color: Colors.grey, fontSize: 14)),
             ],
           ),
         ),
         Column(
           children: [
             Text(
-              '\$${spent.toStringAsFixed(2)}',
+              type == 'Ingreso'
+                  ? '+\$${spent.toStringAsFixed(2)}'
+                  : '-\$${spent.toStringAsFixed(2)}',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -65,7 +67,7 @@ class TransactionDetailCard extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               time.format(context),
-              style: const TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],
         ),

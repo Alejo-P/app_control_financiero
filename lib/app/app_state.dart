@@ -32,7 +32,7 @@ class AppState extends ChangeNotifier {
   AppState(
     this._movimientosRepository,
     this._categoriasRepository,
-    this._tipoCategoriaRepository
+    this._tipoCategoriaRepository,
   );
 
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
@@ -42,13 +42,19 @@ class AppState extends ChangeNotifier {
   double? _variacionAhorro;
   List<DateTime> _uniqueMovementDates = [];
   Map<DateTime, List<Movimiento>> _movimientosPorFecha = {};
+  List<String> _uniqueTipeCategoryNames = [];
+  Map<String, List<Categoria>> _categoriasByTipoCategoria = {};
 
   TotalesMensuales? get totalesMensuales => _totalesMensuales;
   double? get variacionAhorro => _variacionAhorro;
   List<DateTime> get uniqueMovementDates => _uniqueMovementDates;
+  List<String> get uniqueTipeCategoryNames => _uniqueTipeCategoryNames;
 
   List<Categoria> get categorias => _categoriasRepository.categorias;
-  List<TipoCategoria> get tiposCategorias => _tipoCategoriaRepository.tipoCategorias;
+  Map<String, List<Categoria>> get categoriasByTipoCategoria =>
+      _categoriasByTipoCategoria;
+  List<TipoCategoria> get tiposCategorias =>
+      _tipoCategoriaRepository.tipoCategorias;
   List<Movimiento> get movimientos => _movimientosRepository.movimientos;
 
   String transactionResultMessage = '';
@@ -62,15 +68,16 @@ class AppState extends ChangeNotifier {
       _movimientosRepository.fetchMovimientos(),
     ]);
     await loadMovementsData(notify: false);
+    await loadCategoryData(notify: false);
     loadingInitialData = false;
 
     notifyListeners();
   }
 
-
-
   Future<void> loadMovementsData({bool notify = true}) async {
-    _totalesMensuales = _movimientosRepository.fetchTotalesMensuales(selectedMonth);
+    _totalesMensuales = _movimientosRepository.fetchTotalesMensuales(
+      selectedMonth,
+    );
 
     _variacionAhorro = calcularVariacionAhorro(
       selectedMonth,
@@ -80,6 +87,13 @@ class AppState extends ChangeNotifier {
     _movimientosPorFecha = _fetchMovimientosPorFecha();
 
     _uniqueMovementDates = _fetchUniqueMovementDates();
+
+    if (notify) notifyListeners();
+  }
+
+  Future<void> loadCategoryData({bool notify = true}) async {
+    await _categoriasRepository.fetchCategorias();
+    _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
 
     if (notify) notifyListeners();
   }
@@ -143,7 +157,6 @@ class AppState extends ChangeNotifier {
     return sortedMap;
   }
 
-
   // Obtener movimientos filtrados por fecha (mes y año)
   List<Movimiento> getMovimientosByDateAndFilter(
     DateTime fecha,
@@ -153,17 +166,33 @@ class AppState extends ChangeNotifier {
 
     if (filtro == MovimientoFiltro.todos) return movimientos;
 
-    return movimientos.where((m) =>
-      filtro == MovimientoFiltro.ingresos
-        ? m.type == TipoMovimiento.ingreso
-        : m.type == TipoMovimiento.gasto
-    ).toList();
+    return movimientos
+        .where(
+          (m) => filtro == MovimientoFiltro.ingresos
+              ? m.type == TipoMovimiento.ingreso
+              : m.type == TipoMovimiento.gasto,
+        )
+        .toList();
+  }
+
+  // Obtener todas las categorias de un tipo de categoria
+  List<Categoria> getCategoriasByTipoCategoria(String tipoCategoriaName) {
+    return categorias
+        .where((cat) =>
+            getCategoryTypeById(cat.categoryTypeID)?.name ==
+            tipoCategoriaName)
+        .toList();
+  }
+
+  List<String> getUniqueTipeCategoryNames() {
+    return tiposCategorias
+        .map((tipoCat) => tipoCat.name)
+        .toSet()
+        .toList();
   }
 
   bool isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year &&
-      a.month == b.month &&
-      a.day == b.day;
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   // Calcular la variacion de ahorro entre dos meses
@@ -224,14 +253,12 @@ class AppState extends ChangeNotifier {
     }
   }
 
-
   // ================================ CATEGORIAS CRUD =================================
   Future<void> agregarCategoria(Categoria categoria) async {
     final result = await _categoriasRepository.addCategoria(categoria);
     transactionResultMessage = result['message'] ?? '';
     if (result['success'] == true) {
-      await _categoriasRepository.fetchCategorias();
-      notifyListeners();
+      await loadCategoryData();
     }
   }
 
@@ -239,8 +266,7 @@ class AppState extends ChangeNotifier {
     final result = await _categoriasRepository.updateCategoria(categoria);
     transactionResultMessage = result['message'] ?? '';
     if (result['success'] == true) {
-      await _categoriasRepository.fetchCategorias();
-      notifyListeners();
+      await loadCategoryData();  
     }
   }
 
@@ -248,8 +274,7 @@ class AppState extends ChangeNotifier {
     final result = await _categoriasRepository.deleteCategoria(id);
     transactionResultMessage = result['message'] ?? '';
     if (result['success'] == true) {
-      await _categoriasRepository.fetchCategorias();
-      notifyListeners();
+      await loadCategoryData();
     }
   }
 }
