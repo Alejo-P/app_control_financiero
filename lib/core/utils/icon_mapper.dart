@@ -9,6 +9,10 @@ class IconMapper {
     'restaurant': Icons.restaurant,
     'home': Icons.home,
     'category': Icons.category,
+    'fitness_center': Icons.fitness_center,
+    'local_gas_station': Icons.local_gas_station,
+    'flight': Icons.flight,
+    'local_hospital': Icons.local_hospital,
   };
 
   static IconData fromName(String name) {
