@@ -9,21 +9,18 @@ import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:flutter/material.dart';
 
-// Importacion de los datos mock
-import 'package:control_financiero/features/movimientos/data/mock_categorias.dart';
-
 class AppState extends ChangeNotifier {
-  int currentTab = 0;
-  String currentPageName = 'Inicio';
   DateTime selectedMonth = DateTime.now();
 
   final List<String> pageNames = [
-    'Inicio',
     'Movimientos',
     'Presupuesto',
     'Categorías',
+    'Historial',
     'Ajustes',
   ];
+  String currentPageName = 'Movimientos';
+  int currentTab = 0;
 
   List<AppBarAction> _appBarActions = [];
   List<AppBarAction> get appBarActions => _appBarActions;
@@ -38,11 +35,6 @@ class AppState extends ChangeNotifier {
     this._tipoCategoriaRepository
   );
 
-  final List<TipoCategoria> _tiposCategorias = mockTipoCategorias;
-  final List<Categoria> _categorias = mockCategorias;
-  //final List<Movimiento> _movimientos = mockMovimientos;
-
-
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
   MovimientoFiltro get movimientoFiltro => _movimientoFiltro;
 
@@ -55,10 +47,11 @@ class AppState extends ChangeNotifier {
   double? get variacionAhorro => _variacionAhorro;
   List<DateTime> get uniqueMovementDates => _uniqueMovementDates;
 
+  List<Categoria> get categorias => _categoriasRepository.categorias;
+  List<TipoCategoria> get tiposCategorias => _tipoCategoriaRepository.tipoCategorias;
+  List<Movimiento> get movimientos => _movimientosRepository.movimientos;
 
-  List<Categoria> get categorias => _categorias;
-  List<TipoCategoria> get tiposCategorias => _tiposCategorias;
-
+  String transactionResultMessage = '';
 
   // Cargar datos iniciales de los repositorios
   Future<void> loadInitialData() async {
@@ -68,21 +61,20 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadMovementsData() async {
-    _totalesMensuales =
-        await _movimientosRepository.fetchTotalesMensuales(selectedMonth);
+    //movimientos = await _movimientosRepository.fetchMovimientos();
+    _totalesMensuales = _movimientosRepository.fetchTotalesMensuales(selectedMonth);
 
-    _variacionAhorro = await calcularVariacionAhorro(
+    _variacionAhorro = calcularVariacionAhorro(
       selectedMonth,
       DateTime(selectedMonth.year, selectedMonth.month - 1),
     );
 
-    _movimientosPorFecha = await _fetchMovimientosPorFecha();
+    _movimientosPorFecha = _fetchMovimientosPorFecha();
 
-    _uniqueMovementDates = await _fetchUniqueMovementDates();
+    _uniqueMovementDates = _fetchUniqueMovementDates();
 
     notifyListeners();
   }
-
 
   void changeMovimientoFiltro(MovimientoFiltro filtro) {
     if (_movimientoFiltro == filtro) return;
@@ -90,35 +82,21 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Categoria? getCategoriaById(String id) {
-    return _categorias.firstWhere(
-      (cat) => cat.id == id,
-      orElse: () => Categoria(
-        id: 'unknown',
-        name: 'Desconocida',
-        description: 'Categoría no encontrada',
-        movementType: TipoMovimiento.gasto,
-        categoryTypeID: 'unknown',
-        iconName: 'help_outline',
-        iconColorValue: 0xFF9E9E9E,
-      )
-    );
+  Categoria? getCategoriaById(int id) {
+    try {
+      final categoria = categorias.firstWhere((cat) => cat.id == id);
+      return categoria;
+    } catch (e) {
+      return null;
+    }
   }
 
-  TipoCategoria? getCategoryTypeById(String id) {
-    return _tiposCategorias.firstWhere(
-      (type) => type.id == id,
-      orElse: () => TipoCategoria(
-        id: 'unknown',
-        name: 'Desconocido',
-        description: 'Tipo de categoría no encontrado',
-      )
-    );
+  TipoCategoria? getCategoryTypeById(int id) {
+    return _tipoCategoriaRepository.getTipoCategoriaById(id);
   }
 
   // Obtener todas las fechas únicas de movimientos
-  Future<List<DateTime>> _fetchUniqueMovementDates() async {
-    final movimientos = await _movimientosRepository.fetchMovimientos();
+  List<DateTime> _fetchUniqueMovementDates() {
     final dates = movimientos
         .map((m) => DateTime(m.date.year, m.date.month, m.date.day))
         .toSet()
@@ -129,8 +107,7 @@ class AppState extends ChangeNotifier {
   }
 
   // Obtener movimientos agrupados por fecha
-  Future<Map<DateTime, List<Movimiento>>> _fetchMovimientosPorFecha() async {
-    final movimientos = await _movimientosRepository.fetchMovimientos();
+  Map<DateTime, List<Movimiento>> _fetchMovimientosPorFecha() {
     final Map<DateTime, List<Movimiento>> groupedMovements = {};
 
     for (var movimiento in movimientos) {
@@ -176,15 +153,15 @@ class AppState extends ChangeNotifier {
   }
 
   bool isSameDay(DateTime a, DateTime b) {
-  return a.year == b.year &&
+    return a.year == b.year &&
       a.month == b.month &&
       a.day == b.day;
   }
 
   // Calcular la variacion de ahorro entre dos meses
-  Future<double?> calcularVariacionAhorro(DateTime mesActual, DateTime mesAnterior) async {
-    final actual = await _movimientosRepository.fetchTotalesMensuales(mesActual);
-    final anterior = await _movimientosRepository.fetchTotalesMensuales(mesAnterior);
+  double? calcularVariacionAhorro(DateTime mesActual, DateTime mesAnterior) {
+    final actual = _movimientosRepository.fetchTotalesMensuales(mesActual);
+    final anterior = _movimientosRepository.fetchTotalesMensuales(mesAnterior);
 
     if (anterior.ahorro == 0) return null;
 
@@ -212,5 +189,59 @@ class AppState extends ChangeNotifier {
   void clearAppBarActions() {
     _appBarActions = [];
     notifyListeners();
+  }
+
+  // ================================= MOVIMIENTOS CRUD =================================
+  Future<void> agregarMovimiento(Movimiento movimiento) async {
+    final result = await _movimientosRepository.addMovimiento(movimiento);
+    transactionResultMessage = result['message'] ?? '';
+    if (result['success'] == true) {
+      await loadMovementsData();
+    }
+  }
+
+  Future<void> actualizarMovimiento(Movimiento movimiento) async {
+    final result = await _movimientosRepository.updateMovimiento(movimiento);
+    transactionResultMessage = result['message'] ?? '';
+    if (result['success'] == true) {
+      await loadMovementsData();
+    }
+  }
+
+  Future<void> eliminarMovimiento(int id) async {
+    final result = await _movimientosRepository.deleteMovimiento(id);
+    transactionResultMessage = result['message'] ?? '';
+    if (result['success'] == true) {
+      await loadMovementsData();
+    }
+  }
+
+
+  // ================================ CATEGORIAS CRUD =================================
+  Future<void> agregarCategoria(Categoria categoria) async {
+    final result = await _categoriasRepository.addCategoria(categoria);
+    transactionResultMessage = result['message'] ?? '';
+    if (result['success'] == true) {
+      await _categoriasRepository.fetchCategorias();
+      notifyListeners();
+    }
+  }
+
+  Future<void> actualizarCategoria(Categoria categoria) async {
+    final result = await _categoriasRepository.updateCategoria(categoria);
+    transactionResultMessage = result['message'] ?? '';
+    if (result['success'] == true) {
+      await _categoriasRepository.fetchCategorias();
+      notifyListeners();
+    }
+  }
+
+  Future<void> eliminarCategoria(int id) async {
+    final result = await _categoriasRepository.deleteCategoria(id);
+    transactionResultMessage = result['message'] ?? '';
+    if (result['success'] == true) {
+      await _categoriasRepository.fetchCategorias();
+      notifyListeners();
+    }
   }
 }

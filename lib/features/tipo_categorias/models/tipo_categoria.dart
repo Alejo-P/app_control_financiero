@@ -1,24 +1,23 @@
 class TipoCategoria {
-  final String id;
+  final int? id;
   final String name;
   final String description;
 
   TipoCategoria({
-    required this.id,
+    this.id,
     required this.name,
     required this.description,
   });
 
   factory TipoCategoria.fromMap(Map<String, dynamic> map) {
     return TipoCategoria(
-      id: map['id'],
+      id: map['id'] != null ? map['id'] as int : null,
       name: map['name'],
       description: map['description']
     );
   }
 
   Map<String, dynamic> toMap() => {
-    'id': id,
     'name': name,
     'description': description
   };

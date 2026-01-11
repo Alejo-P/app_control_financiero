@@ -3,6 +3,7 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/widgets/text_input_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/movimientos/widgets/detail_category_card.dart';
@@ -20,7 +21,8 @@ class AgregarMovimientoPage extends StatefulWidget {
 }
 
 class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
-  String category = 'Sin categoría';
+  int categoryId = 0;
+  String categoryName = 'Sin categoría';
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
   bool _hasUnsavedChanges = false;
   late DateTime selectedDate;
@@ -63,7 +65,8 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
     setState(() {
       _hasUnsavedChanges = true;
-      category = 'Sin categoría';
+      categoryId = 0;
+      categoryName = 'Sin categoría';
       tipoMovimiento = newTipoMovimiento;
       categoriasFiltradas = categorias
           .where((categoria) => categoria.movementType == tipoMovimiento)
@@ -87,21 +90,32 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
     }
   }
 
-  void _guardarMovimiento() {
+ Future<void> _guardarMovimiento() async {
     final amountText = _amountController.text.trim();
     final noteText = _noteController.text.trim();
     final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
-
-    debugPrint('Monto: $amount');
-    debugPrint('Tipo de Movimiento: $tipoMovimiento');
-    debugPrint('Categoría: $category');
-    debugPrint('Fecha: ${formatDate(selectedDate)}');
-    debugPrint('Nota: $noteText');
+    final titleText = _titleController.text.trim();
     setState(() {
       _hasUnsavedChanges = false;
     });
 
-    Navigator.pop(context, true);
+    // Crear el objeto Movimiento
+    final movimiento = Movimiento(
+      id: 0, // El ID se asignará automáticamente en la base de datos
+      title: titleText,
+      categoryID: categoryId,
+      type: tipoMovimiento,
+      ammount: amount,
+      date: selectedDate,
+      time: TimeOfDay.now(),
+      note: noteText,
+    );
+
+    await context.read<AppState>().agregarMovimiento(movimiento);
+    
+    if (mounted) {
+      Navigator.pop(context, true);
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -153,7 +167,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                   return;
                 }
 
-                if (category.isEmpty || category == 'Sin categoría') {
+                if (categoryId == 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Seleccione una categoría')),
                   );
@@ -164,7 +178,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                   context,
                   titleModal: 'Confirmar movimiento',
                   title: titleText,
-                  category: category,
+                  category: categoryName,
                   tipoMovimiento: tipoMovimiento,
                   amount: amountText,
                   date: selectedDate,
@@ -172,7 +186,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                 );
 
                 if (confirmed == true) {
-                  _guardarMovimiento();
+                  await _guardarMovimiento();
                 }
               },
             ),
@@ -217,7 +231,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                                   categoryName: 'Categoría',
                                   categoryIcon: Icons.category,
                                   iconColor: Colors.blue,
-                                  currentValue: category,
+                                  currentValue: categoryName,
                                 ),
                               ),
                               Divider(color: Colors.grey[300]),
@@ -304,7 +318,8 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
       if (categoriaSeleccionada != null) {
         setState(() {
           _hasUnsavedChanges = true;
-          category = categoriaSeleccionada.name;
+          categoryId = categoriaSeleccionada.id;
+          categoryName = categoriaSeleccionada.name;
         });
       }
     });

@@ -16,6 +16,7 @@ class CategoriasTable {
   static const categoryTypeId = 'category_type_id';
   static const iconName = 'icon_name';
   static const iconColorValue = 'icon_color_value';
+  static const isDefault = 'is_default';
 }
 
 class MovimientosTable {

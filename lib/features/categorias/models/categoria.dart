@@ -3,47 +3,52 @@ import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:flutter/material.dart';
 
 class Categoria {
-  final String id;
+  final int? id;
   final String name;
   final String description;
   final TipoMovimiento movementType;
-  final String categoryTypeID;
+  final int categoryTypeID;
   final String iconName;
   final int iconColorValue;
+  final bool isDefault;
 
   Categoria({
-    required this.id,
+    this.id,
     required this.name,
     required this.description,
     required this.movementType,
     required this.categoryTypeID,
     required this.iconName,
     required this.iconColorValue,
+    this.isDefault = false,
   });
 
   // Factory constructor to create a Categoria from JSON
   factory Categoria.fromMap(Map<String, dynamic> map) {
     return Categoria(
-      id: map['id'],
+      id: map['id'] != null ? map['id'] as int : null,
       name: map['name'],
       description: map['description'],
-      movementType: map['movementType'],
-      categoryTypeID: map['categoryTypeID'],
-      iconName: map['iconName'],
-      iconColorValue: map['iconColorValue'],
+      movementType: map['movement_type'] == 'ingreso'
+          ? TipoMovimiento.ingreso
+          : TipoMovimiento.gasto,
+      categoryTypeID: map['category_type_id'],
+      iconName: map['icon_name'],
+      iconColorValue: map['icon_color_value'],
+      isDefault: map['is_default'] == 1,
     );
   }
 
   // Method to convert a Categoria to JSON
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'name': name,
       'description': description,
-      'movementType': movementType,
-      'categoryTypeID': categoryTypeID,
-      'iconName': iconName,
-      'iconColorValue': iconColorValue,
+      'movement_type': movementType.name,
+      'category_type_id': categoryTypeID,
+      'icon_name': iconName,
+      'icon_color_value': iconColorValue,
+      'is_default': isDefault ? 1 : 0,
     };
   }
 

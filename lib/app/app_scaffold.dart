@@ -1,12 +1,12 @@
 import 'package:control_financiero/app/app_appbar.dart';
 import 'package:control_financiero/app/app_bottom_nav.dart';
 import 'package:control_financiero/features/categorias/presentation/categorias_page.dart';
+import 'package:control_financiero/features/historial/presentation/historial_page.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimientos_page.dart';
 import 'package:control_financiero/features/presupuestos/presentation/presupuestos_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
-import 'package:control_financiero/features/home/presentation/home_page.dart';
 import 'package:control_financiero/features/ajustes/presentation/ajustes_page.dart';
 
 class AppScaffold extends StatelessWidget {
@@ -17,11 +17,11 @@ class AppScaffold extends StatelessWidget {
     final appState = context.watch<AppState>();
 
     final pages = [
-      const HomePage(),
       MovimientosPage(),
-      const PresupuestoPage(),
-      const CategoriasPage(),
-      const AjustesPage(),
+      PresupuestosPage(),
+      CategoriasPage(),
+      HistorialPage(),
+      AjustesPage(),
     ];
 
     return Scaffold(

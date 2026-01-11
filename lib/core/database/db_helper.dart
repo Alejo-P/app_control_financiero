@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/database/db_tables.dart';
+import 'package:control_financiero/core/database/db_init_data.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,38 +28,39 @@ class DBHelper {
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
-      onCreate: _onCreate
+      onCreate: _onCreate,
     );
   }
 
   Future _onCreate(Database db, int version) async {
-    // Aquí puedes crear las tablas necesarias
+    // Crear tablas
     await db.execute('''
       CREATE TABLE ${TipoCategoriasTable.table} (
-        ${TipoCategoriasTable.id} TEXT PRIMARY KEY,
+        ${TipoCategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
         ${TipoCategoriasTable.name} TEXT NOT NULL,
         ${TipoCategoriasTable.description} TEXT
       );
     ''');
-    
+
     await db.execute('''
       CREATE TABLE ${CategoriasTable.table} (
-        ${CategoriasTable.id} TEXT PRIMARY KEY,
+        ${CategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
         ${CategoriasTable.name} TEXT NOT NULL,
         ${CategoriasTable.description} TEXT,
         ${CategoriasTable.movementType} TEXT NOT NULL,
-        ${CategoriasTable.categoryTypeId} TEXT NOT NULL,
+        ${CategoriasTable.categoryTypeId} INTEGER NOT NULL,
         ${CategoriasTable.iconName} TEXT NOT NULL,
         ${CategoriasTable.iconColorValue} INTEGER NOT NULL,
+        ${CategoriasTable.isDefault} INTEGER DEFAULT 0,
         FOREIGN KEY(${CategoriasTable.categoryTypeId}) REFERENCES ${TipoCategoriasTable.table}(${TipoCategoriasTable.id})
       );
     ''');
 
     await db.execute('''
       CREATE TABLE ${MovimientosTable.table} (
-        ${MovimientosTable.id} TEXT PRIMARY KEY,
+        ${MovimientosTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
         ${MovimientosTable.title} TEXT NOT NULL,
-        ${MovimientosTable.categoryId} TEXT NOT NULL,
+        ${MovimientosTable.categoryId} INTEGER NOT NULL,
         ${MovimientosTable.type} TEXT NOT NULL,
         ${MovimientosTable.ammount} REAL NOT NULL,
         ${MovimientosTable.date} TEXT NOT NULL,
@@ -67,5 +69,14 @@ class DBHelper {
         FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
       )
     ''');
+
+    // Insertar valores iniciales
+    for (var tipoCategoria in tipoCategoriasList) {
+      await db.insert(TipoCategoriasTable.table, tipoCategoria.toMap());
+    }
+
+    for (var categoria in categoriasList) {
+      await db.insert(CategoriasTable.table, categoria.toMap());
+    }
   }
 }

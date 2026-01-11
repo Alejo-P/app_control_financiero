@@ -17,18 +17,20 @@ class TipoCategoriaLocalDataSource {
   }
 
   // Agregar un nuevo tipo de categoría
-  Future<bool> addTipoCategoria(TipoCategoria tipoCategoria) async {
+  Future<Map<String, dynamic>> addTipoCategoria(TipoCategoria tipoCategoria) async {
     final db = await _dbHelper.database;
     final result = await db.insert(
       TipoCategoriasTable.table,
       tipoCategoria.toMap()
     );
 
-    return result > 0;
+    return result > 0 
+      ? {'success': true, 'message': 'Tipo de categoría agregada exitosamente.'} 
+      : {'success': false, 'message': 'Error al agregar el tipo de categoría.'};
   }
 
   // Actualizar un tipo de categoría existente
-  Future<bool> updateTipoCategoria(TipoCategoria tipoCategoria) async {
+  Future<Map<String, dynamic>> updateTipoCategoria(TipoCategoria tipoCategoria) async {
     final db = await _dbHelper.database;
     final result = await db.update(
       TipoCategoriasTable.table,
@@ -37,11 +39,13 @@ class TipoCategoriaLocalDataSource {
       whereArgs: [tipoCategoria.id],
     );
 
-    return result > 0;
+    return result > 0
+      ? {'success': true, 'message': 'Tipo de categoría actualizada exitosamente.'} 
+      : {'success': false, 'message': 'Error al actualizar el tipo de categoría.'};
   }
 
   // Eliminar un tipo de categoría por su ID
-  Future<bool> deleteTipoCategoria(String id) async {
+  Future<Map<String, dynamic>> deleteTipoCategoria(int id) async {
     final db = await _dbHelper.database;
     final result = await db.delete(
       TipoCategoriasTable.table,
@@ -49,6 +53,8 @@ class TipoCategoriaLocalDataSource {
       whereArgs: [id],
     );
     
-    return result > 0;
+    return result > 0 
+      ? {'success': true, 'message': 'Tipo de categoría eliminada exitosamente.'} 
+      : {'success': false, 'message': 'Error al eliminar el tipo de categoría.'};
   }
 }

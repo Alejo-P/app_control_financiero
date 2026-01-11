@@ -4,9 +4,9 @@ import 'package:intl/intl.dart';
 
 
 class Movimiento {
-  final String id;
+  final int? id;
   final String title;
-  final String categoryID;
+  final int categoryID;
   final TipoMovimiento type;
   final double ammount;
   final DateTime date;
@@ -14,7 +14,7 @@ class Movimiento {
   final String note;
 
   Movimiento({
-    required this.id,
+    this.id,
     required this.title,
     required this.categoryID,
     required this.type,
@@ -27,9 +27,9 @@ class Movimiento {
   // Factory constructor to create a Movimiento from JSON
   factory Movimiento.fromMap(Map<String, dynamic> map) {
     return Movimiento(
-      id: map['id'],
+      id: map['id'] != null ? map['id'] as int : null,
       title: map['title'],
-      categoryID: map['categoryID'],
+      categoryID: map['category_id'],
       type: map['type'] == 'ingreso'
           ? TipoMovimiento.ingreso
           : TipoMovimiento.gasto,
@@ -46,9 +46,8 @@ class Movimiento {
   // Method to convert a Movimiento to JSON
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'title': title,
-      'categoryID': categoryID,
+      'category_id': categoryID,
       'type': type == TipoMovimiento.ingreso ? 'ingreso' : 'gasto',
       'ammount': ammount,
       'date': DateFormat('yyyy-MM-dd').format(date),

@@ -92,7 +92,7 @@ class MovimientosLocalDataSource {
   }
 
   // Agregar un nuevo movimiento
-  Future<bool> addMovimiento(Movimiento movimiento) async {
+  Future<Map<String, dynamic>> addMovimiento(Movimiento movimiento) async {
     final db = await _dbHelper.database;
     final result = await db.insert(
       MovimientosTable.table,
@@ -100,11 +100,13 @@ class MovimientosLocalDataSource {
       conflictAlgorithm: ConflictAlgorithm.replace
     );
 
-    return result > 0;
+    return result > 0
+      ? {'success': true, 'message': 'Movimiento agregado exitosamente.'} 
+      : {'success': false, 'message': 'Error al agregar el movimiento.'};
   }
 
   // Actualizar un movimiento existente
-  Future<bool> updateMovimiento(Movimiento movimiento) async {
+  Future<Map<String, dynamic>> updateMovimiento(Movimiento movimiento) async {
     final db = await _dbHelper.database;
     final result = await db.update(
       MovimientosTable.table,
@@ -113,11 +115,13 @@ class MovimientosLocalDataSource {
       whereArgs: [movimiento.id],
     );
 
-    return result > 0;
+    return result > 0
+      ? {'success': true, 'message': 'Movimiento actualizado exitosamente.'} 
+      : {'success': false, 'message': 'Error al actualizar el movimiento.'};
   }
 
   // Eliminar un movimiento por ID
-  Future<bool> deleteMovimiento(String id) async {
+  Future<Map<String, dynamic>> deleteMovimiento(int id) async {
     final db = await _dbHelper.database;
     final result = await db.delete(
       MovimientosTable.table,
@@ -125,6 +129,8 @@ class MovimientosLocalDataSource {
       whereArgs: [id],
     );
     
-    return result > 0;
+    return result > 0
+      ? {'success': true, 'message': 'Movimiento eliminado exitosamente.'} 
+      : {'success': false, 'message': 'Error al eliminar el movimiento.'};
   }
 }

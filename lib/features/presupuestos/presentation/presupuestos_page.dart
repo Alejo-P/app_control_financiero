@@ -5,14 +5,14 @@ import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
 import '../widgets/month_selection.dart';
 import '../widgets/category_card.dart';
-class PresupuestoPage extends StatefulWidget {
-  const PresupuestoPage({super.key});
+class PresupuestosPage extends StatefulWidget {
+  const PresupuestosPage({super.key});
 
   @override
-  State<PresupuestoPage> createState() => _PresupuestoPageState();
+  State<PresupuestosPage> createState() => _PresupuestosPageState();
 }
 
-class _PresupuestoPageState extends State<PresupuestoPage> {
+class _PresupuestosPageState extends State<PresupuestosPage> {
   late AppState _appState;
 
   @override

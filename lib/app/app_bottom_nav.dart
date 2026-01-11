@@ -20,12 +20,6 @@ class AppBottomNav extends StatelessWidget {
       landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home, size: 30),
-          label: 'Inicio',
-          tooltip: 'Pestaña de Inicio',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.compare_arrows_outlined),
           activeIcon: Icon(Icons.compare_arrows, size: 30),
           label: 'Movimientos',
@@ -42,6 +36,12 @@ class AppBottomNav extends StatelessWidget {
           activeIcon: Icon(Icons.category, size: 30),
           label: 'Categorías',
           tooltip: 'Pestaña de Categorías',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.history_outlined),
+          activeIcon: Icon(Icons.history, size: 30),
+          label: 'Historial',
+          tooltip: 'Pestaña de Historial',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.settings_outlined),
