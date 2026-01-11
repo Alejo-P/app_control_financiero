@@ -40,6 +40,8 @@ class CategoriasLocalDataSource {
       whereArgs: [categoria.id],
     );
 
+    //TODO: Devolver la id del objeto afectado
+
     return result > 0 
       ? {'success': true, 'message': 'Categoría actualizada exitosamente.'} 
       : {'success': false, 'message': 'Error al actualizar la categoría.'};

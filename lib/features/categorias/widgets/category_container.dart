@@ -1,8 +1,6 @@
-import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/widgets/category_card_detail.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class CategoryContainer extends StatelessWidget {
   final String categoryName;
@@ -16,7 +14,6 @@ class CategoryContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
     final cantidadCategorias = categorias.length;
 
     return Container(
