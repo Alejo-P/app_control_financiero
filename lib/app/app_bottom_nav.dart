@@ -32,8 +32,8 @@ class AppBottomNav extends StatelessWidget {
           tooltip: 'Pestaña de Movimientos',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.pie_chart_outline_outlined),
-          activeIcon: Icon(Icons.pie_chart, size: 30),
+          icon: Icon(Icons.donut_large_outlined),
+          activeIcon: Icon(Icons.donut_large, size: 30),
           label: 'Presupuesto',
           tooltip: 'Pestaña de Presupuesto',
         ),

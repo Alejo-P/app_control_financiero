@@ -1,5 +1,6 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/add_note_card.dart';
@@ -81,7 +82,6 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                 );
                 return;
               }
-
 
               final confirmed = await showConfirmDialog(
                 context,
@@ -210,10 +210,11 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
           separatorBuilder: (_, __) => const Divider(),
           itemBuilder: (context, index) {
             final categoria = categoriasFiltradas[index];
+            final [r, g, b] = getRGBFromColor(categoria.iconColor);
 
             return ListTile(
               leading: CircleAvatar(
-                backgroundColor: categoria.iconColor.withOpacity(0.2),
+                backgroundColor: Color.fromRGBO(r, g, b, 0.15),
                 child: Icon(categoria.iconData, color: categoria.iconColor),
               ),
               title: Text(

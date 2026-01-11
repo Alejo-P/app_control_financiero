@@ -19,6 +19,23 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/
+
+flutter_icons:
+  android: true
+  ios: true
+
+  # Icono por defecto
+  image_path: "assets/icons/app_prod_icon.png"
+
+  # Configuración de sabores
+  flavors:
+    dev:
+      image_path: "assets/icons/app_dev_icon.png"
+    prod:
+      image_path: "assets/icons/app_prod_icon.png"
