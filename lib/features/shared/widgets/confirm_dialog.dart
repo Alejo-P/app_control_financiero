@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 Future<bool?> showConfirmDialog(
   BuildContext context, {
+  required String titleModal,
   required String title,
   required String category,
   required TipoMovimiento tipoMovimiento,
@@ -17,7 +18,7 @@ Future<bool?> showConfirmDialog(
     builder: (context) {
       return AlertDialog(
         title: Text(
-          title,
+          titleModal,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -27,6 +28,7 @@ Future<bool?> showConfirmDialog(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Título: $title'),
             Text('Monto: \$$amount'),
             Text('Tipo: ${tipoMovimiento == TipoMovimiento.gasto ? 'Gasto' : 'Ingreso'}'),
             Text('Categoría: $category'),

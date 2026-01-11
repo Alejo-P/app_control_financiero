@@ -3,7 +3,7 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
-import 'package:control_financiero/features/movimientos/widgets/add_note_card.dart';
+import 'package:control_financiero/features/movimientos/widgets/text_input_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/movimientos/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/info_tipe_movement_card.dart';
@@ -27,6 +27,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
   late List<Categoria> categoriasFiltradas;
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+  final _titleController = TextEditingController();
   
   @override
   void initState() {
@@ -68,10 +69,18 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
             tooltip: 'Guardar',
             onPressed: () async {
               final amountText = _amountController.text;
+              final titleText = _titleController.text.trim();
 
               if (amountText.isEmpty || double.tryParse(amountText.replaceAll(',', '.')) == null || double.parse(amountText.replaceAll(',', '.')) <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Ingrese un monto válido')),
+                );
+                return;
+              }
+
+              if (titleText.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ingrese un título')),
                 );
                 return;
               }
@@ -85,7 +94,8 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
 
               final confirmed = await showConfirmDialog(
                 context,
-                title: 'Confirmar movimiento',
+                titleModal: 'Confirmar movimiento',
+                title: titleText,
                 category: category,
                 tipoMovimiento: tipoMovimiento,
                 amount: amountText,
@@ -128,6 +138,15 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            TextInputCard(
+                              textController: _titleController,
+                              placeholder: 'Agregar un título',
+                              iconData: Icons.title,
+                              iconColor: Colors.grey.shade600,
+                            ),
+                            Divider(
+                              color: Colors.grey[300],
+                            ),
                             InkWell(
                               onTap: () => _openCategoriasModal(context),
                               borderRadius: BorderRadius.circular(12),
@@ -154,8 +173,11 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
                             Divider(
                               color: Colors.grey[300],
                             ),
-                            AddNoteCard(
-                              noteController: _noteController,
+                            TextInputCard(
+                              textController: _noteController,
+                              placeholder: 'Agregar una nota (opcional)',
+                              iconData: Icons.edit_note,
+                              iconColor: Colors.grey.shade600,
                             ),
                           ],
                         )

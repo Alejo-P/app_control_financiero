@@ -2,15 +2,23 @@ import 'package:control_financiero/core/formatters/note_input_formatter.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
-class AddNoteCard extends StatelessWidget {
-  final TextEditingController noteController;
+class   TextInputCard extends StatelessWidget {
+  final TextEditingController textController;
+  final String? placeholder;
+  final IconData iconData;
+  final Color iconColor;
 
-  const AddNoteCard({super.key, required this.noteController});
+  const TextInputCard({super.key,
+  required this.textController,
+  this.placeholder,
+  required this.iconData,
+  required this.iconColor
+  });
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = Colors.grey.shade600;
     final [r, g, b] = getRGBFromColor(iconColor);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -24,7 +32,7 @@ class AddNoteCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
           ),
           child: Icon(
-            Icons.edit_note,
+            iconData,
             size: 22,
             color: iconColor
           ),
@@ -33,11 +41,11 @@ class AddNoteCard extends StatelessWidget {
         const SizedBox(width: 3),
         Expanded(
           child: TextField(
-            controller: noteController,
-            decoration: const InputDecoration(
+            controller: textController,
+            decoration: InputDecoration(
               border: InputBorder.none,
               hintStyle: TextStyle(color: Colors.grey),
-              hintText: 'Agregar una nota (opcional)',
+              hintText: placeholder,
             ),
             style: const TextStyle(fontSize: 16),
             inputFormatters: [
