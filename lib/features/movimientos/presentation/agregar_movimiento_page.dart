@@ -112,10 +112,16 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
     );
 
     await context.read<AppState>().agregarMovimiento(movimiento);
-    
+
     if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.read<AppState>().transactionResultMessage),
+        ),
+      );
       Navigator.pop(context, true);
     }
+
   }
 
   Future<bool> _onWillPop() async {

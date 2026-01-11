@@ -52,6 +52,7 @@ class AppState extends ChangeNotifier {
   List<Movimiento> get movimientos => _movimientosRepository.movimientos;
 
   String transactionResultMessage = '';
+  bool loadingInitialData = true;
 
   // Cargar datos iniciales de los repositorios
   Future<void> loadInitialData() async {
@@ -61,6 +62,7 @@ class AppState extends ChangeNotifier {
       _movimientosRepository.fetchMovimientos(),
     ]);
     await loadMovementsData(notify: false);
+    loadingInitialData = false;
 
     notifyListeners();
   }

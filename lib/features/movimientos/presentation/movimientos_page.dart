@@ -3,6 +3,7 @@ import 'package:control_financiero/features/movimientos/models/totales_mensuales
 import 'package:control_financiero/features/movimientos/widgets/balance_summary_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/category_chip.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
+import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/summary_card.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +43,9 @@ class _MovimientosPageState extends State<MovimientosPage> {
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
 
+    // Indicador de carga mientras se cargan los datos iniciales
+    final bool loadingInitialData = appState.loadingInitialData;
+
     // Obtener totales de ingresos y gastos del mes seleccionado
     final totalMesActual = appState.totalesMensuales ??
         TotalesMensuales(ingresos: 0.0, gastos: 0.0);
@@ -67,7 +71,9 @@ class _MovimientosPageState extends State<MovimientosPage> {
         // permite desplazamiento si el contenido es mayor que el espacio.
         children: [
           Expanded(
-            child: fechasMovimientos.isEmpty
+            child: loadingInitialData
+                ? LoadingScreen()
+                : fechasMovimientos.isEmpty
                 ? _EmptyMovimientos()
                 : SingleChildScrollView(
               child: Column(

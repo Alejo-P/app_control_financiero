@@ -1,5 +1,6 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
+import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -34,10 +35,38 @@ class _CategoriasPageState extends State<CategoriasPage> {
   
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+    final categorias = appState.categorias;
+    final bool loadingInitialData = appState.loadingInitialData;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Center(
-        child: _EmptyCategorias(),
+        child: loadingInitialData
+                ? LoadingScreen()
+                : categorias.isEmpty
+                    ? _EmptyCategorias()
+                    : ListView.separated(
+                        itemCount: categorias.length,
+                        separatorBuilder: (context, index) => const Divider(),
+                        itemBuilder: (context, index) {
+                          final categoria = categorias[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: categoria.iconColor,
+                              child: Icon(
+                                categoria.iconData,
+                                color: Colors.white,
+                              ),
+                            ),
+                            title: Text(categoria.name),
+                            subtitle: Text(categoria.description),
+                            onTap: () {
+                              // Acción al tocar una categoría (si es necesario)
+                            },
+                          );
+                        },
+                      ),  
       ),
     );
   }
