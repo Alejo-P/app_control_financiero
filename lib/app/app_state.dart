@@ -55,13 +55,19 @@ class AppState extends ChangeNotifier {
 
   // Cargar datos iniciales de los repositorios
   Future<void> loadInitialData() async {
-    await _movimientosRepository.fetchMovimientos();
-    await _categoriasRepository.fetchCategorias();
-    await _tipoCategoriaRepository.fetchTipoCategorias();
+    await Future.wait([
+      _tipoCategoriaRepository.fetchTipoCategorias(),
+      _categoriasRepository.fetchCategorias(),
+      _movimientosRepository.fetchMovimientos(),
+    ]);
+    await loadMovementsData(notify: false);
+
+    notifyListeners();
   }
 
-  Future<void> loadMovementsData() async {
-    //movimientos = await _movimientosRepository.fetchMovimientos();
+
+
+  Future<void> loadMovementsData({bool notify = true}) async {
     _totalesMensuales = _movimientosRepository.fetchTotalesMensuales(selectedMonth);
 
     _variacionAhorro = calcularVariacionAhorro(
@@ -73,7 +79,7 @@ class AppState extends ChangeNotifier {
 
     _uniqueMovementDates = _fetchUniqueMovementDates();
 
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   void changeMovimientoFiltro(MovimientoFiltro filtro) {
