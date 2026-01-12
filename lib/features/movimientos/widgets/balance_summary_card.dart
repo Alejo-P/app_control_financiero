@@ -56,11 +56,13 @@ class BalanceSummaryCard extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: 4),
+            SizedBox(width: 6),
             Text(
-              'desde el mes pasado',
+              'en ahorros desde el mes pasado',
               style: TextStyle(
                 color: Colors.white70,
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
               ),
             ),
           ],

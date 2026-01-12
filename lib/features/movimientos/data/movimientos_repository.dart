@@ -32,6 +32,11 @@ abstract class _MovimientosRepository {
   /// @return Un objeto TotalesMensuales con los totales de ingresos y gastos.
   TotalesMensuales fetchTotalesMensuales(DateTime date);
 
+  /// Obtener totales mensuales (ingresos y gastos) para el mes pasado de una fecha dada
+  /// @param date La fecha para la cual se desean los totales del mes pasado.
+  /// @return Un objeto TotalesMensuales con los totales de ingresos y gastos del mes pasado.
+  TotalesMensuales fetchTotalesMensualesMesPasado(DateTime date);
+
   /// Agrega un nuevo movimiento financiero.
   /// @param movimiento El objeto Movimiento a agregar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
@@ -52,12 +57,28 @@ class MovimientosRepository implements _MovimientosRepository {
   final MovimientosLocalDataSource localDataSource;
   final List<Movimiento> movimientos = [];
 
+  // Para calculos de totales mensuales se conservara una lista de los movimientos del mes pasado
+  final List<Movimiento> movimientosMesPasado = [];
+
+
   MovimientosRepository(this.localDataSource);
 
   @override
   Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
     movimientos.clear();
-    movimientos.addAll(await localDataSource.fetchMovimientosByMonthAndYear(date));
+    movimientosMesPasado.clear();
+
+    // Obtener movimientos del mes actual
+    movimientos.addAll(
+      await localDataSource.fetchMovimientosByMonthAndYear(date)
+    );
+
+    // Obtener movimientos del mes pasado
+    final mesPasado = DateTime(date.year, date.month - 1);
+    movimientosMesPasado.addAll(
+      await localDataSource.fetchMovimientosByMonthAndYear(mesPasado)
+    );
+
     return movimientos;
   }
 
@@ -97,8 +118,29 @@ class MovimientosRepository implements _MovimientosRepository {
     double totalGastos = 0.0;
 
     for (var movimiento in movimientos) {
-      if (movimiento.date.year == date.year &&
-          movimiento.date.month == date.month) {
+      if (_isSameMonth(movimiento.date, date)) {
+        if (movimiento.type == TipoMovimiento.ingreso) {
+          totalIngresos += movimiento.ammount;
+        } else if (movimiento.type == TipoMovimiento.gasto) {
+          totalGastos += movimiento.ammount;
+        }
+      }
+    }
+
+    return TotalesMensuales(
+      ingresos: totalIngresos,
+      gastos: totalGastos,
+    );
+  }
+
+  @override
+  TotalesMensuales fetchTotalesMensualesMesPasado(DateTime date) {
+    double totalIngresos = 0.0;
+    double totalGastos = 0.0;
+    DateTime mesPasado = DateTime(date.year, date.month - 1);
+
+    for (var movimiento in movimientosMesPasado) {
+      if (_isSameMonth(movimiento.date, mesPasado)) {
         if (movimiento.type == TipoMovimiento.ingreso) {
           totalIngresos += movimiento.ammount;
         } else if (movimiento.type == TipoMovimiento.gasto) {
@@ -141,5 +183,10 @@ class MovimientosRepository implements _MovimientosRepository {
       movimientos.removeWhere((m) => m.id == id);
     }
     return success;
+  }
+
+  // Metodos personalizados adicionales
+  bool _isSameMonth(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month;
   }
 }

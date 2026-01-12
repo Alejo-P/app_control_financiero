@@ -98,8 +98,7 @@ class AppState extends ChangeNotifier {
     );
 
     _variacionAhorro = calcularVariacionAhorro(
-      selectedMovementsMonth,
-      DateTime(selectedMovementsMonth.year, selectedMovementsMonth.month - 1),
+      selectedMovementsMonth
     );
 
     _movimientosPorFecha = _fetchMovimientosPorFecha();
@@ -207,9 +206,9 @@ class AppState extends ChangeNotifier {
   }
 
   // Calcular la variacion de ahorro entre dos meses
-  double? calcularVariacionAhorro(DateTime mesActual, DateTime mesAnterior) {
+  double? calcularVariacionAhorro(DateTime mesActual) {
     final actual = _movimientosRepository.fetchTotalesMensuales(mesActual);
-    final anterior = _movimientosRepository.fetchTotalesMensuales(mesAnterior);
+    final anterior = _movimientosRepository.fetchTotalesMensualesMesPasado(mesActual);
 
     if (anterior.ahorro == 0) return null;
 
