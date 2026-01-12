@@ -39,6 +39,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   void initState() {
     super.initState();
+    selectedDate = getCurrentDateWithoutTime();
     categorias = [];
     categoriasFiltradas = [];
 
@@ -178,20 +179,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
-    final dateSelected = appState.getSelectedMovementsMonth;
     categorias = appState.categorias;
     categoriasFiltradas = categorias
         .where((categoria) => categoria.movementType == tipoMovimiento)
         .toList();
-
-    // Seleccionar la fecha seleccionada (en el estado) solo al crear un nuevo movimiento
-    if (widget.mode == MovimientoFormMode.create) {
-      if (!isCurrentMonth(dateSelected)) {
-        selectedDate = dateSelected;
-      } else {
-        selectedDate = getCurrentDateWithoutTime();
-      }
-    }
 
     return WillPopScope(
       onWillPop: _onWillPop,
