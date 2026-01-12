@@ -33,7 +33,7 @@ class _AjustesPageState extends State<AjustesPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           WidgetsContainer(
-            title: 'Gestion de datos'.toUpperCase(),
+            title: 'Gestion de datos',
             description: 'Opciones para respaldar y restaurar tus datos.',
             children: [
               SettingOptionCard(

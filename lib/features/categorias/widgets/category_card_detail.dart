@@ -22,51 +22,41 @@ class CategoryCardDetail extends StatelessWidget {
     final [r, g, b] = getRGBFromColor(color);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(r, g, b, 0.15),
-                      borderRadius: BorderRadius.circular(8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Color.fromRGBO(r, g, b, 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
-                    child: Icon(icon, color: color),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            name,
-                            style:
-                              const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16
-                              )
-                        ),
-                        Text(
-                          description,
-                          style:
-                              const TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
-                      ],
+                    Text(
+                      description,
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
