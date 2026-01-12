@@ -156,6 +156,19 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
   }
 
+  Future<void> _eliminarMovimiento() async {
+    await context.read<AppState>().eliminarMovimiento(movementId);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.read<AppState>().transactionResultMessage),
+        ),
+      );
+      Navigator.pop(context, true);
+    }
+  }
+
   Future<bool> _onWillPop() async {
     if (!_hasUnsavedChanges) return true;
 
@@ -186,6 +199,24 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
             : 'Editar Movimiento'
           ),
           actions: [
+            if (widget.mode == MovimientoFormMode.edit)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'Eliminar',
+                onPressed: () async {
+                  final confirmed = await showConfirmDialog(
+                    context,
+                    title: 'Eliminar movimiento',
+                    content:
+                        '¿Estás seguro de que deseas eliminar este movimiento?',
+                  );
+
+                  if (confirmed == true) {
+                    await _eliminarMovimiento();
+                  }
+                },
+              ),
+            
             IconButton(
               icon: const Icon(Icons.save),
               tooltip: 'Guardar',
