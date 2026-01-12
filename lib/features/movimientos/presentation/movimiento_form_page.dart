@@ -13,15 +13,23 @@ import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AgregarMovimientoPage extends StatefulWidget {
-  const AgregarMovimientoPage({super.key});
+class MovimientoFormPage extends StatefulWidget {
+  final MovimientoFormMode mode;
+  final Movimiento? movimiento;
+
+  const MovimientoFormPage({
+    super.key,
+    required this.mode,
+    this.movimiento,
+  });
 
   @override
-  State<AgregarMovimientoPage> createState() => _AgregarMovimientoPageState();
+  State<MovimientoFormPage> createState() => _MovimientoFormPageState();
 }
 
-class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
+class _MovimientoFormPageState extends State<MovimientoFormPage> {
   int categoryId = 0;
+  int movementId = 0;
   String categoryName = 'Sin categoría';
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
   bool _hasUnsavedChanges = false;
@@ -38,6 +46,27 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
     selectedDate = getCurrentDateWithoutTime();
     categorias = [];
     categoriasFiltradas = [];
+
+    if (widget.mode == MovimientoFormMode.edit && widget.movimiento != null) {
+        _amountController.text = widget.movimiento!.ammount.toString();
+        _noteController.text = widget.movimiento!.note;
+        _titleController.text = widget.movimiento!.title;
+        categoryId = widget.movimiento!.categoryID;
+        selectedDate = widget.movimiento!.date;
+        tipoMovimiento = widget.movimiento!.type;
+        movementId = widget.movimiento!.id!;
+        
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final appState = context.read<AppState>();
+          final category = appState.getCategoriaById(categoryId);
+
+          if (category == null) return;
+
+          setState(() {
+            categoryName = category.name;
+          });
+        });
+      }
 
     // Escuchar cambios en los controladores de texto
     _amountController.addListener(_markAsDirty);
@@ -100,7 +129,7 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
 
     // Crear el objeto Movimiento
     final movimiento = Movimiento(
-      id: 0, // El ID se asignará automáticamente en la base de datos
+      id: widget.mode == MovimientoFormMode.edit ? movementId : null,
       title: titleText,
       categoryID: categoryId,
       type: tipoMovimiento,
@@ -110,7 +139,11 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
       note: noteText,
     );
 
-    await context.read<AppState>().agregarMovimiento(movimiento);
+    if (widget.mode == MovimientoFormMode.edit) {
+      await context.read<AppState>().actualizarMovimiento(movimiento);
+    } else {
+      await context.read<AppState>().agregarMovimiento(movimiento);
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -147,7 +180,11 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Agregar Movimiento'),
+          title: Text(
+            widget.mode == MovimientoFormMode.create 
+            ? 'Agregar Movimiento' 
+            : 'Editar Movimiento'
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.save),

@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 
@@ -9,17 +10,17 @@ abstract class _CategoriasRepository {
   /// Agrega una nueva categoría.
   /// @param categoria El objeto Categoria a agregar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<Map<String, dynamic>> addCategoria(Categoria categoria);
+  Future<OperationResult<int>> addCategoria(Categoria categoria);
 
   /// Actualiza una categoría existente.
   /// @param categoria El objeto Categoria con los datos actualizados.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<Map<String, dynamic>> updateCategoria(Categoria categoria);
+  Future<OperationResult<void>> updateCategoria(Categoria categoria);
 
   /// Elimina una categoría por su ID.
   /// @param id El ID de la categoría a eliminar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<Map<String, dynamic>> deleteCategoria(int id);
+  Future<OperationResult<void>> deleteCategoria(int id);
 }
 
 class CategoriasRepository implements _CategoriasRepository {
@@ -36,18 +37,18 @@ class CategoriasRepository implements _CategoriasRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> addCategoria(Categoria categoria) async {
+  Future<OperationResult<int>> addCategoria(Categoria categoria) async {
     final success = await localDataSource.addCategoria(categoria);
-    if (success['success'] == true) {
-      categorias.add(categoria);
+    if (success.success == true) {
+      categorias.add(categoria.copyWith(id: success.data!));
     }
     return success;
   }
 
   @override
-  Future<Map<String, dynamic>> updateCategoria(Categoria categoria) async {
+  Future<OperationResult<void>> updateCategoria(Categoria categoria) async {
     final success = await localDataSource.updateCategoria(categoria);
-    if (success['success'] == true) {
+    if (success.success == true) {
       final index = categorias.indexWhere((c) => c.id == categoria.id);
       if (index != -1) {
         categorias[index] = categoria;
@@ -57,9 +58,9 @@ class CategoriasRepository implements _CategoriasRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> deleteCategoria(int id) async {
+  Future<OperationResult<void>> deleteCategoria(int id) async {
     final success = await localDataSource.deleteCategoria(id);
-    if (success['success'] == true) {
+    if (success.success == true) {
       categorias.removeWhere((c) => c.id == id);
     }
     return success;

@@ -23,6 +23,33 @@ class Categoria {
     this.isDefault = false,
   });
 
+  Categoria copyWith({
+    int? id,
+    String? name,
+    String? description,
+    TipoMovimiento? movementType,
+    int? categoryTypeID,
+    String? iconName,
+    int? iconColorValue,
+    bool? isDefault,
+  }) {
+    return Categoria(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      movementType: movementType ?? this.movementType,
+      categoryTypeID: categoryTypeID ?? this.categoryTypeID,
+      iconName: iconName ?? this.iconName,
+      iconColorValue: iconColorValue ?? this.iconColorValue,
+      isDefault: isDefault ?? this.isDefault,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Categoria{id: $id, name: $name, description: $description, movementType: $movementType, categoryTypeID: $categoryTypeID, iconName: $iconName, iconColorValue: $iconColorValue, isDefault: $isDefault}';
+  }
+
   // Factory constructor to create a Categoria from JSON
   factory Categoria.fromMap(Map<String, dynamic> map) {
     return Categoria(

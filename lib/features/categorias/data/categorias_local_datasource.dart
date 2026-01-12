@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
+import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -18,20 +19,21 @@ class CategoriasLocalDataSource {
   }
 
   // Agregar una nueva categoría
-  Future<Map<String, dynamic>> addCategoria(Categoria categoria) async {
+  Future<OperationResult<int>> addCategoria(Categoria categoria) async {
     final db = await _dbHelper.database;
-    final result = await db.insert(
-      CategoriasTable.table,
-      categoria.toMap()
-    );
+    final id = await db.insert(CategoriasTable.table, categoria.toMap());
 
-    return result > 0 
-      ? {'success': true, 'message': 'Categoría agregada exitosamente.'} 
-      : {'success': false, 'message': 'Error al agregar la categoría.'};
+    return OperationResult<int>(
+      success: id > 0,
+      message: id > 0
+          ? 'Categoría agregada exitosamente.'
+          : 'Error al agregar la categoría.',
+      data: id > 0 ? id : null,
+    );
   }
 
   // Actualizar una categoría existente
-  Future<Map<String, dynamic>> updateCategoria( Categoria categoria) async {
+  Future<OperationResult<void>> updateCategoria(Categoria categoria) async {
     final db = await _dbHelper.database;
     final result = await db.update(
       CategoriasTable.table,
@@ -40,15 +42,16 @@ class CategoriasLocalDataSource {
       whereArgs: [categoria.id],
     );
 
-    //TODO: Devolver la id del objeto afectado
-
-    return result > 0 
-      ? {'success': true, 'message': 'Categoría actualizada exitosamente.'} 
-      : {'success': false, 'message': 'Error al actualizar la categoría.'};
+    return OperationResult<void>(
+      success: result > 0,
+      message: result > 0
+          ? 'Categoría actualizada exitosamente.'
+          : 'Error al actualizar la categoría.',
+    );
   }
 
   // Eliminar una categoría por su ID
-  Future<Map<String, dynamic>> deleteCategoria(int id) async {
+  Future<OperationResult<void>> deleteCategoria(int id) async {
     final db = await _dbHelper.database;
 
     // Comprobar que la categoría no es predeterminada
@@ -60,16 +63,27 @@ class CategoriasLocalDataSource {
 
     if (maps.isNotEmpty && maps.first[CategoriasTable.isDefault] == 1) {
       // No eliminar si es predeterminada
-      return {'success': false, 'message': 'No se puede eliminar una categoría predeterminada.'};
+      return OperationResult<void>(
+        success: false,
+        message: 'No se puede eliminar una categoría predeterminada.',
+      );
     }
 
     // Si tiene movimientos asociados, no eliminar
-    final movimientoCount = Sqflite.firstIntValue(await db.rawQuery(
-      'SELECT COUNT(*) FROM ${MovimientosTable.table} WHERE ${MovimientosTable.categoryId} = ?',
-      [id],
-    )) ?? 0;
+    final movimientoCount =
+        Sqflite.firstIntValue(
+          await db.rawQuery(
+            'SELECT COUNT(*) FROM ${MovimientosTable.table} WHERE ${MovimientosTable.categoryId} = ?',
+            [id],
+          ),
+        ) ??
+        0;
     if (movimientoCount > 0) {
-      return {'success': false, 'message': 'No se puede eliminar una categoría con movimientos asociados.'};
+      return OperationResult<void>(
+        success: false,
+        message:
+            'No se puede eliminar una categoría con movimientos asociados.',
+      );
     }
 
     final result = await db.delete(
@@ -77,9 +91,12 @@ class CategoriasLocalDataSource {
       where: '${CategoriasTable.id} = ?',
       whereArgs: [id],
     );
-    
-    return result > 0 
-      ? {'success': true, 'message': 'Categoría eliminada exitosamente.'} 
-      : {'success': false, 'message': 'Error al eliminar la categoría.'};
+
+    return OperationResult<void>(
+      success: result > 0,
+      message: result > 0
+          ? 'Categoría eliminada exitosamente.'
+          : 'Error al eliminar la categoría.',
+    );
   }
 }

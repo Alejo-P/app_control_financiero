@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
+import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:sqflite/sqflite.dart';
@@ -50,17 +51,18 @@ class MovimientosLocalDataSource {
 
     return maps.map(Movimiento.fromMap).toList();
   }
-  
+
   // Obtener moviimeintos por fecha y tipo
   Future<List<Movimiento>> fetchMovimientosByDateAndType(
     DateTime date,
-    TipoMovimiento type
+    TipoMovimiento type,
   ) async {
     final db = await _dbHelper.database;
     final String dateString = date.toIso8601String().split('T')[0];
     final List<Map<String, dynamic>> maps = await db.query(
       MovimientosTable.table,
-      where: "date(${MovimientosTable.date}) = ? AND ${MovimientosTable.type} = ?",
+      where:
+          "date(${MovimientosTable.date}) = ? AND ${MovimientosTable.type} = ?",
       whereArgs: [dateString, type.name],
       orderBy: '${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC',
     );
@@ -90,28 +92,29 @@ class MovimientosLocalDataSource {
       }
     }
 
-    return TotalesMensuales(
-      ingresos: ingresos,
-      gastos: gastos,
-    );
+    return TotalesMensuales(ingresos: ingresos, gastos: gastos);
   }
 
   // Agregar un nuevo movimiento
-  Future<Map<String, dynamic>> addMovimiento(Movimiento movimiento) async {
+  Future<OperationResult<int>> addMovimiento(Movimiento movimiento) async {
     final db = await _dbHelper.database;
-    final result = await db.insert(
+    final int id = await db.insert(
       MovimientosTable.table,
       movimiento.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
-    return result > 0
-      ? {'success': true, 'message': 'Movimiento agregado exitosamente.'} 
-      : {'success': false, 'message': 'Error al agregar el movimiento.'};
+    return OperationResult<int>(
+      success: id > 0,
+      data: id > 0 ? id : null,
+      message: id > 0
+          ? 'Movimiento agregado exitosamente.'
+          : 'Error al agregar el movimiento.',
+    );
   }
 
   // Actualizar un movimiento existente
-  Future<Map<String, dynamic>> updateMovimiento(Movimiento movimiento) async {
+  Future<OperationResult<void>> updateMovimiento(Movimiento movimiento) async {
     final db = await _dbHelper.database;
     final result = await db.update(
       MovimientosTable.table,
@@ -120,22 +123,28 @@ class MovimientosLocalDataSource {
       whereArgs: [movimiento.id],
     );
 
-    return result > 0
-      ? {'success': true, 'message': 'Movimiento actualizado exitosamente.'} 
-      : {'success': false, 'message': 'Error al actualizar el movimiento.'};
+    return OperationResult<void>(
+      success: result > 0,
+      message: result > 0
+          ? 'Movimiento actualizado exitosamente.'
+          : 'Error al actualizar el movimiento.',
+    );
   }
 
   // Eliminar un movimiento por ID
-  Future<Map<String, dynamic>> deleteMovimiento(int id) async {
+  Future<OperationResult<void>> deleteMovimiento(int id) async {
     final db = await _dbHelper.database;
     final result = await db.delete(
       MovimientosTable.table,
       where: '${MovimientosTable.id} = ?',
       whereArgs: [id],
     );
-    
-    return result > 0
-      ? {'success': true, 'message': 'Movimiento eliminado exitosamente.'} 
-      : {'success': false, 'message': 'Error al eliminar el movimiento.'};
+
+    return OperationResult<void>(
+      success: result > 0,
+      message: result > 0
+          ? 'Movimiento eliminado exitosamente.'
+          : 'Error al eliminar el movimiento.',
+    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/movimientos/data/movimentos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
@@ -40,17 +41,17 @@ abstract class _MovimientosRepository {
   /// Agrega un nuevo movimiento financiero.
   /// @param movimiento El objeto Movimiento a agregar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<Map<String, dynamic>> addMovimiento(Movimiento movimiento);
+  Future<OperationResult<int>> addMovimiento(Movimiento movimiento);
   
   /// Actualiza un movimiento financiero existente.
   /// @param movimiento El objeto Movimiento con los datos actualizados.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<Map<String, dynamic>> updateMovimiento(Movimiento movimiento);
+  Future<OperationResult<void>> updateMovimiento(Movimiento movimiento);
  
   /// Elimina un movimiento financiero por su ID.
   /// @param id El ID del movimiento a eliminar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<Map<String, dynamic>> deleteMovimiento(int id);
+  Future<OperationResult<void>> deleteMovimiento(int id);
 }
 
 class MovimientosRepository implements _MovimientosRepository {
@@ -156,33 +157,33 @@ class MovimientosRepository implements _MovimientosRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> addMovimiento(Movimiento movimiento) async {
-    final success = await localDataSource.addMovimiento(movimiento);
-    if (success['success'] == true) {
-      movimientos.add(movimiento);
+  Future<OperationResult<int>> addMovimiento(Movimiento movimiento) async {
+    final result = await localDataSource.addMovimiento(movimiento);
+    if (result.success == true) {
+      movimientos.add(movimiento.copyWith(id: result.data!));
     }
-    return success;
+    return result;
   }
 
   @override
-  Future<Map<String, dynamic>> updateMovimiento(Movimiento movimiento) async {
-    final success = await localDataSource.updateMovimiento(movimiento);
-    if (success['success'] == true) {
+  Future<OperationResult<void>> updateMovimiento(Movimiento movimiento) async {
+    final result = await localDataSource.updateMovimiento(movimiento);
+    if (result.success == true) {
       final index = movimientos.indexWhere((m) => m.id == movimiento.id);
       if (index != -1) {
         movimientos[index] = movimiento;
       }
     }
-    return success;
+    return result;
   }
 
   @override
-  Future<Map<String, dynamic>> deleteMovimiento(int id) async {
-    final success = await localDataSource.deleteMovimiento(id);
-    if (success['success'] == true) {
+  Future<OperationResult<void>> deleteMovimiento(int id) async {
+    final result = await localDataSource.deleteMovimiento(id);
+    if (result.success == true) {
       movimientos.removeWhere((m) => m.id == id);
     }
-    return success;
+    return result;
   }
 
   // Metodos personalizados adicionales

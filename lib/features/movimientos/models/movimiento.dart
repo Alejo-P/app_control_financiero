@@ -24,6 +24,28 @@ class Movimiento {
     this.note = '',
   });
 
+  Movimiento copyWith({
+    int? id,
+    String? title,
+    int? categoryID,
+    TipoMovimiento? type,
+    double? ammount,
+    DateTime? date,
+    TimeOfDay? time,
+    String? note,
+  }) {
+    return Movimiento(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      categoryID: categoryID ?? this.categoryID,
+      type: type ?? this.type,
+      ammount: ammount ?? this.ammount,
+      date: date ?? this.date,
+      time: time ?? this.time,
+      note: note ?? this.note,
+    );
+  }
+
   // Factory constructor to create a Movimiento from JSON
   factory Movimiento.fromMap(Map<String, dynamic> map) {
     return Movimiento(

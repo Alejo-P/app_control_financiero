@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/movimientos/widgets/transaction_detail_card.dart';
 import 'package:flutter/material.dart';
 import 'package:control_financiero/app/app_state.dart';
@@ -68,7 +69,19 @@ class TransactionsContainer extends StatelessWidget {
                     movimiento.categoryID,
                   );
 
-                  return TransactionDetailCard(
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MovimientoFormPage(
+                            mode: MovimientoFormMode.edit,
+                            movimiento: movimiento,
+                          ),
+                        ),
+                      );
+                    },
+                    child: TransactionDetailCard(
                     title: movimiento.title,
                     category: categoria!.name,
                     type: _getTypeName(movimiento.type),
@@ -78,7 +91,9 @@ class TransactionsContainer extends StatelessWidget {
                       categoria.iconColorValue,
                     ),
                     time: movimiento.time,
-                  );
+                  )
+                  )
+                  ;
                 },
               ),
             ),

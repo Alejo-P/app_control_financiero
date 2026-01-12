@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 enum TipoMovimiento { ingreso, gasto }
 
+enum MovimientoFormMode { create, edit }
+
 enum MovimientoFiltro { todos, ingresos, gastos }
 
 extension MovimientoFiltroUI on MovimientoFiltro {
@@ -23,4 +25,3 @@ extension MovimientoFiltroUI on MovimientoFiltro {
     _ => Colors.grey,
   };
 }
-

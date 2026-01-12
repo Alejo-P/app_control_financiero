@@ -1,9 +1,10 @@
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/presentation/agregar_categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimentos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
-import 'package:control_financiero/features/movimientos/presentation/agregar_movimiento_page.dart';
+import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +44,7 @@ class App extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (_) => const AppScaffold(), // navegación principal
-          '/agregar_movimiento': (_) => const AgregarMovimientoPage(),
+          '/agregar_movimiento': (_) => const MovimientoFormPage(mode: MovimientoFormMode.create),
           '/agregar_categoria': (_) => const AgregarCategoria(),
         },
         //home: const AppScaffold(),

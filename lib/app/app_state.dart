@@ -261,24 +261,24 @@ class AppState extends ChangeNotifier {
   // ================================= MOVIMIENTOS CRUD =================================
   Future<void> agregarMovimiento(Movimiento movimiento) async {
     final result = await _movimientosRepository.addMovimiento(movimiento);
-    transactionResultMessage = result['message'] ?? '';
-    if (result['success'] == true) {
+    transactionResultMessage = result.message;
+    if (result.success == true) {
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
 
   Future<void> actualizarMovimiento(Movimiento movimiento) async {
     final result = await _movimientosRepository.updateMovimiento(movimiento);
-    transactionResultMessage = result['message'] ?? '';
-    if (result['success'] == true) {
+    transactionResultMessage = result.message;
+    if (result.success == true) {
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
 
   Future<void> eliminarMovimiento(int id) async {
     final result = await _movimientosRepository.deleteMovimiento(id);
-    transactionResultMessage = result['message'] ?? '';
-    if (result['success'] == true) {
+    transactionResultMessage = result.message;
+    if (result.success == true) {
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
@@ -286,24 +286,24 @@ class AppState extends ChangeNotifier {
   // ================================ CATEGORIAS CRUD =================================
   Future<void> agregarCategoria(Categoria categoria) async {
     final result = await _categoriasRepository.addCategoria(categoria);
-    transactionResultMessage = result['message'] ?? '';
-    if (result['success'] == true) {
+    transactionResultMessage = result.message;
+    if (result.success == true) {
       await loadCategoryData();
     }
   }
 
   Future<void> actualizarCategoria(Categoria categoria) async {
     final result = await _categoriasRepository.updateCategoria(categoria);
-    transactionResultMessage = result['message'] ?? '';
-    if (result['success'] == true) {
+    transactionResultMessage = result.message;
+    if (result.success == true) {
       await loadCategoryData();  
     }
   }
 
   Future<void> eliminarCategoria(int id) async {
     final result = await _categoriasRepository.deleteCategoria(id);
-    transactionResultMessage = result['message'] ?? '';
-    if (result['success'] == true) {
+    transactionResultMessage = result.message;
+    if (result.success == true) {
       await loadCategoryData();
     }
   }
