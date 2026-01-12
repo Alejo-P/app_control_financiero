@@ -2,16 +2,27 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:flutter/material.dart';
 
 class TipoMovimientoSelector extends StatefulWidget {
+  final TipoMovimiento tipoMovimiento;
   final ValueChanged<TipoMovimiento>? onChanged;
-  const TipoMovimientoSelector({super.key, this.onChanged});
+  
+  const TipoMovimientoSelector({
+    super.key, this.tipoMovimiento = TipoMovimiento.gasto,
+    this.onChanged
+  });
 
   @override
   State<TipoMovimientoSelector> createState() => _TipoMovimientoSelectorState();
 }
 
 class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
-  TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
+  late TipoMovimiento tipoMovimiento;
   double borderRadiusValue = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    tipoMovimiento = widget.tipoMovimiento;
+  }
 
   @override
   Widget build(BuildContext context) {

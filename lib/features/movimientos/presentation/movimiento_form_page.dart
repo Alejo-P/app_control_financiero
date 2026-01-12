@@ -270,7 +270,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TipoMovimientoSelector(onChanged: _onChangeTipoMovimiento),
+              TipoMovimientoSelector(
+                tipoMovimiento: tipoMovimiento,
+                onChanged: _onChangeTipoMovimiento
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
