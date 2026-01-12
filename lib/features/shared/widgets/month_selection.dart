@@ -34,6 +34,14 @@ class _MonthSelectionState extends State<MonthSelection> {
     return (selectedDate.year == now.year && selectedDate.month == now.month);
   }
 
+  bool isLimitPastMonth(DateTime selectedDate) {
+    final now = DateTime.now();
+    // Limite de solo 3 años en el pasado
+    final limitDate = DateTime(now.year - 3, now.month);
+    return (selectedDate.year < limitDate.year) ||
+        (selectedDate.year == limitDate.year && selectedDate.month < limitDate.month);
+  }
+
   void changeMonth(int offset) {
     if (offset > 0 && isFutureMonth(selectedDate)) {
       return; // No permitir avanzar a meses futuros
@@ -68,6 +76,8 @@ class _MonthSelectionState extends State<MonthSelection> {
   Widget build(BuildContext context) {
     final isFuture = isFutureMonth(selectedDate);
     final isCurrent = isCurrentMonth();
+    final isLimitPast = isLimitPastMonth(selectedDate);
+
     return Card(
       color: Colors.white,
       elevation: 6,
@@ -80,10 +90,10 @@ class _MonthSelectionState extends State<MonthSelection> {
           textBaseline: TextBaseline.alphabetic,
           children: [
             IconButton(
-              onPressed: () => changeMonth(-1),
+              onPressed: isLimitPast ? null : () => changeMonth(-1),
               icon: Icon(
                   Icons.arrow_back_ios_new,
-                  color: Colors.blueAccent,
+                  color: isLimitPast ? Colors.grey : Colors.blueAccent,
                 ),
             ),
             Column(
