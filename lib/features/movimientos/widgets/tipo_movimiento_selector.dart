@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
 class TipoMovimientoSelector extends StatefulWidget {
@@ -26,6 +27,7 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final [r, g, b] = getRGBFromColor(Colors.black);
     return Container(
       height: 50,
       padding: const EdgeInsets.all(4),
@@ -34,7 +36,7 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
         borderRadius: BorderRadius.circular(borderRadiusValue),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Color.fromRGBO(r, g, b, 0.15),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),

@@ -17,11 +17,7 @@ class MovimientoFormPage extends StatefulWidget {
   final MovimientoFormMode mode;
   final Movimiento? movimiento;
 
-  const MovimientoFormPage({
-    super.key,
-    required this.mode,
-    this.movimiento,
-  });
+  const MovimientoFormPage({super.key, required this.mode, this.movimiento});
 
   @override
   State<MovimientoFormPage> createState() => _MovimientoFormPageState();
@@ -43,30 +39,29 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   void initState() {
     super.initState();
-    selectedDate = getCurrentDateWithoutTime();
     categorias = [];
     categoriasFiltradas = [];
 
     if (widget.mode == MovimientoFormMode.edit && widget.movimiento != null) {
-        _amountController.text = widget.movimiento!.ammount.toString();
-        _noteController.text = widget.movimiento!.note;
-        _titleController.text = widget.movimiento!.title;
-        categoryId = widget.movimiento!.categoryID;
-        selectedDate = widget.movimiento!.date;
-        tipoMovimiento = widget.movimiento!.type;
-        movementId = widget.movimiento!.id!;
-        
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final appState = context.read<AppState>();
-          final category = appState.getCategoriaById(categoryId);
+      _amountController.text = widget.movimiento!.ammount.toString();
+      _noteController.text = widget.movimiento!.note;
+      _titleController.text = widget.movimiento!.title;
+      categoryId = widget.movimiento!.categoryID;
+      selectedDate = widget.movimiento!.date;
+      tipoMovimiento = widget.movimiento!.type;
+      movementId = widget.movimiento!.id!;
 
-          if (category == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final appState = context.read<AppState>();
+        final category = appState.getCategoriaById(categoryId);
 
-          setState(() {
-            categoryName = category.name;
-          });
+        if (category == null) return;
+
+        setState(() {
+          categoryName = category.name;
         });
-      }
+      });
+    }
 
     // Escuchar cambios en los controladores de texto
     _amountController.addListener(_markAsDirty);
@@ -118,7 +113,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     }
   }
 
- Future<void> _guardarMovimiento() async {
+  Future<void> _guardarMovimiento() async {
     final amountText = _amountController.text.trim();
     final noteText = _noteController.text.trim();
     final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
@@ -153,7 +148,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       );
       Navigator.pop(context, true);
     }
-
   }
 
   Future<void> _eliminarMovimiento() async {
@@ -184,19 +178,29 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
+    final dateSelected = appState.getSelectedMovementsMonth;
     categorias = appState.categorias;
     categoriasFiltradas = categorias
         .where((categoria) => categoria.movementType == tipoMovimiento)
         .toList();
+
+    // Seleccionar la fecha seleccionada (en el estado) solo al crear un nuevo movimiento
+    if (widget.mode == MovimientoFormMode.create) {
+      if (!isCurrentMonth(dateSelected)) {
+        selectedDate = dateSelected;
+      } else {
+        selectedDate = getCurrentDateWithoutTime();
+      }
+    }
 
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.mode == MovimientoFormMode.create 
-            ? 'Agregar Movimiento' 
-            : 'Editar Movimiento'
+            widget.mode == MovimientoFormMode.create
+                ? 'Agregar Movimiento'
+                : 'Editar Movimiento',
           ),
           actions: [
             if (widget.mode == MovimientoFormMode.edit)
@@ -216,7 +220,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                   }
                 },
               ),
-            
+
             IconButton(
               icon: const Icon(Icons.save),
               tooltip: 'Guardar',
@@ -272,7 +276,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
             children: [
               TipoMovimientoSelector(
                 tipoMovimiento: tipoMovimiento,
-                onChanged: _onChangeTipoMovimiento
+                onChanged: _onChangeTipoMovimiento,
               ),
               Expanded(
                 child: SingleChildScrollView(

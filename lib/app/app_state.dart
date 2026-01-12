@@ -201,10 +201,6 @@ class AppState extends ChangeNotifier {
         .toList();
   }
 
-  bool isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
   // Calcular la variacion de ahorro entre dos meses
   double? calcularVariacionAhorro(DateTime mesActual) {
     final actual = _movimientosRepository.fetchTotalesMensuales(mesActual);

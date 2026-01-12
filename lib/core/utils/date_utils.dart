@@ -38,3 +38,49 @@ String formatDate(DateTime date) {
   final year = date.year.toString();
   return '$day/$month/$year';
 }
+
+// Función para formatear una fecha reladiva (Hoy, 29 de Junio, etc.)
+String formatRelativeDateWithMonth(DateTime date) {
+  final currentDate = getCurrentDateWithoutTime();
+  final targetDate = DateTime(date.year, date.month, date.day);
+  final difference = currentDate.difference(targetDate).inDays;
+  final monthName = getMonthName(date);
+  String resultado = '';
+
+  if (difference == 0) {
+    resultado = 'Hoy, ';
+  } else if (difference == 1) {
+    resultado = 'Ayer, ';
+  } else {
+    resultado = '';
+  }
+
+  resultado += '${date.day} de $monthName';
+
+  // Agregar el año solo si no es el año actual
+  if (date.year != currentDate.year) {
+    resultado += ', ${date.year}';
+  }
+
+  return resultado;
+}
+
+bool isSameDay(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+bool isCurrentMonth(DateTime date) {
+  final now = DateTime.now();
+  return date.year == now.year && date.month == now.month;
+}
+
+DateTime getFirstDayOfMonth(DateTime date) {
+  return DateTime(date.year, date.month, 1);
+}
+
+DateTime getLastDayOfMonth(DateTime date) {
+  final beginningNextMonth = (date.month < 12)
+      ? DateTime(date.year, date.month + 1, 1)
+      : DateTime(date.year + 1, 1, 1);
+  return beginningNextMonth.subtract(const Duration(days: 1));
+}
