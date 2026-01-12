@@ -42,7 +42,7 @@ final categoriasList = <Categoria>[
     isDefault: true,
   ),
   Categoria(
-    id: 2,
+    id: 3,
     name: 'Transporte',
     description: 'Gastos en transporte público y gasolina',
     movementType: TipoMovimiento.gasto,
@@ -52,17 +52,17 @@ final categoriasList = <Categoria>[
     isDefault: true,
   ),
   Categoria(
-    id: 3,
+    id: 4,
     name: 'Trabajo',
     description: 'Ingresos relacionados con el trabajo',
     movementType: TipoMovimiento.ingreso,
     categoryTypeID: 3,
-    iconName: 'attach_money',
+    iconName: 'payments',
     iconColorValue: 0xFF4CAF50,
     isDefault: true,
   ),
   Categoria(
-    id: 4,
+    id: 5,
     name: 'Salud',
     description: 'Gastos en salud y bienestar',
     movementType: TipoMovimiento.gasto,
@@ -72,7 +72,7 @@ final categoriasList = <Categoria>[
     isDefault: true,
   ),
   Categoria(
-    id: 5,
+    id: 6,
     name: 'Ocio',
     description: 'Gastos en actividades recreativas y entretenimiento',
     movementType: TipoMovimiento.gasto,

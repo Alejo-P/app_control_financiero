@@ -13,6 +13,8 @@ class IconMapper {
     'local_gas_station': Icons.local_gas_station,
     'flight': Icons.flight,
     'local_hospital': Icons.local_hospital,
+    'payments': Icons.payments,
+    'school': Icons.school,
   };
 
   static IconData fromName(String name) {

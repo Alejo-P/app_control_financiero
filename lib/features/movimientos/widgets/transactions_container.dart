@@ -43,7 +43,9 @@ class TransactionsContainer extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
-                '\$${totalAmount.toStringAsFixed(2)}',
+                totalAmount < 0
+                    ? '-\$${totalAmount.abs().toStringAsFixed(2)}'
+                    : '+\$${totalAmount.toStringAsFixed(2)}',
                 style: TextStyle(
                   color: totalAmount < 0 ? Colors.red : Colors.green,
                   fontWeight: FontWeight.bold,

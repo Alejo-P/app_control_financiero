@@ -64,7 +64,6 @@ class _AgregarMovimientoPageState extends State<AgregarMovimientoPage> {
 
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
     setState(() {
-      _hasUnsavedChanges = true;
       categoryId = 0;
       categoryName = 'Sin categoría';
       tipoMovimiento = newTipoMovimiento;
