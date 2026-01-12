@@ -90,7 +90,9 @@ class _MovimientosPageState extends State<MovimientosPage> {
           const SizedBox(height: 6),
           Expanded(
             child: isLoading
-                ? LoadingScreen()
+                ? LoadingScreen(
+                    message: 'Cargando movimientos para ${formatMonthYear(selectedMonth)}...',
+                )
                 : fechasMovimientos.isEmpty
                 ? _EmptyMovimientos()
                 : SingleChildScrollView(

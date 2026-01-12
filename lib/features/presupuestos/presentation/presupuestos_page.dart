@@ -40,9 +40,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     final selectedMonth = appState.selectedBudgetMonth;
 
     if (appState.loadingInitialData) {
-      return LoadingScreen(
-        message: 'Cargando datos de presupuesto...'
-      );
+      return LoadingScreen(message: 'Cargando datos de presupuesto...');
     }
 
     return Padding(
@@ -63,7 +61,10 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
           // permite desplazamiento si el contenido es mayor que el espacio.
           Expanded(
             child: isLoading
-                ? LoadingScreen()
+                ? LoadingScreen(
+                    message:
+                        'Cargando datos de presupuesto para\n ${formatMonthYear(selectedMonth)}...',
+                  )
                 : false // TODO: Aquí iría la condición para verificar si hay presupuestos
                 ? _EmptyPresupuestos()
                 : SingleChildScrollView(

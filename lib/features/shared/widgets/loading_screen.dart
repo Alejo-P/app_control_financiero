@@ -15,7 +15,14 @@ class LoadingScreen extends StatelessWidget {
           children: [
             CircularProgressIndicator(),
             const SizedBox(height: 16),
-            Text(message),
+            Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
