@@ -64,6 +64,13 @@ class _MovimientosPageState extends State<MovimientosPage> {
     // Movimientos agrupados por fecha
     final fechasMovimientos = appState.uniqueMovementDates;
 
+    final movimientosFiltradosDelMes = fechasMovimientos
+    .expand((fecha) => appState.getMovimientosByDateAndFilter(
+          fecha,
+          selectedFilter,
+        ))
+    .toList();
+
     final categories = [
       MovimientoFiltro.todos,
       MovimientoFiltro.ingresos,
@@ -114,7 +121,6 @@ class _MovimientosPageState extends State<MovimientosPage> {
                     ),
                   ),
                   SizedBox(height: 8),
-                  // Aquí puedes agregar más widgets relacionados con los movimientos
                   SizedBox(
                     height: 35,
                     child: ListView.separated(
@@ -137,6 +143,10 @@ class _MovimientosPageState extends State<MovimientosPage> {
                     ),
                   ),
                   SizedBox(height: 16),
+                  if (movimientosFiltradosDelMes.isEmpty &&
+                      selectedFilter != MovimientoFiltro.todos)
+                    _EmptyFilteredMovimientos(filtro: selectedFilter)
+                  else
                   // Lista de movimientos agrupados por fecha
                   ...fechasMovimientos.map((fecha) {
                     // Filtrar movimientos por fecha y filtro seleccionado
@@ -196,3 +206,48 @@ class _EmptyMovimientos extends StatelessWidget {
     );
   }
 }
+
+class _EmptyFilteredMovimientos extends StatelessWidget {
+  final MovimientoFiltro filtro;
+
+  const _EmptyFilteredMovimientos({required this.filtro});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      margin: const EdgeInsets.symmetric(vertical: 20.0),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.filter_alt_off,
+            size: 72,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No existen movimientos de tipo ${_labelFromFiltro(filtro).toLowerCase()}',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _labelFromFiltro(MovimientoFiltro filtro) {
+    switch (filtro) {
+      case MovimientoFiltro.ingresos:
+        return 'Ingresos';
+      case MovimientoFiltro.gastos:
+        return 'Gastos';
+      default:
+        return 'Todos';
+    }
+  }
+}
+
