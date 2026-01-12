@@ -2,14 +2,21 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 
 class MonthSelection extends StatefulWidget {
-  const MonthSelection({super.key});
+  final DateTime initialDate;
+  final ValueChanged<DateTime>? onMonthChanged;
+  
+  const MonthSelection({
+    super.key,
+    required this.initialDate,
+    this.onMonthChanged
+  });
 
   @override
   State<MonthSelection> createState() => _MonthSelectionState();
 }
 
 class _MonthSelectionState extends State<MonthSelection> {
-  DateTime selectedDate = DateTime.now();
+  late DateTime selectedDate = widget.initialDate;
 
   String get monthYearLabel {
     return formatMonthYear(selectedDate);
@@ -22,12 +29,22 @@ class _MonthSelectionState extends State<MonthSelection> {
         selectedDate.month + offset,
       );
     });
+
+    // Notificar el cambio de mes si se proporcionó un callback
+    if (widget.onMonthChanged != null) {
+      widget.onMonthChanged!(selectedDate);
+    }
   }
 
   void returnToday() {
     setState(() {
       selectedDate = DateTime.now();
     });
+
+    // Notificar el cambio de mes si se proporcionó un callback
+    if (widget.onMonthChanged != null) {
+      widget.onMonthChanged!(selectedDate);
+    }
   }
 
   @override

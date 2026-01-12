@@ -6,7 +6,7 @@ import 'package:control_financiero/features/movimientos/models/totales_mensuales
 abstract class _MovimientosRepository {
   ///Obtiene la lista de movimientos financieros.
   ///@return Una lista de objetos Movimiento.
-  Future<List<Movimiento>> fetchMovimientos();
+  Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date);
 
   /// Obtener movimientos por categoría
   /// @param categoryId El ID de la categoría.
@@ -55,9 +55,9 @@ class MovimientosRepository implements _MovimientosRepository {
   MovimientosRepository(this.localDataSource);
 
   @override
-  Future<List<Movimiento>> fetchMovimientos() async {
+  Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
     movimientos.clear();
-    movimientos.addAll(await localDataSource.fetchMovimientos());
+    movimientos.addAll(await localDataSource.fetchMovimientosByMonthAndYear(date));
     return movimientos;
   }
 

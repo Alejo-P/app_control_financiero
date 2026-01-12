@@ -10,7 +10,17 @@ import 'package:control_financiero/features/tipo_categorias/models/tipo_categori
 import 'package:flutter/material.dart';
 
 class AppState extends ChangeNotifier {
-  DateTime selectedMonth = DateTime.now();
+  // Estado unico para movimientos
+  DateTime selectedMovementsMonth = DateTime.now();
+  DateTime get getSelectedMovementsMonth => selectedMovementsMonth;
+  bool _isLoadingMonth = false;
+  bool get isLoadingMonth => _isLoadingMonth;
+
+  // Estado unico para presupuestos
+  DateTime selectedBudgetMonth = DateTime.now();
+  DateTime get getSelectedBudgetMonth => selectedBudgetMonth;
+  bool _isLoadingBudget = false;
+  bool get isLoadingBudget => _isLoadingBudget;
 
   final List<String> pageNames = [
     'Movimientos',
@@ -65,35 +75,36 @@ class AppState extends ChangeNotifier {
     await Future.wait([
       _tipoCategoriaRepository.fetchTipoCategorias(),
       _categoriasRepository.fetchCategorias(),
-      _movimientosRepository.fetchMovimientos(),
+      loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
     ]);
-    await loadMovementsData(notify: false);
     await loadCategoryData(notify: false);
     loadingInitialData = false;
 
     notifyListeners();
   }
 
-  Future<void> loadMovementsData({bool notify = true}) async {
+  Future<void> loadCategoryData({bool notify = true}) async {
+    await _categoriasRepository.fetchCategorias();
+    _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
+
+    if (notify) notifyListeners();
+  }
+
+  Future<void> loadMovementsByMonthAndYear(DateTime date, {bool notify = true}) async {
+    await _movimientosRepository.fetchMovimientosByMonthAndYear(date);
+
     _totalesMensuales = _movimientosRepository.fetchTotalesMensuales(
-      selectedMonth,
+      selectedMovementsMonth,
     );
 
     _variacionAhorro = calcularVariacionAhorro(
-      selectedMonth,
-      DateTime(selectedMonth.year, selectedMonth.month - 1),
+      selectedMovementsMonth,
+      DateTime(selectedMovementsMonth.year, selectedMovementsMonth.month - 1),
     );
 
     _movimientosPorFecha = _fetchMovimientosPorFecha();
 
     _uniqueMovementDates = _fetchUniqueMovementDates();
-
-    if (notify) notifyListeners();
-  }
-
-  Future<void> loadCategoryData({bool notify = true}) async {
-    await _categoriasRepository.fetchCategorias();
-    _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
 
     if (notify) notifyListeners();
   }
@@ -213,8 +224,28 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeMonth(DateTime month) {
-    selectedMonth = month;
+  Future<void> changeMovementsMonth(DateTime month) async {
+    selectedMovementsMonth = month;
+    _isLoadingMonth = true;
+    notifyListeners();
+
+    await loadMovementsByMonthAndYear(month);
+
+    _isLoadingMonth = false;
+    notifyListeners();
+  }
+
+  Future<void> changeBudgetMonth(DateTime month) async {
+    selectedBudgetMonth = month;
+    _isLoadingBudget = true;
+    notifyListeners();
+
+    // Aquí podrías cargar datos relacionados con el presupuesto si es necesario
+
+    // Como ejemplo, simulamos una carga con un retraso
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    _isLoadingBudget = false;
     notifyListeners();
   }
 
@@ -233,7 +264,7 @@ class AppState extends ChangeNotifier {
     final result = await _movimientosRepository.addMovimiento(movimiento);
     transactionResultMessage = result['message'] ?? '';
     if (result['success'] == true) {
-      await loadMovementsData();
+      await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
 
@@ -241,7 +272,7 @@ class AppState extends ChangeNotifier {
     final result = await _movimientosRepository.updateMovimiento(movimiento);
     transactionResultMessage = result['message'] ?? '';
     if (result['success'] == true) {
-      await loadMovementsData();
+      await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
 
@@ -249,7 +280,7 @@ class AppState extends ChangeNotifier {
     final result = await _movimientosRepository.deleteMovimiento(id);
     transactionResultMessage = result['message'] ?? '';
     if (result['success'] == true) {
-      await loadMovementsData();
+      await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
 

@@ -1,9 +1,11 @@
 import 'package:control_financiero/core/models/app_bar_action.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/movimientos/widgets/balance_summary_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/category_chip.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
+import 'package:control_financiero/features/shared/widgets/month_selection.dart';
 import 'package:control_financiero/features/shared/widgets/summary_card.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:provider/provider.dart';
@@ -43,8 +45,11 @@ class _MovimientosPageState extends State<MovimientosPage> {
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
 
-    // Indicador de carga mientras se cargan los datos iniciales
-    final bool loadingInitialData = appState.loadingInitialData;
+    // Indicador de carga para el mes seleccionado
+    final isLoading = appState.isLoadingMonth;
+
+    // Obtener el mes seleccionado
+    final selectedMonth = appState.selectedMovementsMonth;
 
     // Obtener totales de ingresos y gastos del mes seleccionado
     final totalMesActual = appState.totalesMensuales ??
@@ -65,13 +70,26 @@ class _MovimientosPageState extends State<MovimientosPage> {
       MovimientoFiltro.gastos,
     ];
 
+    if (appState.loadingInitialData) {
+      return LoadingScreen(
+        message: 'Cargando datos de movimientos...',
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
       child: Column(
         // permite desplazamiento si el contenido es mayor que el espacio.
         children: [
+          MonthSelection(
+            initialDate: selectedMonth,
+            onMonthChanged: (newMonth) async {
+              await appState.changeMovementsMonth(newMonth);
+            },
+          ),
+          const SizedBox(height: 6),
           Expanded(
-            child: loadingInitialData
+            child: isLoading
                 ? LoadingScreen()
                 : fechasMovimientos.isEmpty
                 ? _EmptyMovimientos()
@@ -83,7 +101,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
                     width: double.infinity,
                     height: 210,
                     child: SummaryCard(
-                      title: 'Balance Mensual',
+                      title: 'Balance Mensual (${formatMonthYear(selectedMonth)})',
                       icon: Icons.account_balance,
                       backgroundColor: Colors.blue,
                       content: BalanceSummaryCard(
@@ -105,10 +123,10 @@ class _MovimientosPageState extends State<MovimientosPage> {
                         final filtro = categories[index];
 
                         return CategoryChip(
-                          label: _labelFromFiltro(filtro),
+                          label: filtro.label,
                           selected: filtro == selectedFilter,
-                          icon: _iconFromFiltro(filtro),
-                          iconColor: _colorFromFiltro(filtro),
+                          icon: filtro.icon,
+                          iconColor: filtro.color,
                           onTap: () {
                             appState.changeMovimientoFiltro(filtro);
                           },
@@ -142,44 +160,13 @@ class _MovimientosPageState extends State<MovimientosPage> {
       ),
     );
   }
-
-  String _labelFromFiltro(MovimientoFiltro filtro) {
-    switch (filtro) {
-      case MovimientoFiltro.ingresos:
-        return 'Ingresos';
-      case MovimientoFiltro.gastos:
-        return 'Gastos';
-      default:
-        return 'Todos';
-    }
-  }
-
-  IconData _iconFromFiltro(MovimientoFiltro filtro) {
-    switch (filtro) {
-      case MovimientoFiltro.ingresos:
-        return Icons.arrow_upward;
-      case MovimientoFiltro.gastos:
-        return Icons.arrow_downward;
-      default:
-        return Icons.list;
-    }
-  }
-
-  Color _colorFromFiltro(MovimientoFiltro filtro) {
-    switch (filtro) {
-      case MovimientoFiltro.ingresos:
-        return Colors.green;
-      case MovimientoFiltro.gastos:
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
 }
 
 class _EmptyMovimientos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+    final selectedMonth = appState.selectedMovementsMonth;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -191,7 +178,7 @@ class _EmptyMovimientos extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'No hay movimientos para mostrar.',
+            'No hay movimientos para ${formatMonthYear(selectedMonth)}.',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),

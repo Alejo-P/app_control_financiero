@@ -19,10 +19,10 @@ String getMonthName(DateTime date) {
   return monthNames[date.month - 1];
 }
 
-// Función para formatear una fecha como "Mes Año"
+// Función para formatear una fecha como "Mes de Año"
 String formatMonthYear(DateTime date) {
   final monthName = getMonthName(date);
-  return '$monthName ${date.year}';
+  return '$monthName de ${date.year}';
 }
 
 // Funcion para obtener la fecha actual sin hora

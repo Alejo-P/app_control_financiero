@@ -9,10 +9,15 @@ class MovimientosLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
 
   // Obtener todos los movimientos
-  Future<List<Movimiento>> fetchMovimientos() async {
+  Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
     final db = await _dbHelper.database;
+    final String month = date.month.toString().padLeft(2, '0');
+    final int year = date.year;
+
     final List<Map<String, dynamic>> maps = await db.query(
       MovimientosTable.table,
+      where: "strftime('%Y-%m', ${MovimientosTable.date}) = ?",
+      whereArgs: ['$year-$month'],
       orderBy: '${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC',
     );
 
