@@ -91,7 +91,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
           Expanded(
             child: isLoading
                 ? LoadingScreen(
-                    message: 'Cargando movimientos para ${formatMonthYear(selectedMonth)}...',
+                    message: 'Cargando movimientos para\n ${formatMonthYear(selectedMonth)}...',
                 )
                 : fechasMovimientos.isEmpty
                 ? _EmptyMovimientos()
