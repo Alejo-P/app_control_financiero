@@ -41,7 +41,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
     final bool loadingInitialData = appState.loadingInitialData;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
       child: Column(
         children: [
           Expanded(

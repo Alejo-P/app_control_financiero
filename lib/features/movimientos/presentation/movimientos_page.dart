@@ -157,9 +157,9 @@ class _MovimientosPageState extends State<MovimientosPage> {
   IconData _iconFromFiltro(MovimientoFiltro filtro) {
     switch (filtro) {
       case MovimientoFiltro.ingresos:
-        return Icons.arrow_downward;
-      case MovimientoFiltro.gastos:
         return Icons.arrow_upward;
+      case MovimientoFiltro.gastos:
+        return Icons.arrow_downward;
       default:
         return Icons.list;
     }
