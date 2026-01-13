@@ -47,16 +47,6 @@ class _AjustesPageState extends State<AjustesPage> {
                   debugPrint('Exportar datos a Excel');
                 },
               ),
-              SettingOptionCard(
-                title: 'Respaldar datos',
-                icon: Icons.backup,
-                iconColor: Colors.blue,
-              ),
-              SettingOptionCard(
-                title: 'Restaurar datos',
-                icon: Icons.restore,
-                iconColor: Colors.green,
-              ),
             ],
           ),
           SizedBox(height: 16),
@@ -76,6 +66,23 @@ class _AjustesPageState extends State<AjustesPage> {
                       builder: (_) => CategoriasPage(),
                     ),
                   );
+                },
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          WidgetsContainer(
+            title: 'Ajustes de la app',
+            description: 'Configura las preferencias de la aplicación.',
+            children: [
+              SettingOptionCard(
+                title: 'Configuración',
+                description: 'Ajusta las preferencias de la aplicación',
+                icon: Icons.settings_outlined,
+                iconColor: Colors.blue,
+                onTap: () {
+                  // Lógica para cambiar el tema de la aplicación
+                  debugPrint('Abrir configuración de la app');
                 },
               ),
             ],
