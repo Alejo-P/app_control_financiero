@@ -25,9 +25,8 @@ class AppState extends ChangeNotifier {
   final List<String> pageNames = [
     'Movimientos',
     'Presupuesto',
-    'Categorías',
     'Historial',
-    'Ajustes',
+    'Más acciones',
   ];
   String currentPageName = 'Movimientos';
   int currentTab = 0;

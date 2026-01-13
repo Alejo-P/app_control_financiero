@@ -1,5 +1,6 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/ajustes/widgets/setting_option_card.dart';
+import 'package:control_financiero/features/categorias/presentation/categorias_page.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -58,7 +59,27 @@ class _AjustesPageState extends State<AjustesPage> {
               ),
             ],
           ),
-          // Aquí puedes agregar más widgets para los ajustes
+          SizedBox(height: 16),
+          WidgetsContainer(
+            title: 'Mas elementos',
+            description: 'Gestiona categorias y otros elementos.',
+            children: [
+              SettingOptionCard(
+                title: 'Categorias',
+                description: 'Gestiona las categorias de tus movimientos',
+                icon: Icons.category_outlined,
+                iconColor: Colors.purple,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CategoriasPage(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );

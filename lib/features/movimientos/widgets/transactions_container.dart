@@ -45,7 +45,14 @@ class TransactionsContainer extends StatelessWidget {
       children: movimientos.map((movimiento) {
         final categoria = appState.getCategoriaById(movimiento.categoryID);
 
-        return InkWell(
+        return TransactionDetailCard(
+          title: movimiento.title,
+          category: categoria!.name,
+          type: _getTypeName(movimiento.type),
+          spent: movimiento.ammount,
+          icon: categoria.iconData,
+          iconColor: Color(categoria.iconColorValue),
+          time: movimiento.time,
           onTap: () {
             Navigator.push(
               context,
@@ -57,15 +64,6 @@ class TransactionsContainer extends StatelessWidget {
               ),
             );
           },
-          child: TransactionDetailCard(
-            title: movimiento.title,
-            category: categoria!.name,
-            type: _getTypeName(movimiento.type),
-            spent: movimiento.ammount,
-            icon: categoria.iconData,
-            iconColor: Color(categoria.iconColorValue),
-            time: movimiento.time,
-          ),
         );
       }).toList(),
     );
