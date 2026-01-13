@@ -26,14 +26,13 @@ flutter:
   assets:
     - assets/
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
+  remove_alpha_ios: true
 
-  # Icono por defecto
   image_path: "assets/icons/app_prod_icon.png"
 
-  # Configuración de sabores
   flavors:
     dev:
       image_path: "assets/icons/app_dev_icon.png"
