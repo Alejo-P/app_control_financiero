@@ -54,6 +54,21 @@ class CategoryCardDetail extends StatelessWidget {
                   ],
                 ),
               ),
+              if (isDefault)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Tooltip(
+                    message: 'Categoría predeterminada',
+                    child: const Icon(Icons.lock, size: 16, color: Colors.grey),
+                  ),
+                ),
             ],
           ),
         ],

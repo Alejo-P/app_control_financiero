@@ -113,6 +113,10 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  int getTotalCategoriasCount() {
+    return categorias.length;
+  }
+
   Categoria? getCategoriaById(int id) {
     try {
       final categoria = categorias.firstWhere((cat) => cat.id == id);

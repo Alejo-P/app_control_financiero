@@ -13,58 +13,73 @@ class CategoriasPage extends StatefulWidget {
 }
 
 class _CategoriasPageState extends State<CategoriasPage> {
-  late AppState _appState;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    _appState = context.read<AppState>();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _appState.setAppBarActions([
-        AppBarAction(
-          icon: Icons.add,
-          tooltip: 'Nueva categoría',
-          onPressed: () {
-            Navigator.pushNamed(context, '/agregar_categoria');
-          },
-        ),
-      ]);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final nombresTiposCategoria = appState.uniqueTipeCategoryNames;
     final bool loadingInitialData = appState.loadingInitialData;
+    final int cantidadCategorias = appState.getTotalCategoriasCount();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-      child: Column(
-        children: [
-          Expanded(
-            child: loadingInitialData
-                ? LoadingScreen()
-                : nombresTiposCategoria.isEmpty
-                ? _EmptyCategorias()
-                : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        ...nombresTiposCategoria.map((tipoCategoria) {
-                          final categorias = appState
-                              .getCategoriasByTipoCategoria(tipoCategoria);
-                          return CategoryContainer(
-                            categoryName: tipoCategoria,
-                            categorias: categorias,
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Categorías'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: 'Nueva categoría',
+            onPressed: () {
+              Navigator.pushNamed(context, '/agregar_categoria');
+            },
           ),
         ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(Icons.lock, color: Colors.grey[600]),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Las categorías con este ícono no se pueden eliminar ni modificar.',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: loadingInitialData
+                  ? LoadingScreen()
+                  : nombresTiposCategoria.isEmpty
+                  ? _EmptyCategorias()
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          ...nombresTiposCategoria.map((tipoCategoria) {
+                            final categorias = appState
+                                .getCategoriasByTipoCategoria(tipoCategoria);
+                            return CategoryContainer(
+                              categoryName: tipoCategoria,
+                              categorias: categorias,
+                            );
+                          }),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Total de categorías: $cantidadCategorias',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
