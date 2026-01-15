@@ -1,6 +1,8 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
+import 'package:sqflite/sqflite.dart';
 
 final tipoCategoriasList = <TipoCategoria>[
   TipoCategoria(
@@ -82,3 +84,39 @@ final categoriasList = <Categoria>[
     isDefault: true,
   ),
 ];
+
+Future<void> runSeeds(Database db) async {
+  final result = await db.query(
+    MetaTable.table,
+    where: '${MetaTable.key} = ?',
+    whereArgs: ['seed_version'],
+  );
+
+  final currentVersion =
+      result.isEmpty ? 0 : int.parse(result.first['value'] as String);
+
+  if (currentVersion < 1) {
+    for (var tipo in tipoCategoriasList) {
+      await db.insert(
+        TipoCategoriasTable.table,
+        tipo.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+    }
+
+    for (var categoria in categoriasList) {
+      await db.insert(
+        CategoriasTable.table,
+        categoria.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+    }
+
+    await db.insert(
+      MetaTable.table,
+      {MetaTable.key: 'seed_version', MetaTable.value: '1'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+}
+

@@ -31,3 +31,10 @@ class MovimientosTable {
   static const time = 'time';
   static const note = 'note';
 }
+
+class MetaTable {
+  static const table = 'meta';
+
+  static const key = 'key';
+  static const value = 'value';
+}

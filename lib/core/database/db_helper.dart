@@ -35,6 +35,13 @@ class DBHelper {
   Future _onCreate(Database db, int version) async {
     // Crear tablas
     await db.execute('''
+      CREATE TABLE ${MetaTable.table} (
+        ${MetaTable.key} TEXT PRIMARY KEY,
+        ${MetaTable.value} TEXT NOT NULL
+      );
+    ''');
+
+    await db.execute('''
       CREATE TABLE ${TipoCategoriasTable.table} (
         ${TipoCategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
         ${TipoCategoriasTable.name} TEXT NOT NULL,

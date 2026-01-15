@@ -45,7 +45,7 @@ class WidgetsContainer extends StatelessWidget {
             ],
           ),
           if (children != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(

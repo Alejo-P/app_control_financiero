@@ -21,44 +21,48 @@ class SettingOptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final [r, g, b] = getRGBFromColor(iconColor);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Color.fromRGBO(r, g, b, 0.15),
-              borderRadius: BorderRadius.circular(8),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Color.fromRGBO(r, g, b, 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: iconColor),
             ),
-            child: Icon(icon, color: iconColor),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                if (description != null)
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    description!,
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
-              ],
+                  if (description != null)
+                    Text(
+                      description!,
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                ],
+              ),
             ),
-          ),
-          if (onTap != null)
-            IconButton(
-              icon: const Icon(Icons.arrow_forward_ios, size: 16),
-              onPressed: onTap,
-            ),
-        ],
+            if (onTap != null)
+               Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey,
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -4,9 +4,9 @@ import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
-import 'package:control_financiero/features/movimientos/widgets/text_input_card.dart';
+import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
-import 'package:control_financiero/features/movimientos/widgets/detail_category_card.dart';
+import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/info_tipe_movement_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/tipo_movimiento_selector.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
@@ -261,7 +261,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -290,7 +290,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                             children: [
                               TextInputCard(
                                 textController: _titleController,
-                                placeholder: 'Agregar un título',
+                                placeholder: 'Titulo del movimiento',
                                 iconData: Icons.title,
                                 iconColor: Colors.grey.shade600,
                               ),
