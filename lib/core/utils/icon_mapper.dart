@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// TODO> Implementar o unificar los iconos de la lista categoryIcons
 class IconMapper {
   static const Map<String, IconData> _icons = {
     'shopping_cart': Icons.shopping_cart,
