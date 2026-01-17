@@ -1,9 +1,9 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
-import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
@@ -363,12 +363,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           separatorBuilder: (_, __) => const Divider(),
           itemBuilder: (context, index) {
             final categoria = categoriasFiltradas[index];
-            final [r, g, b] = getRGBFromColor(categoria.iconColor);
 
             return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Color.fromRGBO(r, g, b, 0.15),
-                child: Icon(categoria.iconData, color: categoria.iconColor),
+              leading: IconContainer(
+                icon: categoria.iconData,
+                color: categoria.iconColor,
+                size: 26,
               ),
               title: Text(
                 categoria.name,

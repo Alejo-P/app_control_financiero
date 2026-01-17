@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
 class SummaryCard extends StatelessWidget {
@@ -65,17 +66,10 @@ class SummaryCard extends StatelessWidget {
                             fontSize: 16
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            icon,
-                            color: Colors.white,
-                            size: 30,
-                          ),
+                        IconContainer(
+                          icon: icon,
+                          color: Colors.white,
+                          size: 26,
                         ),
                       ],
                     ),

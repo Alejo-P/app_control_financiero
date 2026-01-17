@@ -1,4 +1,4 @@
-import 'package:control_financiero/core/utils/color_utils.dart';
+import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -20,7 +20,6 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = spent / total;
-    final [r, g, b] = getRGBFromColor(color);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -34,13 +33,10 @@ class CategoryCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(r, g, b, 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, color: color),
+                  IconContainer(
+                    icon: icon,
+                    color: color,
+                    size: 26,
                   ),
                   const SizedBox(width: 12),
                   Expanded(

@@ -21,18 +21,19 @@ class IconContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = size * 1.15;
     final [r, g, b] = getRGBFromColor(color);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(size * 0.25),
         decoration: BoxDecoration(
           color: Color.fromRGBO(r, g, b, 0.15),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: borderColor, width: borderWidth),
         ),
-        child: Icon(icon, size: size, color: color),
+        child: Icon(icon, size: iconSize, color: color),
       ),
     );
   }

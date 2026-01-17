@@ -42,7 +42,6 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
     tiposCategorias = appState.tiposCategorias;
-    final [r, g, b] = getRGBFromColor(selectedColor);
 
     return Scaffold(
       appBar: AppBar(
@@ -129,6 +128,7 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     IconData tempIcon = selectedIcon;
     Color tempColor = selectedColor;
     String selectedTab = 'icons';
+    final [r, g, b] = getRGBFromColor(Colors.grey);
 
     showModalBottomSheet(
       context: context,
@@ -140,7 +140,6 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            final [r, g, b] = getRGBFromColor(tempColor);
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               child: Column(
@@ -182,7 +181,7 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
                           setModalState(() {
                             selectedTab = 'icons';
                           });
-                        }
+                        },
                       ),
                       TabChip(
                         isSelected: selectedTab == 'colors',
@@ -192,11 +191,11 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
                           setModalState(() {
                             selectedTab = 'colors';
                           });
-                        }
+                        },
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 6),
 
                   /// ÍCONOS
                   if (selectedTab == 'icons')
@@ -212,7 +211,7 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
                         },
                       ),
                     ),
-                  
+
                   /// COLORES
                   if (selectedTab == 'colors')
                     SizedBox(
@@ -227,19 +226,28 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
                       ),
                     ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 6),
 
                   /// BOTÓN CONFIRMAR
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromRGBO(r, g, b, 0.1),
+                      ),
                       onPressed: () {
                         Navigator.pop(context, {
                           'icon': tempIcon,
                           'color': tempColor,
                         });
                       },
-                      child: const Text('Confirmar'),
+                      child: const Text(
+                        'Confirmar',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
