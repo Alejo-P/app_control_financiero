@@ -1,7 +1,12 @@
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
+import 'package:control_financiero/features/categorias/widgets/colors_single_child_scroll.dart';
+import 'package:control_financiero/features/categorias/widgets/icons_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/info_categoria_predeterminada.dart';
+import 'package:control_financiero/features/categorias/widgets/tab_chip.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
+import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
@@ -29,8 +34,8 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
   @override
   void initState() {
     super.initState();
-    selectedColor = Colors.blue;
-    selectedIcon = Icons.category;
+    selectedColor = categoryColors.first;
+    selectedIcon = categoryIcons.first;
   }
 
   @override
@@ -61,13 +66,11 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
             Center(
               child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(r, g, b, 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(selectedIcon, color: selectedColor, size: 48),
+                  IconContainer(
+                    icon: selectedIcon,
+                    color: selectedColor,
+                    size: 64,
+                    onTap: () => _openIconColorPickerModal(context),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -120,6 +123,140 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
         ),
       ),
     );
+  }
+
+  void _openIconColorPickerModal(BuildContext context) {
+    IconData tempIcon = selectedIcon;
+    Color tempColor = selectedColor;
+    String selectedTab = 'icons';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final [r, g, b] = getRGBFromColor(tempColor);
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// PREVIEW
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Vista previa',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: IconContainer(
+                      icon: tempIcon,
+                      color: tempColor,
+                      size: 72,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      TabChip(
+                        isSelected: selectedTab == 'icons',
+                        tempColor: tempColor,
+                        label: 'Íconos',
+                        onTap: () {
+                          setModalState(() {
+                            selectedTab = 'icons';
+                          });
+                        }
+                      ),
+                      TabChip(
+                        isSelected: selectedTab == 'colors',
+                        tempColor: tempColor,
+                        label: 'Colores',
+                        onTap: () {
+                          setModalState(() {
+                            selectedTab = 'colors';
+                          });
+                        }
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  /// ÍCONOS
+                  if (selectedTab == 'icons')
+                    SizedBox(
+                      height: 200,
+                      child: IconsSingleChildScroll(
+                        tempIcon: tempIcon,
+                        tempColor: tempColor,
+                        onTap: (icon) {
+                          setModalState(() {
+                            tempIcon = icon;
+                          });
+                        },
+                      ),
+                    ),
+                  
+                  /// COLORES
+                  if (selectedTab == 'colors')
+                    SizedBox(
+                      height: 200,
+                      child: ColorsSingleChildScroll(
+                        tempColor: tempColor,
+                        onTap: (color) {
+                          setModalState(() {
+                            tempColor = color;
+                          });
+                        },
+                      ),
+                    ),
+
+                  const SizedBox(height: 24),
+
+                  /// BOTÓN CONFIRMAR
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context, {
+                          'icon': tempIcon,
+                          'color': tempColor,
+                        });
+                      },
+                      child: const Text('Confirmar'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    ).then((result) {
+      if (result != null) {
+        setState(() {
+          _hasUnsavedChanges = true;
+          selectedIcon = result['icon'];
+          selectedColor = result['color'];
+        });
+      }
+    });
   }
 
   void _openTipoCategoriasModal(BuildContext context) {

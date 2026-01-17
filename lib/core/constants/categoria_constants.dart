@@ -1,5 +1,46 @@
-enum TipoCategoria {
-  ahorroInversion,
-  estiloDeVida,
-  gastosEsenciales
-}
+import 'package:flutter/material.dart';
+
+const List<IconData> categoryIcons = [
+  Icons.fastfood,
+  Icons.shopping_cart,
+  Icons.home,
+  Icons.directions_car,
+  Icons.school,
+  Icons.favorite,
+  Icons.savings,
+  Icons.attach_money,
+  Icons.receipt_long,
+  Icons.local_grocery_store,
+  Icons.health_and_safety,
+  Icons.pets,
+  Icons.flight,
+  Icons.work,
+  Icons.movie,
+  Icons.fitness_center,
+  Icons.local_gas_station,
+  Icons.restaurant,
+  Icons.payments,
+  Icons.directions_bus,
+  Icons.local_hospital,
+  Icons.music_note,
+  Icons.coffee,
+  Icons.beach_access,
+  Icons.camera_alt,
+  Icons.computer,
+  Icons.phone_android,
+  Icons.home_repair_service,
+  Icons.build,
+];
+
+const List<Color> categoryColors = [
+  Colors.blue,
+  Colors.green,
+  Colors.red,
+  Colors.orange,
+  Colors.purple,
+  Colors.teal,
+  Colors.pink,
+  Colors.brown,
+  Colors.grey,
+];
+
