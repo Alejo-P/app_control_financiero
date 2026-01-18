@@ -3,6 +3,7 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
@@ -109,6 +110,14 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     });
   }
 
+  void _onCategoriaSelected(Categoria categoria) {
+    setState(() {
+      _hasUnsavedChanges = true;
+      categoryId = categoria.id!;
+      categoryName = categoria.name;
+    });
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -130,6 +139,44 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     final noteText = _noteController.text.trim();
     final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
     final titleText = _titleController.text.trim();
+
+    if (amountText.isEmpty ||
+        double.tryParse(amountText.replaceAll(',', '.')) == null ||
+        double.parse(amountText.replaceAll(',', '.')) <= 0) {
+      AppSnackbar.error(context, 'Ingrese un monto válido');
+      return;
+    }
+
+    if (titleText.isEmpty) {
+      AppSnackbar.error(context, 'Ingrese un título');
+      return;
+    }
+
+    if (categoryId == -1) {
+      AppSnackbar.warning(
+        context,
+        'Seleccione una categoría para el movimiento',
+      );
+      return;
+    }
+
+    final confirmed = await showConfirmAddDialog(
+      context,
+      titleModal: 'Confirmar movimiento',
+      content: [
+        Text('Título: $titleText'),
+        Text('Monto: \$$amountText'),
+        Text(
+          'Tipo: ${tipoMovimiento == TipoMovimiento.gasto ? 'Gasto' : 'Ingreso'}',
+        ),
+        Text('Categoría: $categoryName'),
+        Text('Fecha: ${formatDate(selectedDate)}'),
+        if (_noteController.text.trim().isNotEmpty)
+          Text('Nota: ${_noteController.text.trim()}'),
+      ],
+    );
+    if (confirmed != true) return;
+
     setState(() {
       _hasUnsavedChanges = false;
     });
@@ -153,23 +200,29 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     }
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.read<AppState>().transactionResultMessage),
-        ),
+      AppSnackbar.success(
+        context,
+        context.read<AppState>().transactionResultMessage,
       );
       Navigator.pop(context, true);
     }
   }
 
   Future<void> _eliminarMovimiento() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Eliminar movimiento',
+      content:
+          '¿Estás seguro de que deseas eliminar este movimiento?',
+    );
+    if (confirmed != true) return;
+
     await context.read<AppState>().eliminarMovimiento(movementId);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.read<AppState>().transactionResultMessage),
-        ),
+      AppSnackbar.success(
+        context,
+        context.read<AppState>().transactionResultMessage,
       );
       Navigator.pop(context, true);
     }
@@ -210,16 +263,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                 icon: const Icon(Icons.delete, color: Colors.red),
                 tooltip: 'Eliminar',
                 onPressed: () async {
-                  final confirmed = await showConfirmDialog(
-                    context,
-                    title: 'Eliminar movimiento',
-                    content:
-                        '¿Estás seguro de que deseas eliminar este movimiento?',
-                  );
-
-                  if (confirmed == true) {
-                    await _eliminarMovimiento();
-                  }
+                  await _eliminarMovimiento();
                 },
               ),
 
@@ -227,50 +271,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
               icon: const Icon(Icons.save),
               tooltip: 'Guardar',
               onPressed: () async {
-                final amountText = _amountController.text;
-                final titleText = _titleController.text.trim();
-
-                if (amountText.isEmpty ||
-                    double.tryParse(amountText.replaceAll(',', '.')) == null ||
-                    double.parse(amountText.replaceAll(',', '.')) <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Ingrese un monto válido')),
-                  );
-                  return;
-                }
-
-                if (titleText.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Ingrese un título')),
-                  );
-                  return;
-                }
-
-                if (categoryId == -1) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Seleccione una categoría')),
-                  );
-                  return;
-                }
-
-                final confirmed = await showConfirmAddDialog(
-                  context,
-                  titleModal: 'Confirmar movimiento',
-                  content: [
-                    Text('Título: $titleText'),
-                    Text('Monto: \$$amountText'),
-                    Text(
-                        'Tipo: ${tipoMovimiento == TipoMovimiento.gasto ? 'Gasto' : 'Ingreso'}'),
-                    Text('Categoría: $categoryName'),
-                    Text('Fecha: ${formatDate(selectedDate)}'),
-                    if (_noteController.text.trim().isNotEmpty)
-                      Text('Nota: ${_noteController.text.trim()}'),
-                  ],
-                );
-
-                if (confirmed == true) {
-                  await _guardarMovimiento();
-                }
+                await _guardarMovimiento();
               },
             ),
           ],
@@ -311,7 +312,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                               ),
                               Divider(color: Colors.grey[300]),
                               InkWell(
-                                onTap: () => _openCategoriasModal(context),
+                                onTap: () async => await _openCategoriasModal(context),
                                 borderRadius: BorderRadius.circular(12),
                                 child: DetailCategoryCard(
                                   categoryName: 'Categoría',
@@ -354,8 +355,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     );
   }
 
-  void _openCategoriasModal(BuildContext context) {
-    showModalBottomSheet(
+  Future<void> _openCategoriasModal(BuildContext context) async {
+    await showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -401,12 +402,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         );
       },
     ).then((categoriaSeleccionada) {
-      if (categoriaSeleccionada != null) {
-        setState(() {
-          _hasUnsavedChanges = true;
-          categoryId = categoriaSeleccionada.id;
-          categoryName = categoriaSeleccionada.name;
-        });
+      if (categoriaSeleccionada != null && categoriaSeleccionada is Categoria) {
+        _onCategoriaSelected(categoriaSeleccionada);
       }
     });
   }

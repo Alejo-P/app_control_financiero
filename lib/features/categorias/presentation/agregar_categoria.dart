@@ -1,3 +1,4 @@
+import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
@@ -96,19 +97,17 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     final descripcion = _descriptionController.text.trim();
 
     if (nombre.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('El nombre de la categoría no puede estar vacío.'),
-        ),
+      AppSnackbar.error(
+        context,
+        'El nombre de la categoría no puede estar vacío.',
       );
       return;
     }
 
     if (categoryTypeID == -1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, selecciona un tipo de categoría.'),
-        ),
+      AppSnackbar.warning(
+        context,
+        'Por favor, selecciona un tipo de categoría.',
       );
       return;
     }
@@ -127,6 +126,10 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     );
     if (confirmed != true) return;
 
+    setState(() {
+      _hasUnsavedChanges = false;
+    });
+
     final categoria = Categoria(
       id: null,
       name: nombre,
@@ -141,10 +144,9 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     await context.read<AppState>().agregarCategoria(categoria);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.read<AppState>().transactionResultMessage),
-        ),
+      AppSnackbar.success(
+        context,
+        context.read<AppState>().transactionResultMessage,
       );
       Navigator.pop(context, true);
     }
@@ -176,8 +178,8 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
             IconButton(
               icon: const Icon(Icons.check),
               tooltip: 'Guardar',
-              onPressed: () {
-                _guardarCategoria();
+              onPressed: () async {
+                await _guardarCategoria();
               },
             ),
           ],
