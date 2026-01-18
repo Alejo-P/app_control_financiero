@@ -1,36 +1,41 @@
 import 'package:flutter/material.dart';
 
-const List<IconData> categoryIcons = [
-  Icons.fastfood,
-  Icons.shopping_cart,
-  Icons.home,
-  Icons.directions_car,
-  Icons.school,
-  Icons.favorite,
-  Icons.savings,
-  Icons.attach_money,
-  Icons.receipt_long,
-  Icons.local_grocery_store,
-  Icons.health_and_safety,
-  Icons.pets,
-  Icons.flight,
-  Icons.work,
-  Icons.movie,
-  Icons.fitness_center,
-  Icons.local_gas_station,
-  Icons.restaurant,
-  Icons.payments,
-  Icons.directions_bus,
-  Icons.local_hospital,
-  Icons.music_note,
-  Icons.coffee,
-  Icons.beach_access,
-  Icons.camera_alt,
-  Icons.computer,
-  Icons.phone_android,
-  Icons.home_repair_service,
-  Icons.build,
-];
+// Mapa de nombres exactos de Material Icons a IconData
+const Map<String, IconData> categoryIconsMap = {
+  'fastfood': Icons.fastfood,
+  'shopping_cart': Icons.shopping_cart,
+  'home': Icons.home,
+  'directions_car': Icons.directions_car,
+  'school': Icons.school,
+  'favorite': Icons.favorite,
+  'savings': Icons.savings,
+  'attach_money': Icons.attach_money,
+  'receipt_long': Icons.receipt_long,
+  'local_grocery_store': Icons.local_grocery_store,
+  'health_and_safety': Icons.health_and_safety,
+  'pets': Icons.pets,
+  'flight': Icons.flight,
+  'work': Icons.work,
+  'movie': Icons.movie,
+  'fitness_center': Icons.fitness_center,
+  'local_gas_station': Icons.local_gas_station,
+  'restaurant': Icons.restaurant,
+  'payments': Icons.payments,
+  'directions_bus': Icons.directions_bus,
+  'local_hospital': Icons.local_hospital,
+  'music_note': Icons.music_note,
+  'coffee': Icons.coffee,
+  'beach_access': Icons.beach_access,
+  'camera_alt': Icons.camera_alt,
+  'computer': Icons.computer,
+  'phone_android': Icons.phone_android,
+  'home_repair_service': Icons.home_repair_service,
+  'build': Icons.build,
+};
+
+// Lista para compatibilidad con código existente
+final List<IconData> categoryIcons =
+    categoryIconsMap.values.toList();
 
 const List<Color> categoryColors = [
   Colors.blue,
@@ -42,5 +47,14 @@ const List<Color> categoryColors = [
   Colors.pink,
   Colors.brown,
   Colors.grey,
+  Colors.indigo,
+  Colors.cyan,
+  Colors.lime,
+  Colors.amber,
+  Colors.deepOrange,
+  Colors.lightBlue,
+  Colors.lightGreen,
+  Colors.deepPurple,
+  Colors.yellow,
 ];
 

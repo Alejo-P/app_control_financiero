@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/database/db_seeds.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
@@ -69,7 +70,7 @@ final categoriasList = <Categoria>[
     description: 'Gastos en salud y bienestar',
     movementType: TipoMovimiento.gasto,
     categoryTypeID: 2,
-    iconName: 'movie',
+    iconName: 'local_hospital',
     iconColorValue: 0xFFAB47BC,
     isDefault: true,
   ),
@@ -79,44 +80,32 @@ final categoriasList = <Categoria>[
     description: 'Gastos en actividades recreativas y entretenimiento',
     movementType: TipoMovimiento.gasto,
     categoryTypeID: 2,
-    iconName: 'fitness_center',
+    iconName: 'movie',
     iconColorValue: 0xFFFF7043,
     isDefault: true,
   ),
 ];
 
 Future<void> runSeeds(Database db) async {
+  await createTables(db);
   final result = await db.query(
     MetaTable.table,
     where: '${MetaTable.key} = ?',
     whereArgs: ['seed_version'],
   );
 
-  final currentVersion =
-      result.isEmpty ? 0 : int.parse(result.first['value'] as String);
+  final currentVersion = result.isEmpty
+      ? 0
+      : int.parse(result.first['value'] as String);
 
   if (currentVersion < 1) {
     for (var tipo in tipoCategoriasList) {
-      await db.insert(
-        TipoCategoriasTable.table,
-        tipo.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
+      await upsertTipoCategoria(db, tipo);
     }
 
     for (var categoria in categoriasList) {
-      await db.insert(
-        CategoriasTable.table,
-        categoria.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
+      await upsertCategoria(db, categoria);
     }
-
-    await db.insert(
-      MetaTable.table,
-      {MetaTable.key: 'seed_version', MetaTable.value: '1'},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await setSeedVersion(db, currentVersion + 1);
   }
 }
-

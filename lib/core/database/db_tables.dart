@@ -1,3 +1,5 @@
+import 'package:sqflite/sqflite.dart';
+
 class TipoCategoriasTable {
   static const table = 'tipo_categorias';
 
@@ -37,4 +39,67 @@ class MetaTable {
 
   static const key = 'key';
   static const value = 'value';
+}
+
+Future<void> createTables(Database db) async {
+  // Obtener lista de tablas existentes
+  final existingTables = await db.rawQuery(
+    "SELECT name FROM sqlite_master WHERE type='table';",
+  );
+
+  final existingTableNames = existingTables
+      .map((table) => table['name'] as String)
+      .toSet();
+
+  // Crear tablas si no existen
+  if (!existingTableNames.contains(MetaTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${MetaTable.table} (
+        ${MetaTable.key} TEXT PRIMARY KEY,
+        ${MetaTable.value} TEXT NOT NULL
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(TipoCategoriasTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${TipoCategoriasTable.table} (
+        ${TipoCategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${TipoCategoriasTable.name} TEXT NOT NULL,
+        ${TipoCategoriasTable.description} TEXT
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(CategoriasTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${CategoriasTable.table} (
+        ${CategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${CategoriasTable.name} TEXT NOT NULL,
+        ${CategoriasTable.description} TEXT,
+        ${CategoriasTable.movementType} TEXT NOT NULL,
+        ${CategoriasTable.categoryTypeId} INTEGER NOT NULL,
+        ${CategoriasTable.iconName} TEXT NOT NULL,
+        ${CategoriasTable.iconColorValue} INTEGER NOT NULL,
+        ${CategoriasTable.isDefault} INTEGER DEFAULT 0,
+        FOREIGN KEY(${CategoriasTable.categoryTypeId}) REFERENCES ${TipoCategoriasTable.table}(${TipoCategoriasTable.id})
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(MovimientosTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${MovimientosTable.table} (
+        ${MovimientosTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${MovimientosTable.title} TEXT NOT NULL,
+        ${MovimientosTable.categoryId} INTEGER NOT NULL,
+        ${MovimientosTable.type} TEXT NOT NULL,
+        ${MovimientosTable.ammount} REAL NOT NULL,
+        ${MovimientosTable.date} TEXT NOT NULL,
+        ${MovimientosTable.time} TEXT NOT NULL,
+        ${MovimientosTable.note} TEXT DEFAULT '',
+        FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
+      )
+    ''');
+  }
 }
