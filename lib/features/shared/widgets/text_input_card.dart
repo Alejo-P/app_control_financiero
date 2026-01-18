@@ -2,17 +2,20 @@ import 'package:control_financiero/core/formatters/note_input_formatter.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
-class   TextInputCard extends StatelessWidget {
+class TextInputCard extends StatelessWidget {
   final TextEditingController textController;
   final String? placeholder;
   final IconData? iconData;
   final Color? iconColor;
+  final bool isEditable;
 
-  const TextInputCard({super.key,
-  required this.textController,
-  this.placeholder,
-  this.iconData,
-  this.iconColor
+  const TextInputCard({
+    super.key,
+    required this.textController,
+    this.placeholder,
+    this.iconData,
+    this.iconColor,
+    this.isEditable = true,
   });
 
   @override
@@ -32,11 +35,7 @@ class   TextInputCard extends StatelessWidget {
               color: Color.fromRGBO(r, g, b, 0.15),
               borderRadius: BorderRadius.circular(50),
             ),
-            child: Icon(
-              iconData,
-              size: 22,
-              color: iconColor ?? Colors.grey,
-            ),
+            child: Icon(iconData, size: 22, color: iconColor ?? Colors.grey),
           ),
 
         const SizedBox(width: 3),
@@ -49,9 +48,8 @@ class   TextInputCard extends StatelessWidget {
               hintText: placeholder,
             ),
             style: const TextStyle(fontSize: 16),
-            inputFormatters: [
-              NoteInputFormatter(),
-            ],
+            inputFormatters: [NoteInputFormatter()],
+            enabled: isEditable,
           ),
         ),
       ],

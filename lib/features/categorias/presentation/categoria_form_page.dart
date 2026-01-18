@@ -286,21 +286,27 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                               icon: selectedIcon,
                               color: selectedColor,
                               size: 64,
-                              onTap: () => _openIconColorPickerModal(context),
+                              onTap: () {
+                                if (isDefault) return;
+                                _openIconColorPickerModal(context);
+                              },
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "Cambiar ícono",
-                              style: TextStyle(
-                                color: selectedColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
+                            if (!isDefault)
+                            ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                "Toca el ícono para cambiar",
+                                style: TextStyle(
+                                  color: selectedColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 9),
                       WidgetsContainer(
                         title: 'Detalles de la categoría',
                         children: [
@@ -309,31 +315,38 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                             placeholder: 'Nombre de la categoría',
                             iconData: Icons.label_outline,
                             iconColor: Colors.grey.shade600,
+                            isEditable: !isDefault,
                           ),
                           TextInputCard(
                             textController: _descriptionController,
                             placeholder: 'Descripción (opcional)',
                             iconData: Icons.description_outlined,
                             iconColor: Colors.grey.shade600,
+                            isEditable: !isDefault,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 9),
                       WidgetsContainer(
                         title: 'Opciones adicionales',
                         children: [
                           InkWell(
-                            onTap: () => _openTipoCategoriasModal(context),
+                            onTap: () {
+                              if (isDefault) return;
+                              _openTipoCategoriasModal(context);
+                            },
                             borderRadius: BorderRadius.circular(12),
                             child: DetailCategoryCard(
                               categoryName: 'Tipo de categoría',
                               categoryIcon: Icons.category,
                               iconColor: Colors.blue,
                               currentValue: categoryTypeName,
+                              showArrow: !isDefault,
                             ),
                           ),
                           InkWell(
                             onTap: () {
+                              if (isDefault) return;
                               _onChangeTipoMovimiento(
                                 selectedTipeMovement == 'gasto'
                                     ? 'ingreso'
@@ -352,14 +365,16 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                               currentValue: selectedTipeMovement == 'gasto'
                                   ? 'Gasto'
                                   : 'Ingreso',
+                              showArrow: !isDefault,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 9),
                       if (movimientosCategoria.isNotEmpty)
                         WidgetsContainer(
                           title: 'Movimientos asociados',
+                          description: 'No puedes borrar esta categoría, tiene movimientos asociados.',
                           backgroundColor: Colors.orange.shade50,
                           borderColor: Colors.orange,
                           padding: const EdgeInsets.all(12),
@@ -376,7 +391,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           ],
                         ),
 
-                      if (widget.mode == CategoriaFormMode.edit)
+                      if (widget.mode == CategoriaFormMode.edit )
                         InfoCategoriaPredeterminada(isDefault: isDefault),
                     ],
                   ),

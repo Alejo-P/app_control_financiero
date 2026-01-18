@@ -17,8 +17,7 @@ class InfoCategoriaPredeterminada extends StatelessWidget {
                 : Colors.grey.shade200,
           ),
           alignment: Alignment.center,
-          margin: const EdgeInsets.only(top: 10),
-          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 9),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -30,7 +29,7 @@ class InfoCategoriaPredeterminada extends StatelessWidget {
                     : Colors.grey.shade700,
                 size: 18,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
                 isDefault
                     ? 'Esta es una categoría predeterminada'
