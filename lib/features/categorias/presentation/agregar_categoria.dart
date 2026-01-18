@@ -1,6 +1,5 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/categoria_constants.dart';
-import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/features/categorias/widgets/colors_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/icons_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/info_categoria_predeterminada.dart';
@@ -128,7 +127,6 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     IconData tempIcon = selectedIcon;
     Color tempColor = selectedColor;
     String selectedTab = 'icons';
-    final [r, g, b] = getRGBFromColor(Colors.grey);
 
     showModalBottomSheet(
       context: context,
