@@ -77,6 +77,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
                       ),
                     ),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
