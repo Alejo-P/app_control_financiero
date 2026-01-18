@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+enum CategoriaFormMode { create, edit }
+
 // Mapa de nombres exactos de Material Icons a IconData
 const Map<String, IconData> categoryIconsMap = {
   'fastfood': Icons.fastfood,
@@ -34,8 +36,7 @@ const Map<String, IconData> categoryIconsMap = {
 };
 
 // Lista para compatibilidad con código existente
-final List<IconData> categoryIcons =
-    categoryIconsMap.values.toList();
+final List<IconData> categoryIcons = categoryIconsMap.values.toList();
 
 const List<Color> categoryColors = [
   Colors.blue,
@@ -57,4 +58,3 @@ const List<Color> categoryColors = [
   Colors.deepPurple,
   Colors.yellow,
 ];
-

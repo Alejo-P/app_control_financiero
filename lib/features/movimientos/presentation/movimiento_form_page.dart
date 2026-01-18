@@ -267,13 +267,14 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                 },
               ),
 
-            IconButton(
-              icon: const Icon(Icons.save),
-              tooltip: 'Guardar',
-              onPressed: () async {
-                await _guardarMovimiento();
-              },
-            ),
+            if (_hasUnsavedChanges)
+              IconButton(
+                icon: const Icon(Icons.check),
+                tooltip: 'Guardar',
+                onPressed: () async {
+                  await _guardarMovimiento();
+                },
+              ),
           ],
         ),
         body: Padding(

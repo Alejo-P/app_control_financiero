@@ -17,14 +17,21 @@ import 'package:control_financiero/features/tipo_categorias/models/tipo_categori
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AgregarCategoria extends StatefulWidget {
-  const AgregarCategoria({super.key});
+class CategoriaFormPage extends StatefulWidget {
+  final CategoriaFormMode mode;
+  final Categoria? categoriaExistente;
+
+  const CategoriaFormPage({
+    super.key,
+    required this.mode,
+    this.categoriaExistente,
+  });
 
   @override
-  State<AgregarCategoria> createState() => _AgregarCategoriaState();
+  State<CategoriaFormPage> createState() => _CategoriaFormPageState();
 }
 
-class _AgregarCategoriaState extends State<AgregarCategoria> {
+class _CategoriaFormPageState extends State<CategoriaFormPage> {
   late Color selectedColor;
   late IconData selectedIcon;
   bool _hasUnsavedChanges = false;
@@ -45,6 +52,30 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     super.initState();
     selectedColor = categoryColors.first;
     selectedIcon = categoryIcons.first;
+
+    if (widget.mode == CategoriaFormMode.edit &&
+        widget.categoriaExistente != null) {
+      final categoria = widget.categoriaExistente!;
+      _categoryNameController.text = categoria.name;
+      _descriptionController.text = categoria.description;
+      selectedIcon = IconMapper.fromName(categoria.iconName);
+      selectedColor = Color(categoria.iconColorValue);
+      categoryTypeID = categoria.categoryTypeID;
+      selectedTipeMovement = categoria.movementType == TipoMovimiento.ingreso
+          ? 'ingreso'
+          : 'gasto';
+      isDefault = categoria.isDefault;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final appState = context.read<AppState>();
+        final tipoCategoria = appState.getCategoryTypeById(categoryTypeID);
+        if (tipoCategoria != null) return;
+        
+        setState(() {
+          categoryTypeName = tipoCategoria!.name;
+        });
+      });
+    }
 
     _categoryNameController.addListener(_markAsDirty);
     _descriptionController.addListener(_markAsDirty);
@@ -131,7 +162,10 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     });
 
     final categoria = Categoria(
-      id: null,
+      id: widget.mode == CategoriaFormMode.edit &&
+              widget.categoriaExistente != null
+          ? widget.categoriaExistente!.id
+          : null,
       name: nombre,
       description: descripcion,
       categoryTypeID: categoryTypeID,
@@ -141,7 +175,32 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
       isDefault: isDefault,
     );
 
-    await context.read<AppState>().agregarCategoria(categoria);
+    if (widget.mode == CategoriaFormMode.edit &&
+        widget.categoriaExistente != null) {
+      await context.read<AppState>().actualizarCategoria(categoria);
+    } else {
+      await context.read<AppState>().agregarCategoria(categoria);
+    }
+
+    if (mounted) {
+      AppSnackbar.success(
+        context,
+        context.read<AppState>().transactionResultMessage,
+      );
+      Navigator.pop(context, true);
+    }
+  }
+
+  Future <void> _eliminarCategoria() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Eliminar categoría',
+      content:
+          '¿Estás seguro de que deseas eliminar esta categoría?',
+    );
+    if (confirmed != true) return;
+
+    await context.read<AppState>().eliminarCategoria(widget.categoriaExistente!.id!);
 
     if (mounted) {
       AppSnackbar.success(
@@ -173,15 +232,31 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Agregar Categoría'),
+          title: Text(
+            widget.mode == CategoriaFormMode.create
+                ? 'Agregar Categoría'
+                : 'Editar Categoría',
+          ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.check),
-              tooltip: 'Guardar',
-              onPressed: () async {
-                await _guardarCategoria();
-              },
-            ),
+            if (widget.mode == CategoriaFormMode.edit &&
+                widget.categoriaExistente != null &&
+                !isDefault)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'Eliminar',
+                onPressed: () async {
+                  await _eliminarCategoria();
+                },
+              ),
+
+            if (!isDefault && _hasUnsavedChanges)
+              IconButton(
+                icon: const Icon(Icons.check),
+                tooltip: 'Guardar',
+                onPressed: () async {
+                  await _guardarCategoria();
+                },
+              ),
           ],
         ),
         body: Padding(
@@ -270,7 +345,8 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
                           ),
                         ],
                       ),
-                      InfoCategoriaPredeterminada(isDefault: isDefault),
+                      if (widget.mode == CategoriaFormMode.edit)
+                        InfoCategoriaPredeterminada(isDefault: isDefault),
                     ],
                   ),
                 ),

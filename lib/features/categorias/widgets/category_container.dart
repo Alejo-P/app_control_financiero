@@ -1,4 +1,6 @@
+import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
 import 'package:control_financiero/features/categorias/widgets/category_card_detail.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +35,17 @@ class CategoryContainer extends StatelessWidget {
           icon: categoria.iconData,
           color: categoria.iconColor,
           isDefault: categoria.isDefault,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CategoriaFormPage(
+                  mode: CategoriaFormMode.edit,
+                  categoriaExistente: categoria,
+                ),
+              ),
+            );
+          },
         );
       }).toList(),
     );
