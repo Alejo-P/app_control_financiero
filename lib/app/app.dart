@@ -3,7 +3,7 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
-import 'package:control_financiero/features/movimientos/data/movimentos_local_datasource.dart';
+import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';

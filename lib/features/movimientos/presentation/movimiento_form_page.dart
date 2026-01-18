@@ -392,7 +392,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                categoria.description,
+                categoria.description.isNotEmpty
+                    ? categoria.description
+                    : '(Sin descripción)',
                 style: const TextStyle(color: Colors.grey),
               ),
               onTap: () {

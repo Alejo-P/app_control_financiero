@@ -2,10 +2,12 @@ import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 
 class CategoriasLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
+  final MovimientosLocalDataSource _movimientosLocalDataSource =
+      MovimientosLocalDataSource();
 
   // Obtener todas las categorías
   Future<List<Categoria>> fetchCategorias() async {
@@ -70,19 +72,12 @@ class CategoriasLocalDataSource {
     }
 
     // Si tiene movimientos asociados, no eliminar
-    final movimientoCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM ${MovimientosTable.table} WHERE ${MovimientosTable.categoryId} = ?',
-            [id],
-          ),
-        ) ??
-        0;
+    final movimientoCount = await _movimientosLocalDataSource.fetchMovimientoCountByCategory(id);
     if (movimientoCount > 0) {
       return OperationResult<void>(
         success: false,
         message:
-            'No se puede eliminar una categoría con movimientos asociados.',
+            'No se puede eliminar esta categoría. Tiene $movimientoCount movimientos asociados.',
       );
     }
 

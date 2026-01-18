@@ -30,6 +30,7 @@ class AppState extends ChangeNotifier {
   ];
   String currentPageName = 'Movimientos';
   int currentTab = 0;
+  int movementsByCategory = 0;
 
   List<AppBarAction> _appBarActions = [];
   List<AppBarAction> get appBarActions => _appBarActions;
@@ -52,7 +53,6 @@ class AppState extends ChangeNotifier {
   List<DateTime> _uniqueMovementDates = [];
   Map<DateTime, List<Movimiento>> _movimientosPorFecha = {};
   List<String> _uniqueTipeCategoryNames = [];
-  Map<String, List<Categoria>> _categoriasByTipoCategoria = {};
 
   TotalesMensuales? get totalesMensuales => _totalesMensuales;
   double? get variacionAhorro => _variacionAhorro;
@@ -60,8 +60,7 @@ class AppState extends ChangeNotifier {
   List<String> get uniqueTipeCategoryNames => _uniqueTipeCategoryNames;
 
   List<Categoria> get categorias => _categoriasRepository.categorias;
-  Map<String, List<Categoria>> get categoriasByTipoCategoria =>
-      _categoriasByTipoCategoria;
+
   List<TipoCategoria> get tiposCategorias =>
       _tipoCategoriaRepository.tipoCategorias;
   List<Movimiento> get movimientos => _movimientosRepository.movimientos;
@@ -90,22 +89,31 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  Future<void> loadMovementsByMonthAndYear(DateTime date, {bool notify = true}) async {
+  Future<void> loadMovementsByMonthAndYear(
+    DateTime date, {
+    bool notify = true,
+  }) async {
     await _movimientosRepository.fetchMovimientosByMonthAndYear(date);
 
     _totalesMensuales = _movimientosRepository.fetchTotalesMensuales(
       selectedMovementsMonth,
     );
 
-    _variacionAhorro = calcularVariacionAhorro(
-      selectedMovementsMonth
-    );
+    _variacionAhorro = calcularVariacionAhorro(selectedMovementsMonth);
 
     _movimientosPorFecha = _fetchMovimientosPorFecha();
 
     _uniqueMovementDates = _fetchUniqueMovementDates();
 
     if (notify) notifyListeners();
+  }
+
+  Future<void> countMovementsByCategory(int categoryId) async {
+    movementsByCategory =
+        await _movimientosRepository.fetchMovimientoCountByCategory(
+      categoryId,
+    );
+    notifyListeners();
   }
 
   void changeMovimientoFiltro(MovimientoFiltro filtro) {
@@ -201,23 +209,24 @@ class AppState extends ChangeNotifier {
   // Obtener todas las categorias de un tipo de categoria
   List<Categoria> getCategoriasByTipoCategoria(String tipoCategoriaName) {
     return categorias
-        .where((cat) =>
-            getCategoryTypeById(cat.categoryTypeID)?.name ==
-            tipoCategoriaName)
+        .where(
+          (cat) =>
+              getCategoryTypeById(cat.categoryTypeID)?.name ==
+              tipoCategoriaName,
+        )
         .toList();
   }
 
   List<String> getUniqueTipeCategoryNames() {
-    return tiposCategorias
-        .map((tipoCat) => tipoCat.name)
-        .toSet()
-        .toList();
+    return tiposCategorias.map((tipoCat) => tipoCat.name).toSet().toList();
   }
 
   // Calcular la variacion de ahorro entre dos meses
   double? calcularVariacionAhorro(DateTime mesActual) {
     final actual = _movimientosRepository.fetchTotalesMensuales(mesActual);
-    final anterior = _movimientosRepository.fetchTotalesMensualesMesPasado(mesActual);
+    final anterior = _movimientosRepository.fetchTotalesMensualesMesPasado(
+      mesActual,
+    );
 
     if (anterior.ahorro == 0) return null;
 
@@ -310,7 +319,7 @@ class AppState extends ChangeNotifier {
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
-      await loadCategoryData();  
+      await loadCategoryData();
     }
   }
 

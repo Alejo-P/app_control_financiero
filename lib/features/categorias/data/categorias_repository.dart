@@ -38,31 +38,31 @@ class CategoriasRepository implements _CategoriasRepository {
 
   @override
   Future<OperationResult<int>> addCategoria(Categoria categoria) async {
-    final success = await localDataSource.addCategoria(categoria);
-    if (success.success == true) {
-      categorias.add(categoria.copyWith(id: success.data!));
+    final result = await localDataSource.addCategoria(categoria);
+    if (result.success == true) {
+      categorias.add(categoria.copyWith(id: result.data!));
     }
-    return success;
+    return result;
   }
 
   @override
   Future<OperationResult<void>> updateCategoria(Categoria categoria) async {
-    final success = await localDataSource.updateCategoria(categoria);
-    if (success.success == true) {
+    final result = await localDataSource.updateCategoria(categoria);
+    if (result.success == true) {
       final index = categorias.indexWhere((c) => c.id == categoria.id);
       if (index != -1) {
         categorias[index] = categoria;
       }
     }
-    return success;
+    return result;
   }
 
   @override
   Future<OperationResult<void>> deleteCategoria(int id) async {
-    final success = await localDataSource.deleteCategoria(id);
-    if (success.success == true) {
+    final result = await localDataSource.deleteCategoria(id);
+    if (result.success == true) {
       categorias.removeWhere((c) => c.id == id);
     }
-    return success;
+    return result;
   }
 }

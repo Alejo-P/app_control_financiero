@@ -1,6 +1,6 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
-import 'package:control_financiero/features/movimientos/data/movimentos_local_datasource.dart';
+import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 
@@ -9,10 +9,19 @@ abstract class _MovimientosRepository {
   ///@return Una lista de objetos Movimiento.
   Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date);
 
-  /// Obtener movimientos por categoría
+  /// Obtener cantidad de movimientos por categoría
   /// @param categoryId El ID de la categoría.
+  /// @return La cantidad de movimientos asociados a la categoría.
+  Future<int> fetchMovimientoCountByCategory(int categoryId);
+
+  /// Obtener movimientos por categoría y mes
+  /// @param categoryId El ID de la categoría.
+  /// @param date La fecha para filtrar los movimientos.
   /// @return Una lista de objetos Movimiento.
-  List<Movimiento> fetchMovimientosByCategory(String categoryId);
+  List<Movimiento> fetchMovimientosByCategoryAndMonth(
+    int categoryId,
+    DateTime date,
+  );
 
   /// Obtener movimientos por fecha
   /// @param date La fecha para filtrar los movimientos.
@@ -25,7 +34,7 @@ abstract class _MovimientosRepository {
   /// @return Una lista de objetos Movimiento.
   List<Movimiento> fetchMovimientosByDateAndType(
     DateTime date,
-    TipoMovimiento type
+    TipoMovimiento type,
   );
 
   /// Obtener totales mensuales (ingresos y gastos) para una fecha dada
@@ -42,12 +51,12 @@ abstract class _MovimientosRepository {
   /// @param movimiento El objeto Movimiento a agregar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
   Future<OperationResult<int>> addMovimiento(Movimiento movimiento);
-  
+
   /// Actualiza un movimiento financiero existente.
   /// @param movimiento El objeto Movimiento con los datos actualizados.
   /// @return Un valor booleano que indica si la operación fue exitosa.
   Future<OperationResult<void>> updateMovimiento(Movimiento movimiento);
- 
+
   /// Elimina un movimiento financiero por su ID.
   /// @param id El ID del movimiento a eliminar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
@@ -61,7 +70,6 @@ class MovimientosRepository implements _MovimientosRepository {
   // Para calculos de totales mensuales se conservara una lista de los movimientos del mes pasado
   final List<Movimiento> movimientosMesPasado = [];
 
-
   MovimientosRepository(this.localDataSource);
 
   @override
@@ -71,46 +79,67 @@ class MovimientosRepository implements _MovimientosRepository {
 
     // Obtener movimientos del mes actual
     movimientos.addAll(
-      await localDataSource.fetchMovimientosByMonthAndYear(date)
+      await localDataSource.fetchMovimientosByMonthAndYear(date),
     );
 
     // Obtener movimientos del mes pasado
     final mesPasado = DateTime(date.year, date.month - 1);
     movimientosMesPasado.addAll(
-      await localDataSource.fetchMovimientosByMonthAndYear(mesPasado)
+      await localDataSource.fetchMovimientosByMonthAndYear(mesPasado),
     );
 
     return movimientos;
   }
 
   @override
-  List<Movimiento> fetchMovimientosByCategory(String categoryId) {
-    final filteredMovements = movimientos.where(
-      (m) => m.categoryID.toString() == categoryId
-    ).toList();
+  Future<int> fetchMovimientoCountByCategory(int categoryId) async {
+    final cantidadMovimientos = await localDataSource.fetchMovimientoCountByCategory(
+      categoryId,
+    );
+    return cantidadMovimientos;
+  }
+
+  @override
+  List<Movimiento> fetchMovimientosByCategoryAndMonth(
+    int categoryId,
+    DateTime date,
+  ) {
+    final filteredMovements = movimientos
+        .where(
+          (m) =>
+              m.categoryID == categoryId &&
+              _isSameMonth(m.date, date),
+        )
+        .toList();
     return filteredMovements;
   }
 
   @override
   List<Movimiento> fetchMovimientosByDate(DateTime date) {
-    return movimientos.where((m) =>
-      m.date.year == date.year &&
-      m.date.month == date.month &&
-      m.date.day == date.day
-    ).toList();
+    return movimientos
+        .where(
+          (m) =>
+              m.date.year == date.year &&
+              m.date.month == date.month &&
+              m.date.day == date.day,
+        )
+        .toList();
   }
 
   @override
   List<Movimiento> fetchMovimientosByDateAndType(
     DateTime date,
-    TipoMovimiento type
+    TipoMovimiento type,
   ) {
-    return movimientos.where((m) =>
-      m.date.year == date.year &&
-      m.date.month == date.month &&
-      m.date.day == date.day &&
-      m.type == type
-    ).toList();
+    return movimientos
+        .where(
+          (m) =>
+              m.date.year == date.year &&
+              m.date.month == date.month &&
+              m.date.day == date.day &&
+              m.type == type,
+        )
+        .toList();
   }
 
   @override
@@ -128,10 +157,7 @@ class MovimientosRepository implements _MovimientosRepository {
       }
     }
 
-    return TotalesMensuales(
-      ingresos: totalIngresos,
-      gastos: totalGastos,
-    );
+    return TotalesMensuales(ingresos: totalIngresos, gastos: totalGastos);
   }
 
   @override
@@ -150,10 +176,7 @@ class MovimientosRepository implements _MovimientosRepository {
       }
     }
 
-    return TotalesMensuales(
-      ingresos: totalIngresos,
-      gastos: totalGastos,
-    );
+    return TotalesMensuales(ingresos: totalIngresos, gastos: totalGastos);
   }
 
   @override

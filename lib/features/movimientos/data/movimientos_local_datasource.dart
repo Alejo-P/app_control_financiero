@@ -25,17 +25,17 @@ class MovimientosLocalDataSource {
     return maps.map(Movimiento.fromMap).toList();
   }
 
-  // Obtener movimientos por categoría
-  Future<List<Movimiento>> fetchMovimientosByCategory(String categoryId) async {
+  // Obtener cantidad de movimientos por categoría
+  Future<int> fetchMovimientoCountByCategory(int categoryId) async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      MovimientosTable.table,
-      where: '${MovimientosTable.categoryId} = ?',
-      whereArgs: [categoryId],
-      orderBy: '${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC',
-    );
+    final int count = Sqflite.firstIntValue(
+      await db.rawQuery(
+        'SELECT COUNT(*) FROM ${MovimientosTable.table} WHERE ${MovimientosTable.categoryId} = ?',
+        [categoryId],
+      ),
+    ) ?? 0;
 
-    return maps.map(Movimiento.fromMap).toList();
+    return count;
   }
 
   // Obtener movimientos por fecha
@@ -52,7 +52,7 @@ class MovimientosLocalDataSource {
     return maps.map(Movimiento.fromMap).toList();
   }
 
-  // Obtener moviimeintos por fecha y tipo
+  // Obtener movimientos por fecha y tipo
   Future<List<Movimiento>> fetchMovimientosByDateAndType(
     DateTime date,
     TipoMovimiento type,

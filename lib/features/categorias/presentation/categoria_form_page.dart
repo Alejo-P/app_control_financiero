@@ -45,7 +45,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       ? TipoMovimiento.ingreso
       : TipoMovimiento.gasto;
   late List<TipoCategoria> tiposCategorias;
-  List<Movimiento> movimientosCategoria = [];
+  late int movementsByCategory;
   final _categoryNameController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -71,12 +71,12 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final appState = context.read<AppState>();
         final tipoCategoria = appState.getCategoryTypeById(categoryTypeID);
-        final movimientos = appState.getMovimientosByCategoriaId(categoria.id!);
         if (tipoCategoria == null) return;
+
+        appState.countMovementsByCategory(categoria.id!);
         
         setState(() {
           categoryTypeName = tipoCategoria.name;
-          movimientosCategoria = movimientos;
         });
       });
     }
@@ -238,6 +238,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
     tiposCategorias = appState.tiposCategorias;
+    movementsByCategory = appState.movementsByCategory;
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -246,7 +247,9 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           title: Text(
             widget.mode == CategoriaFormMode.create
                 ? 'Agregar Categoría'
-                : 'Editar Categoría',
+                : isDefault
+                    ? 'Ver Categoría'
+                    : 'Editar Categoría',
           ),
           actions: [
             if (widget.mode == CategoriaFormMode.edit &&
@@ -306,7 +309,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 9),
                       WidgetsContainer(
                         title: 'Detalles de la categoría',
                         children: [
@@ -326,7 +328,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 9),
                       WidgetsContainer(
                         title: 'Opciones adicionales',
                         children: [
@@ -370,14 +371,12 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 9),
-                      if (movimientosCategoria.isNotEmpty)
+                      if (movementsByCategory > 0)
                         WidgetsContainer(
                           title: 'Movimientos asociados',
-                          description: 'No puedes borrar esta categoría, tiene movimientos asociados.',
+                          description: 'Esta categoría tiene movimientos asociados.\nPara eliminarla, primero elimina o reasigna esos movimientos.',
                           backgroundColor: Colors.orange.shade50,
                           borderColor: Colors.orange,
-                          padding: const EdgeInsets.all(12),
                           children: [
                             DetailCategoryCard(
                               categoryName:
@@ -385,7 +384,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                               categoryIcon: Icons.list_alt,
                               iconColor: Colors.purple,
                               currentValue:
-                                  '${movimientosCategoria.length} movimiento(s)',
+                                  '$movementsByCategory movimiento(s)',
                               showArrow: false,
                             ),
                           ],
