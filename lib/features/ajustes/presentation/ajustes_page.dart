@@ -121,6 +121,28 @@ class _AjustesPageState extends State<AjustesPage> {
                           onChanged: _toggleDarkMode,
                         ),
                       ),
+                      SettingOptionCard(
+                        title: 'Notificaciones',
+                        description:
+                            'Configura las notificaciones de la aplicación',
+                        icon: Icons.notifications_outlined,
+                        iconColor: Colors.teal,
+                        onTap: () {
+                          // Lógica para configurar notificaciones
+                          debugPrint('Configurar notificaciones');
+                        },
+                      ),
+                      SettingOptionCard(
+                        title: 'Sobre la aplicación',
+                        description:
+                            'Información sobre la aplicación y su versión',
+                        icon: Icons.info_outline,
+                        iconColor: Colors.grey,
+                        onTap: () {
+                          // Lógica para mostrar información sobre la aplicación
+                          debugPrint('Información sobre la aplicación');
+                        },
+                      ),
                     ],
                   ),
                 ],
