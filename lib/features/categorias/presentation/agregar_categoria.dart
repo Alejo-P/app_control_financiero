@@ -233,7 +233,7 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromRGBO(r, g, b, 0.1),
+                        backgroundColor: Colors.black,
                       ),
                       onPressed: () {
                         Navigator.pop(context, {
@@ -244,7 +244,7 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
                       child: const Text(
                         'Confirmar',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
