@@ -5,12 +5,7 @@ import 'package:flutter/material.dart';
 Future<bool?> showConfirmAddDialog(
   BuildContext context, {
   required String titleModal,
-  required String title,
-  required String category,
-  required TipoMovimiento tipoMovimiento,
-  required String amount,
-  required DateTime date,
-  String? note,
+  required List<Widget> content,
 }) {
   return showDialog<bool>(
     context: context,
@@ -27,14 +22,7 @@ Future<bool?> showConfirmAddDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Título: $title'),
-            Text('Monto: \$$amount'),
-            Text('Tipo: ${tipoMovimiento == TipoMovimiento.gasto ? 'Gasto' : 'Ingreso'}'),
-            Text('Categoría: $category'),
-            Text('Fecha: ${formatDate(date)}'),
-            if (note != null && note.isNotEmpty) Text('Nota: ${note.trim()}'),
-          ],
+          children: content,
         ),
 
         shape: RoundedRectangleBorder(

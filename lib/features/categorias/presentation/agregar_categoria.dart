@@ -1,5 +1,8 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/categoria_constants.dart';
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/utils/icon_mapper.dart';
+import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/widgets/colors_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/icons_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/info_categoria_predeterminada.dart';
@@ -27,6 +30,11 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
   bool isDefault = false;
   int categoryTypeID = -1;
   String categoryTypeName = 'Sin seleccionar';
+  String selectedTipeMovement = 'gasto';
+  TipoMovimiento get tipoMovimientoSeleccionado =>
+      selectedTipeMovement == 'ingreso'
+      ? TipoMovimiento.ingreso
+      : TipoMovimiento.gasto;
   late List<TipoCategoria> tiposCategorias;
   final _categoryNameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -41,9 +49,18 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     _descriptionController.addListener(_markAsDirty);
   }
 
+  @override
+  void dispose() {
+    // Limpiar los controladores al desechar el widget
+    _categoryNameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
   void _markAsDirty() {
     // Si el campo esta vacío, no marcar como sucio
-    if (_categoryNameController.text.isEmpty && _descriptionController.text.isEmpty) {
+    if (_categoryNameController.text.isEmpty &&
+        _descriptionController.text.isEmpty) {
       setState(() {
         _hasUnsavedChanges = false;
       });
@@ -54,6 +71,82 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
       setState(() {
         _hasUnsavedChanges = true;
       });
+    }
+  }
+
+  void _onChangeTipoCategoria(TipoCategoria? tipoCategoria) {
+    if (tipoCategoria != null) {
+      setState(() {
+        categoryTypeID = tipoCategoria.id!;
+        categoryTypeName = tipoCategoria.name;
+        _hasUnsavedChanges = true;
+      });
+    }
+  }
+
+  void _onChangeTipoMovimiento(String tipoMovimiento) {
+    setState(() {
+      selectedTipeMovement = tipoMovimiento;
+      _hasUnsavedChanges = true;
+    });
+  }
+
+  Future<void> _guardarCategoria() async {
+    final nombre = _categoryNameController.text.trim();
+    final descripcion = _descriptionController.text.trim();
+
+    if (nombre.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('El nombre de la categoría no puede estar vacío.'),
+        ),
+      );
+      return;
+    }
+
+    if (categoryTypeID == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, selecciona un tipo de categoría.'),
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showConfirmAddDialog(
+      context,
+      titleModal: 'Confirmar guardar categoría',
+      content: [
+        Text('Nombre: $nombre'),
+        if (descripcion.isNotEmpty) Text('Descripción: $descripcion'),
+        Text('Tipo de categoría: $categoryTypeName'),
+        Text(
+          'Tipo de movimiento: ${selectedTipeMovement == 'gasto' ? 'Gasto' : 'Ingreso'}',
+        ),
+      ],
+    );
+    if (confirmed != true) return;
+
+    final categoria = Categoria(
+      id: null,
+      name: nombre,
+      description: descripcion,
+      categoryTypeID: categoryTypeID,
+      iconName: IconMapper.toName(selectedIcon),
+      iconColorValue: selectedColor.value,
+      movementType: tipoMovimientoSeleccionado,
+      isDefault: isDefault,
+    );
+
+    await context.read<AppState>().agregarCategoria(categoria);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.read<AppState>().transactionResultMessage),
+        ),
+      );
+      Navigator.pop(context, true);
     }
   }
 
@@ -84,8 +177,7 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
               icon: const Icon(Icons.check),
               tooltip: 'Guardar',
               onPressed: () {
-                // Lógica para guardar la nueva categoría
-                debugPrint('Guardar nueva categoría');
+                _guardarCategoria();
               },
             ),
           ],
@@ -150,6 +242,28 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
                               categoryIcon: Icons.category,
                               iconColor: Colors.blue,
                               currentValue: categoryTypeName,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              _onChangeTipoMovimiento(
+                                selectedTipeMovement == 'gasto'
+                                    ? 'ingreso'
+                                    : 'gasto',
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: DetailCategoryCard(
+                              categoryName: 'Tipo de movimiento',
+                              categoryIcon: selectedTipeMovement == 'gasto'
+                                  ? Icons.arrow_downward
+                                  : Icons.arrow_upward,
+                              iconColor: selectedTipeMovement == 'gasto'
+                                  ? Colors.red
+                                  : Colors.green,
+                              currentValue: selectedTipeMovement == 'gasto'
+                                  ? 'Gasto'
+                                  : 'Ingreso',
                             ),
                           ),
                         ],
@@ -356,11 +470,7 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
       },
     ).then((tipoCategoriaSeleccionada) {
       if (tipoCategoriaSeleccionada != null) {
-        setState(() {
-          _hasUnsavedChanges = true;
-          categoryTypeID = tipoCategoriaSeleccionada.id;
-          categoryTypeName = tipoCategoriaSeleccionada.name;
-        });
+        _onChangeTipoCategoria(tipoCategoriaSeleccionada as TipoCategoria);
       }
     });
   }

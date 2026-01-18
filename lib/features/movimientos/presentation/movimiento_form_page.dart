@@ -24,7 +24,7 @@ class MovimientoFormPage extends StatefulWidget {
 }
 
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
-  int categoryId = 0;
+  int categoryId = -1;
   int movementId = 0;
   String categoryName = 'Sin categoría';
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
@@ -100,7 +100,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
     setState(() {
-      categoryId = 0;
+      categoryId = -1;
       categoryName = 'Sin categoría';
       tipoMovimiento = newTipoMovimiento;
       categoriasFiltradas = categorias
@@ -246,7 +246,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                   return;
                 }
 
-                if (categoryId == 0) {
+                if (categoryId == -1) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Seleccione una categoría')),
                   );
@@ -256,12 +256,16 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                 final confirmed = await showConfirmAddDialog(
                   context,
                   titleModal: 'Confirmar movimiento',
-                  title: titleText,
-                  category: categoryName,
-                  tipoMovimiento: tipoMovimiento,
-                  amount: amountText,
-                  date: selectedDate,
-                  note: _noteController.text.trim(),
+                  content: [
+                    Text('Título: $titleText'),
+                    Text('Monto: \$$amountText'),
+                    Text(
+                        'Tipo: ${tipoMovimiento == TipoMovimiento.gasto ? 'Gasto' : 'Ingreso'}'),
+                    Text('Categoría: $categoryName'),
+                    Text('Fecha: ${formatDate(selectedDate)}'),
+                    if (_noteController.text.trim().isNotEmpty)
+                      Text('Nota: ${_noteController.text.trim()}'),
+                  ],
                 );
 
                 if (confirmed == true) {
