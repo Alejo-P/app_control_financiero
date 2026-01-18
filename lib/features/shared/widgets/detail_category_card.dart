@@ -34,16 +34,23 @@ class DetailCategoryCard extends StatelessWidget {
         ),
 
         const SizedBox(width: 3),
+        Text(
+          categoryName,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(width: 10),
+        //Valor actual
         Expanded(
-          child: Text(
-            categoryName,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          child: Container(
+            alignment: Alignment.centerRight,
+            child: Text(
+              currentValue,
+              textAlign: TextAlign.right,
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
           ),
         ),
-        Text(
-          currentValue,
-          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-        ),
+
         const SizedBox(width: 3),
         Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
       ],

@@ -291,12 +291,12 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
           separatorBuilder: (_, __) => const Divider(),
           itemBuilder: (context, index) {
             final tipoCategoria = tiposCategorias[index];
-            final [r, g, b] = getRGBFromColor(Colors.grey[800]!);
 
             return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Color.fromRGBO(r, g, b, 0.15),
-                child: Icon(Icons.category, color: Colors.grey[800]),
+              leading: IconContainer(
+                icon: Icons.category,
+                color: Colors.grey[800]!,
+                size: 26,
               ),
               title: Text(
                 tipoCategoria.name,
