@@ -75,11 +75,22 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     // Limpiar los controladores al desechar el widget
     _amountController.dispose();
     _noteController.dispose();
+    _titleController.dispose();
     super.dispose();
   }
 
   // Marca que hay cambios no guardados
   void _markAsDirty() {
+    // Si el campo esta vacío, no marcar como sucio
+    if (_amountController.text.isEmpty &&
+        _titleController.text.isEmpty &&
+        _noteController.text.isEmpty) {
+      setState(() {
+        _hasUnsavedChanges = false;
+      });
+      return;
+    }
+
     if (!_hasUnsavedChanges) {
       setState(() {
         _hasUnsavedChanges = true;
