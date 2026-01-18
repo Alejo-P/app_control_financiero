@@ -4,6 +4,7 @@ import 'package:control_financiero/features/categorias/widgets/colors_single_chi
 import 'package:control_financiero/features/categorias/widgets/icons_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/info_categoria_predeterminada.dart';
 import 'package:control_financiero/features/categorias/widgets/tab_chip.dart';
+import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
@@ -35,6 +36,37 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     super.initState();
     selectedColor = categoryColors.first;
     selectedIcon = categoryIcons.first;
+
+    _categoryNameController.addListener(_markAsDirty);
+    _descriptionController.addListener(_markAsDirty);
+  }
+
+  void _markAsDirty() {
+    // Si el campo esta vacío, no marcar como sucio
+    if (_categoryNameController.text.isEmpty && _descriptionController.text.isEmpty) {
+      setState(() {
+        _hasUnsavedChanges = false;
+      });
+      return;
+    }
+
+    if (!_hasUnsavedChanges) {
+      setState(() {
+        _hasUnsavedChanges = true;
+      });
+    }
+  }
+
+  Future<bool> _onWillPop() async {
+    if (!_hasUnsavedChanges) return true;
+
+    final shouldLeave = await showConfirmDialog(
+      context,
+      title: 'Salir sin guardar',
+      content: 'Tienes cambios sin guardar. ¿Seguro que deseas salir?',
+    );
+
+    return shouldLeave == true;
   }
 
   @override
@@ -42,82 +74,93 @@ class _AgregarCategoriaState extends State<AgregarCategoria> {
     final appState = context.read<AppState>();
     tiposCategorias = appState.tiposCategorias;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Agregar Categoría'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            tooltip: 'Guardar',
-            onPressed: () {
-              // Lógica para guardar la nueva categoría
-              debugPrint('Guardar nueva categoría');
-            },
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Column(
-                children: [
-                  IconContainer(
-                    icon: selectedIcon,
-                    color: selectedColor,
-                    size: 64,
-                    onTap: () => _openIconColorPickerModal(context),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Cambiar ícono",
-                    style: TextStyle(
-                      color: selectedColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Agregar Categoría'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check),
+              tooltip: 'Guardar',
+              onPressed: () {
+                // Lógica para guardar la nueva categoría
+                debugPrint('Guardar nueva categoría');
+              },
             ),
-            const SizedBox(height: 16),
-            WidgetsContainer(
-              title: 'Detalles de la categoría',
-              children: [
-                TextInputCard(
-                  textController: _categoryNameController,
-                  placeholder: 'Nombre de la categoría',
-                  iconData: Icons.label_outline,
-                  iconColor: Colors.grey.shade600,
-                ),
-                TextInputCard(
-                  textController: _descriptionController,
-                  placeholder: 'Descripción (opcional)',
-                  iconData: Icons.description_outlined,
-                  iconColor: Colors.grey.shade600,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            WidgetsContainer(
-              title: 'Opciones adicionales',
-              children: [
-                InkWell(
-                  onTap: () => _openTipoCategoriasModal(context),
-                  borderRadius: BorderRadius.circular(12),
-                  child: DetailCategoryCard(
-                    categoryName: 'Tipo de categoría',
-                    categoryIcon: Icons.category,
-                    iconColor: Colors.blue,
-                    currentValue: categoryTypeName,
-                  ),
-                ),
-              ],
-            ),
-            InfoCategoriaPredeterminada(isDefault: isDefault),
           ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Column(
+                          children: [
+                            IconContainer(
+                              icon: selectedIcon,
+                              color: selectedColor,
+                              size: 64,
+                              onTap: () => _openIconColorPickerModal(context),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Cambiar ícono",
+                              style: TextStyle(
+                                color: selectedColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      WidgetsContainer(
+                        title: 'Detalles de la categoría',
+                        children: [
+                          TextInputCard(
+                            textController: _categoryNameController,
+                            placeholder: 'Nombre de la categoría',
+                            iconData: Icons.label_outline,
+                            iconColor: Colors.grey.shade600,
+                          ),
+                          TextInputCard(
+                            textController: _descriptionController,
+                            placeholder: 'Descripción (opcional)',
+                            iconData: Icons.description_outlined,
+                            iconColor: Colors.grey.shade600,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      WidgetsContainer(
+                        title: 'Opciones adicionales',
+                        children: [
+                          InkWell(
+                            onTap: () => _openTipoCategoriasModal(context),
+                            borderRadius: BorderRadius.circular(12),
+                            child: DetailCategoryCard(
+                              categoryName: 'Tipo de categoría',
+                              categoryIcon: Icons.category,
+                              iconColor: Colors.blue,
+                              currentValue: categoryTypeName,
+                            ),
+                          ),
+                        ],
+                      ),
+                      InfoCategoriaPredeterminada(isDefault: isDefault),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
