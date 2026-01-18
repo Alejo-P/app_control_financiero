@@ -59,13 +59,16 @@ class SummaryCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 8),
                         IconContainer(
                           icon: icon,
                           color: Colors.white,
