@@ -17,7 +17,7 @@ class InfoCategoriaPredeterminada extends StatelessWidget {
                 : Colors.grey.shade200,
           ),
           alignment: Alignment.center,
-          margin: const EdgeInsets.only(top: 20),
+          margin: const EdgeInsets.only(top: 10),
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,

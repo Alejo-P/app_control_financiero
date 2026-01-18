@@ -128,7 +128,11 @@ class AppState extends ChangeNotifier {
   }
 
   TipoCategoria? getCategoryTypeById(int id) {
-    return _tipoCategoriaRepository.getTipoCategoriaById(id);
+    try {
+      return tiposCategorias.firstWhere((t) => t.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 
   // Obtener todas las fechas únicas de movimientos
@@ -140,6 +144,11 @@ class AppState extends ChangeNotifier {
 
     dates.sort((a, b) => b.compareTo(a));
     return dates;
+  }
+
+  // Obtener movimientos por categoria (id)
+  List<Movimiento> getMovimientosByCategoriaId(int categoriaId) {
+    return movimientos.where((m) => m.categoryID == categoriaId).toList();
   }
 
   // Obtener movimientos agrupados por fecha

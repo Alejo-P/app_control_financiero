@@ -8,6 +8,8 @@ class WidgetsContainer extends StatelessWidget {
   final String? description;
   final List<Widget>? children;
   final Color backgroundColor;
+  final EdgeInsetsGeometry padding;
+  final Color borderColor;
 
   const WidgetsContainer({
     super.key,
@@ -17,6 +19,8 @@ class WidgetsContainer extends StatelessWidget {
     this.description,
     this.children,
     this.backgroundColor = Colors.white,
+    this.padding = const EdgeInsets.all(8),
+    this.borderColor = Colors.transparent,
   });
 
   @override
@@ -24,7 +28,7 @@ class WidgetsContainer extends StatelessWidget {
     final [r, g, b] = getRGBFromColor(backgroundColor);
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: padding,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -51,6 +55,7 @@ class WidgetsContainer extends StatelessWidget {
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: borderColor),
                 boxShadow: [
                   BoxShadow(
                     color: Color.fromRGBO(r, g, b, 0.15),

@@ -8,6 +8,7 @@ import 'package:control_financiero/features/categorias/widgets/colors_single_chi
 import 'package:control_financiero/features/categorias/widgets/icons_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/info_categoria_predeterminada.dart';
 import 'package:control_financiero/features/categorias/widgets/tab_chip.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
@@ -44,6 +45,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       ? TipoMovimiento.ingreso
       : TipoMovimiento.gasto;
   late List<TipoCategoria> tiposCategorias;
+  List<Movimiento> movimientosCategoria = [];
   final _categoryNameController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -69,10 +71,12 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final appState = context.read<AppState>();
         final tipoCategoria = appState.getCategoryTypeById(categoryTypeID);
-        if (tipoCategoria != null) return;
+        final movimientos = appState.getMovimientosByCategoriaId(categoria.id!);
+        if (tipoCategoria == null) return;
         
         setState(() {
-          categoryTypeName = tipoCategoria!.name;
+          categoryTypeName = tipoCategoria.name;
+          movimientosCategoria = movimientos;
         });
       });
     }
@@ -258,7 +262,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
             if (!isDefault && _hasUnsavedChanges)
               IconButton(
-                icon: const Icon(Icons.check),
+                icon: const Icon(Icons.check, color: Colors.green),
                 tooltip: 'Guardar',
                 onPressed: () async {
                   await _guardarCategoria();
@@ -352,6 +356,26 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      if (movimientosCategoria.isNotEmpty)
+                        WidgetsContainer(
+                          title: 'Movimientos asociados',
+                          backgroundColor: Colors.orange.shade50,
+                          borderColor: Colors.orange,
+                          padding: const EdgeInsets.all(12),
+                          children: [
+                            DetailCategoryCard(
+                              categoryName:
+                                  'Cantidad de movimientos asociados',
+                              categoryIcon: Icons.list_alt,
+                              iconColor: Colors.purple,
+                              currentValue:
+                                  '${movimientosCategoria.length} movimiento(s)',
+                              showArrow: false,
+                            ),
+                          ],
+                        ),
+
                       if (widget.mode == CategoriaFormMode.edit)
                         InfoCategoriaPredeterminada(isDefault: isDefault),
                     ],

@@ -6,6 +6,7 @@ class DetailCategoryCard extends StatelessWidget {
   final IconData categoryIcon;
   final Color iconColor;
   final String currentValue;
+  final bool showArrow;
 
   const DetailCategoryCard({
     super.key,
@@ -13,6 +14,7 @@ class DetailCategoryCard extends StatelessWidget {
     required this.categoryIcon,
     required this.iconColor,
     this.currentValue = "Seleccionar",
+    this.showArrow = true,
   });
 
   @override
@@ -34,13 +36,17 @@ class DetailCategoryCard extends StatelessWidget {
         ),
 
         const SizedBox(width: 3),
-        Text(
+        //Nombre categoria
+        Expanded(
+          child: Text(
           categoryName,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
         ),
-        const SizedBox(width: 10),
+        
+        const SizedBox(width: 4),
         //Valor actual
-        Expanded(
+        IntrinsicWidth(
           child: Container(
             alignment: Alignment.centerRight,
             child: Text(
@@ -51,8 +57,15 @@ class DetailCategoryCard extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(width: 3),
-        Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+        if (showArrow) 
+        ...[
+          const SizedBox(width: 3),
+          Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: Colors.grey[400],
+          ),
+        ],
       ],
     );
   }
