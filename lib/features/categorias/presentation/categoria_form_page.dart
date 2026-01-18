@@ -203,6 +203,13 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     await context.read<AppState>().eliminarCategoria(widget.categoriaExistente!.id!);
 
     if (mounted) {
+      if (!context.read<AppState>().transactionSuccess) {
+        AppSnackbar.error(
+          context,
+          context.read<AppState>().transactionResultMessage,
+        );
+        return;
+      }
       AppSnackbar.success(
         context,
         context.read<AppState>().transactionResultMessage,
