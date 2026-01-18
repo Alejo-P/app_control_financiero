@@ -37,6 +37,22 @@ class CategoriasLocalDataSource {
   // Actualizar una categoría existente
   Future<OperationResult<void>> updateCategoria(Categoria categoria) async {
     final db = await _dbHelper.database;
+
+    // Comprobar que la categoría no es predeterminada
+    final List<Map<String, dynamic>> maps = await db.query(
+      CategoriasTable.table,
+      where: '${CategoriasTable.id} = ?',
+      whereArgs: [categoria.id],
+    );
+
+    if (maps.isNotEmpty && maps.first[CategoriasTable.isDefault] == 1) {
+      // No actualizar si es predeterminada
+      return OperationResult<void>(
+        success: false,
+        message: 'No se puede actualizar una categoría predeterminada.',
+      );
+    }
+
     final result = await db.update(
       CategoriasTable.table,
       categoria.toMap(),
@@ -77,7 +93,7 @@ class CategoriasLocalDataSource {
       return OperationResult<void>(
         success: false,
         message:
-            'No se puede eliminar esta categoría. Tiene $movimientoCount movimientos asociados.',
+            'No se puede eliminar esta categoría. Tiene $movimientoCount${movimientoCount == 1 ? ' movimiento asociado.' : ' movimientos asociados.'}',
       );
     }
 
