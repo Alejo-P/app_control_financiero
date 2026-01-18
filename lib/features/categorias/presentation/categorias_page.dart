@@ -65,7 +65,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
                               categorias: categorias,
                             );
                           }),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 8),
                           Text(
                             'Total de categorías: $cantidadCategorias',
                             style: Theme.of(context)
@@ -73,11 +73,11 @@ class _CategoriasPageState extends State<CategoriasPage> {
                                 .bodySmall
                                 ?.copyWith(color: Colors.grey[600]),
                           ),
+                          const SizedBox(height: 8),
                         ],
                       ),
                     ),
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
