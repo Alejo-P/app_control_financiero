@@ -44,7 +44,7 @@ class CategoryCardDetail extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        description,
+                        description.isEmpty ? '(Sin descripción)' : description,
                         style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 14,
