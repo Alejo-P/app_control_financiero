@@ -31,6 +31,7 @@ class AppState extends ChangeNotifier {
   String currentPageName = 'Movimientos';
   int currentTab = 0;
   int movementsByCategory = 0;
+  bool isDarkMode = false;
 
   List<AppBarAction> _appBarActions = [];
   List<AppBarAction> get appBarActions => _appBarActions;
@@ -231,6 +232,11 @@ class AppState extends ChangeNotifier {
     if (anterior.ahorro == 0) return null;
 
     return ((actual.ahorro - anterior.ahorro) / anterior.ahorro) * 100;
+  }
+
+  void setDarkMode(bool value) {
+    isDarkMode = value;
+    notifyListeners();
   }
 
   void changeTab(int index) {

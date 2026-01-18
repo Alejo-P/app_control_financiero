@@ -27,18 +27,19 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final [r, g, b] = getRGBFromColor(Colors.black);
+    final theme = Theme.of(context);
+    final themeColors = theme.colorScheme;
+    final [r, g, b] = getRGBFromColor(themeColors.onSurface);
+    
     return Container(
       height: 50,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: themeColors.surface,
         borderRadius: BorderRadius.circular(borderRadiusValue),
         boxShadow: [
           BoxShadow(
             color: Color.fromRGBO(r, g, b, 0.15),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -47,6 +48,8 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
           _buildOption(
             text: 'Gasto',
             selected: tipoMovimiento == TipoMovimiento.gasto,
+            textColor: Colors.red,
+            selectedTextColor: Colors.white,
             color: Colors.red,
             onTap: () {
               setState(() {
@@ -58,6 +61,8 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
           _buildOption(
             text: 'Ingreso',
             selected: tipoMovimiento == TipoMovimiento.ingreso,
+            textColor: Colors.green,
+            selectedTextColor: Colors.white,
             color: Colors.green,
             onTap: () {
               setState(() {
@@ -73,6 +78,8 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
 
   Widget _buildOption({
     required String text,
+    required Color textColor,
+    required Color selectedTextColor,
     required bool selected,
     required Color color,
     required VoidCallback onTap,
@@ -91,7 +98,7 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
           child: Text(
             text,
             style: TextStyle(
-              color: selected ? Colors.white : Colors.grey[700],
+              color: selected ? selectedTextColor : textColor,
               fontWeight: FontWeight.bold,
             ),
           ),

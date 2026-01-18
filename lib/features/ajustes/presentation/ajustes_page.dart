@@ -26,8 +26,17 @@ class _AjustesPageState extends State<AjustesPage> {
     });
   }
 
+  void _toggleDarkMode(bool value) {
+    setState(() {
+      _appState.setDarkMode(value);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+    final isDarkMode = appState.isDarkMode;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
       child: Column(
@@ -63,7 +72,6 @@ class _AjustesPageState extends State<AjustesPage> {
                           debugPrint('Respaldar datos');
                         },
                       ),
-
                       SettingOptionCard(
                         title: 'Restaurar datos',
                         description:
@@ -77,7 +85,6 @@ class _AjustesPageState extends State<AjustesPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
                   WidgetsContainer(
                     title: 'Mas elementos',
                     description: 'Gestiona categorias y otros elementos.',
@@ -97,20 +104,22 @@ class _AjustesPageState extends State<AjustesPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
                   WidgetsContainer(
                     title: 'Ajustes de la app',
                     description: 'Configura las preferencias de la aplicación.',
                     children: [
                       SettingOptionCard(
-                        title: 'Configuración',
-                        description: 'Ajusta las preferencias de la aplicación',
-                        icon: Icons.settings_outlined,
-                        iconColor: Colors.blue,
-                        onTap: () {
-                          // Lógica para cambiar el tema de la aplicación
-                          debugPrint('Abrir configuración de la app');
-                        },
+                        title: 'Modo oscuro',
+                        description:
+                            'Activa o desactiva el modo oscuro en la aplicación',
+                        icon: isDarkMode
+                            ? Icons.dark_mode_outlined
+                            : Icons.light_mode_outlined,
+                        iconColor: isDarkMode ? Colors.yellow : Colors.blue,
+                        trailing: Switch(
+                          value: isDarkMode,
+                          onChanged: _toggleDarkMode,
+                        ),
                       ),
                     ],
                   ),

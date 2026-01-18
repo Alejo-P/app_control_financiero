@@ -6,6 +6,7 @@ class SettingOptionCard extends StatelessWidget {
   final String? description;
   final IconData icon;
   final Color iconColor;
+  final Widget? trailing;
   final VoidCallback? onTap;
 
   const SettingOptionCard({
@@ -14,6 +15,7 @@ class SettingOptionCard extends StatelessWidget {
     this.description,
     required this.icon,
     required this.iconColor,
+    this.trailing,
     this.onTap,
   });
 
@@ -51,7 +53,10 @@ class SettingOptionCard extends StatelessWidget {
                 ],
               ),
             ),
-            if (onTap != null)
+            if (trailing != null)
+              trailing!,
+
+            if (onTap != null && trailing == null)
                Icon(
                 Icons.arrow_forward_ios,
                 size: 16,

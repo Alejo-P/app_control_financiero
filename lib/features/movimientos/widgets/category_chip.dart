@@ -18,6 +18,18 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    final bgColor = selected
+        ? colors.primary
+        : colors.surface;
+
+    final contentColor = selected
+        ? colors.onPrimary
+        : colors.onSurface;
+
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(50),
@@ -27,10 +39,11 @@ class CategoryChip extends StatelessWidget {
           vertical: 8,
         ),
         decoration: BoxDecoration(
-          color: selected ? Colors.black : Colors.white,
+          color: bgColor,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
-            color: selected ? Colors.black : Colors.grey.shade300,
+            color: contentColor,
+            width: selected ? 0 : 1,
           ),
         ),
         child: Row(
@@ -38,15 +51,14 @@ class CategoryChip extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: selected ? Colors.white : iconColor,
+              color: selected ? contentColor : iconColor,
               size: 16,
-              fontWeight: FontWeight.bold,
             ),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: selected ? Colors.white : Colors.black87,
+                color: selected ? contentColor : colors.onSurface,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
               ),
             ),

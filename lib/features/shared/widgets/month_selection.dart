@@ -77,9 +77,11 @@ class _MonthSelectionState extends State<MonthSelection> {
     final isFuture = isFutureMonth(selectedDate);
     final isCurrent = isCurrentMonth();
     final isLimitPast = isLimitPastMonth(selectedDate);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundThemeColor = Theme.of(context).colorScheme.surface;
 
     return Card(
-      color: Colors.white,
+      color: backgroundThemeColor,
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -103,7 +105,7 @@ class _MonthSelectionState extends State<MonthSelection> {
                   monthYearLabel,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black,
+                    color: isDarkMode ? Colors.white : Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -113,7 +115,6 @@ class _MonthSelectionState extends State<MonthSelection> {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.white24,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

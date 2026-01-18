@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/formatters/money_input_formatter.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
 class AmountInput extends StatelessWidget {
@@ -8,6 +9,10 @@ class AmountInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final [r, g, b] = getRGBFromColor(colorScheme.surface);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -17,7 +22,7 @@ class AmountInput extends StatelessWidget {
           'Monto',
           style: Theme.of(
             context,
-          ).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),
+          ).textTheme.labelMedium?.copyWith(color: Color.fromRGBO(r, g, b, 0.6)),
         ),
         const SizedBox(height: 5),
         Row(
@@ -30,7 +35,7 @@ class AmountInput extends StatelessWidget {
               style: TextStyle(
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: Color.fromRGBO(r, g, b, 0.7),
               ),
             ),
             const SizedBox(width: 18),
@@ -46,12 +51,12 @@ class AmountInput extends StatelessWidget {
                   fontSize: 40,
                   fontWeight: FontWeight.w500,
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: '0.00',
                   hintStyle: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.w500,
-                    color: Colors.grey,
+                    color: Color.fromRGBO(r, g, b, 0.6),
                   ),
                   border: InputBorder.none,
                   isDense: true,
@@ -59,7 +64,7 @@ class AmountInput extends StatelessWidget {
                 inputFormatters: [
                   MoneyInputFormatter(),
                 ],
-                cursorColor: Theme.of(context).primaryColor,
+                cursorColor: colorScheme.primary,
                 textAlign: TextAlign.center,
               ),
             ),

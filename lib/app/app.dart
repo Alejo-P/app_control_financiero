@@ -21,15 +21,15 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final movimientosRepository = MovimientosRepository(
-      MovimientosLocalDataSource()
+      MovimientosLocalDataSource(),
     );
 
     final categoriasRepository = CategoriasRepository(
-      CategoriasLocalDataSource()
+      CategoriasLocalDataSource(),
     );
 
     final tipoCategoriasRepository = TipoCategoriaRepository(
-      TipoCategoriaLocalDataSource()
+      TipoCategoriaLocalDataSource(),
     );
 
     return ChangeNotifierProvider(
@@ -38,17 +38,22 @@ class App extends StatelessWidget {
         categoriasRepository,
         tipoCategoriasRepository,
       )..loadInitialData(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: appName,
-        theme: AppTheme.light,
-        initialRoute: '/',
-        routes: {
-          '/': (_) => const AppScaffold(), // navegación principal
-          '/agregar_movimiento': (_) => const MovimientoFormPage(mode: MovimientoFormMode.create),
-          '/agregar_categoria': (_) => const CategoriaFormPage(mode: CategoriaFormMode.create),
+      child: Consumer<AppState>(
+        builder: (context, appState, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: appName,
+            theme: appState.isDarkMode ? AppTheme.dark : AppTheme.light,
+            initialRoute: '/',
+            routes: {
+              '/': (_) => const AppScaffold(), // navegación principal
+              '/agregar_movimiento': (_) =>
+                  const MovimientoFormPage(mode: MovimientoFormMode.create),
+              '/agregar_categoria': (_) =>
+                  const CategoriaFormPage(mode: CategoriaFormMode.create),
+            },
+          );
         },
-        //home: const AppScaffold(),
       ),
     );
   }

@@ -3,6 +3,19 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static final ThemeData light = ThemeData(
     primarySwatch: Colors.blue,
+    primaryColor: Colors.blue,
+    colorScheme: ColorScheme.fromSwatch(
+      primarySwatch: Colors.blue,
+      cardColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 239, 239, 239),
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: Colors.black,
+      secondary: Colors.blue,
+      surface: Colors.white,
+      onPrimary: Colors.white,
+      onSurface: Colors.black87,
+    ),
     scaffoldBackgroundColor: Color.fromARGB(255, 239, 239, 239),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
@@ -15,7 +28,11 @@ class AppTheme {
         fontSize: 22,
       ),
     ),
-
+    buttonTheme: const ButtonThemeData(
+      buttonColor: Colors.blue,
+      textTheme: ButtonTextTheme.primary,
+    ),
+    dividerColor: Colors.grey[500],
     textTheme: const TextTheme(
       displayLarge: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold),
       displayMedium: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w600),
@@ -33,12 +50,26 @@ class AppTheme {
       headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
       headlineSmall: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
     ),
+    useMaterial3: true,
   );
 
   static final ThemeData dark = ThemeData(
     brightness: Brightness.dark,
     primarySwatch: Colors.blue,
-    scaffoldBackgroundColor: Color.fromARGB(255, 157, 154, 154),
+    primaryColor: Colors.blue,
+    colorScheme: ColorScheme.fromSwatch(
+      primarySwatch: Colors.blue,
+      cardColor: Color.fromARGB(255, 48, 48, 48),
+      backgroundColor: Color.fromARGB(255, 34, 34, 34),
+      brightness: Brightness.dark,
+    ).copyWith(
+      primary: Colors.white,
+      secondary: Colors.blue,
+      surface: Color.fromARGB(255, 48, 48, 48),
+      onPrimary: Colors.black,
+      onSurface: Colors.white70,
+    ),
+    scaffoldBackgroundColor: Color.fromARGB(255, 34, 34, 34),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
@@ -50,5 +81,28 @@ class AppTheme {
         fontSize: 22,
       ),
     ),
+    buttonTheme: const ButtonThemeData(
+      buttonColor: Colors.blue,
+      textTheme: ButtonTextTheme.primary,
+    ),
+    dividerColor: Colors.grey[700],
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold),
+      displayMedium: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w600),
+      displaySmall: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
+
+      bodyLarge: TextStyle(fontSize: 18.0),
+      bodyMedium: TextStyle(fontSize: 16.0),
+      bodySmall: TextStyle(fontSize: 14.0),
+
+      labelLarge: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+      labelMedium: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+      labelSmall: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400),
+
+      headlineLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+      headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
+      headlineSmall: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+    ),
+    useMaterial3: true,
   );
 }

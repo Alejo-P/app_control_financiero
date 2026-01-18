@@ -7,7 +7,7 @@ class WidgetsContainer extends StatelessWidget {
   final TextStyle? summaryAmountStyle;
   final String? description;
   final List<Widget>? children;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final EdgeInsetsGeometry padding;
   final Color borderColor;
 
@@ -18,14 +18,16 @@ class WidgetsContainer extends StatelessWidget {
     this.summaryAmountStyle,
     this.description,
     this.children,
-    this.backgroundColor = Colors.white,
+    this.backgroundColor,
     this.padding = const EdgeInsets.all(8),
     this.borderColor = Colors.transparent,
   });
 
   @override
   Widget build(BuildContext context) {
-    final [r, g, b] = getRGBFromColor(backgroundColor);
+    final backgroundThemeColor =
+        Theme.of(context).colorScheme.surface; // Color de fondo del tema
+    final [r, g, b] = getRGBFromColor(backgroundThemeColor);
 
     return Container(
       padding: padding,
@@ -53,7 +55,7 @@ class WidgetsContainer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: backgroundColor,
+                color: backgroundColor ?? backgroundThemeColor,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: borderColor),
                 boxShadow: [

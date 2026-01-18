@@ -11,6 +11,7 @@ import 'package:control_financiero/features/shared/widgets/detail_category_card.
 import 'package:control_financiero/features/movimientos/widgets/info_tipe_movement_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/tipo_movimiento_selector.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -242,6 +243,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     final appState = context.read<AppState>();
     categorias = appState.categorias;
     categoriasFiltradas = categorias
@@ -288,64 +293,50 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AmountInput(controller: _amountController),
-                        Container(
-                          margin: const EdgeInsets.only(top: 20),
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AmountInput(controller: _amountController),
+                      WidgetsContainer(
+                        title: 'Detalles del movimiento',
+                        padding: const EdgeInsets.all(12),
+                        children: [
+                          TextInputCard(
+                            textController: _titleController,
+                            placeholder: 'Titulo del movimiento',
+                            iconData: Icons.title,
+                            iconColor: Colors.grey.shade600,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextInputCard(
-                                textController: _titleController,
-                                placeholder: 'Titulo del movimiento',
-                                iconData: Icons.title,
-                                iconColor: Colors.grey.shade600,
-                              ),
-                              Divider(color: Colors.grey[300]),
-                              InkWell(
-                                onTap: () async => await _openCategoriasModal(context),
-                                borderRadius: BorderRadius.circular(12),
-                                child: DetailCategoryCard(
-                                  categoryName: 'Categoría',
-                                  categoryIcon: Icons.category,
-                                  iconColor: Colors.blue,
-                                  currentValue: categoryName,
-                                ),
-                              ),
-                              Divider(color: Colors.grey[300]),
-                              InkWell(
-                                onTap: () => _selectDate(context),
-                                borderRadius: BorderRadius.circular(12),
-                                child: DetailCategoryCard(
-                                  categoryName: 'Fecha',
-                                  categoryIcon: Icons.calendar_today,
-                                  iconColor: Colors.purple,
-                                  currentValue: formatDate(selectedDate),
-                                ),
-                              ),
-                              Divider(color: Colors.grey[300]),
-                              TextInputCard(
-                                textController: _noteController,
-                                placeholder: 'Agregar una nota (opcional)',
-                                iconData: Icons.edit_note,
-                                iconColor: Colors.grey.shade600,
-                              ),
-                            ],
+                          InkWell(
+                            onTap: () async => await _openCategoriasModal(context),
+                            borderRadius: BorderRadius.circular(12),
+                            child: DetailCategoryCard(
+                              categoryName: 'Categoría',
+                              categoryIcon: Icons.category,
+                              iconColor: Colors.blue,
+                              currentValue: categoryName,
+                            ),
                           ),
-                        ),
-                        InfoTipeMovementCard(tipoMovimiento: tipoMovimiento),
-                      ],
-                    ),
+                          InkWell(
+                            onTap: () => _selectDate(context),
+                            borderRadius: BorderRadius.circular(12),
+                            child: DetailCategoryCard(
+                              categoryName: 'Fecha',
+                              categoryIcon: Icons.calendar_today,
+                              iconColor: Colors.purple,
+                              currentValue: formatDate(selectedDate),
+                            ),
+                          ),
+                          TextInputCard(
+                            textController: _noteController,
+                            placeholder: 'Agregar una nota (opcional)',
+                            iconData: Icons.edit_note,
+                            iconColor: Colors.grey.shade600,
+                          ),
+                        ],
+                      ),
+                      InfoTipeMovementCard(tipoMovimiento: tipoMovimiento),
+                    ],
                   ),
                 ),
               ),
@@ -382,6 +373,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
             final categoria = categoriasFiltradas[index];
 
             return ListTile(
+              selected: categoria.id == categoryId,
+              selectedTileColor: Colors.grey.shade200,
+              selectedColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               leading: IconContainer(
                 icon: categoria.iconData,
                 color: categoria.iconColor,
