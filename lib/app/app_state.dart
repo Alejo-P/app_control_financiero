@@ -32,7 +32,6 @@ class AppState extends ChangeNotifier {
   ];
   String currentPageName = 'Movimientos';
   int currentTab = 0;
-  int movementsByCategory = 0;
   bool isDarkMode = false;
 
   List<AppBarAction> _appBarActions = [];
@@ -121,12 +120,10 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  Future<void> countMovementsByCategory(int categoryId) async {
-    movementsByCategory =
-        await _movimientosRepository.fetchMovimientoCountByCategory(
+  Future<int> countMovementsByCategory(int categoryId) async {
+    return await _movimientosRepository.fetchMovimientoCountByCategory(
       categoryId,
     );
-    notifyListeners();
   }
 
   void changeMovimientoFiltro(MovimientoFiltro filtro) {

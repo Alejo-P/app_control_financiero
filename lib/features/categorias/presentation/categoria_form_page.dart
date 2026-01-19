@@ -51,6 +51,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   @override
   void initState() {
     super.initState();
+    movementsByCategory = 0;
     selectedColor = categoryColors.first;
     selectedIcon = categoryIcons.first;
 
@@ -67,15 +68,16 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           : 'gasto';
       isDefault = categoria.isDefault;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         final appState = context.read<AppState>();
         final tipoCategoria = appState.getCategoryTypeById(categoryTypeID);
         if (tipoCategoria == null) return;
 
-        appState.countMovementsByCategory(categoria.id!);
+        final movementsCount = await appState.countMovementsByCategory(categoria.id!);
         
         setState(() {
           categoryTypeName = tipoCategoria.name;
+          movementsByCategory = movementsCount;
         });
       });
     }
@@ -237,7 +239,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
     tiposCategorias = appState.tiposCategorias;
-    movementsByCategory = appState.movementsByCategory;
 
     return WillPopScope(
       onWillPop: _onWillPop,
