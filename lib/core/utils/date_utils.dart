@@ -31,6 +31,11 @@ DateTime getCurrentDateWithoutTime() {
   return DateTime(now.year, now.month, now.day);
 }
 
+DateTime normalizeDate(DateTime date) {
+  return DateTime(date.year, date.month, 1);
+}
+
+
 // Función para formatear una fecha como "dd/MM/yyyy"
 String formatDate(DateTime date) {
   final day = date.day.toString().padLeft(2, '0');

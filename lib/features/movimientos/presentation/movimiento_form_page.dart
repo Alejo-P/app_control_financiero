@@ -26,6 +26,7 @@ class MovimientoFormPage extends StatefulWidget {
 }
 
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
+  late AppState _appState;
   int categoryId = -1;
   int movementId = 0;
   String categoryName = 'Sin categoría';
@@ -41,9 +42,21 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   void initState() {
     super.initState();
-    selectedDate = getCurrentDateWithoutTime();
     categorias = [];
     categoriasFiltradas = [];
+
+    if (widget.mode == MovimientoFormMode.create) {
+      selectedDate = getCurrentDateWithoutTime();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final appState = context.read<AppState>();
+        final selectedMonth = normalizeDate(appState.selectedMovementsMonth);
+        if (isCurrentMonth(selectedMonth)) return;
+        
+        setState(() {
+          selectedDate = selectedMonth;
+        });
+      });
+    }
 
     if (widget.mode == MovimientoFormMode.edit && widget.movimiento != null) {
       _amountController.text = widget.movimiento!.amount.toString();
@@ -213,8 +226,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Eliminar movimiento',
-      content:
-          '¿Estás seguro de que deseas eliminar este movimiento?',
+      content: '¿Estás seguro de que deseas eliminar este movimiento?',
     );
     if (confirmed != true) return;
 
@@ -308,7 +320,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                             iconColor: Colors.grey.shade600,
                           ),
                           InkWell(
-                            onTap: () async => await _openCategoriasModal(context),
+                            onTap: () async =>
+                                await _openCategoriasModal(context),
                             borderRadius: BorderRadius.circular(12),
                             child: DetailCategoryCard(
                               categoryName: 'Categoría',
