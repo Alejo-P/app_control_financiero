@@ -1,5 +1,4 @@
 import 'package:control_financiero/core/formatters/money_input_formatter.dart';
-import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
 class AmountInput extends StatelessWidget {
@@ -10,8 +9,7 @@ class AmountInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme; 
-    final [r, g, b] = getRGBFromColor(colorScheme.surface);
+    final colorScheme = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
