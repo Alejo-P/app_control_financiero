@@ -10,7 +10,7 @@ class AmountInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = theme.colorScheme; 
     final [r, g, b] = getRGBFromColor(colorScheme.surface);
 
     return Column(
@@ -22,7 +22,7 @@ class AmountInput extends StatelessWidget {
           'Monto',
           style: Theme.of(
             context,
-          ).textTheme.labelMedium?.copyWith(color: Color.fromRGBO(r, g, b, 0.6)),
+          ).textTheme.labelMedium,
         ),
         const SizedBox(height: 5),
         Row(
@@ -35,7 +35,6 @@ class AmountInput extends StatelessWidget {
               style: TextStyle(
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(r, g, b, 0.7),
               ),
             ),
             const SizedBox(width: 18),
@@ -56,7 +55,6 @@ class AmountInput extends StatelessWidget {
                   hintStyle: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.w500,
-                    color: Color.fromRGBO(r, g, b, 0.6),
                   ),
                   border: InputBorder.none,
                   isDense: true,

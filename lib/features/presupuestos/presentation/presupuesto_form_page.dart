@@ -40,8 +40,24 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                 : 'Editar Presupuesto',
           ),
         ),
-        body: Center(
-          child: Text('Formulario de Presupuesto'),
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                //TODO Implementar formulario de presupuesto
+                child: Center(
+                  child: Text(
+                    widget.mode == PresupuestoFormMode.create
+                        ? 'Formulario para crear un nuevo presupuesto.'
+                        : 'Formulario para editar el presupuesto existente.',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
