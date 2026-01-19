@@ -29,8 +29,8 @@ class TransactionsContainer extends StatelessWidget {
     final formattedDate = formatRelativeDateWithMonth(date);
     final totalAmount = movimientos.fold<double>(0.0, (total, mov) {
       return mov.type == TipoMovimiento.gasto
-          ? total - mov.ammount
-          : total + mov.ammount;
+          ? total - mov.amount
+          : total + mov.amount;
     });
 
     return WidgetsContainer(
@@ -49,7 +49,7 @@ class TransactionsContainer extends StatelessWidget {
           title: movimiento.title,
           category: categoria!.name,
           type: _getTypeName(movimiento.type),
-          spent: movimiento.ammount,
+          spent: movimiento.amount,
           icon: categoria.iconData,
           iconColor: Color(categoria.iconColorValue),
           time: movimiento.time,

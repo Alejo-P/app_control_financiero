@@ -86,9 +86,9 @@ class MovimientosLocalDataSource {
     for (final map in maps) {
       final movimiento = Movimiento.fromMap(map);
       if (movimiento.type == TipoMovimiento.ingreso) {
-        ingresos += movimiento.ammount;
+        ingresos += movimiento.amount;
       } else {
-        gastos += movimiento.ammount;
+        gastos += movimiento.amount;
       }
     }
 

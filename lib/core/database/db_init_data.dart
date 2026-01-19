@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/database/db_migrations.dart';
 import 'package:control_financiero/core/database/db_seeds.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -106,6 +107,10 @@ Future<void> runSeeds(Database db) async {
     for (var categoria in categoriasList) {
       await upsertCategoria(db, categoria);
     }
+    await setSeedVersion(db, currentVersion + 1);
+  }
+  if (currentVersion < 2) {
+    await migrateMovimientosAmount(db);
     await setSeedVersion(db, currentVersion + 1);
   }
 }

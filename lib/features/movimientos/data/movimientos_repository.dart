@@ -150,9 +150,9 @@ class MovimientosRepository implements _MovimientosRepository {
     for (var movimiento in movimientos) {
       if (_isSameMonth(movimiento.date, date)) {
         if (movimiento.type == TipoMovimiento.ingreso) {
-          totalIngresos += movimiento.ammount;
+          totalIngresos += movimiento.amount;
         } else if (movimiento.type == TipoMovimiento.gasto) {
-          totalGastos += movimiento.ammount;
+          totalGastos += movimiento.amount;
         }
       }
     }
@@ -169,9 +169,9 @@ class MovimientosRepository implements _MovimientosRepository {
     for (var movimiento in movimientosMesPasado) {
       if (_isSameMonth(movimiento.date, mesPasado)) {
         if (movimiento.type == TipoMovimiento.ingreso) {
-          totalIngresos += movimiento.ammount;
+          totalIngresos += movimiento.amount;
         } else if (movimiento.type == TipoMovimiento.gasto) {
-          totalGastos += movimiento.ammount;
+          totalGastos += movimiento.amount;
         }
       }
     }

@@ -8,7 +8,7 @@ class Movimiento {
   final String title;
   final int categoryID;
   final TipoMovimiento type;
-  final double ammount;
+  final double amount;
   final DateTime date;
   final TimeOfDay time;
   final String note;
@@ -18,7 +18,7 @@ class Movimiento {
     required this.title,
     required this.categoryID,
     required this.type,
-    required this.ammount,
+    required this.amount,
     required this.date,
     required this.time,
     this.note = '',
@@ -29,7 +29,7 @@ class Movimiento {
     String? title,
     int? categoryID,
     TipoMovimiento? type,
-    double? ammount,
+    double? amount,
     DateTime? date,
     TimeOfDay? time,
     String? note,
@@ -39,7 +39,7 @@ class Movimiento {
       title: title ?? this.title,
       categoryID: categoryID ?? this.categoryID,
       type: type ?? this.type,
-      ammount: ammount ?? this.ammount,
+      amount: amount ?? this.amount,
       date: date ?? this.date,
       time: time ?? this.time,
       note: note ?? this.note,
@@ -55,7 +55,7 @@ class Movimiento {
       type: map['type'] == 'ingreso'
           ? TipoMovimiento.ingreso
           : TipoMovimiento.gasto,
-      ammount: map['ammount'],
+      amount: map['amount'],
       date: DateTime.parse(map['date']),
       time: TimeOfDay(
         hour: int.parse(map['time'].split(':')[0]),
@@ -71,7 +71,7 @@ class Movimiento {
       'title': title,
       'category_id': categoryID,
       'type': type == TipoMovimiento.ingreso ? 'ingreso' : 'gasto',
-      'ammount': ammount,
+      'amount': amount,
       'date': DateFormat('yyyy-MM-dd').format(date),
       'time': '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
       'note': note,
@@ -81,6 +81,6 @@ class Movimiento {
   // Funtion for debugging purposes
   @override
   String toString() {
-    return 'Movimiento{id: $id, title: $title, categoryID: $categoryID, type: $type, ammount: $ammount, date: $date, time: $time, note: $note}';
+    return 'Movimiento{id: $id, title: $title, categoryID: $categoryID, type: $type, amount: $amount, date: $date, time: $time, note: $note}';
   }
 }

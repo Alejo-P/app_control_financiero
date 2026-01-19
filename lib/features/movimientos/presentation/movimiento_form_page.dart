@@ -46,7 +46,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     categoriasFiltradas = [];
 
     if (widget.mode == MovimientoFormMode.edit && widget.movimiento != null) {
-      _amountController.text = widget.movimiento!.ammount.toString();
+      _amountController.text = widget.movimiento!.amount.toString();
       _noteController.text = widget.movimiento!.note;
       _titleController.text = widget.movimiento!.title;
       categoryId = widget.movimiento!.categoryID;
@@ -188,7 +188,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       title: titleText,
       categoryID: categoryId,
       type: tipoMovimiento,
-      ammount: amount,
+      amount: amount,
       date: selectedDate,
       time: TimeOfDay.now(),
       note: noteText,

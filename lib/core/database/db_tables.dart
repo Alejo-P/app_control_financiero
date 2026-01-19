@@ -21,6 +21,15 @@ class CategoriasTable {
   static const isDefault = 'is_default';
 }
 
+class PresupuestosTable {
+  static const table = 'presupuestos';
+
+  static const id = 'id';
+  static const categoryId = 'category_id';
+  static const date = 'date';
+  static const amount = 'amount';
+}
+
 class MovimientosTable {
   static const table = 'movimientos';
 
@@ -28,7 +37,7 @@ class MovimientosTable {
   static const title = 'title';
   static const categoryId = 'category_id';
   static const type = 'type';
-  static const ammount = 'ammount';
+  static const amount = 'amount';
   static const date = 'date';
   static const time = 'time';
   static const note = 'note';
@@ -94,11 +103,23 @@ Future<void> createTables(Database db) async {
         ${MovimientosTable.title} TEXT NOT NULL,
         ${MovimientosTable.categoryId} INTEGER NOT NULL,
         ${MovimientosTable.type} TEXT NOT NULL,
-        ${MovimientosTable.ammount} REAL NOT NULL,
+        ${MovimientosTable.amount} REAL NOT NULL,
         ${MovimientosTable.date} TEXT NOT NULL,
         ${MovimientosTable.time} TEXT NOT NULL,
         ${MovimientosTable.note} TEXT DEFAULT '',
         FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
+      )
+    ''');
+  }
+
+  if (!existingTableNames.contains(PresupuestosTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${PresupuestosTable.table} (
+        ${PresupuestosTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${PresupuestosTable.categoryId} INTEGER NOT NULL,
+        ${PresupuestosTable.date} TEXT NOT NULL,
+        ${PresupuestosTable.amount} REAL NOT NULL,
+        FOREIGN KEY(${PresupuestosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
       )
     ''');
   }
