@@ -93,9 +93,8 @@ class MovimientosRepository implements _MovimientosRepository {
 
   @override
   Future<int> fetchMovimientoCountByCategory(int categoryId) async {
-    final cantidadMovimientos = await localDataSource.fetchMovimientoCountByCategory(
-      categoryId,
-    );
+    final cantidadMovimientos = await localDataSource
+        .fetchMovimientoCountByCategory(categoryId);
     return cantidadMovimientos;
   }
 
@@ -105,11 +104,7 @@ class MovimientosRepository implements _MovimientosRepository {
     DateTime date,
   ) {
     final filteredMovements = movimientos
-        .where(
-          (m) =>
-              m.categoryID == categoryId &&
-              _isSameMonth(m.date, date),
-        )
+        .where((m) => m.categoryID == categoryId && _isSameMonth(m.date, date))
         .toList();
     return filteredMovements;
   }

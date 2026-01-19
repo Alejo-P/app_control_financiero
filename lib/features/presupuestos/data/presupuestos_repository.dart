@@ -48,7 +48,8 @@ class PresupuestosRepository implements _PresupuestosRepository {
 
   @override
   Future<OperationResult<void>> updatePresupuesto(
-      Presupuesto presupuesto) async {
+    Presupuesto presupuesto,
+  ) async {
     final result = await localDatasource.updatePresupuesto(presupuesto);
     if (result.success) {
       final index = presupuestos.indexWhere((p) => p.id == presupuesto.id);
