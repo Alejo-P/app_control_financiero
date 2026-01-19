@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/presupuestos/widgets/total_budget_summary_card.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -25,13 +26,38 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     _appState = context.read<AppState>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _appState.clearAppBarActions();
+      _appState.setAppBarActions([
+        AppBarAction(
+          icon: Icons.add,
+          tooltip: 'Nuevo presupuesto',
+          onPressed: () {
+            Navigator.pushNamed(
+              context,
+              '/agregar_presupuesto',
+            );
+          },
+        ),
+      ]);
     });
+  }
+
+  Map<String, dynamic> getCategoryDetailsById(int categoryId) {
+    final categoria = _appState.getCategoriaById(categoryId);
+    final gastosAcumulados = _appState.getGastoAcumuladoPorCategoriaEnMes(
+      categoryId,
+    );
+    return {
+      'name': categoria?.name ?? 'Categoría Desconocida',
+      'icon': categoria?.iconData ?? Icons.category,
+      'iconColor': categoria?.iconColor ?? Colors.grey,
+      'spent': gastosAcumulados,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final presupuestos = appState.presupuestos;
 
     // Indicador de carga para el mes seleccionado
     final isLoading = appState.isLoadingBudget;
@@ -65,7 +91,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                     message:
                         'Cargando datos de presupuesto para\n ${formatMonthYear(selectedMonth)}...',
                   )
-                : false // TODO: Aquí iría la condición para verificar si hay presupuestos
+                : presupuestos.isEmpty
                 ? _EmptyPresupuestos()
                 : SingleChildScrollView(
                     child: Column(
@@ -85,45 +111,24 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                         SizedBox(height: 20),
                         Text(
                           'Categorías',
+                          textAlign: TextAlign.left,
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         SizedBox(height: 8),
                         Divider(),
-                        CategoryCard(
-                          icon: Icons.home,
-                          title: 'Vivienda',
-                          spent: 950,
-                          total: 1000,
-                          color: Colors.blue,
-                        ),
-                        CategoryCard(
-                          icon: Icons.restaurant,
-                          title: 'Alimentación',
-                          spent: 380,
-                          total: 500,
-                          color: Colors.orange,
-                        ),
-                        CategoryCard(
-                          icon: Icons.directions_car,
-                          title: 'Transporte',
-                          spent: 120,
-                          total: 200,
-                          color: Colors.green,
-                        ),
-                        CategoryCard(
-                          icon: Icons.sports_esports,
-                          title: 'Ocio',
-                          spent: 154.5,
-                          total: 200,
-                          color: Colors.purple,
-                        ),
-                        CategoryCard(
-                          icon: Icons.shopping_cart,
-                          title: 'Compras',
-                          spent: 200,
-                          total: 250,
-                          color: Colors.red,
-                        ),
+                        ...presupuestos.map((presupuesto) {
+                          final categoryDetails = getCategoryDetailsById(
+                            presupuesto.categoryId,
+                          );
+
+                          return CategoryCard(
+                            icon: categoryDetails['icon'],
+                            title: categoryDetails['name'],
+                            spent: categoryDetails['spent'],
+                            total: presupuesto.amount,
+                            color: categoryDetails['iconColor'],
+                          );
+                        }),
                       ],
                     ),
                   ),
@@ -150,7 +155,7 @@ class _EmptyPresupuestos extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'No hay movimientos para ${formatMonthYear(selectedMonth)}.',
+            'No hay presupuestos para ${formatMonthYear(selectedMonth)}.',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),

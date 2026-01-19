@@ -1,0 +1,1 @@
+enum PresupuestoFormMode { create, edit }

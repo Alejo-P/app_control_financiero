@@ -5,7 +5,7 @@ import 'package:control_financiero/features/presupuestos/models/presupuesto.dart
 abstract class _PresupuestosRepository {
   ///Obtiene la lista de presupuestos.
   ///@return Una lista de objetos Presupuesto.
-  Future<List<Presupuesto>> fetchPresupuestos();
+  Future<List<Presupuesto>> fetchPresupuestosByMonthAndYear(DateTime date);
 
   /// Agrega un nuevo presupuesto.
   /// @param presupuesto El objeto Presupuesto a agregar.
@@ -30,10 +30,10 @@ class PresupuestosRepository implements _PresupuestosRepository {
   PresupuestosRepository(this.localDatasource);
 
   @override
-  Future<List<Presupuesto>> fetchPresupuestos() async {
+  Future<List<Presupuesto>> fetchPresupuestosByMonthAndYear(DateTime date) async {
     // Aquí podrías agregar lógica adicional si es necesario
     return await localDatasource.fetchPresupuestosByMonthAndYear(
-      DateTime.now(),
+      date,
     );
   }
 

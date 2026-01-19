@@ -5,6 +5,8 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
+import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
+import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +41,13 @@ class AppState extends ChangeNotifier {
   final MovimientosRepository _movimientosRepository;
   final CategoriasRepository _categoriasRepository;
   final TipoCategoriaRepository _tipoCategoriaRepository;
+  final PresupuestosRepository _presupuestosRepository;
 
   AppState(
     this._movimientosRepository,
     this._categoriasRepository,
     this._tipoCategoriaRepository,
+    this._presupuestosRepository,
   );
 
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
@@ -66,6 +70,8 @@ class AppState extends ChangeNotifier {
       _tipoCategoriaRepository.tipoCategorias;
   List<Movimiento> get movimientos => _movimientosRepository.movimientos;
 
+  List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
+
   String transactionResultMessage = '';
   bool transactionSuccess = false;
   bool loadingInitialData = true;
@@ -76,6 +82,7 @@ class AppState extends ChangeNotifier {
       _tipoCategoriaRepository.fetchTipoCategorias(),
       _categoriasRepository.fetchCategorias(),
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
+      loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
     ]);
     await loadCategoryData(notify: false);
     loadingInitialData = false;
@@ -106,6 +113,11 @@ class AppState extends ChangeNotifier {
 
     _uniqueMovementDates = _fetchUniqueMovementDates();
 
+    if (notify) notifyListeners();
+  }
+
+  Future<void> loadPresupuestosByMonthAndYear(DateTime date, {bool notify = true}) async {
+    await _presupuestosRepository.fetchPresupuestosByMonthAndYear(date);
     if (notify) notifyListeners();
   }
 
@@ -234,6 +246,24 @@ class AppState extends ChangeNotifier {
     return ((actual.ahorro - anterior.ahorro) / anterior.ahorro) * 100;
   }
 
+  // Obtener el acumulado de gastos para una categoria en el mes seleccionado
+  double getGastoAcumuladoPorCategoriaEnMes(int categoriaId) {
+    final movimientosCategoria = getMovimientosByCategoriaId(categoriaId);
+
+    final gastosEnMes = movimientosCategoria.where((m) {
+      return m.type == TipoMovimiento.gasto &&
+          m.date.year == selectedMovementsMonth.year &&
+          m.date.month == selectedMovementsMonth.month;
+    }).toList();
+
+    final totalGastos = gastosEnMes.fold<double>(
+      0.0,
+      (sum, m) => sum + m.amount,
+    );
+
+    return totalGastos;
+  }
+
   void setDarkMode(bool value) {
     isDarkMode = value;
     notifyListeners();
@@ -263,10 +293,7 @@ class AppState extends ChangeNotifier {
     _isLoadingBudget = true;
     notifyListeners();
 
-    // Aquí podrías cargar datos relacionados con el presupuesto si es necesario
-
-    // Como ejemplo, simulamos una carga con un retraso
-    await Future.delayed(const Duration(milliseconds: 500));
+    await loadPresupuestosByMonthAndYear(month);
 
     _isLoadingBudget = false;
     notifyListeners();
@@ -335,6 +362,34 @@ class AppState extends ChangeNotifier {
     transactionSuccess = result.success;
     if (result.success == true) {
       await loadCategoryData();
+    }
+  }
+
+  // ================================ PRESUPUESTOS CRUD =================================
+  Future<void> agregarPresupuesto(Presupuesto presupuesto) async {
+    final result = await _presupuestosRepository.addPresupuesto(presupuesto);
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success == true) {
+      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+    }
+  }
+
+  Future<void> actualizarPresupuesto(Presupuesto presupuesto) async {
+    final result = await _presupuestosRepository.updatePresupuesto(presupuesto);
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success == true) {
+      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+    }
+  }
+
+  Future<void> eliminarPresupuesto(int id) async {
+    final result = await _presupuestosRepository.deletePresupuesto(id);
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success == true) {
+      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
     }
   }
 }

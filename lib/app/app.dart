@@ -1,11 +1,15 @@
 import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
+import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
+import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
+import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:flutter/material.dart';
@@ -32,11 +36,16 @@ class App extends StatelessWidget {
       TipoCategoriaLocalDataSource(),
     );
 
+    final presupuestosRepository = PresupuestosRepository(
+      PresupuestosLocalDataSource(),
+    );
+
     return ChangeNotifierProvider(
       create: (_) => AppState(
         movimientosRepository,
         categoriasRepository,
         tipoCategoriasRepository,
+        presupuestosRepository,
       )..loadInitialData(),
       child: Consumer<AppState>(
         builder: (context, appState, _) {
@@ -51,6 +60,8 @@ class App extends StatelessWidget {
                   const MovimientoFormPage(mode: MovimientoFormMode.create),
               '/agregar_categoria': (_) =>
                   const CategoriaFormPage(mode: CategoriaFormMode.create),
+              '/agregar_presupuesto': (_) =>
+                  const PresupuestoFormPage(mode: PresupuestoFormMode.create),
             },
           );
         },
