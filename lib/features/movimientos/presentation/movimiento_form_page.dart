@@ -133,11 +133,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    final currentDay = DateTime.now();
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
+      firstDate: DateTime(currentDay.year - 3),
+      lastDate: DateTime(currentDay.year, currentDay.month, currentDay.day),
     );
 
     if (picked != null && picked != selectedDate) {
