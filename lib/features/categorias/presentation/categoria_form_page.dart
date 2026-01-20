@@ -263,7 +263,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                 },
               ),
 
-            if (!isDefault && _hasUnsavedChanges)
+            if (!isDefault)
               IconButton(
                 icon: const Icon(Icons.check, color: Colors.green),
                 tooltip: 'Guardar',
