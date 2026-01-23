@@ -89,3 +89,13 @@ DateTime getLastDayOfMonth(DateTime date) {
       : DateTime(date.year + 1, 1, 1);
   return beginningNextMonth.subtract(const Duration(days: 1));
 }
+
+// Funcion que genere una lista de años desde una fecha inicial hasta el limite especificado
+List<int> generateYearList(int startYear, int numberOfYears) {
+  // Verificar que la lista no exceda los 10 elementos
+  if (numberOfYears > 10) {
+    numberOfYears = 10;
+  }
+  
+  return List<int>.generate(numberOfYears, (i) => startYear + i);
+}

@@ -1,5 +1,7 @@
 import 'package:control_financiero/core/constants/presupuesto_constants.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
+import 'package:control_financiero/features/presupuestos/widgets/custom_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 
@@ -15,8 +17,26 @@ class PresupuestoFormPage extends StatefulWidget {
 
 class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   final _hasUnsavedChanges = false;
+  final meses = monthNames;
+  final anios = generateYearList(DateTime.now().year, 10);
+  late String mesSeleccionado;
+  late int anioSeleccionado;
 
-   Future<bool> _onWillPop() async {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.mode == PresupuestoFormMode.edit &&
+        widget.presupuesto != null) {
+      mesSeleccionado = getMonthName(widget.presupuesto!.date);
+      anioSeleccionado = widget.presupuesto!.date.year;
+    } else {
+      final now = DateTime.now();
+      mesSeleccionado = getMonthName(now);
+      anioSeleccionado = now.year;
+    }
+  }
+
+  Future<bool> _onWillPop() async {
     if (!_hasUnsavedChanges) return true;
 
     final shouldLeave = await showConfirmDialog(
@@ -46,13 +66,49 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                //TODO Implementar formulario de presupuesto
-                child: Center(
-                  child: Text(
-                    widget.mode == PresupuestoFormMode.create
-                        ? 'Formulario para crear un nuevo presupuesto.'
-                        : 'Formulario para editar el presupuesto existente.',
-                    style: const TextStyle(fontSize: 18),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Periodo del presupuesto',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Selecciona el mes y año',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomDropdown<String>(
+                            hintText: 'Mes',
+                            items: meses,
+                            selectedItem: mesSeleccionado,
+                            onChanged: (value) {
+                              setState(() => mesSeleccionado = value!);
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          CustomDropdown<int>(
+                            hintText: 'Año',
+                            items: anios,
+                            selectedItem: anioSeleccionado,
+                            onChanged: (value) {
+                              setState(() => anioSeleccionado = value!);
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),

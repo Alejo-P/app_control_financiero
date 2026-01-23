@@ -34,6 +34,7 @@ class BalanceSummaryCard extends StatelessWidget {
           ),
         ),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(4),
@@ -64,13 +65,15 @@ class BalanceSummaryCard extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: 6),
-            Text(
-              'en ahorros desde el mes pasado',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Comparado con el mes anterior',
+                style: TextStyle(
+                  color: Colors.grey[200],
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
           ],

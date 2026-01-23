@@ -31,6 +31,7 @@ class TransactionDetailCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconContainer(
               icon: icon,
@@ -57,6 +58,7 @@ class TransactionDetailCard extends StatelessWidget {
               ),
             ),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   type == 'Ingreso'
@@ -72,6 +74,7 @@ class TransactionDetailCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   time.format(context),
+                  textAlign: TextAlign.right,
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
