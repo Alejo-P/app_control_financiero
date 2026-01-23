@@ -20,10 +20,11 @@ class CustomDropdown<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: DropdownButtonFormField<T>(
+        isExpanded: true,
         value: selectedItem,
         items: items
             .map(
-              (item) => DropdownMenuItem(
+              (item) => DropdownMenuItem<T>(
                 value: item,
                 child: Text(
                   itemLabelBuilder != null
@@ -44,7 +45,9 @@ class CustomDropdown<T> extends StatelessWidget {
       hintText: hintText,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
     );
   }
 }

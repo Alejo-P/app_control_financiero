@@ -1,6 +1,6 @@
 import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/features/categorias/widgets/color_container.dart';
-import 'package:control_financiero/features/categorias/widgets/grid_container.dart';
+import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:flutter/material.dart';
 
 class ColorsSingleChildScroll extends StatelessWidget {
