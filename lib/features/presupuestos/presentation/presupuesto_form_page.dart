@@ -1,5 +1,6 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/presupuesto_constants.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -64,6 +65,11 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final categorias = appState.categorias;
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final [r, g, b] = getRGBFromColor(colorScheme.primary);
+    final primaryColorWithOpacity = Color.fromRGBO(r, g, b, 0.1);
 
     if (categorias.isEmpty) {
       return Scaffold(
@@ -179,7 +185,15 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                       ),
                       const SizedBox(height: 12),
                       Card(
-                        color: Colors.grey[100],
+                        color: primaryColorWithOpacity,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          side: BorderSide(
+                            color: colorScheme.primary,
+                            width: 1.0,
+                          ),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Row(
@@ -201,7 +215,16 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                     'Disponible para este presupuesto',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.grey[700],
+                                      color: colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '(Basado en tus ingresos)',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.primary,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -210,23 +233,10 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                 ],
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Basado en tus ingresos',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[500],
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
                               ),
                             ],
                           ),
