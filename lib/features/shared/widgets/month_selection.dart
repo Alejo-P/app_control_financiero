@@ -38,8 +38,8 @@ class _MonthSelectionState extends State<MonthSelection> {
     final now = DateTime.now();
     // Limite de solo 3 años en el pasado
     final limitDate = DateTime(now.year - 3, now.month);
-    return (selectedDate.year < limitDate.year) ||
-        (selectedDate.year == limitDate.year && selectedDate.month < limitDate.month);
+    return (selectedDate.year == limitDate.year) &&
+        (selectedDate.month == limitDate.month);
   }
 
   void changeMonth(int offset) {
