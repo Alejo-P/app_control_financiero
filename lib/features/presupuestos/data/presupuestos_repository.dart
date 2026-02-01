@@ -1,8 +1,21 @@
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
+import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 
 abstract class _PresupuestosRepository {
+  /// Obtiene el ingreso presupuestado para un mes y año específicos.
+  /// @param date La fecha que contiene el mes y año deseados.
+  /// @return El objeto IngresoPresupuestado correspondiente.
+  Future<IngresoPresupuestado> fetchIngresosPresupuestadosByMonthAndYear(
+    DateTime date,
+  );
+
+  /// Agrega o actualiza un ingreso presupuestado.
+  /// @param ingreso El objeto IngresoPresupuestado a agregar o actualizar.
+  /// @return Un OperationResult que indica el resultado de la operación y el ID del ingreso presupuestado si fue exitoso.
+  Future<OperationResult<int>> upsertIngresoPresupuestado(IngresoPresupuestado ingreso);
+
   ///Obtiene la lista de presupuestos.
   ///@return Una lista de objetos Presupuesto.
   Future<List<Presupuesto>> fetchPresupuestosByMonthAndYear(DateTime date);
@@ -30,11 +43,22 @@ class PresupuestosRepository implements _PresupuestosRepository {
   PresupuestosRepository(this.localDatasource);
 
   @override
-  Future<List<Presupuesto>> fetchPresupuestosByMonthAndYear(DateTime date) async {
-    // Aquí podrías agregar lógica adicional si es necesario
-    return await localDatasource.fetchPresupuestosByMonthAndYear(
-      date,
-    );
+  Future<IngresoPresupuestado> fetchIngresosPresupuestadosByMonthAndYear(
+    DateTime date,
+  ) async {
+    return await localDatasource.fetchIngresosPresupuestadosByMonthAndYear(date);
+  }
+
+  @override
+  Future<OperationResult<int>> upsertIngresoPresupuestado(IngresoPresupuestado ingreso) async {
+    return await localDatasource.upsertIngresoPresupuestado(ingreso);
+  }
+
+  @override
+  Future<List<Presupuesto>> fetchPresupuestosByMonthAndYear(
+    DateTime date,
+  ) async {
+    return await localDatasource.fetchPresupuestosByMonthAndYear(date);
   }
 
   @override

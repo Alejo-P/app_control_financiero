@@ -153,6 +153,14 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Presupuesto? getPresupuestoByCategoriaId(int categoriaId) {
+    try {
+      return presupuestos.firstWhere((p) => p.categoryId == categoriaId);
+    } catch (e) {
+      return null;
+    }
+  }
+
   // Obtener todas las fechas únicas de movimientos
   List<DateTime> _fetchUniqueMovementDates() {
     final dates = movimientos

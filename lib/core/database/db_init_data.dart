@@ -113,4 +113,7 @@ Future<void> runSeeds(Database db) async {
     await migrateMovimientosAmount(db);
     await setSeedVersion(db, currentVersion + 1);
   }
+  if (currentVersion < 3) {
+    await setSeedVersion(db, currentVersion + 1);
+  }
 }

@@ -36,6 +36,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   late IconData selectedIcon;
   bool _hasUnsavedChanges = false;
   bool isDefault = false;
+  bool isEditing = false;
   int categoryTypeID = -1;
   String categoryTypeName = 'Sin seleccionar';
   String selectedTipeMovement = 'gasto';
@@ -67,14 +68,17 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           ? 'ingreso'
           : 'gasto';
       isDefault = categoria.isDefault;
+      isEditing = true;
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final appState = context.read<AppState>();
         final tipoCategoria = appState.getCategoryTypeById(categoryTypeID);
         if (tipoCategoria == null) return;
 
-        final movementsCount = await appState.countMovementsByCategory(categoria.id!);
-        
+        final movementsCount = await appState.countMovementsByCategory(
+          categoria.id!,
+        );
+
         setState(() {
           categoryTypeName = tipoCategoria.name;
           movementsByCategory = movementsCount;
@@ -167,7 +171,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     });
 
     final categoria = Categoria(
-      id: widget.mode == CategoriaFormMode.edit &&
+      id:
+          widget.mode == CategoriaFormMode.edit &&
               widget.categoriaExistente != null
           ? widget.categoriaExistente!.id
           : null,
@@ -196,16 +201,17 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     }
   }
 
-  Future <void> _eliminarCategoria() async {
+  Future<void> _eliminarCategoria() async {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Eliminar categoría',
-      content:
-          '¿Estás seguro de que deseas eliminar esta categoría?',
+      content: '¿Estás seguro de que deseas eliminar esta categoría?',
     );
     if (confirmed != true) return;
 
-    await context.read<AppState>().eliminarCategoria(widget.categoriaExistente!.id!);
+    await context.read<AppState>().eliminarCategoria(
+      widget.categoriaExistente!.id!,
+    );
 
     if (mounted) {
       if (!context.read<AppState>().transactionSuccess) {
@@ -248,8 +254,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
             widget.mode == CategoriaFormMode.create
                 ? 'Agregar Categoría'
                 : isDefault
-                    ? 'Ver Categoría'
-                    : 'Editar Categoría',
+                ? 'Ver Categoría'
+                : 'Editar Categoría',
           ),
           actions: [
             if (widget.mode == CategoriaFormMode.edit &&
@@ -294,8 +300,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                                 _openIconColorPickerModal(context);
                               },
                             ),
-                            if (!isDefault)
-                            ...[
+                            if (!isDefault) ...[
                               const SizedBox(height: 8),
                               Text(
                                 "Toca el ícono para cambiar",
@@ -330,10 +335,13 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                       ),
                       WidgetsContainer(
                         title: 'Opciones adicionales',
+                        description: !isEditing
+                            ? 'Configura opciones adicionales para esta categoría.'
+                            : 'No puedes cambiar estas opciones para categorías predeterminadas o al editar.',
                         children: [
                           InkWell(
                             onTap: () {
-                              if (isDefault) return;
+                              if (isDefault || isEditing) return;
                               _openTipoCategoriasModal(context);
                             },
                             borderRadius: BorderRadius.circular(12),
@@ -342,12 +350,12 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                               categoryIcon: Icons.category,
                               iconColor: Colors.blue,
                               currentValue: categoryTypeName,
-                              showArrow: !isDefault,
+                              showArrow: (!isDefault && !isEditing),
                             ),
                           ),
                           InkWell(
                             onTap: () {
-                              if (isDefault) return;
+                              if (isDefault || isEditing) return;
                               _onChangeTipoMovimiento(
                                 selectedTipeMovement == 'gasto'
                                     ? 'ingreso'
@@ -366,7 +374,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                               currentValue: selectedTipeMovement == 'gasto'
                                   ? 'Gasto'
                                   : 'Ingreso',
-                              showArrow: !isDefault,
+                              showArrow: (!isDefault && !isEditing),
                             ),
                           ),
                         ],
@@ -374,13 +382,13 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                       if (movementsByCategory > 0)
                         WidgetsContainer(
                           title: 'Movimientos asociados',
-                          description: 'Esta categoría tiene movimientos asociados.\nPara eliminarla, primero elimina o reasigna esos movimientos.',
+                          description:
+                              'Esta categoría tiene movimientos asociados.\nPara eliminarla, primero elimina o reasigna esos movimientos.',
                           backgroundColor: Colors.orange.shade50,
                           borderColor: Colors.orange,
                           children: [
                             DetailCategoryCard(
-                              categoryName:
-                                  'Cantidad de movimientos asociados',
+                              categoryName: 'Cantidad de movimientos asociados',
                               categoryIcon: Icons.list_alt,
                               iconColor: Colors.purple,
                               currentValue:
@@ -390,7 +398,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           ],
                         ),
 
-                      if (widget.mode == CategoriaFormMode.edit )
+                      if (widget.mode == CategoriaFormMode.edit)
                         InfoCategoriaPredeterminada(isDefault: isDefault),
                     ],
                   ),

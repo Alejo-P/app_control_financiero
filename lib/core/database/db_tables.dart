@@ -43,6 +43,14 @@ class MovimientosTable {
   static const note = 'note';
 }
 
+class IngresoPresupuestadoTable {
+  static const table = 'ingreso_presupuestado';
+
+  static const id = 'id';
+  static const amount = 'amount';
+  static const date = 'date';
+}
+
 class MetaTable {
   static const table = 'meta';
 
@@ -80,6 +88,16 @@ Future<void> createTables(Database db) async {
     ''');
   }
 
+  if (!existingTableNames.contains(IngresoPresupuestadoTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${IngresoPresupuestadoTable.table} (
+        ${IngresoPresupuestadoTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${IngresoPresupuestadoTable.amount} REAL NOT NULL,
+        ${IngresoPresupuestadoTable.date} TEXT NOT NULL
+      );
+    ''');
+  }
+
   if (!existingTableNames.contains(CategoriasTable.table)) {
     await db.execute('''
       CREATE TABLE ${CategoriasTable.table} (
@@ -108,7 +126,7 @@ Future<void> createTables(Database db) async {
         ${MovimientosTable.time} TEXT NOT NULL,
         ${MovimientosTable.note} TEXT DEFAULT '',
         FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
-      )
+      );
     ''');
   }
 
@@ -120,7 +138,7 @@ Future<void> createTables(Database db) async {
         ${PresupuestosTable.date} TEXT NOT NULL,
         ${PresupuestosTable.amount} REAL NOT NULL,
         FOREIGN KEY(${PresupuestosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
-      )
+      );
     ''');
   }
 }
