@@ -28,7 +28,8 @@ class TransactionsContainer extends StatelessWidget {
     final appState = context.watch<AppState>();
     final formattedDate = formatRelativeDateWithMonth(date);
     final totalAmount = movimientos.fold<double>(0.0, (total, mov) {
-      return mov.type == TipoMovimiento.gasto
+      final categoria = appState.getCategoriaById(mov.categoryID);
+      return categoria!.movementType == TipoMovimiento.gasto
           ? total - mov.amount
           : total + mov.amount;
     });
@@ -48,7 +49,7 @@ class TransactionsContainer extends StatelessWidget {
         return TransactionDetailCard(
           title: movimiento.title,
           category: categoria!.name,
-          type: _getTypeName(movimiento.type),
+          type: _getTypeName(categoria.movementType),
           spent: movimiento.amount,
           icon: categoria.iconData,
           iconColor: Color(categoria.iconColorValue),

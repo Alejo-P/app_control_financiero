@@ -2,6 +2,8 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:sqflite/sqflite.dart';
@@ -28,12 +30,14 @@ class MovimientosLocalDataSource {
   // Obtener cantidad de movimientos por categoría
   Future<int> fetchMovimientoCountByCategory(int categoryId) async {
     final db = await _dbHelper.database;
-    final int count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM ${MovimientosTable.table} WHERE ${MovimientosTable.categoryId} = ?',
-        [categoryId],
-      ),
-    ) ?? 0;
+    final int count =
+        Sqflite.firstIntValue(
+          await db.rawQuery(
+            'SELECT COUNT(*) FROM ${MovimientosTable.table} WHERE ${MovimientosTable.categoryId} = ?',
+            [categoryId],
+          ),
+        ) ??
+        0;
 
     return count;
   }
@@ -52,44 +56,44 @@ class MovimientosLocalDataSource {
     return maps.map(Movimiento.fromMap).toList();
   }
 
-  // Obtener movimientos por fecha y tipo
-  Future<List<Movimiento>> fetchMovimientosByDateAndType(
-    DateTime date,
-    TipoMovimiento type,
-  ) async {
-    final db = await _dbHelper.database;
-    final String dateString = date.toIso8601String().split('T')[0];
-    final List<Map<String, dynamic>> maps = await db.query(
-      MovimientosTable.table,
-      where:
-          "date(${MovimientosTable.date}) = ? AND ${MovimientosTable.type} = ?",
-      whereArgs: [dateString, type.name],
-      orderBy: '${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC',
-    );
-
-    return maps.map(Movimiento.fromMap).toList();
-  }
-
   // Obtener ingresos y gastos totales para una fecha dada
   Future<TotalesMensuales> fetchTotalesMensuales(DateTime date) async {
     double ingresos = 0.0;
     double gastos = 0.0;
 
-    final db = await _dbHelper.database;
-    final String dateString = date.toIso8601String().split('T')[0];
-    final List<Map<String, dynamic>> maps = await db.query(
-      MovimientosTable.table,
-      where: "strftime('%Y-%m', ${MovimientosTable.date}) = ?",
-      whereArgs: [dateString.substring(0, 7)],
-    );
+    try {
+      final db = await _dbHelper.database;
+      final String yearMonth = date.toIso8601String().substring(0, 7);
+      final List<Map<String, dynamic>> result = await db.rawQuery(
+        '''
+          SELECT
+            m.id AS id,
+            m.title AS titulo,
+            m.amount AS monto,
+            m.date as fecha,
+            m.note AS nota,
+            c.name AS categoria,
+            c.movement_type AS tipoMovimiento
+          FROM movimientos m
+          JOIN categorias c ON m.category_id = c.id
+          WHERE strftime('%Y-%m', m.date) = ?
+        ''',
+        [yearMonth],
+      );
 
-    for (final map in maps) {
-      final movimiento = Movimiento.fromMap(map);
-      if (movimiento.type == TipoMovimiento.ingreso) {
-        ingresos += movimiento.amount;
-      } else {
-        gastos += movimiento.amount;
+      for (final map in result) {
+        final detalleMovimento = DetalleMovimiento.fromMap(map);
+        if (detalleMovimento.tipoMovimiento == TipoMovimiento.ingreso) {
+          ingresos += detalleMovimento.monto;
+        } else {
+          gastos += detalleMovimento.monto;
+        }
       }
+    } on Exception catch (e) {
+      AppLogger.log(
+        'Error al calcular totales mensuales: $e',
+        level: LogLevel.error,
+      );
     }
 
     return TotalesMensuales(ingresos: ingresos, gastos: gastos);

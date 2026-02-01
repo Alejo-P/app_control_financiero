@@ -133,6 +133,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   }
 
   Future<void> _guardarCategoria() async {
+    final appState = context.read<AppState>();
     final nombre = _categoryNameController.text.trim();
     final descripcion = _descriptionController.text.trim();
 
@@ -187,21 +188,22 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     if (widget.mode == CategoriaFormMode.edit &&
         widget.categoriaExistente != null) {
-      await context.read<AppState>().actualizarCategoria(categoria);
+      await appState.actualizarCategoria(categoria);
     } else {
-      await context.read<AppState>().agregarCategoria(categoria);
+      await appState.agregarCategoria(categoria);
     }
 
-    if (mounted) {
-      AppSnackbar.success(
-        context,
-        context.read<AppState>().transactionResultMessage,
-      );
-      Navigator.pop(context, true);
-    }
+    if (!mounted) return;
+
+    AppSnackbar.success(
+      context,
+      appState.transactionResultMessage,
+    );
+    Navigator.pop(context, true);
   }
 
   Future<void> _eliminarCategoria() async {
+    final appState = context.read<AppState>();
     final confirmed = await showConfirmDialog(
       context,
       title: 'Eliminar categoría',
@@ -209,24 +211,25 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     );
     if (confirmed != true) return;
 
-    await context.read<AppState>().eliminarCategoria(
+    await appState.eliminarCategoria(
       widget.categoriaExistente!.id!,
     );
 
-    if (mounted) {
-      if (!context.read<AppState>().transactionSuccess) {
-        AppSnackbar.error(
-          context,
-          context.read<AppState>().transactionResultMessage,
-        );
-        return;
-      }
-      AppSnackbar.success(
+    if (!mounted) return;
+
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(
         context,
-        context.read<AppState>().transactionResultMessage,
+        appState.transactionResultMessage,
       );
-      Navigator.pop(context, true);
+      return;
     }
+    
+    AppSnackbar.success(
+      context,
+      appState.transactionResultMessage,
+    );
+    Navigator.pop(context, true);
   }
 
   Future<bool> _onWillPop() async {

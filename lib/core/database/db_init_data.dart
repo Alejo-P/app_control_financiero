@@ -116,4 +116,8 @@ Future<void> runSeeds(Database db) async {
   if (currentVersion < 3) {
     await setSeedVersion(db, currentVersion + 1);
   }
+  if (currentVersion < 4) {
+    await migrateMovimientosTable(db);
+    await setSeedVersion(db, currentVersion + 1);
+  }
 }

@@ -20,6 +20,22 @@ class CategoriasLocalDataSource {
     return maps.map(Categoria.fromMap).toList();
   }
 
+  // Obtener una categoría por su ID
+  Future<Categoria?> fetchCategoriaById(int id) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      CategoriasTable.table,
+      where: '${CategoriasTable.id} = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Categoria.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
   // Agregar una nueva categoría
   Future<OperationResult<int>> addCategoria(Categoria categoria) async {
     final db = await _dbHelper.database;

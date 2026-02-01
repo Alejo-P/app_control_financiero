@@ -36,7 +36,6 @@ class MovimientosTable {
   static const id = 'id';
   static const title = 'title';
   static const categoryId = 'category_id';
-  static const type = 'type';
   static const amount = 'amount';
   static const date = 'date';
   static const time = 'time';
@@ -120,7 +119,6 @@ Future<void> createTables(Database db) async {
         ${MovimientosTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
         ${MovimientosTable.title} TEXT NOT NULL,
         ${MovimientosTable.categoryId} INTEGER NOT NULL,
-        ${MovimientosTable.type} TEXT NOT NULL,
         ${MovimientosTable.amount} REAL NOT NULL,
         ${MovimientosTable.date} TEXT NOT NULL,
         ${MovimientosTable.time} TEXT NOT NULL,

@@ -26,7 +26,6 @@ class MovimientoFormPage extends StatefulWidget {
 }
 
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
-  late AppState _appState;
   int categoryId = -1;
   int movementId = 0;
   String categoryName = 'Sin categoría';
@@ -64,7 +63,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       _titleController.text = widget.movimiento!.title;
       categoryId = widget.movimiento!.categoryID;
       selectedDate = widget.movimiento!.date;
-      tipoMovimiento = widget.movimiento!.type;
       movementId = widget.movimiento!.id!;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -75,6 +73,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
         setState(() {
           categoryName = category.name;
+          tipoMovimiento = category.movementType;
         });
       });
     }
@@ -150,6 +149,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   Future<void> _guardarMovimiento() async {
+    final appState = context.read<AppState>();
     final amountText = _amountController.text.trim();
     final noteText = _noteController.text.trim();
     final amount = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
@@ -201,7 +201,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       id: widget.mode == MovimientoFormMode.edit ? movementId : null,
       title: titleText,
       categoryID: categoryId,
-      type: tipoMovimiento,
       amount: amount,
       date: selectedDate,
       time: TimeOfDay.now(),
@@ -209,21 +208,22 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     );
 
     if (widget.mode == MovimientoFormMode.edit) {
-      await context.read<AppState>().actualizarMovimiento(movimiento);
+      await appState.actualizarMovimiento(movimiento);
     } else {
-      await context.read<AppState>().agregarMovimiento(movimiento);
+      await appState.agregarMovimiento(movimiento);
     }
 
-    if (mounted) {
-      AppSnackbar.success(
-        context,
-        context.read<AppState>().transactionResultMessage,
-      );
-      Navigator.pop(context, true);
-    }
+    if (!mounted) return;
+
+    AppSnackbar.success(
+      context,
+      appState.transactionResultMessage,
+    );
+    Navigator.pop(context, true);
   }
 
   Future<void> _eliminarMovimiento() async {
+    final appState = context.read<AppState>();
     final confirmed = await showConfirmDialog(
       context,
       title: 'Eliminar movimiento',
@@ -231,15 +231,15 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     );
     if (confirmed != true) return;
 
-    await context.read<AppState>().eliminarMovimiento(movementId);
+    await appState.eliminarMovimiento(movementId);
 
-    if (mounted) {
-      AppSnackbar.success(
-        context,
-        context.read<AppState>().transactionResultMessage,
-      );
-      Navigator.pop(context, true);
-    }
+    if (!mounted) return;
+
+    AppSnackbar.success(
+      context,
+      appState.transactionResultMessage,
+    );
+    Navigator.pop(context, true);
   }
 
   Future<bool> _onWillPop() async {

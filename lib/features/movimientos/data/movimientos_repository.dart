@@ -1,5 +1,7 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
@@ -28,24 +30,15 @@ abstract class _MovimientosRepository {
   /// @return Una lista de objetos Movimiento.
   List<Movimiento> fetchMovimientosByDate(DateTime date);
 
-  /// Obtener movimientos por fecha y tipo
-  /// @param date La fecha para filtrar los movimientos.
-  /// @param type El tipo de movimiento (ingreso o gasto).
-  /// @return Una lista de objetos Movimiento.
-  List<Movimiento> fetchMovimientosByDateAndType(
-    DateTime date,
-    TipoMovimiento type,
-  );
-
   /// Obtener totales mensuales (ingresos y gastos) para una fecha dada
   /// @param date La fecha para la cual se desean los totales.
   /// @return Un objeto TotalesMensuales con los totales de ingresos y gastos.
-  TotalesMensuales fetchTotalesMensuales(DateTime date);
+  Future<TotalesMensuales> fetchTotalesMensuales(DateTime date);
 
   /// Obtener totales mensuales (ingresos y gastos) para el mes pasado de una fecha dada
   /// @param date La fecha para la cual se desean los totales del mes pasado.
   /// @return Un objeto TotalesMensuales con los totales de ingresos y gastos del mes pasado.
-  TotalesMensuales fetchTotalesMensualesMesPasado(DateTime date);
+  Future<TotalesMensuales> fetchTotalesMensualesMesPasado(DateTime date);
 
   /// Agrega un nuevo movimiento financiero.
   /// @param movimiento El objeto Movimiento a agregar.
@@ -65,6 +58,8 @@ abstract class _MovimientosRepository {
 
 class MovimientosRepository implements _MovimientosRepository {
   final MovimientosLocalDataSource localDataSource;
+  final CategoriasLocalDataSource _categoriasLocalDataSource =
+      CategoriasLocalDataSource();
   final List<Movimiento> movimientos = [];
 
   // Para calculos de totales mensuales se conservara una lista de los movimientos del mes pasado
@@ -122,53 +117,63 @@ class MovimientosRepository implements _MovimientosRepository {
   }
 
   @override
-  List<Movimiento> fetchMovimientosByDateAndType(
-    DateTime date,
-    TipoMovimiento type,
-  ) {
-    return movimientos
-        .where(
-          (m) =>
-              m.date.year == date.year &&
-              m.date.month == date.month &&
-              m.date.day == date.day &&
-              m.type == type,
-        )
-        .toList();
-  }
-
-  @override
-  TotalesMensuales fetchTotalesMensuales(DateTime date) {
+  Future<TotalesMensuales> fetchTotalesMensuales(DateTime date) async {
     double totalIngresos = 0.0;
     double totalGastos = 0.0;
 
-    for (var movimiento in movimientos) {
-      if (_isSameMonth(movimiento.date, date)) {
-        if (movimiento.type == TipoMovimiento.ingreso) {
-          totalIngresos += movimiento.amount;
-        } else if (movimiento.type == TipoMovimiento.gasto) {
-          totalGastos += movimiento.amount;
+    try {
+      for (var movimiento in movimientos) {
+        if (_isSameMonth(movimiento.date, date)) {
+          // Aquí se asume que los ingresos son positivos y los gastos negativos
+          final categoria = await _categoriasLocalDataSource.fetchCategoriaById(
+            movimiento.categoryID,
+          );
+          if (categoria != null) {
+            if (categoria.movementType == TipoMovimiento.ingreso) {
+              totalIngresos += movimiento.amount;
+            } else if (categoria.movementType == TipoMovimiento.gasto) {
+              totalGastos += movimiento.amount;
+            }
+          }
         }
       }
+    } on Exception catch (e) {
+      AppLogger.log(
+        'Error al calcular totales mensuales: $e',
+        level: LogLevel.error,
+      );
     }
 
     return TotalesMensuales(ingresos: totalIngresos, gastos: totalGastos);
   }
 
   @override
-  TotalesMensuales fetchTotalesMensualesMesPasado(DateTime date) {
+  Future<TotalesMensuales> fetchTotalesMensualesMesPasado(DateTime date) async {
     double totalIngresos = 0.0;
     double totalGastos = 0.0;
     DateTime mesPasado = DateTime(date.year, date.month - 1);
 
-    for (var movimiento in movimientosMesPasado) {
-      if (_isSameMonth(movimiento.date, mesPasado)) {
-        if (movimiento.type == TipoMovimiento.ingreso) {
-          totalIngresos += movimiento.amount;
-        } else if (movimiento.type == TipoMovimiento.gasto) {
-          totalGastos += movimiento.amount;
+    try {
+      for (var movimiento in movimientosMesPasado) {
+        if (_isSameMonth(movimiento.date, mesPasado)) {
+          // Aquí se asume que los ingresos son positivos y los gastos negativos
+          final categoria = await _categoriasLocalDataSource.fetchCategoriaById(
+            movimiento.categoryID,
+          );
+          if (categoria != null) {
+            if (categoria.movementType == TipoMovimiento.ingreso) {
+              totalIngresos += movimiento.amount;
+            } else if (categoria.movementType == TipoMovimiento.gasto) {
+              totalGastos += movimiento.amount;
+            }
+          }
         }
       }
+    } on Exception catch (e) {
+      AppLogger.log(
+        'Error al calcular totales mensuales mes pasado: $e',
+        level: LogLevel.error,
+      );
     }
 
     return TotalesMensuales(ingresos: totalIngresos, gastos: totalGastos);
