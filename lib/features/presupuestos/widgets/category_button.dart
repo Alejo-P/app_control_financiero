@@ -24,16 +24,12 @@ class CategoryButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        color: isSelected
-            ? Color.fromRGBO(r, g, b, 0.1)
-            : Colors.transparent,
+        color: isSelected ? Color.fromRGBO(r, g, b, 0.1) : Colors.transparent,
         shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
           side: BorderSide(
-            color: isSelected
-                ? colorScheme.primary
-                : Colors.grey[400]!,
+            color: isSelected ? colorScheme.primary : Colors.grey[400]!,
             width: 1.0,
           ),
         ),
@@ -41,19 +37,31 @@ class CategoryButton extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                icon,
-                size: 40,
-                color: isSelected
-                    ? colorScheme.primary
-                    : Colors.grey[600],
+              Center(
+                child: Icon(
+                  icon,
+                  size: 40,
+                  color: isSelected ? colorScheme.primary : Colors.grey[600],
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: true,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: isSelected
+                          ? colorScheme.primary
+                          : Colors.grey[800],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

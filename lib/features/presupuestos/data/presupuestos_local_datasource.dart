@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 
@@ -19,6 +20,10 @@ class PresupuestosLocalDataSource {
       where: "date(${IngresoPresupuestadoTable.date}) = ?",
       whereArgs: [dateString],
     );
+
+    if (maps.isEmpty) {
+      return IngresoPresupuestado(monto: 0.0, fecha: date);
+    }
 
     return IngresoPresupuestado.fromMap(maps.first);
   }
@@ -126,7 +131,9 @@ class PresupuestosLocalDataSource {
   }
 
   // Actualizar un presupuesto existente
-  Future<OperationResult<void>> updatePresupuesto(Presupuesto presupuesto) async {
+  Future<OperationResult<void>> updatePresupuesto(
+    Presupuesto presupuesto,
+  ) async {
     final db = await _dbHelper.database;
     final int count = await db.update(
       PresupuestosTable.table,

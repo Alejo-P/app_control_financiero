@@ -6,8 +6,8 @@ import 'package:control_financiero/features/shared/widgets/summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
-import '../../shared/widgets/month_selection.dart';
-import '../widgets/category_card.dart';
+import 'package:control_financiero/features/shared/widgets/month_selection.dart';
+import 'package:control_financiero/features/presupuestos/widgets/category_card.dart';
 
 class PresupuestosPage extends StatefulWidget {
   const PresupuestosPage({super.key});
@@ -64,7 +64,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
 
     // Obtener el mes seleccionado
     final selectedMonth = appState.selectedBudgetMonth;
-
+    final ingresoPresupuestado = appState.ingresoPresupuestado;
     if (appState.loadingInitialData) {
       return LoadingScreen(message: 'Cargando datos de presupuesto...');
     }
@@ -103,7 +103,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             icon: Icons.calendar_month,
                             backgroundColor: Colors.teal,
                             content: TotalBudgetSummaryCard(
-                              totalBudget: 2000,
+                              totalBudget: ingresoPresupuestado?.monto ?? 0.0,
                               spentAmount: 1766.50,
                             ),
                           ),

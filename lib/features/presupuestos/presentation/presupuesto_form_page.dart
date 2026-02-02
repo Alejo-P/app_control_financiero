@@ -1,7 +1,13 @@
+import 'package:control_financiero/app/app.dart';
+import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
+import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/widgets/category_button.dart';
@@ -27,20 +33,36 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   late String mesSeleccionado;
   late int anioSeleccionado;
   late int categoriaSeleccionada;
+  late IngresoPresupuestado ingresoPresupuestado;
+  final _presupuestoAmountController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    late AppState appState;
     categoriaSeleccionada = -1;
+    ingresoPresupuestado = context.read<AppState>().ingresoPresupuestado!;
     if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
       mesSeleccionado = getMonthName(widget.presupuesto!.date);
       anioSeleccionado = widget.presupuesto!.date.year;
       categoriaSeleccionada = widget.presupuesto!.categoryId;
+      _presupuestoAmountController.text = widget.presupuesto!.amount.toString();
     } else {
       final now = DateTime.now();
       mesSeleccionado = getMonthName(now);
       anioSeleccionado = now.year;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      appState = context.read<AppState>();
+      final fechaPresupuesto = DateTime(
+        anioSeleccionado,
+        meses.indexOf(mesSeleccionado) + 1,
+      );
+      ingresoPresupuestado = await appState
+          .getIngresoPresupuestadoByMonthAndYear(fechaPresupuesto);
+      _presupuestoAmountController.text =
+          ingresoPresupuestado.monto.toString();
+    });
   }
 
   Future<bool> _onWillPop() async {
@@ -61,10 +83,47 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     });
   }
 
+  List<Categoria> get categoriasTipoGasto {
+    final appState = context.read<AppState>();
+    return appState.categorias
+        .where((cat) => cat.movementType == TipoMovimiento.gasto)
+        .toList();
+  }
+
+  Future<void> _guardarIngresoPresupuesto() async {
+    // Lógica para guardar el ingreso presupuestado
+    final amountText = _presupuestoAmountController.text.trim();
+    final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+
+    final nuevoIngresoPresupuestado = IngresoPresupuestado(
+      monto: value,
+      fecha: DateTime(anioSeleccionado, meses.indexOf(mesSeleccionado) + 1),
+    );
+
+    setState(() {
+      ingresoPresupuestado = nuevoIngresoPresupuestado;
+    });
+
+    // 🔥 opcional: guardar en AppState / DB
+    await context.read<AppState>().setIngresoPresupuestado(
+      nuevoIngresoPresupuestado,
+    );
+
+    if (!mounted) return;
+
+    AppSnackbar.success(context, 'Ingreso presupuestado guardado correctamente');
+
+    Navigator.pop(context, true);
+  }
+
+  Future<void> _guardarPresupuesto() async {
+    // Lógica para guardar el presupuesto
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
-    final categorias = appState.categorias;
+    final categorias = categoriasTipoGasto;
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -198,7 +257,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                           padding: const EdgeInsets.all(12.0),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.wallet_rounded,
@@ -209,7 +268,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
-
                                 children: [
                                   Text(
                                     'Disponible para este presupuesto',
@@ -229,7 +287,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '\$0.00',
+                                    '\$${ingresoPresupuestado.monto.toStringAsFixed(2)}',
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -237,6 +295,15 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                     ),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: _mostrarModalIngresoPresupuestado,
+                                child: Icon(
+                                  Icons.edit,
+                                  size: 30,
+                                  color: colorScheme.primary,
+                                ),
                               ),
                             ],
                           ),
@@ -250,6 +317,45 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _mostrarModalIngresoPresupuestado() async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Ingreso presupuestado'),
+          content: SizedBox(
+            height: 100,
+            child: AmountInput(
+              controller: _presupuestoAmountController,
+            ),
+          ),
+          
+          
+          
+          
+          // TextField(
+          //   controller: controller,
+          //   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          //   decoration: const InputDecoration(
+          //     labelText: 'Monto',
+          //     prefixIcon: Icon(Icons.attach_money),
+          //   ),
+          // ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: _guardarIngresoPresupuesto,
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

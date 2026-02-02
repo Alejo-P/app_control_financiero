@@ -6,6 +6,7 @@ import 'package:control_financiero/features/movimientos/data/movimientos_reposit
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
+import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
@@ -53,12 +54,13 @@ class AppState extends ChangeNotifier {
   MovimientoFiltro get movimientoFiltro => _movimientoFiltro;
 
   TotalesMensuales? _totalesMensuales;
+  IngresoPresupuestado? _ingresoPresupuestado;
   double? _variacionAhorro;
   List<DateTime> _uniqueMovementDates = [];
   Map<DateTime, List<Movimiento>> _movimientosPorFecha = {};
   List<String> _uniqueTipeCategoryNames = [];
-
   TotalesMensuales? get totalesMensuales => _totalesMensuales;
+  IngresoPresupuestado? get ingresoPresupuestado => _ingresoPresupuestado;
   double? get variacionAhorro => _variacionAhorro;
   List<DateTime> get uniqueMovementDates => _uniqueMovementDates;
   List<String> get uniqueTipeCategoryNames => _uniqueTipeCategoryNames;
@@ -115,8 +117,13 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  Future<void> loadPresupuestosByMonthAndYear(DateTime date, {bool notify = true}) async {
+  Future<void> loadPresupuestosByMonthAndYear(
+    DateTime date, {
+    bool notify = true,
+  }) async {
     await _presupuestosRepository.fetchPresupuestosByMonthAndYear(date);
+    _ingresoPresupuestado = await _presupuestosRepository
+        .fetchIngresosPresupuestadosByMonthAndYear(date);
     if (notify) notifyListeners();
   }
 
@@ -124,6 +131,25 @@ class AppState extends ChangeNotifier {
     return await _movimientosRepository.fetchMovimientoCountByCategory(
       categoryId,
     );
+  }
+
+  Future<IngresoPresupuestado> getIngresoPresupuestadoByMonthAndYear(
+    DateTime date,
+  ) async {
+    return await _presupuestosRepository
+        .fetchIngresosPresupuestadosByMonthAndYear(date);
+  }
+
+  Future<void> setIngresoPresupuestado(IngresoPresupuestado ingreso) async {
+    final result = await _presupuestosRepository.upsertIngresoPresupuestado(
+      ingreso,
+    );
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success && result.data != null) {
+      _ingresoPresupuestado = ingreso.copyWith(id: result.data!);
+      notifyListeners();
+    }
   }
 
   void changeMovimientoFiltro(MovimientoFiltro filtro) {
@@ -225,8 +251,10 @@ class AppState extends ChangeNotifier {
     return movimientos
         .where(
           (m) => filtro == MovimientoFiltro.ingresos
-              ? getTipoMovimientoByCategoriaId(m.categoryID) == TipoMovimiento.ingreso
-              : getTipoMovimientoByCategoriaId(m.categoryID) == TipoMovimiento.gasto,
+              ? getTipoMovimientoByCategoriaId(m.categoryID) ==
+                    TipoMovimiento.ingreso
+              : getTipoMovimientoByCategoriaId(m.categoryID) ==
+                    TipoMovimiento.gasto,
         )
         .toList();
   }
@@ -248,10 +276,11 @@ class AppState extends ChangeNotifier {
 
   // Calcular la variacion de ahorro entre dos meses
   Future<double?> calcularVariacionAhorro(DateTime mesActual) async {
-    final actual = await _movimientosRepository.fetchTotalesMensuales(mesActual);
-    final anterior = await _movimientosRepository.fetchTotalesMensualesMesPasado(
+    final actual = await _movimientosRepository.fetchTotalesMensuales(
       mesActual,
     );
+    final anterior = await _movimientosRepository
+        .fetchTotalesMensualesMesPasado(mesActual);
 
     if (anterior.ahorro == 0) return null;
 
@@ -263,7 +292,8 @@ class AppState extends ChangeNotifier {
     final movimientosCategoria = getMovimientosByCategoriaId(categoriaId);
 
     final gastosEnMes = movimientosCategoria.where((m) {
-      return getTipoMovimientoByCategoriaId(m.categoryID) == TipoMovimiento.gasto &&
+      return getTipoMovimientoByCategoriaId(m.categoryID) ==
+              TipoMovimiento.gasto &&
           m.date.year == selectedMovementsMonth.year &&
           m.date.month == selectedMovementsMonth.month;
     }).toList();
