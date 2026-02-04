@@ -219,7 +219,19 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!mounted) return;
 
-    AppSnackbar.success(context, appState.transactionResultMessage);
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(
+        context,
+        appState.transactionResultMessage,
+      );
+      return;
+    }
+    
+    AppSnackbar.success(
+      context,
+      appState.transactionResultMessage,
+    );
+    
     Navigator.pop(context, true);
   }
 
@@ -236,7 +248,19 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!mounted) return;
 
-    AppSnackbar.success(context, appState.transactionResultMessage);
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(
+        context,
+        appState.transactionResultMessage,
+      );
+      return;
+    }
+    
+    AppSnackbar.success(
+      context,
+      appState.transactionResultMessage,
+    );
+
     Navigator.pop(context, true);
   }
 

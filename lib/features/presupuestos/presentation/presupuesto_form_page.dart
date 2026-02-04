@@ -30,38 +30,32 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   final _hasUnsavedChanges = false;
   final meses = monthNames;
   final anios = generateYearList(DateTime.now().year, 10);
-  late String mesSeleccionado;
-  late int anioSeleccionado;
+  late DateTime fechaPresupuesto;
   late int categoriaSeleccionada;
   late IngresoPresupuestado ingresoPresupuestado;
   final _presupuestoAmountController = TextEditingController();
+  final _ingresoPresupuestadoController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     late AppState appState;
     categoriaSeleccionada = -1;
+    fechaPresupuesto = DateTime.now();
+    _ingresoPresupuestadoController.text = '';
+    _presupuestoAmountController.text = '';
     ingresoPresupuestado = context.read<AppState>().ingresoPresupuestado!;
     if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
-      mesSeleccionado = getMonthName(widget.presupuesto!.date);
-      anioSeleccionado = widget.presupuesto!.date.year;
       categoriaSeleccionada = widget.presupuesto!.categoryId;
       _presupuestoAmountController.text = widget.presupuesto!.amount.toString();
-    } else {
-      final now = DateTime.now();
-      mesSeleccionado = getMonthName(now);
-      anioSeleccionado = now.year;
-    }
+    } 
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       appState = context.read<AppState>();
-      final fechaPresupuesto = DateTime(
-        anioSeleccionado,
-        meses.indexOf(mesSeleccionado) + 1,
-      );
+      fechaPresupuesto = appState.selectedBudgetMonth;
       ingresoPresupuestado = await appState
           .getIngresoPresupuestadoByMonthAndYear(fechaPresupuesto);
-      _presupuestoAmountController.text =
-          ingresoPresupuestado.monto.toString();
+      _ingresoPresupuestadoController.text = ingresoPresupuestado.monto.toString();
     });
   }
 
@@ -92,12 +86,13 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
   Future<void> _guardarIngresoPresupuesto() async {
     // Lógica para guardar el ingreso presupuestado
-    final amountText = _presupuestoAmountController.text.trim();
+    final appState = context.read<AppState>();
+    final amountText = _ingresoPresupuestadoController.text.trim();
     final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
 
     final nuevoIngresoPresupuestado = IngresoPresupuestado(
       monto: value,
-      fecha: DateTime(anioSeleccionado, meses.indexOf(mesSeleccionado) + 1),
+      fecha: fechaPresupuesto,
     );
 
     setState(() {
@@ -105,13 +100,24 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     });
 
     // 🔥 opcional: guardar en AppState / DB
-    await context.read<AppState>().setIngresoPresupuestado(
+      await appState.setIngresoPresupuestado(
       nuevoIngresoPresupuestado,
     );
 
     if (!mounted) return;
 
-    AppSnackbar.success(context, 'Ingreso presupuestado guardado correctamente');
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(
+        context,
+        appState.transactionResultMessage,
+      );
+      return;
+    }
+    
+    AppSnackbar.success(
+      context,
+      appState.transactionResultMessage,
+    );
 
     Navigator.pop(context, true);
   }
@@ -180,32 +186,27 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Selecciona el mes y año',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 12),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CustomDropdown<String>(
-                            hintText: 'Mes',
-                            items: meses,
-                            selectedItem: mesSeleccionado,
-                            onChanged: (value) {
-                              setState(() => mesSeleccionado = value!);
-                            },
+                          Expanded(
+                            child: const Text(
+                              'Ajustando el presupuesto para la siguiente fecha:',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
-                          const SizedBox(width: 12),
-                          CustomDropdown<int>(
-                            hintText: 'Año',
-                            items: anios,
-                            selectedItem: anioSeleccionado,
-                            onChanged: (value) {
-                              setState(() => anioSeleccionado = value!);
-                            },
+                          const SizedBox(width: 8),
+                          Text(
+                            formatMonthYear(fechaPresupuesto),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -224,7 +225,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                       const Text(
                         'Asigna un presupuesto a una categoría específica',
                         textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                       const SizedBox(height: 12),
                       // Aquí iría el listado de categorías con campos para ingresar el monto del presupuesto
@@ -309,6 +310,10 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
+                      AmountInput(
+                        controller: _presupuestoAmountController,
+                      ),
                     ],
                   ),
                 ),
@@ -328,14 +333,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
           title: const Text('Ingreso presupuestado'),
           content: SizedBox(
             height: 100,
-            child: AmountInput(
-              controller: _presupuestoAmountController,
-            ),
+            child: AmountInput(controller: _ingresoPresupuestadoController),
           ),
-          
-          
-          
-          
+
           // TextField(
           //   controller: controller,
           //   keyboardType: const TextInputType.numberWithOptions(decimal: true),

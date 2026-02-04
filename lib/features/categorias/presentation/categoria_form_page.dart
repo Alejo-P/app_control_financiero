@@ -195,10 +195,19 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     if (!mounted) return;
 
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(
+        context,
+        appState.transactionResultMessage,
+      );
+      return;
+    }
+    
     AppSnackbar.success(
       context,
       appState.transactionResultMessage,
     );
+    
     Navigator.pop(context, true);
   }
 
