@@ -29,6 +29,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   int categoryId = -1;
   int movementId = 0;
   String categoryName = 'Sin categoría';
+  TimeOfDay movementTime = TimeOfDay.now();
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
   bool _hasUnsavedChanges = false;
   late DateTime selectedDate;
@@ -50,7 +51,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         final appState = context.read<AppState>();
         final selectedMonth = normalizeDate(appState.selectedMovementsMonth);
         if (isCurrentMonth(selectedMonth)) return;
-        
+
         setState(() {
           selectedDate = selectedMonth;
         });
@@ -63,6 +64,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       _titleController.text = widget.movimiento!.title;
       categoryId = widget.movimiento!.categoryID;
       selectedDate = widget.movimiento!.date;
+      movementTime = widget.movimiento!.time;
       movementId = widget.movimiento!.id!;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -203,7 +205,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       categoryID: categoryId,
       amount: amount,
       date: selectedDate,
-      time: TimeOfDay.now(),
+      time: widget.mode == MovimientoFormMode.edit
+          ? movementTime
+          : TimeOfDay.now(),
       note: noteText,
     );
 
@@ -215,10 +219,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!mounted) return;
 
-    AppSnackbar.success(
-      context,
-      appState.transactionResultMessage,
-    );
+    AppSnackbar.success(context, appState.transactionResultMessage);
     Navigator.pop(context, true);
   }
 
@@ -235,10 +236,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!mounted) return;
 
-    AppSnackbar.success(
-      context,
-      appState.transactionResultMessage,
-    );
+    AppSnackbar.success(context, appState.transactionResultMessage);
     Navigator.pop(context, true);
   }
 
