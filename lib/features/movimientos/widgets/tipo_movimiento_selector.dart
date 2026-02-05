@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 class TipoMovimientoSelector extends StatefulWidget {
   final TipoMovimiento tipoMovimiento;
   final ValueChanged<TipoMovimiento>? onChanged;
-  
+
   const TipoMovimientoSelector({
-    super.key, this.tipoMovimiento = TipoMovimiento.gasto,
-    this.onChanged
+    super.key,
+    required this.tipoMovimiento,
+    this.onChanged,
   });
 
   @override
@@ -22,7 +23,10 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
   @override
   void initState() {
     super.initState();
-    tipoMovimiento = widget.tipoMovimiento;
+    
+    setState(() {
+      tipoMovimiento = widget.tipoMovimiento;
+    });
   }
 
   @override
@@ -30,18 +34,15 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
     final theme = Theme.of(context);
     final themeColors = theme.colorScheme;
     final [r, g, b] = getRGBFromColor(themeColors.onSurface);
-    
+    debugPrint('TipoMovimientoSelector - build - tipoMovimiento: $tipoMovimiento');
+
     return Container(
       height: 50,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: themeColors.surface,
         borderRadius: BorderRadius.circular(borderRadiusValue),
-        boxShadow: [
-          BoxShadow(
-            color: Color.fromRGBO(r, g, b, 0.15),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Color.fromRGBO(r, g, b, 0.15))],
       ),
       child: Row(
         children: [

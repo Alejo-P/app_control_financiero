@@ -11,7 +11,6 @@ import 'package:control_financiero/features/presupuestos/models/ingreso_presupue
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/widgets/category_button.dart';
-import 'package:control_financiero/features/presupuestos/widgets/custom_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +26,7 @@ class PresupuestoFormPage extends StatefulWidget {
 }
 
 class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
-  final _hasUnsavedChanges = false;
+  bool _hasUnsavedChanges = false;
   final meses = monthNames;
   final anios = generateYearList(DateTime.now().year, 10);
   late DateTime fechaPresupuesto;
@@ -42,9 +41,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     late AppState appState;
     categoriaSeleccionada = -1;
     fechaPresupuesto = DateTime.now();
-    _ingresoPresupuestadoController.text = '';
-    _presupuestoAmountController.text = '';
-    ingresoPresupuestado = context.read<AppState>().ingresoPresupuestado!;
+      fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
     if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
       categoriaSeleccionada = widget.presupuesto!.categoryId;
       _presupuestoAmountController.text = widget.presupuesto!.amount.toString();
@@ -52,11 +49,39 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       appState = context.read<AppState>();
-      fechaPresupuesto = appState.selectedBudgetMonth;
       ingresoPresupuestado = await appState
           .getIngresoPresupuestadoByMonthAndYear(fechaPresupuesto);
-      _ingresoPresupuestadoController.text = ingresoPresupuestado.monto.toString();
+      _ingresoPresupuestadoController.text = ingresoPresupuestado.monto > 0
+          ? ingresoPresupuestado.monto.toString()
+          : '';
     });
+
+    _presupuestoAmountController.addListener(_markAsDirty);
+    _ingresoPresupuestadoController.addListener(_markAsDirty);
+  }
+
+  @override
+  void dispose() {
+    _presupuestoAmountController.dispose();
+    _ingresoPresupuestadoController.dispose();
+    super.dispose();
+  }
+
+  void _markAsDirty() {
+    // Si el campo esta vacío, no marcar como sucio
+    if (_presupuestoAmountController.text.isEmpty &&
+        _ingresoPresupuestadoController.text.isEmpty) {
+      setState(() {
+        _hasUnsavedChanges = false;
+      });
+      return;
+    }
+
+    if (!_hasUnsavedChanges) {
+      setState(() {
+        _hasUnsavedChanges = true;
+      });
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -79,6 +104,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
   List<Categoria> get categoriasTipoGasto {
     final appState = context.read<AppState>();
+    final totalPresupuesto = appState.totalIngresoPresupuestado ?? 0.0;
     return appState.categorias
         .where((cat) => cat.movementType == TipoMovimiento.gasto)
         .toList();
@@ -277,15 +303,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                       color: colorScheme.primary,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    '(Basado en tus ingresos)',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: colorScheme.primary,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
                                   const SizedBox(height: 4),
                                   Text(
                                     '\$${ingresoPresupuestado.monto.toStringAsFixed(2)}',
@@ -311,6 +328,14 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
+                      const Text(
+                        'Monto del presupuesto',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       AmountInput(
                         controller: _presupuestoAmountController,
                       ),

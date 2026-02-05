@@ -1,34 +1,47 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:flutter/material.dart';
 
 /// Modelo que representa el detalle de un movimiento financiero.
 class DetalleMovimiento {
   final int? id;
-  final String titulo;
-  final double monto;
-  final TipoMovimiento tipoMovimiento;
-  final DateTime fecha;
-  final String nota;
+  final String title;
+  final double amount;
+  final TipoMovimiento movementType;
+  final DateTime date;
+  final String? categoryName;
+  final int? categoryId;
+  final TimeOfDay? time;
+  final String note;
 
   DetalleMovimiento({
     this.id,
-    required this.titulo,
-    required this.monto,
-    required this.tipoMovimiento,
-    required this.fecha,
-    this.nota = '',
+    required this.title,
+    required this.amount,
+    required this.movementType,
+    required this.date,
+    this.categoryName,
+    this.categoryId,
+    this.time,
+    this.note = '',
   });
 
   // Factory constructor para crear un DetalleMovimiento desde un mapa (por ejemplo, desde una base de datos)
   factory DetalleMovimiento.fromMap(Map<String, dynamic> map) {
     return DetalleMovimiento(
       id: map['id'] != null ? map['id'] as int : null,
-      titulo: map['titulo'],
-      monto: map['monto'],
-      tipoMovimiento: map['tipoMovimiento'] == 'ingreso'
+      title: map['titulo'],
+      amount: map['monto'],
+      movementType: map['tipoMovimiento'] == 'ingreso'
           ? TipoMovimiento.ingreso
           : TipoMovimiento.gasto,
-      fecha: DateTime.parse(map['fecha']),
-      nota: map['nota'],
+      date: DateTime.parse(map['fecha']),
+      note: map['nota'],
+      categoryName: map['categoria'] != null ? map['categoria'] as String : null,
+      time: map['hora'] != null ? TimeOfDay(
+        hour: int.parse(map['time'].split(':')[0]),
+        minute: int.parse(map['time'].split(':')[1]),
+      ) : null,
+      categoryId: map['categoriaId'] != null ? map['categoriaId'] as int : null,
     );
   }
 }

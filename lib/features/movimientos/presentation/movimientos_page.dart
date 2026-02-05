@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
+import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/movimientos/widgets/balance_summary_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/category_chip.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
@@ -34,7 +35,15 @@ class _MovimientosPageState extends State<MovimientosPage> {
           icon: Icons.add,
           tooltip: 'Nuevo movimiento',
           onPressed: () {
-            Navigator.pushNamed(context, '/agregar_movimiento');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MovimientoFormPage(
+                  mode: MovimientoFormMode.create,
+                  fechaInicial: _appState.selectedMovementsMonth,
+                ),
+              ),
+            );
           },
         ),
       ]);
@@ -52,12 +61,13 @@ class _MovimientosPageState extends State<MovimientosPage> {
     final selectedMonth = appState.selectedMovementsMonth;
 
     // Obtener totales de ingresos y gastos del mes seleccionado
-    final totalMesActual = appState.totalesMensuales ??
+    final totalMesActual =
+        appState.totalesMensuales ??
         TotalesMensuales(ingresos: 0.0, gastos: 0.0);
 
     // Obtener el porcentaje de variación respecto al mes anterior
     final variationPercent = appState.variacionAhorro;
-    
+
     // Filtro de movimientos seleccionado
     MovimientoFiltro selectedFilter = appState.movimientoFiltro;
 
@@ -65,11 +75,11 @@ class _MovimientosPageState extends State<MovimientosPage> {
     final fechasMovimientos = appState.uniqueMovementDates;
 
     final movimientosFiltradosDelMes = fechasMovimientos
-    .expand((fecha) => appState.getMovimientosByDateAndFilter(
-          fecha,
-          selectedFilter,
-        ))
-    .toList();
+        .expand(
+          (fecha) =>
+              appState.getMovimientosByDateAndFilter(fecha, selectedFilter),
+        )
+        .toList();
 
     final categories = [
       MovimientoFiltro.todos,
@@ -78,9 +88,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
     ];
 
     if (appState.loadingInitialData) {
-      return LoadingScreen(
-        message: 'Cargando datos de movimientos...',
-      );
+      return LoadingScreen(message: 'Cargando datos de movimientos...');
     }
 
     return Padding(
@@ -98,75 +106,79 @@ class _MovimientosPageState extends State<MovimientosPage> {
           Expanded(
             child: isLoading
                 ? LoadingScreen(
-                    message: 'Cargando movimientos para\n ${formatMonthYear(selectedMonth)}...',
-                )
+                    message:
+                        'Cargando movimientos para\n ${formatMonthYear(selectedMonth)}...',
+                  )
                 : fechasMovimientos.isEmpty
                 ? _EmptyMovimientos()
                 : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 210,
-                    child: SummaryCard(
-                      title: 'Balance Mensual (${formatMonthYear(selectedMonth)})',
-                      icon: Icons.account_balance,
-                      backgroundColor: Colors.blue,
-                      content: BalanceSummaryCard(
-                        ammountIncome: totalMesActual.ingresos,
-                        ammountExpense: totalMesActual.gastos,
-                        variationPercent: variationPercent ?? 0.0,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          height: 210,
+                          child: SummaryCard(
+                            title:
+                                'Balance Mensual (${formatMonthYear(selectedMonth)})',
+                            icon: Icons.account_balance,
+                            backgroundColor: Colors.blue,
+                            content: BalanceSummaryCard(
+                              ammountIncome: totalMesActual.ingresos,
+                              ammountExpense: totalMesActual.gastos,
+                              variationPercent: variationPercent ?? 0.0,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        SizedBox(
+                          height: 35,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: categories.length,
+                            separatorBuilder: (context, index) =>
+                                SizedBox(width: 8),
+                            itemBuilder: (context, index) {
+                              final filtro = categories[index];
+
+                              return CategoryChip(
+                                label: filtro.label,
+                                selected: filtro == selectedFilter,
+                                icon: filtro.icon,
+                                iconColor: filtro.color,
+                                onTap: () {
+                                  appState.changeMovimientoFiltro(filtro);
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        if (movimientosFiltradosDelMes.isEmpty &&
+                            selectedFilter != MovimientoFiltro.todos)
+                          _EmptyFilteredMovimientos(filtro: selectedFilter)
+                        else
+                          // Lista de movimientos agrupados por fecha
+                          ...fechasMovimientos.map((fecha) {
+                            // Filtrar movimientos por fecha y filtro seleccionado
+                            final movimientosFiltrados = appState
+                                .getMovimientosByDateAndFilter(
+                                  fecha,
+                                  selectedFilter,
+                                );
+
+                            if (movimientosFiltrados.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return TransactionsContainer(
+                              date: fecha,
+                              movimientos: movimientosFiltrados,
+                            );
+                          }),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 8),
-                  SizedBox(
-                    height: 35,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: categories.length,
-                      separatorBuilder: (context, index) => SizedBox(width: 8),
-                      itemBuilder: (context, index) {
-                        final filtro = categories[index];
-
-                        return CategoryChip(
-                          label: filtro.label,
-                          selected: filtro == selectedFilter,
-                          icon: filtro.icon,
-                          iconColor: filtro.color,
-                          onTap: () {
-                            appState.changeMovimientoFiltro(filtro);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  if (movimientosFiltradosDelMes.isEmpty &&
-                      selectedFilter != MovimientoFiltro.todos)
-                    _EmptyFilteredMovimientos(filtro: selectedFilter)
-                  else
-                  // Lista de movimientos agrupados por fecha
-                  ...fechasMovimientos.map((fecha) {
-                    // Filtrar movimientos por fecha y filtro seleccionado
-                    final movimientosFiltrados = appState.getMovimientosByDateAndFilter(
-                      fecha,
-                      selectedFilter,
-                    );
-
-                    if (movimientosFiltrados.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return TransactionsContainer(
-                      date: fecha,
-                      movimientos: movimientosFiltrados,
-                    );
-                  }),
-                ],
-              ),
-            ),
           ),
         ],
       ),
@@ -183,11 +195,7 @@ class _EmptyMovimientos extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.receipt_long,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.receipt_long, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 24),
           Text(
             'No hay movimientos para ${formatMonthYear(selectedMonth)}.',
@@ -196,11 +204,11 @@ class _EmptyMovimientos extends StatelessWidget {
           ),
           Text(
             'Agrega nuevos movimientos para empezar a llevar el control de tus finanzas.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey[500],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
             textAlign: TextAlign.center,
-          )
+          ),
         ],
       ),
     );
@@ -223,11 +231,7 @@ class _EmptyFilteredMovimientos extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            Icons.filter_alt_off,
-            size: 72,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.filter_alt_off, size: 72, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No existen movimientos de tipo ${_labelFromFiltro(filtro).toLowerCase()}',
@@ -250,4 +254,3 @@ class _EmptyFilteredMovimientos extends StatelessWidget {
     }
   }
 }
-

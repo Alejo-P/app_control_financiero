@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/movimientos/widgets/transaction_detail_card.dart';
@@ -60,7 +61,17 @@ class TransactionsContainer extends StatelessWidget {
               MaterialPageRoute(
                 builder: (_) => MovimientoFormPage(
                   mode: MovimientoFormMode.edit,
-                  movimiento: movimiento,
+                  movimiento: DetalleMovimiento(
+                    id: movimiento.id,
+                    title: movimiento.title,
+                    amount: movimiento.amount,
+                    movementType: categoria.movementType,
+                    date: movimiento.date,
+                    categoryName: categoria.name,
+                    categoryId: categoria.id,
+                    time: movimiento.time,
+                    note: movimiento.note,
+                  ),
                 ),
               ),
             );

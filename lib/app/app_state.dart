@@ -55,12 +55,14 @@ class AppState extends ChangeNotifier {
 
   TotalesMensuales? _totalesMensuales;
   IngresoPresupuestado? _ingresoPresupuestado;
+  double? _totalIngresoPresupuestado;
   double? _variacionAhorro;
   List<DateTime> _uniqueMovementDates = [];
   Map<DateTime, List<Movimiento>> _movimientosPorFecha = {};
   List<String> _uniqueTipeCategoryNames = [];
   TotalesMensuales? get totalesMensuales => _totalesMensuales;
   IngresoPresupuestado? get ingresoPresupuestado => _ingresoPresupuestado;
+  double? get totalIngresoPresupuestado => _totalIngresoPresupuestado;
   double? get variacionAhorro => _variacionAhorro;
   List<DateTime> get uniqueMovementDates => _uniqueMovementDates;
   List<String> get uniqueTipeCategoryNames => _uniqueTipeCategoryNames;
@@ -138,6 +140,22 @@ class AppState extends ChangeNotifier {
   ) async {
     return await _presupuestosRepository
         .fetchIngresosPresupuestadosByMonthAndYear(date);
+  }
+
+  // Descontar del ingreso total presupuestado el monto de los presupuestos asignados
+  Future<void> calculateTotalIngresoPresupuestado() async {
+    if (_ingresoPresupuestado == null) return;
+
+    _totalIngresoPresupuestado = _ingresoPresupuestado!.monto;
+    if (_totalIngresoPresupuestado == null) return;
+
+    if (_totalIngresoPresupuestado! <= 0) return;
+
+    for (var presupuesto in presupuestos) {
+      _totalIngresoPresupuestado =
+          _totalIngresoPresupuestado! - presupuesto.amount;
+    }
+    notifyListeners();
   }
 
   Future<void> setIngresoPresupuestado(IngresoPresupuestado ingreso) async {

@@ -1,12 +1,10 @@
 import 'package:control_financiero/core/constants/categoria_constants.dart';
-import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
-import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
 import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
@@ -56,8 +54,6 @@ class App extends StatelessWidget {
             initialRoute: '/',
             routes: {
               '/': (_) => const AppScaffold(), // navegación principal
-              '/agregar_movimiento': (_) =>
-                  const MovimientoFormPage(mode: MovimientoFormMode.create),
               '/agregar_categoria': (_) =>
                   const CategoriaFormPage(mode: CategoriaFormMode.create),
               '/agregar_presupuesto': (_) =>

@@ -2,6 +2,7 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
@@ -17,9 +18,15 @@ import 'package:provider/provider.dart';
 
 class MovimientoFormPage extends StatefulWidget {
   final MovimientoFormMode mode;
-  final Movimiento? movimiento;
+  final DetalleMovimiento? movimiento;
+  final DateTime? fechaInicial;
 
-  const MovimientoFormPage({super.key, required this.mode, this.movimiento});
+  const MovimientoFormPage({
+    super.key,
+    required this.mode,
+    this.movimiento,
+    this.fechaInicial,
+  });
 
   @override
   State<MovimientoFormPage> createState() => _MovimientoFormPageState();
@@ -44,40 +51,26 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     super.initState();
     categorias = [];
     categoriasFiltradas = [];
+    selectedDate = getCurrentDateWithoutTime();
 
-    if (widget.mode == MovimientoFormMode.create) {
-      selectedDate = getCurrentDateWithoutTime();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final appState = context.read<AppState>();
-        final selectedMonth = normalizeDate(appState.selectedMovementsMonth);
-        if (isCurrentMonth(selectedMonth)) return;
-
-        setState(() {
-          selectedDate = selectedMonth;
-        });
-      });
+    if (widget.mode == MovimientoFormMode.create && widget.fechaInicial != null) {
+      final fechaInicial = widget.fechaInicial ?? DateTime.now();
+      final fechaNormalizada = normalizeDate(fechaInicial);
+      selectedDate = !isCurrentMonth(fechaNormalizada)
+          ? fechaNormalizada
+          : getCurrentDateWithoutTime();
     }
 
     if (widget.mode == MovimientoFormMode.edit && widget.movimiento != null) {
       _amountController.text = widget.movimiento!.amount.toString();
       _noteController.text = widget.movimiento!.note;
       _titleController.text = widget.movimiento!.title;
-      categoryId = widget.movimiento!.categoryID;
+      categoryId = widget.movimiento!.categoryId!;
       selectedDate = widget.movimiento!.date;
-      movementTime = widget.movimiento!.time;
+      movementTime = widget.movimiento!.time!;
       movementId = widget.movimiento!.id!;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final appState = context.read<AppState>();
-        final category = appState.getCategoriaById(categoryId);
-
-        if (category == null) return;
-
-        setState(() {
-          categoryName = category.name;
-          tipoMovimiento = category.movementType;
-        });
-      });
+      categoryName = widget.movimiento!.categoryName ?? 'Sin categoría';
+      tipoMovimiento = widget.movimiento!.movementType;
     }
 
     // Escuchar cambios en los controladores de texto
@@ -115,6 +108,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
+    if (newTipoMovimiento == tipoMovimiento) return;
+
     setState(() {
       categoryId = -1;
       categoryName = 'Sin categoría';
@@ -220,18 +215,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     if (!mounted) return;
 
     if (!appState.transactionSuccess) {
-      AppSnackbar.error(
-        context,
-        appState.transactionResultMessage,
-      );
+      AppSnackbar.error(context, appState.transactionResultMessage);
       return;
     }
-    
-    AppSnackbar.success(
-      context,
-      appState.transactionResultMessage,
-    );
-    
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
+
     Navigator.pop(context, true);
   }
 
@@ -249,17 +238,11 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     if (!mounted) return;
 
     if (!appState.transactionSuccess) {
-      AppSnackbar.error(
-        context,
-        appState.transactionResultMessage,
-      );
+      AppSnackbar.error(context, appState.transactionResultMessage);
       return;
     }
-    
-    AppSnackbar.success(
-      context,
-      appState.transactionResultMessage,
-    );
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
 
     Navigator.pop(context, true);
   }

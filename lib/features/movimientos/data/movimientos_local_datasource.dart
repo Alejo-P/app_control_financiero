@@ -68,12 +68,13 @@ class MovimientosLocalDataSource {
         '''
           SELECT
             m.id AS id,
-            m.title AS titulo,
-            m.amount AS monto,
-            m.date as fecha,
-            m.note AS nota,
-            c.name AS categoria,
-            c.movement_type AS tipoMovimiento
+            m.title AS title,
+            m.amount AS amount,
+            m.date as date,
+            m.note AS note,
+            c.name AS categoryName,
+            c.movement_type AS movementType,
+            c.id AS categoryId
           FROM movimientos m
           JOIN categorias c ON m.category_id = c.id
           WHERE strftime('%Y-%m', m.date) = ?
@@ -83,10 +84,10 @@ class MovimientosLocalDataSource {
 
       for (final map in result) {
         final detalleMovimento = DetalleMovimiento.fromMap(map);
-        if (detalleMovimento.tipoMovimiento == TipoMovimiento.ingreso) {
-          ingresos += detalleMovimento.monto;
+        if (detalleMovimento.movementType == TipoMovimiento.ingreso) {
+          ingresos += detalleMovimento.amount;
         } else {
-          gastos += detalleMovimento.monto;
+          gastos += detalleMovimento.amount;
         }
       }
     } on Exception catch (e) {
