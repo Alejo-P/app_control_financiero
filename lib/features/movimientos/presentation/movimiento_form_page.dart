@@ -233,7 +233,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     );
     if (confirmed != true) return;
 
-    await appState.eliminarMovimiento(movementId);
+    await appState.eliminarMovimiento(movementId, categoryId);
 
     if (!mounted) return;
 

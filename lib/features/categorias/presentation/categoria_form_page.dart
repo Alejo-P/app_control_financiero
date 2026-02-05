@@ -4,6 +4,7 @@ import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
 import 'package:control_financiero/features/categorias/widgets/colors_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/icons_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/info_categoria_predeterminada.dart';
@@ -19,7 +20,7 @@ import 'package:provider/provider.dart';
 
 class CategoriaFormPage extends StatefulWidget {
   final CategoriaFormMode mode;
-  final Categoria? categoriaExistente;
+  final DetalleCategoria? categoriaExistente;
 
   const CategoriaFormPage({
     super.key,
@@ -61,29 +62,15 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       final categoria = widget.categoriaExistente!;
       _categoryNameController.text = categoria.name;
       _descriptionController.text = categoria.description;
-      selectedIcon = IconMapper.fromName(categoria.iconName);
-      selectedColor = Color(categoria.iconColorValue);
-      categoryTypeID = categoria.categoryTypeID;
+      selectedIcon = categoria.icon ?? categoryIcons.first;
+      selectedColor = categoria.color ?? categoryColors.first;
+      movementsByCategory = categoria.totalMovements ?? 0;
+      categoryTypeName = categoria.categoryTypeName;
       selectedTipeMovement = categoria.movementType == TipoMovimiento.ingreso
           ? 'ingreso'
           : 'gasto';
       isDefault = categoria.isDefault;
       isEditing = true;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final appState = context.read<AppState>();
-        final tipoCategoria = appState.getCategoryTypeById(categoryTypeID);
-        if (tipoCategoria == null) return;
-
-        final movementsCount = await appState.countMovementsByCategory(
-          categoria.id!,
-        );
-
-        setState(() {
-          categoryTypeName = tipoCategoria.name;
-          movementsByCategory = movementsCount;
-        });
-      });
     }
 
     _categoryNameController.addListener(_markAsDirty);
@@ -221,7 +208,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     if (confirmed != true) return;
 
     await appState.eliminarCategoria(
-      widget.categoriaExistente!.id!,
+      widget.categoriaExistente!.id,
     );
 
     if (!mounted) return;

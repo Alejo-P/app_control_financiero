@@ -1,4 +1,3 @@
-import 'package:control_financiero/app/app.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';

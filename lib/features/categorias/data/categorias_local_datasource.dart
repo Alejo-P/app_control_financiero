@@ -12,9 +12,14 @@ class CategoriasLocalDataSource {
   // Obtener todas las categorías
   Future<List<Categoria>> fetchCategorias() async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      CategoriasTable.table,
-      orderBy: '${CategoriasTable.name} ASC',
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+        SELECT 
+          c.*, 
+          (SELECT COUNT(*) FROM ${MovimientosTable.table} m WHERE m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}) AS movements_count
+        FROM ${CategoriasTable.table} c
+        ORDER BY c.${CategoriasTable.name} ASC
+      ''',
     );
 
     return maps.map(Categoria.fromMap).toList();
@@ -23,10 +28,15 @@ class CategoriasLocalDataSource {
   // Obtener una categoría por su ID
   Future<Categoria?> fetchCategoriaById(int id) async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      CategoriasTable.table,
-      where: '${CategoriasTable.id} = ?',
-      whereArgs: [id],
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      ''''
+        SELECT 
+          c.*, 
+          (SELECT COUNT(*) FROM ${MovimientosTable.table} m WHERE m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}) AS movements_count
+        FROM ${CategoriasTable.table} c
+        WHERE c.${CategoriasTable.id} = ?
+      ''',
+      [id],
     );
 
     if (maps.isNotEmpty) {
@@ -104,7 +114,8 @@ class CategoriasLocalDataSource {
     }
 
     // Si tiene movimientos asociados, no eliminar
-    final movimientoCount = await _movimientosLocalDataSource.fetchMovimientoCountByCategory(id);
+    final movimientoCount = await _movimientosLocalDataSource
+        .fetchMovimientoCountByCategory(id);
     if (movimientoCount > 0) {
       return OperationResult<void>(
         success: false,

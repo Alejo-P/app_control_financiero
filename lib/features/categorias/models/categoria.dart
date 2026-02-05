@@ -10,6 +10,7 @@ class Categoria {
   final int categoryTypeID;
   final String iconName;
   final int iconColorValue;
+  final int? movementsCount;
   final bool isDefault;
 
   Categoria({
@@ -20,6 +21,7 @@ class Categoria {
     required this.categoryTypeID,
     required this.iconName,
     required this.iconColorValue,
+    this.movementsCount = 0,
     this.isDefault = false,
   });
 
@@ -31,6 +33,7 @@ class Categoria {
     int? categoryTypeID,
     String? iconName,
     int? iconColorValue,
+    int? movementsCount,
     bool? isDefault,
   }) {
     return Categoria(
@@ -41,13 +44,14 @@ class Categoria {
       categoryTypeID: categoryTypeID ?? this.categoryTypeID,
       iconName: iconName ?? this.iconName,
       iconColorValue: iconColorValue ?? this.iconColorValue,
+      movementsCount: movementsCount ?? this.movementsCount,
       isDefault: isDefault ?? this.isDefault,
     );
   }
 
   @override
   String toString() {
-    return 'Categoria{id: $id, name: $name, description: $description, movementType: $movementType, categoryTypeID: $categoryTypeID, iconName: $iconName, iconColorValue: $iconColorValue, isDefault: $isDefault}';
+    return 'Categoria{id: $id, name: $name, description: $description, movementType: $movementType, categoryTypeID: $categoryTypeID, iconName: $iconName, iconColorValue: $iconColorValue, movementsCount: $movementsCount, isDefault: $isDefault}';
   }
 
   // Factory constructor to create a Categoria from JSON
@@ -62,6 +66,7 @@ class Categoria {
       categoryTypeID: map['category_type_id'],
       iconName: map['icon_name'],
       iconColorValue: map['icon_color_value'],
+      movementsCount: map['movements_count'] ?? 0,
       isDefault: map['is_default'] == 1,
     );
   }

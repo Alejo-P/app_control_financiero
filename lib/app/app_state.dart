@@ -129,10 +129,16 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  Future<int> countMovementsByCategory(int categoryId) async {
-    return await _movimientosRepository.fetchMovimientoCountByCategory(
-      categoryId,
-    );
+  int countMovementsByCategory(int categoryId) {
+    int total = 0;
+
+    for (var movimiento in movimientos) {
+      if (movimiento.categoryID == categoryId) {
+        total += 1;
+      }
+    }
+
+    return total;
   }
 
   Future<IngresoPresupuestado> getIngresoPresupuestadoByMonthAndYear(
@@ -375,6 +381,16 @@ class AppState extends ChangeNotifier {
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
+      final categoria = getCategoriaById(movimiento.categoryID);
+      if (categoria != null) {
+        final index = categorias.indexWhere((c) => c.id == categoria.id);
+        final updatedCategoria = categoria.copyWith(
+          movementsCount: categoria.movementsCount! + 1,
+        );
+        // Actualizar la categoría en la lista
+        categorias[index] = updatedCategoria;
+        notifyListeners();
+      }
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
@@ -388,11 +404,20 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> eliminarMovimiento(int id) async {
+  Future<void> eliminarMovimiento(int id, int categoryId) async {
     final result = await _movimientosRepository.deleteMovimiento(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
+      final categoria = getCategoriaById(categoryId);
+      if (categoria != null) {
+        final index = categorias.indexWhere((c) => c.id == categoria.id);
+        final updatedCategoria = categoria.copyWith(
+          movementsCount: categoria.movementsCount! - 1,
+        );
+        categorias[index] = updatedCategoria;
+        notifyListeners();
+      }
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }

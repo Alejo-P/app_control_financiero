@@ -1,4 +1,6 @@
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/constants/categoria_constants.dart';
+import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
 import 'package:control_financiero/features/categorias/widgets/category_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +29,13 @@ class _CategoriasPageState extends State<CategoriasPage> {
             icon: const Icon(Icons.add),
             tooltip: 'Nueva categoría',
             onPressed: () {
-              Navigator.pushNamed(context, '/agregar_categoria');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const CategoriaFormPage(mode: CategoriaFormMode.create),
+                ),
+              );
             },
           ),
         ],
@@ -68,9 +76,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
                           const SizedBox(height: 8),
                           Text(
                             'Total de categorías: $cantidadCategorias',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: Colors.grey[600]),
                           ),
                           const SizedBox(height: 8),
