@@ -127,9 +127,7 @@ class AppState extends ChangeNotifier {
     DateTime date, {
     bool notify = true,
   }) async {
-    Future.wait([
-      _presupuestosRepository.fetchPresupuestosByMonthAndYear(date),
-    ]);
+    await _presupuestosRepository.fetchPresupuestosByMonthAndYear(date);
 
     _ingresoPresupuestado = await _presupuestosRepository
         .fetchIngresosPresupuestadosByMonthAndYear(date);
