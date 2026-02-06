@@ -61,15 +61,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       _presupuestoAmountController.text = widget.presupuesto!.amount.toString();
     }
 
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   appState = context.read<AppState>();
-    //   ingresoPresupuestado = await appState
-    //       .getIngresoPresupuestadoByMonthAndYear(fechaPresupuesto);
-    //   _ingresoPresupuestadoController.text = ingresoPresupuestado.monto > 0
-    //       ? ingresoPresupuestado.monto.toString()
-    //       : '';
-    // });
-
     _presupuestoAmountController.addListener(_markAsDirty);
     _ingresoPresupuestadoController.addListener(_markAsDirty);
   }
@@ -155,7 +146,62 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   }
 
   Future<void> _guardarPresupuesto() async {
-    // Lógica para guardar el presupuesto
+    final appState = context.read<AppState>();
+    final amountText = _presupuestoAmountController.text.trim();
+    final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+
+    if (value <= 0) {
+      AppSnackbar.error(
+        context,
+        'El monto del presupuesto debe ser mayor a 0.',
+      );
+      return;
+    }
+
+    if (value > ingresoDisponible.monto) {
+      AppSnackbar.error(
+        context,
+        'El monto del presupuesto no puede exceder el ingreso disponible.',
+      );
+      return;
+    }
+
+    if (ingresoDisponible.monto <= 0) {
+      AppSnackbar.error(
+        context,
+        'El ingreso presupuestado debe ser mayor a 0.',
+      );
+      return;
+    }
+
+    if (categoriaSeleccionada == -1) {
+      AppSnackbar.error(context, 'Por favor, selecciona una categoría.');
+      return;
+    }
+
+    final nuevoPresupuesto = Presupuesto(
+      id: widget.presupuesto?.id,
+      categoryId: categoriaSeleccionada,
+      amount: value,
+      date: fechaPresupuesto,
+    );
+
+    if (widget.mode == PresupuestoFormMode.create) {
+      await appState.agregarPresupuesto(nuevoPresupuesto);
+    } else if (widget.mode == PresupuestoFormMode.edit) {
+      await appState.actualizarPresupuesto(nuevoPresupuesto);
+    }
+
+    if (!mounted) return;
+
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(context, appState.transactionResultMessage);
+      return;
+    }
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
+
+    Navigator.pop(context, true);
   }
 
   @override
@@ -198,6 +244,24 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                 ? 'Nuevo Presupuesto'
                 : 'Editar Presupuesto',
           ),
+          actions: [
+            if (widget.mode == PresupuestoFormMode.edit)
+              IconButton(
+                onPressed: () async {
+                  // Lógica para eliminar el presupuesto
+                },
+                tooltip: 'Eliminar Presupuesto',
+                icon: const Icon(Icons.delete, color: Colors.red),
+              ),
+
+            IconButton(
+              icon: const Icon(Icons.check, color: Colors.green),
+              tooltip: 'Guardar Presupuesto',
+              onPressed: () async {
+                await _guardarPresupuesto();
+              },
+            ),
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
