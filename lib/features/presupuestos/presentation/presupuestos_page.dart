@@ -88,10 +88,6 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
             },
           ),
           const SizedBox(height: 6),
-
-          // Hacemos que la lista de categorías ocupe el espacio restante
-          // para evitar overflow en pantallas pequeñas. El SingleChildScrollView
-          // permite desplazamiento si el contenido es mayor que el espacio.
           Expanded(
             child: isLoading
                 ? LoadingScreen(
@@ -116,13 +112,6 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                           ),
                         ),
                         SizedBox(height: 20),
-                        Text(
-                          'Categorías',
-                          textAlign: TextAlign.left,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        SizedBox(height: 8),
-                        Divider(),
                         ...presupuestos.map((presupuesto) {
                           final categoryDetails = getCategoryDetailsById(
                             presupuesto.categoryId,

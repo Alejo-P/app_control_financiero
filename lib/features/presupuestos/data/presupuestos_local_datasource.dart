@@ -32,12 +32,14 @@ class PresupuestosLocalDataSource {
     DateTime date,
   ) async {
     final db = await _dbHelper.database;
-    final String dateString = date.toIso8601String().split('T')[0];
+    final String month = date.month.toString().padLeft(2, '0');
+    final int year = date.year;
 
     final List<Map<String, dynamic>> maps = await db.query(
       PresupuestosTable.table,
-      where: "date(${PresupuestosTable.date}) = ?",
-      whereArgs: [dateString],
+      where: "strftime('%Y-%m', ${PresupuestosTable.date}) = ?",
+      whereArgs: ['$year-$month'],
+      orderBy: '${PresupuestosTable.date} ASC',
     );
 
     return maps.map((map) => Presupuesto.fromMap(map)).toList();

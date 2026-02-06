@@ -22,10 +22,15 @@ class CategoryCard extends StatelessWidget {
     final progress = spent / total;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Card(
+        color: spent > total ? Colors.red[50] : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: spent > total ? Colors.red : Colors.transparent,
+            width: 1.5,
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -82,7 +87,7 @@ class CategoryCard extends StatelessWidget {
               LinearProgressIndicator(
                 value: progress.clamp(0.0, 1.0),
                 backgroundColor: Colors.grey.shade300,
-                minHeight: 6,
+                minHeight: 7,
                 borderRadius: BorderRadius.circular(3),
                 valueColor:
                     AlwaysStoppedAnimation<Color>(color),

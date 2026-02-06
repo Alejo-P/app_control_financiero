@@ -58,7 +58,12 @@ class PresupuestosRepository implements _PresupuestosRepository {
   Future<List<Presupuesto>> fetchPresupuestosByMonthAndYear(
     DateTime date,
   ) async {
-    return await localDatasource.fetchPresupuestosByMonthAndYear(date);
+    presupuestos.clear();
+    presupuestos.addAll(
+      await localDatasource.fetchPresupuestosByMonthAndYear(date),
+    );
+    
+    return presupuestos;
   }
 
   @override
