@@ -36,6 +36,7 @@ class CategoryContainer extends StatelessWidget {
         return CategoryCardDetail(
           name: categoria.name,
           description: categoria.description,
+          movementsCount: categoria.movementsCount ?? 0,
           icon: categoria.iconData,
           color: categoria.iconColor,
           isDefault: categoria.isDefault,
