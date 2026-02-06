@@ -105,11 +105,16 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     });
   }
 
-  List<Categoria> get categoriasTipoGasto {
+  List<Categoria> get categoriasSinPresupuesto {
     final appState = context.read<AppState>();
-    final totalPresupuesto = appState.totalIngresoPresupuestado ?? 0.0;
+    final categoriasConPresupuesto = appState.presupuestos
+        .map((presupuesto) => presupuesto.categoryId)
+        .toSet();
+
     return appState.categorias
-        .where((cat) => cat.movementType == TipoMovimiento.gasto)
+        .where((cat) =>
+            cat.movementType == TipoMovimiento.gasto &&
+            !categoriasConPresupuesto.contains(cat.id))
         .toList();
   }
 
@@ -128,7 +133,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       ingresoDisponible = nuevoIngresoPresupuestado;
     });
 
-    // 🔥 opcional: guardar en AppState / DB
     await appState.setIngresoPresupuestado(nuevoIngresoPresupuestado);
 
     if (!mounted) return;
@@ -204,8 +208,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
-    final categorias = categoriasTipoGasto;
+    final categorias = categoriasSinPresupuesto;
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;

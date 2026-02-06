@@ -98,6 +98,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
         children: [
           MonthSelection(
             initialDate: selectedMonth,
+            isLoading: isLoading,
             onMonthChanged: (newMonth) async {
               await appState.changeMovementsMonth(newMonth);
             },

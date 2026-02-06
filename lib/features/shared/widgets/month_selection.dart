@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 
 class MonthSelection extends StatefulWidget {
   final DateTime initialDate;
+  final bool isLoading;
   final ValueChanged<DateTime>? onMonthChanged;
 
   const MonthSelection({
     super.key,
     required this.initialDate,
+    this.isLoading = false,
     this.onMonthChanged,
   });
 
@@ -29,11 +31,6 @@ class _MonthSelectionState extends State<MonthSelection> {
         (nextDate.year == now.year && nextDate.month > now.month);
   }
 
-  bool isCurrentMonth() {
-    final now = DateTime.now();
-    return (selectedDate.year == now.year && selectedDate.month == now.month);
-  }
-
   bool isLimitPastMonth(DateTime selectedDate) {
     final now = DateTime.now();
     // Limite de solo 3 años en el pasado
@@ -43,6 +40,15 @@ class _MonthSelectionState extends State<MonthSelection> {
   }
 
   void changeMonth(int offset) {
+    // Validacion extra
+    if (widget.isLoading) {
+      return; // No permitir cambiar mes si está cargando
+    }
+
+    if (offset < 0 && isLimitPastMonth(selectedDate)) {
+      return; // No permitir retroceder más allá del límite
+    }
+    
     if (offset > 0 && isFutureMonth(selectedDate)) {
       return; // No permitir avanzar a meses futuros
     }
@@ -58,7 +64,7 @@ class _MonthSelectionState extends State<MonthSelection> {
   }
 
   void returnToday() {
-    if (isCurrentMonth()) {
+    if (isCurrentMonth(selectedDate)) {
       return; // Ya estamos en el mes actual
     }
 
@@ -75,7 +81,7 @@ class _MonthSelectionState extends State<MonthSelection> {
   @override
   Widget build(BuildContext context) {
     final isFuture = isFutureMonth(selectedDate);
-    final isCurrent = isCurrentMonth();
+    final isCurrent = isCurrentMonth(selectedDate);
     final isLimitPast = isLimitPastMonth(selectedDate);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final backgroundThemeColor = Theme.of(context).colorScheme.surface;
@@ -92,11 +98,11 @@ class _MonthSelectionState extends State<MonthSelection> {
           textBaseline: TextBaseline.alphabetic,
           children: [
             IconButton(
-              onPressed: isLimitPast ? null : () => changeMonth(-1),
+              onPressed: (widget.isLoading || isLimitPast) ? null : () => changeMonth(-1),
               icon: Icon(
-                  Icons.arrow_back_ios_new,
-                  color: isLimitPast ? Colors.grey : Colors.blueAccent,
-                ),
+                Icons.arrow_back_ios_new,
+                color: (widget.isLoading || isLimitPast) ? Colors.grey : Colors.blueAccent,
+              ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -130,11 +136,11 @@ class _MonthSelectionState extends State<MonthSelection> {
               ],
             ),
             IconButton(
-              onPressed: isFuture ? null : () => changeMonth(1),
+              onPressed: (widget.isLoading || isFuture) ? null : () => changeMonth(1),
               icon: Icon(
-                  Icons.arrow_forward_ios,
-                  color: isFuture ? Colors.grey : Colors.blueAccent,
-                ),
+                Icons.arrow_forward_ios,
+                color: (widget.isLoading || isFuture) ? Colors.grey : Colors.blueAccent,
+              ),
             ),
           ],
         ),

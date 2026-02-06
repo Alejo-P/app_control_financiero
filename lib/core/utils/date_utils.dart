@@ -74,6 +74,10 @@ bool isSameDay(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
+bool isSameMonth(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month;
+} 
+
 bool isCurrentMonth(DateTime date) {
   final now = DateTime.now();
   return date.year == now.year && date.month == now.month;

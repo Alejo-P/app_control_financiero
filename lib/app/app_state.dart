@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
@@ -179,6 +180,7 @@ class AppState extends ChangeNotifier {
     transactionSuccess = result.success;
     if (result.success && result.data != null) {
       _ingresoPresupuestado = ingreso.copyWith(id: result.data!);
+      await calculateTotalIngresoPresupuestado();
       notifyListeners();
     }
   }
@@ -327,8 +329,7 @@ class AppState extends ChangeNotifier {
     final gastosEnMes = movimientosCategoria.where((m) {
       return getTipoMovimientoByCategoriaId(m.categoryID) ==
               TipoMovimiento.gasto &&
-          m.date.year == selectedMovementsMonth.year &&
-          m.date.month == selectedMovementsMonth.month;
+          isSameMonth(m.date, selectedBudgetMonth);
     }).toList();
 
     final totalGastos = gastosEnMes.fold<double>(
@@ -359,6 +360,9 @@ class AppState extends ChangeNotifier {
 
     await loadMovementsByMonthAndYear(month);
 
+    // Agregar un delay de 1 segundo para mejorar la experiencia de usuario
+    await Future.delayed(const Duration(milliseconds: 500));
+
     _isLoadingMonth = false;
     notifyListeners();
   }
@@ -369,6 +373,9 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     await loadPresupuestosByMonthAndYear(month);
+
+    // Agregar un delay de 1 segundo para mejorar la experiencia de usuario
+    await Future.delayed(const Duration(milliseconds: 500));
 
     _isLoadingBudget = false;
     notifyListeners();
@@ -406,6 +413,7 @@ class AppState extends ChangeNotifier {
     if (result.success == true) {
       await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
+      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
     }
   }
 
@@ -416,6 +424,7 @@ class AppState extends ChangeNotifier {
     if (result.success == true) {
       await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
+      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
     }
   }
 
@@ -426,6 +435,7 @@ class AppState extends ChangeNotifier {
     if (result.success == true) {
       await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
+      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
     }
   }
 

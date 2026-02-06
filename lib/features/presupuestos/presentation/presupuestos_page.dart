@@ -84,6 +84,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
         children: [
           MonthSelection(
             initialDate: selectedMonth,
+            isLoading: isLoading,
             onMonthChanged: (newMonth) async {
               await appState.changeBudgetMonth(newMonth);
             },
