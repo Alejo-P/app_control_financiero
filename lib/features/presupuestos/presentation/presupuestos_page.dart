@@ -38,7 +38,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
               MaterialPageRoute(
                 builder: (context) => PresupuestoFormPage(
                   mode: PresupuestoFormMode.create,
-                  ingresoPresupuestado: _appState.ingresoPresupuestado,
+                  ingresoPresupuestado: _appState.totalIngresoPresupuestado ?? 0.0,
                 ),
               ),
             );
@@ -65,6 +65,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final presupuestos = appState.presupuestos;
+    final totalGastos = appState.totalGastos ?? 0.0;
 
     // Indicador de carga para el mes seleccionado
     final isLoading = appState.isLoadingBudget;
@@ -107,7 +108,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             backgroundColor: Colors.teal,
                             content: TotalBudgetSummaryCard(
                               totalBudget: ingresoPresupuestado?.monto ?? 0.0,
-                              spentAmount: 1766.50,
+                              spentAmount: totalGastos,
                             ),
                           ),
                         ),

@@ -12,16 +12,28 @@ class PresupuestosLocalDataSource {
     DateTime date,
   ) async {
     final db = await _dbHelper.database;
-    final String dateString = date.toIso8601String().split('T')[0];
+    final String month = date.month.toString().padLeft(2, '0');
+    final int year = date.year;
 
     final List<Map<String, dynamic>> maps = await db.query(
       IngresoPresupuestadoTable.table,
-      where: "date(${IngresoPresupuestadoTable.date}) = ?",
-      whereArgs: [dateString],
+      where: "strftime('%Y-%m', ${IngresoPresupuestadoTable.date}) = ?",
+      whereArgs: ['$year-$month'],
     );
 
     if (maps.isEmpty) {
       return IngresoPresupuestado(monto: 0.0, fecha: date);
+    }
+
+    if (maps.length > 1) {
+      // Si hay más de un registro, tomar el primero y eliminar los demás
+      final first = maps.first;
+      final idsToDelete = maps.skip(1).map((map) => map['id'] as int).toList();
+      await db.delete(
+        IngresoPresupuestadoTable.table,
+        where: 'id IN (${idsToDelete.join(',')})',
+      );
+      return IngresoPresupuestado.fromMap(first);
     }
 
     return IngresoPresupuestado.fromMap(maps.first);
@@ -73,12 +85,14 @@ class PresupuestosLocalDataSource {
     IngresoPresupuestado ingreso,
   ) async {
     final db = await _dbHelper.database;
+    final String month = ingreso.fecha.month.toString().padLeft(2, '0');
+    final int year = ingreso.fecha.year;
 
     // Verificar si ya existe un ingreso presupuestado para la fecha dada
     final List<Map<String, dynamic>> existing = await db.query(
       IngresoPresupuestadoTable.table,
-      where: "date(${IngresoPresupuestadoTable.date}) = ?",
-      whereArgs: [ingreso.fecha.toIso8601String().split('T')[0]],
+      where: "strftime('%Y-%m', ${IngresoPresupuestadoTable.date}) = ?",
+      whereArgs: ['$year-$month'],
     );
 
     if (existing.isNotEmpty) {
@@ -86,8 +100,8 @@ class PresupuestosLocalDataSource {
       final int count = await db.update(
         IngresoPresupuestadoTable.table,
         ingreso.toMap(),
-        where: "date(${IngresoPresupuestadoTable.date}) = ?",
-        whereArgs: [ingreso.fecha.toIso8601String().split('T')[0]],
+        where: "strftime('%Y-%m', ${IngresoPresupuestadoTable.date}) = ?",
+        whereArgs: ['$year-$month'],
       );
 
       return OperationResult<int>(

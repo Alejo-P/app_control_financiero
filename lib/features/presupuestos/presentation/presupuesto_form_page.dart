@@ -17,7 +17,7 @@ import 'package:provider/provider.dart';
 class PresupuestoFormPage extends StatefulWidget {
   final PresupuestoFormMode mode;
   final Presupuesto? presupuesto;
-  final IngresoPresupuestado? ingresoPresupuestado;
+  final double? ingresoPresupuestado;
 
   const PresupuestoFormPage({
     super.key,
@@ -47,14 +47,12 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     categoriaSeleccionada = -1;
     fechaPresupuesto = DateTime.now();
     fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
-    if (widget.ingresoPresupuestado != null) {
-      ingresoDisponible = widget.ingresoPresupuestado!;
-    } else {
-      ingresoDisponible = IngresoPresupuestado(
-        monto: 0.0,
-        fecha: fechaPresupuesto,
-      );
-    }
+    ingresoDisponible = IngresoPresupuestado(
+      monto: widget.ingresoPresupuestado ?? 0.0,
+      fecha: fechaPresupuesto,
+    );
+    _ingresoPresupuestadoController.text =
+        ingresoDisponible.monto.toStringAsFixed(2);
 
     if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
       categoriaSeleccionada = widget.presupuesto!.categoryId;

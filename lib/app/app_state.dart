@@ -57,6 +57,7 @@ class AppState extends ChangeNotifier {
   IngresoPresupuestado? _ingresoPresupuestado;
   double? _totalIngresoPresupuestado;
   double? _variacionAhorro;
+  double? _totalGastos;
   List<DateTime> _uniqueMovementDates = [];
   Map<DateTime, List<Movimiento>> _movimientosPorFecha = {};
   List<String> _uniqueTipeCategoryNames = [];
@@ -74,6 +75,9 @@ class AppState extends ChangeNotifier {
   List<Movimiento> get movimientos => _movimientosRepository.movimientos;
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
+  List<Movimiento> get movimientosPresupuestos =>
+      _presupuestosRepository.movimientos;
+  double? get totalGastos => _totalGastos;
 
   String transactionResultMessage = '';
   bool transactionSuccess = false;
@@ -123,9 +127,14 @@ class AppState extends ChangeNotifier {
     DateTime date, {
     bool notify = true,
   }) async {
-    await _presupuestosRepository.fetchPresupuestosByMonthAndYear(date);
+    Future.wait([
+      _presupuestosRepository.fetchPresupuestosByMonthAndYear(date),
+    ]);
+
     _ingresoPresupuestado = await _presupuestosRepository
         .fetchIngresosPresupuestadosByMonthAndYear(date);
+    calculateTotalIngresoPresupuestado();
+    _totalGastos = _presupuestosRepository.getTotalGastosByMonthAndYear(date);
     if (notify) notifyListeners();
   }
 
@@ -313,7 +322,9 @@ class AppState extends ChangeNotifier {
 
   // Obtener el acumulado de gastos para una categoria en el mes seleccionado
   double getGastoAcumuladoPorCategoriaEnMes(int categoriaId) {
-    final movimientosCategoria = getMovimientosByCategoriaId(categoriaId);
+    final movimientosCategoria = movimientosPresupuestos
+        .where((m) => m.categoryID == categoriaId)
+        .toList();
 
     final gastosEnMes = movimientosCategoria.where((m) {
       return getTipoMovimientoByCategoriaId(m.categoryID) ==
@@ -377,8 +388,7 @@ class AppState extends ChangeNotifier {
 
   // ================================= MOVIMIENTOS CRUD =================================
   Future<void> sincronizarContadoresCategorias() async {
-    final counts =
-        await _movimientosRepository.getMovementsCountByCategory();
+    final counts = await _movimientosRepository.getMovementsCountByCategory();
 
     for (var entry in counts.entries) {
       final categoryId = entry.key;
