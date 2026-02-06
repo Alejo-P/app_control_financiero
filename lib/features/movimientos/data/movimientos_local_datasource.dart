@@ -100,6 +100,21 @@ class MovimientosLocalDataSource {
     return TotalesMensuales(ingresos: ingresos, gastos: gastos);
   }
 
+  Future<Map<int, int>> getMovementsCountByCategory() async {
+    final db = await _dbHelper.database;
+    final result = await db.rawQuery('''
+      SELECT c.${CategoriasTable.id} AS categoryId, 
+      (SELECT COUNT(*) FROM ${MovimientosTable.table} m 
+      WHERE m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}) AS count
+      FROM ${CategoriasTable.table} c
+      GROUP BY c.${CategoriasTable.id};
+    ''');
+
+    return {
+      for (var row in result) row['categoryId'] as int: row['count'] as int,
+    };
+  }
+
   // Agregar un nuevo movimiento
   Future<OperationResult<int>> addMovimiento(Movimiento movimiento) async {
     final db = await _dbHelper.database;

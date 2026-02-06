@@ -29,7 +29,7 @@ class CategoriasLocalDataSource {
   Future<Categoria?> fetchCategoriaById(int id) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      ''''
+      '''
         SELECT 
           c.*, 
           (SELECT COUNT(*) FROM ${MovimientosTable.table} m WHERE m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}) AS movements_count

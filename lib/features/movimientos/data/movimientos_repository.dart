@@ -40,6 +40,10 @@ abstract class _MovimientosRepository {
   /// @return Un objeto TotalesMensuales con los totales de ingresos y gastos del mes pasado.
   Future<TotalesMensuales> fetchTotalesMensualesMesPasado(DateTime date);
 
+  /// Obtener el conteo de movimientos por categoría
+  /// @return Un mapa con el ID de la categoría como clave y la cantidad de movimientos como valor.
+  Future<Map<int, int>> getMovementsCountByCategory();
+
   /// Agrega un nuevo movimiento financiero.
   /// @param movimiento El objeto Movimiento a agregar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
@@ -177,6 +181,11 @@ class MovimientosRepository implements _MovimientosRepository {
     }
 
     return TotalesMensuales(ingresos: totalIngresos, gastos: totalGastos);
+  }
+
+  @override
+  Future<Map<int, int>> getMovementsCountByCategory() async {
+    return await localDataSource.getMovementsCountByCategory();
   }
 
   @override

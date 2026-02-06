@@ -376,21 +376,27 @@ class AppState extends ChangeNotifier {
   }
 
   // ================================= MOVIMIENTOS CRUD =================================
+  Future<void> sincronizarContadoresCategorias() async {
+    final counts =
+        await _movimientosRepository.getMovementsCountByCategory();
+
+    for (var entry in counts.entries) {
+      final categoryId = entry.key;
+      final newCount = entry.value;
+      await _categoriasRepository.updateCategoryMovementCount(
+        categoryId,
+        newCount,
+      );
+    }
+    notifyListeners();
+  }
+
   Future<void> agregarMovimiento(Movimiento movimiento) async {
     final result = await _movimientosRepository.addMovimiento(movimiento);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
-      final categoria = getCategoriaById(movimiento.categoryID);
-      if (categoria != null) {
-        final index = categorias.indexWhere((c) => c.id == categoria.id);
-        final updatedCategoria = categoria.copyWith(
-          movementsCount: categoria.movementsCount! + 1,
-        );
-        // Actualizar la categoría en la lista
-        categorias[index] = updatedCategoria;
-        notifyListeners();
-      }
+      await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
@@ -400,6 +406,7 @@ class AppState extends ChangeNotifier {
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
+      await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
@@ -409,15 +416,7 @@ class AppState extends ChangeNotifier {
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
-      final categoria = getCategoriaById(categoryId);
-      if (categoria != null) {
-        final index = categorias.indexWhere((c) => c.id == categoria.id);
-        final updatedCategoria = categoria.copyWith(
-          movementsCount: categoria.movementsCount! - 1,
-        );
-        categorias[index] = updatedCategoria;
-        notifyListeners();
-      }
+      await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
     }
   }
