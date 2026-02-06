@@ -65,6 +65,8 @@ class CategoryCard extends StatelessWidget {
                     ),
                   ),
                   Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         '\$${spent.toStringAsFixed(2)}',
