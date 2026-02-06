@@ -123,17 +123,27 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     final appState = context.read<AppState>();
     final amountText = _ingresoPresupuestadoController.text.trim();
     final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+    if (value <= 0) {
+      AppSnackbar.error(
+        context,
+        'El ingreso presupuestado debe ser mayor a 0.',
+      );
+      return;
+    }
 
     final nuevoIngresoPresupuestado = IngresoPresupuestado(
       monto: value,
       fecha: fechaPresupuesto,
     );
 
-    setState(() {
-      ingresoDisponible = nuevoIngresoPresupuestado;
-    });
 
     await appState.setIngresoPresupuestado(nuevoIngresoPresupuestado);
+    setState(() {
+      ingresoDisponible = IngresoPresupuestado(
+        monto: appState.totalIngresoPresupuestado ?? value,
+        fecha: fechaPresupuesto,
+      );
+    });
 
     if (!mounted) return;
 
@@ -429,15 +439,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
             height: 100,
             child: AmountInput(controller: _ingresoPresupuestadoController),
           ),
-
-          // TextField(
-          //   controller: controller,
-          //   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          //   decoration: const InputDecoration(
-          //     labelText: 'Monto',
-          //     prefixIcon: Icon(Icons.attach_money),
-          //   ),
-          // ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
