@@ -1,11 +1,9 @@
-import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
-import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:flutter/material.dart';
@@ -52,8 +50,6 @@ class App extends StatelessWidget {
             initialRoute: '/',
             routes: {
               '/': (_) => const AppScaffold(), // navegación principal
-              '/agregar_presupuesto': (_) =>
-                  const PresupuestoFormPage(mode: PresupuestoFormMode.create),
             },
           );
         },

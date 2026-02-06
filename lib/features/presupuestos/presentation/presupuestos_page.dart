@@ -1,5 +1,7 @@
+import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
 import 'package:control_financiero/features/presupuestos/widgets/total_budget_summary_card.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/summary_card.dart';
@@ -31,9 +33,14 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
           icon: Icons.add,
           tooltip: 'Nuevo presupuesto',
           onPressed: () {
-            Navigator.pushNamed(
+            Navigator.push(
               context,
-              '/agregar_presupuesto',
+              MaterialPageRoute(
+                builder: (context) => PresupuestoFormPage(
+                  mode: PresupuestoFormMode.create,
+                  ingresoPresupuestado: _appState.ingresoPresupuestado,
+                ),
+              ),
             );
           },
         ),

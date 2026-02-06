@@ -17,8 +17,14 @@ import 'package:provider/provider.dart';
 class PresupuestoFormPage extends StatefulWidget {
   final PresupuestoFormMode mode;
   final Presupuesto? presupuesto;
+  final IngresoPresupuestado? ingresoPresupuestado;
 
-  const PresupuestoFormPage({super.key, required this.mode, this.presupuesto});
+  const PresupuestoFormPage({
+    super.key,
+    required this.mode,
+    this.presupuesto,
+    this.ingresoPresupuestado,
+  });
 
   @override
   State<PresupuestoFormPage> createState() => _PresupuestoFormPageState();
@@ -30,30 +36,39 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   final anios = generateYearList(DateTime.now().year, 10);
   late DateTime fechaPresupuesto;
   late int categoriaSeleccionada;
-  late IngresoPresupuestado ingresoPresupuestado;
+  late IngresoPresupuestado ingresoDisponible;
   final _presupuestoAmountController = TextEditingController();
   final _ingresoPresupuestadoController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    late AppState appState;
+    //late AppState appState;
     categoriaSeleccionada = -1;
     fechaPresupuesto = DateTime.now();
-      fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
+    fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
+    if (widget.ingresoPresupuestado != null) {
+      ingresoDisponible = widget.ingresoPresupuestado!;
+    } else {
+      ingresoDisponible = IngresoPresupuestado(
+        monto: 0.0,
+        fecha: fechaPresupuesto,
+      );
+    }
+
     if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
       categoriaSeleccionada = widget.presupuesto!.categoryId;
       _presupuestoAmountController.text = widget.presupuesto!.amount.toString();
-    } 
+    }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      appState = context.read<AppState>();
-      ingresoPresupuestado = await appState
-          .getIngresoPresupuestadoByMonthAndYear(fechaPresupuesto);
-      _ingresoPresupuestadoController.text = ingresoPresupuestado.monto > 0
-          ? ingresoPresupuestado.monto.toString()
-          : '';
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   appState = context.read<AppState>();
+    //   ingresoPresupuestado = await appState
+    //       .getIngresoPresupuestadoByMonthAndYear(fechaPresupuesto);
+    //   _ingresoPresupuestadoController.text = ingresoPresupuestado.monto > 0
+    //       ? ingresoPresupuestado.monto.toString()
+    //       : '';
+    // });
 
     _presupuestoAmountController.addListener(_markAsDirty);
     _ingresoPresupuestadoController.addListener(_markAsDirty);
@@ -121,28 +136,20 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     );
 
     setState(() {
-      ingresoPresupuestado = nuevoIngresoPresupuestado;
+      ingresoDisponible = nuevoIngresoPresupuestado;
     });
 
     // 🔥 opcional: guardar en AppState / DB
-      await appState.setIngresoPresupuestado(
-      nuevoIngresoPresupuestado,
-    );
+    await appState.setIngresoPresupuestado(nuevoIngresoPresupuestado);
 
     if (!mounted) return;
 
     if (!appState.transactionSuccess) {
-      AppSnackbar.error(
-        context,
-        appState.transactionResultMessage,
-      );
+      AppSnackbar.error(context, appState.transactionResultMessage);
       return;
     }
-    
-    AppSnackbar.success(
-      context,
-      appState.transactionResultMessage,
-    );
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
 
     Navigator.pop(context, true);
   }
@@ -304,7 +311,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '\$${ingresoPresupuestado.monto.toStringAsFixed(2)}',
+                                    '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -335,9 +342,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      AmountInput(
-                        controller: _presupuestoAmountController,
-                      ),
+                      AmountInput(controller: _presupuestoAmountController),
                     ],
                   ),
                 ),
