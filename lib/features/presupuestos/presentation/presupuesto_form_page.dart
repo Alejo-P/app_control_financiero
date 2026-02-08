@@ -6,6 +6,7 @@ import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
+import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -16,7 +17,7 @@ import 'package:provider/provider.dart';
 
 class PresupuestoFormPage extends StatefulWidget {
   final PresupuestoFormMode mode;
-  final Presupuesto? presupuesto;
+  final DetallePresupuesto? presupuesto;
   final double? ingresoPresupuestado;
 
   const PresupuestoFormPage({
@@ -46,18 +47,24 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     //late AppState appState;
     categoriaSeleccionada = -1;
     fechaPresupuesto = DateTime.now();
-    fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
+
+    if (widget.mode == PresupuestoFormMode.create) {
+      fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
+    }
+
+    if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
+      categoriaSeleccionada = widget.presupuesto!.categoriaId;
+      fechaPresupuesto = widget.presupuesto!.fechaPresupuesto;
+      _presupuestoAmountController.text = widget.presupuesto!.montoPresupuestado
+          .toString();
+    }
+
     ingresoDisponible = IngresoPresupuestado(
       monto: widget.ingresoPresupuestado ?? 0.0,
       fecha: fechaPresupuesto,
     );
-    _ingresoPresupuestadoController.text =
-        ingresoDisponible.monto.toStringAsFixed(2);
-
-    if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
-      categoriaSeleccionada = widget.presupuesto!.categoryId;
-      _presupuestoAmountController.text = widget.presupuesto!.amount.toString();
-    }
+    _ingresoPresupuestadoController.text = ingresoDisponible.monto
+        .toStringAsFixed(2);
 
     _presupuestoAmountController.addListener(_markAsDirty);
     _ingresoPresupuestadoController.addListener(_markAsDirty);
@@ -105,6 +112,13 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     });
   }
 
+  List<Categoria> get gategoriasSoloGastos {
+    final appState = context.read<AppState>();
+    return appState.categorias
+        .where((cat) => cat.movementType == TipoMovimiento.gasto)
+        .toList();
+  }
+
   List<Categoria> get categoriasSinPresupuesto {
     final appState = context.read<AppState>();
     final categoriasConPresupuesto = appState.presupuestos
@@ -112,9 +126,11 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
         .toSet();
 
     return appState.categorias
-        .where((cat) =>
-            cat.movementType == TipoMovimiento.gasto &&
-            !categoriasConPresupuesto.contains(cat.id))
+        .where(
+          (cat) =>
+              cat.movementType == TipoMovimiento.gasto &&
+              !categoriasConPresupuesto.contains(cat.id),
+        )
         .toList();
   }
 
@@ -135,7 +151,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       monto: value,
       fecha: fechaPresupuesto,
     );
-
 
     await appState.setIngresoPresupuestado(nuevoIngresoPresupuestado);
     setState(() {
@@ -192,7 +207,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     }
 
     final nuevoPresupuesto = Presupuesto(
-      id: widget.presupuesto?.id,
+      id: widget.presupuesto?.categoriaId ?? 0,
       categoryId: categoriaSeleccionada,
       amount: value,
       date: fechaPresupuesto,
@@ -218,7 +233,14 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final categorias = categoriasSinPresupuesto;
+    final categorias = widget.mode == PresupuestoFormMode.create
+        ? categoriasSinPresupuesto
+        : [
+            gategoriasSoloGastos.firstWhere(
+              (cat) => cat.id == widget.presupuesto!.categoriaId,
+              orElse: () => throw Exception('Categoría no encontrada'),
+            ),
+          ];
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -237,6 +259,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
         body: const Center(
           child: Text(
             'No hay categorías disponibles. Por favor, crea una categoría primero.',
+            style: TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
           ),
         ),
       );
@@ -320,8 +344,10 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                       const SizedBox(height: 12),
                       const Divider(),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Seleccione una categoría',
+                      Text(
+                        widget.mode == PresupuestoFormMode.create
+                            ? 'Selecciona una categoría'
+                            : 'Categoría del presupuesto',
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 16,
@@ -329,8 +355,10 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Asigna un presupuesto a una categoría específica',
+                      Text(
+                        widget.mode == PresupuestoFormMode.create
+                            ? 'El presupuesto se asignará a la categoría seleccionada.'
+                            : 'El presupuesto actual está asignado a esta categoría.',
                         textAlign: TextAlign.left,
                         style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
@@ -417,7 +445,11 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      AmountInput(controller: _presupuestoAmountController),
+                      AmountInput(
+                        controller: _presupuestoAmountController,
+                        isEditable: ingresoDisponible.monto > 0,
+                        showLabel: false,
+                      ),
                     ],
                   ),
                 ),

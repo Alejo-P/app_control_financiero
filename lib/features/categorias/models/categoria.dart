@@ -11,6 +11,7 @@ class Categoria {
   final String iconName;
   final int iconColorValue;
   final int? movementsCount;
+  final bool enabledRepeatMovement;
   final bool isDefault;
 
   Categoria({
@@ -22,6 +23,7 @@ class Categoria {
     required this.iconName,
     required this.iconColorValue,
     this.movementsCount = 0,
+    this.enabledRepeatMovement = false,
     this.isDefault = false,
   });
 
@@ -34,6 +36,7 @@ class Categoria {
     String? iconName,
     int? iconColorValue,
     int? movementsCount,
+    bool? enabledRepeatMovement,
     bool? isDefault,
   }) {
     return Categoria(
@@ -45,13 +48,15 @@ class Categoria {
       iconName: iconName ?? this.iconName,
       iconColorValue: iconColorValue ?? this.iconColorValue,
       movementsCount: movementsCount ?? this.movementsCount,
+      enabledRepeatMovement:
+          enabledRepeatMovement ?? this.enabledRepeatMovement,
       isDefault: isDefault ?? this.isDefault,
     );
   }
 
   @override
   String toString() {
-    return 'Categoria{id: $id, name: $name, description: $description, movementType: $movementType, categoryTypeID: $categoryTypeID, iconName: $iconName, iconColorValue: $iconColorValue, movementsCount: $movementsCount, isDefault: $isDefault}';
+    return 'Categoria{id: $id, name: $name, description: $description, movementType: $movementType, categoryTypeID: $categoryTypeID, iconName: $iconName, iconColorValue: $iconColorValue, movementsCount: $movementsCount, enabledRepeatMovement: $enabledRepeatMovement, isDefault: $isDefault}';
   }
 
   // Factory constructor to create a Categoria from JSON
@@ -67,6 +72,7 @@ class Categoria {
       iconName: map['icon_name'],
       iconColorValue: map['icon_color_value'],
       movementsCount: map['movements_count'] ?? 0,
+      enabledRepeatMovement: map['enabled_repeat_movement'] == 1,
       isDefault: map['is_default'] == 1,
     );
   }
@@ -80,6 +86,7 @@ class Categoria {
       'category_type_id': categoryTypeID,
       'icon_name': iconName,
       'icon_color_value': iconColorValue,
+      'enabled_repeat_movement': enabledRepeatMovement ? 1 : 0,
       'is_default': isDefault ? 1 : 0,
     };
   }

@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/database/db_tables.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:sqflite/sqflite.dart';
 
 Future<void> migrateMovimientosAmount(Database db) async {
@@ -28,6 +29,7 @@ Future<void> migrateMovimientosAmount(Database db) async {
           ${MovimientosTable.date} TEXT NOT NULL,
           ${MovimientosTable.time} TEXT NOT NULL,
           ${MovimientosTable.note} TEXT DEFAULT '',
+          ${MovimientosTable.repeatMovement} INTEGER DEFAULT 0,
           FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
         )
       ''');
@@ -40,7 +42,8 @@ Future<void> migrateMovimientosAmount(Database db) async {
           ${MovimientosTable.amount},
           ${MovimientosTable.date},
           ${MovimientosTable.time},
-          ${MovimientosTable.note}
+          ${MovimientosTable.note},
+          ${MovimientosTable.repeatMovement}
         )
         SELECT
           ${MovimientosTable.id},
@@ -49,7 +52,8 @@ Future<void> migrateMovimientosAmount(Database db) async {
           $oldAmountColumnName,
           ${MovimientosTable.date},
           ${MovimientosTable.time},
-          ${MovimientosTable.note}
+          ${MovimientosTable.note},
+          0 -- Valor predeterminado para repeat_movement
         FROM temp_${MovimientosTable.table};
       ''');
 
@@ -61,14 +65,14 @@ Future<void> migrateMovimientosAmount(Database db) async {
 }
 
 Future<void> migrateMovimientosTable(Database db) async {
-  // Eliminar la columna 'type' si existe
+  // Agregar la columna 'repeat_movement' si no existe
   final columns = await db.rawQuery(
     "PRAGMA table_info(${MovimientosTable.table});",
   );
 
   final columnNames = columns.map((column) => column['name'] as String).toSet();
 
-  if (columnNames.contains('type')) {
+  if (!columnNames.contains(MovimientosTable.repeatMovement)) {
     await db.transaction((txn) async {
       await txn.execute('''
         ALTER TABLE ${MovimientosTable.table}
@@ -84,6 +88,7 @@ Future<void> migrateMovimientosTable(Database db) async {
           ${MovimientosTable.date} TEXT NOT NULL,
           ${MovimientosTable.time} TEXT NOT NULL,
           ${MovimientosTable.note} TEXT DEFAULT '',
+          ${MovimientosTable.repeatMovement} INTEGER DEFAULT 0,
           FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
         )
       ''');
@@ -96,7 +101,8 @@ Future<void> migrateMovimientosTable(Database db) async {
           ${MovimientosTable.amount},
           ${MovimientosTable.date},
           ${MovimientosTable.time},
-          ${MovimientosTable.note}
+          ${MovimientosTable.note},
+          ${MovimientosTable.repeatMovement}
         )
         SELECT
           ${MovimientosTable.id},
@@ -105,7 +111,8 @@ Future<void> migrateMovimientosTable(Database db) async {
           ${MovimientosTable.amount},
           ${MovimientosTable.date},
           ${MovimientosTable.time},
-          ${MovimientosTable.note}
+          ${MovimientosTable.note},
+          0 -- Valor predeterminado para repeat_movement
         FROM temp_${MovimientosTable.table};
       ''');
 
@@ -113,5 +120,33 @@ Future<void> migrateMovimientosTable(Database db) async {
         DROP TABLE temp_${MovimientosTable.table};
       ''');
     });
+  }
+}
+
+Future<void> migrateCategoriasEnabledRepeatMovement(Database db) async {
+  // Agregar la columna 'enabled_repeat_movement' si no existe
+  final columns = await db.rawQuery(
+    "PRAGMA table_info(${CategoriasTable.table});",
+  );
+
+  final columnNames = columns.map((column) => column['name'] as String).toSet();
+
+  if (!columnNames.contains(CategoriasTable.enabledRepeatMovement)) {
+    await db.execute('''
+      ALTER TABLE ${CategoriasTable.table}
+      ADD COLUMN ${CategoriasTable.enabledRepeatMovement}
+      INTEGER DEFAULT 0;
+    ''');
+
+    // Verificar integridad
+    final result = await db.rawQuery('PRAGMA foreign_key_check');
+    if (result.isNotEmpty) {
+      AppLogger.log(
+        'Foreign key check failed after migration: $result',
+        level: LogLevel.error,
+        tag: 'DBMigration',
+      );
+      throw Exception('Foreign key check failed: $result');
+    }
   }
 }

@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 
 class AmountInput extends StatelessWidget {
   final TextEditingController controller;
+  final bool isEditable;
+  final bool showLabel;
 
-  const AmountInput({super.key, required this.controller});
+  const AmountInput({
+    super.key,
+    required this.controller,
+    this.isEditable = true,
+    this.showLabel = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +22,12 @@ class AmountInput extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 15),
-        // Label
-        Text(
-          'Monto',
-          style: Theme.of(
-            context,
-          ).textTheme.labelMedium,
-        ),
-        const SizedBox(height: 5),
+        if (showLabel) 
+          ...[
+            // Label
+            Text('Monto', style: Theme.of(context).textTheme.labelMedium),
+            const SizedBox(height: 5),
+          ],
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -30,10 +35,7 @@ class AmountInput extends StatelessWidget {
             // Símbolo $
             Text(
               '\$',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 18),
 
@@ -41,6 +43,7 @@ class AmountInput extends StatelessWidget {
             IntrinsicWidth(
               child: TextField(
                 controller: controller,
+                enabled: isEditable,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -57,9 +60,7 @@ class AmountInput extends StatelessWidget {
                   border: InputBorder.none,
                   isDense: true,
                 ),
-                inputFormatters: [
-                  MoneyInputFormatter(),
-                ],
+                inputFormatters: [MoneyInputFormatter()],
                 cursorColor: colorScheme.primary,
                 textAlign: TextAlign.center,
               ),

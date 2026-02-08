@@ -68,6 +68,7 @@ class TransactionsContainer extends StatelessWidget {
                     movementType: categoria.movementType,
                     date: movimiento.date,
                     categoryName: categoria.name,
+                    isEnabledRepeatMovement: categoria.enabledRepeatMovement,
                     categoryId: categoria.id,
                     time: movimiento.time,
                     note: movimiento.note,

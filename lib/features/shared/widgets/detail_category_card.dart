@@ -5,7 +5,8 @@ class DetailCategoryCard extends StatelessWidget {
   final String categoryName;
   final IconData categoryIcon;
   final Color iconColor;
-  final String currentValue;
+  final String? currentValue;
+  final Widget? trailing;
   final bool showArrow;
 
   const DetailCategoryCard({
@@ -14,6 +15,7 @@ class DetailCategoryCard extends StatelessWidget {
     required this.categoryIcon,
     required this.iconColor,
     this.currentValue = "Seleccionar",
+    this.trailing,
     this.showArrow = true,
   });
 
@@ -39,32 +41,31 @@ class DetailCategoryCard extends StatelessWidget {
         //Nombre categoria
         Expanded(
           child: Text(
-          categoryName,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ),
-        
-        const SizedBox(width: 4),
-        //Valor actual
-        IntrinsicWidth(
-          child: Container(
-            alignment: Alignment.centerRight,
-            child: Text(
-              currentValue,
-              textAlign: TextAlign.right,
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-            ),
+            categoryName,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
 
-        if (showArrow) 
-        ...[
-          const SizedBox(width: 3),
-          Icon(
-            Icons.arrow_forward_ios,
-            size: 16,
-            color: Colors.grey[400],
+        //Valor actual
+        if (currentValue != null && trailing == null) ...[
+          const SizedBox(width: 4),
+          IntrinsicWidth(
+            child: Container(
+              alignment: Alignment.centerRight,
+              child: Text(
+                currentValue!,
+                textAlign: TextAlign.right,
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              ),
+            ),
           ),
+        ],
+
+        if (trailing != null) ...[const SizedBox(width: 8), trailing!],
+
+        if (showArrow && trailing == null) ...[
+          const SizedBox(width: 3),
+          Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
         ],
       ],
     );

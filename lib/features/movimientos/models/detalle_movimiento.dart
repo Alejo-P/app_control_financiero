@@ -9,6 +9,7 @@ class DetalleMovimiento {
   final TipoMovimiento movementType;
   final DateTime date;
   final String? categoryName;
+  final bool isEnabledRepeatMovement;
   final int? categoryId;
   final TimeOfDay? time;
   final String note;
@@ -20,6 +21,7 @@ class DetalleMovimiento {
     required this.movementType,
     required this.date,
     this.categoryName,
+    this.isEnabledRepeatMovement = false,
     this.categoryId,
     this.time,
     this.note = '',
@@ -37,6 +39,7 @@ class DetalleMovimiento {
       date: DateTime.parse(map['fecha']),
       note: map['nota'],
       categoryName: map['categoria'] != null ? map['categoria'] as String : null,
+      isEnabledRepeatMovement: map['enabledRepeatMovement'] == 1,
       time: map['hora'] != null ? TimeOfDay(
         hour: int.parse(map['time'].split(':')[0]),
         minute: int.parse(map['time'].split(':')[1]),

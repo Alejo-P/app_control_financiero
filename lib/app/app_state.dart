@@ -86,7 +86,7 @@ class AppState extends ChangeNotifier {
 
   // Cargar datos iniciales de los repositorios
   Future<void> loadInitialData() async {
-    await Future.wait([
+  await Future.wait([
       _tipoCategoriaRepository.fetchTipoCategorias(),
       _categoriasRepository.fetchCategorias(),
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),

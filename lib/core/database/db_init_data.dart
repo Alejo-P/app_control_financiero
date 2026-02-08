@@ -33,6 +33,7 @@ final categoriasList = <Categoria>[
     categoryTypeID: 1,
     iconName: 'home',
     iconColorValue: 0xFF42A5F5,
+    enabledRepeatMovement: true,
     isDefault: true,
   ),
   Categoria(
@@ -43,6 +44,7 @@ final categoriasList = <Categoria>[
     categoryTypeID: 1,
     iconName: 'restaurant',
     iconColorValue: 0xFFEF5350,
+    enabledRepeatMovement: true,
     isDefault: true,
   ),
   Categoria(
@@ -53,6 +55,7 @@ final categoriasList = <Categoria>[
     categoryTypeID: 1,
     iconName: 'directions_bus',
     iconColorValue: 0xFFFF9800,
+    enabledRepeatMovement: true,
     isDefault: true,
   ),
   Categoria(
@@ -63,6 +66,7 @@ final categoriasList = <Categoria>[
     categoryTypeID: 3,
     iconName: 'payments',
     iconColorValue: 0xFF4CAF50,
+    enabledRepeatMovement: true,
     isDefault: true,
   ),
   Categoria(
@@ -73,6 +77,7 @@ final categoriasList = <Categoria>[
     categoryTypeID: 2,
     iconName: 'local_hospital',
     iconColorValue: 0xFFAB47BC,
+    enabledRepeatMovement: true,
     isDefault: true,
   ),
   Categoria(
@@ -83,6 +88,7 @@ final categoriasList = <Categoria>[
     categoryTypeID: 2,
     iconName: 'movie',
     iconColorValue: 0xFFFF7043,
+    enabledRepeatMovement: true,
     isDefault: true,
   ),
 ];
@@ -118,6 +124,14 @@ Future<void> runSeeds(Database db) async {
   }
   if (currentVersion < 4) {
     await migrateMovimientosTable(db);
+    await setSeedVersion(db, currentVersion + 1);
+  }
+  if (currentVersion < 5) {
+    await migrateCategoriasEnabledRepeatMovement(db);
+    await migrateMovimientosTable(db);
+    for (var categoria in categoriasList) {
+      await upsertCategoria(db, categoria);
+    }
     await setSeedVersion(db, currentVersion + 1);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
 import 'package:control_financiero/features/presupuestos/widgets/total_budget_summary_card.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -38,7 +39,8 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
               MaterialPageRoute(
                 builder: (context) => PresupuestoFormPage(
                   mode: PresupuestoFormMode.create,
-                  ingresoPresupuestado: _appState.totalIngresoPresupuestado ?? 0.0,
+                  ingresoPresupuestado:
+                      _appState.totalIngresoPresupuestado ?? 0.0,
                 ),
               ),
             );
@@ -119,12 +121,34 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             presupuesto.categoryId,
                           );
 
-                          return CategoryCard(
-                            icon: categoryDetails['icon'],
-                            title: categoryDetails['name'],
-                            spent: categoryDetails['spent'],
-                            total: presupuesto.amount,
-                            color: categoryDetails['iconColor'],
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PresupuestoFormPage(
+                                    mode: PresupuestoFormMode.edit,
+                                    presupuesto: DetallePresupuesto(
+                                      categoria: categoryDetails['name'],
+                                      categoriaId: presupuesto.categoryId,
+                                      montoPresupuestado: presupuesto.amount,
+                                      icon: categoryDetails['icon'],
+                                      iconColor: categoryDetails['iconColor'],
+                                      fechaPresupuesto: presupuesto.date,
+                                    ),
+                                    ingresoPresupuestado:
+                                        appState.totalIngresoPresupuestado ?? 0.0,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: CategoryCard(
+                              icon: categoryDetails['icon'],
+                              title: categoryDetails['name'],
+                              spent: categoryDetails['spent'],
+                              total: presupuesto.amount,
+                              color: categoryDetails['iconColor'],
+                            ),
                           );
                         }),
                       ],

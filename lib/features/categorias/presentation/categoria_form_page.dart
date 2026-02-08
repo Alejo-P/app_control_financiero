@@ -38,6 +38,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   bool _hasUnsavedChanges = false;
   bool isDefault = false;
   bool isEditing = false;
+  bool isEnabledRepeatMovement = false;
   int categoryTypeID = -1;
   String categoryTypeName = 'Sin seleccionar';
   String selectedTipeMovement = 'gasto';
@@ -150,6 +151,9 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
         Text(
           'Tipo de movimiento: ${selectedTipeMovement == 'gasto' ? 'Gasto' : 'Ingreso'}',
         ),
+        Text(
+          'Permitir repetir movimientos cada mes: ${isEnabledRepeatMovement ? 'Sí' : 'No'}',
+        ),
       ],
     );
     if (confirmed != true) return;
@@ -170,6 +174,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       iconName: IconMapper.toName(selectedIcon),
       iconColorValue: selectedColor.value,
       movementType: tipoMovimientoSeleccionado,
+      enabledRepeatMovement: isEnabledRepeatMovement,
       isDefault: isDefault,
     );
 
@@ -183,18 +188,12 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     if (!mounted) return;
 
     if (!appState.transactionSuccess) {
-      AppSnackbar.error(
-        context,
-        appState.transactionResultMessage,
-      );
+      AppSnackbar.error(context, appState.transactionResultMessage);
       return;
     }
-    
-    AppSnackbar.success(
-      context,
-      appState.transactionResultMessage,
-    );
-    
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
+
     Navigator.pop(context, true);
   }
 
@@ -207,25 +206,24 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     );
     if (confirmed != true) return;
 
-    await appState.eliminarCategoria(
-      widget.categoriaExistente!.id,
-    );
+    await appState.eliminarCategoria(widget.categoriaExistente!.id);
 
     if (!mounted) return;
 
     if (!appState.transactionSuccess) {
-      AppSnackbar.error(
-        context,
-        appState.transactionResultMessage,
-      );
+      AppSnackbar.error(context, appState.transactionResultMessage);
       return;
     }
-    
-    AppSnackbar.success(
-      context,
-      appState.transactionResultMessage,
-    );
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
     Navigator.pop(context, true);
+  }
+
+  void _toggleRepeatMovement(bool value) {
+    setState(() {
+      isEnabledRepeatMovement = value;
+      _hasUnsavedChanges = true;
+    });
   }
 
   Future<bool> _onWillPop() async {
@@ -376,6 +374,20 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                               showArrow: (!isDefault && !isEditing),
                             ),
                           ),
+                          // Configurar si mostrar en la vista de creacion de movimeintos, al seleccionar esta categoria se pueda activar la opcion de repetir el movimiento cada mes
+                          DetailCategoryCard(
+                            categoryName: 'Repetir movimiento cada mes',
+                            categoryIcon: Icons.repeat,
+                            iconColor: Colors.green,
+                            showArrow: false,
+                            trailing: Switch(
+                              value: isEnabledRepeatMovement,
+                              onChanged: (value) {
+                                if (isDefault || isEditing) return;
+                                _toggleRepeatMovement(value);
+                              },
+                            ),
+                          ),
                         ],
                       ),
                       if (movementsByCategory > 0)
@@ -394,6 +406,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                                   '$movementsByCategory movimiento(s)',
                               showArrow: false,
                             ),
+                            // Aquí podrías agregar un botón o enlace para ver los movimientos asociados a esta categoría, si lo deseas.
                           ],
                         ),
 

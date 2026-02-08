@@ -39,6 +39,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   TimeOfDay movementTime = TimeOfDay.now();
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
   bool _hasUnsavedChanges = false;
+  bool isEnabledRepeatMovement = false;
+  bool repeatMovement = false;
   late DateTime selectedDate;
   late List<Categoria> categorias;
   late List<Categoria> categoriasFiltradas;
@@ -70,6 +72,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       movementTime = widget.movimiento!.time!;
       movementId = widget.movimiento!.id!;
       categoryName = widget.movimiento!.categoryName ?? 'Sin categoría';
+      isEnabledRepeatMovement = widget.movimiento!.isEnabledRepeatMovement;
       tipoMovimiento = widget.movimiento!.movementType;
     }
 
@@ -185,6 +188,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         Text('Fecha: ${formatDate(selectedDate)}'),
         if (_noteController.text.trim().isNotEmpty)
           Text('Nota: ${_noteController.text.trim()}'),
+        
+        if (isEnabledRepeatMovement)
+          Text('El movimiento se repetirá mensualmente'),
       ],
     );
     if (confirmed != true) return;
@@ -204,6 +210,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           ? movementTime
           : TimeOfDay.now(),
       note: noteText,
+      repeatMovement: repeatMovement,
     );
 
     if (widget.mode == MovimientoFormMode.edit) {
@@ -245,6 +252,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     AppSnackbar.success(context, appState.transactionResultMessage);
 
     Navigator.pop(context, true);
+  }
+
+  void _toggleRepeatMovement(bool value) {
+    setState(() {
+      repeatMovement = value;
+    });
   }
 
   Future<bool> _onWillPop() async {
@@ -353,6 +366,22 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                           ),
                         ],
                       ),
+                      if (isEnabledRepeatMovement)
+                        WidgetsContainer(
+                          title: 'Movimiento recurrente',
+                          padding: const EdgeInsets.all(12),
+                          children: [
+                            DetailCategoryCard(
+                              categoryName: 'Repetir movimiento mensualmente',
+                              categoryIcon: Icons.repeat,
+                              iconColor: Colors.orange,
+                              trailing: Switch(
+                                value: repeatMovement,
+                                onChanged: _toggleRepeatMovement,
+                              ),
+                            ),
+                          ]
+                        ),
                       InfoTipeMovementCard(tipoMovimiento: tipoMovimiento),
                     ],
                   ),
