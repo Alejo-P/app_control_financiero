@@ -37,6 +37,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   final anios = generateYearList(DateTime.now().year, 10);
   late DateTime fechaPresupuesto;
   late int categoriaSeleccionada;
+  int presupuestoId = 0;
   late IngresoPresupuestado ingresoDisponible;
   final _presupuestoAmountController = TextEditingController();
   final _ingresoPresupuestadoController = TextEditingController();
@@ -55,6 +56,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
       categoriaSeleccionada = widget.presupuesto!.categoriaId;
       fechaPresupuesto = widget.presupuesto!.fechaPresupuesto;
+      presupuestoId = widget.presupuesto!.idPresupuesto;
       _presupuestoAmountController.text = widget.presupuesto!.montoPresupuestado
           .toString();
     }
@@ -207,7 +209,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     }
 
     final nuevoPresupuesto = Presupuesto(
-      id: widget.presupuesto?.categoriaId ?? 0,
+      id: widget.mode == PresupuestoFormMode.edit ? presupuestoId : null,
       categoryId: categoriaSeleccionada,
       amount: value,
       date: fechaPresupuesto,
@@ -218,6 +220,31 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     } else if (widget.mode == PresupuestoFormMode.edit) {
       await appState.actualizarPresupuesto(nuevoPresupuesto);
     }
+
+    if (!mounted) return;
+
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(context, appState.transactionResultMessage);
+      return;
+    }
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
+
+    Navigator.pop(context, true);
+  }
+
+  Future<void> _eliminarPresupuesto() async {
+    final appState = context.read<AppState>();
+
+    final shouldDelete = await showConfirmDialog(
+      context,
+      title: 'Eliminar presupuesto',
+      content: '¿Estás seguro de que deseas eliminar este presupuesto?',
+    );
+
+    if (shouldDelete != true) return;
+
+    await appState.eliminarPresupuesto(presupuestoId);
 
     if (!mounted) return;
 
@@ -282,11 +309,11 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
           actions: [
             if (widget.mode == PresupuestoFormMode.edit)
               IconButton(
-                onPressed: () async {
-                  // Lógica para eliminar el presupuesto
-                },
                 tooltip: 'Eliminar Presupuesto',
                 icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () async {
+                  await _eliminarPresupuesto();
+                },
               ),
 
             IconButton(

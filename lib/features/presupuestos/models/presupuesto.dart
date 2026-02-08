@@ -41,4 +41,9 @@ class Presupuesto {
       'amount': amount,
     };
   }
+
+  @override
+  String toString() {
+    return 'Presupuesto{id: $id, categoryId: $categoryId, date: $date, amount: $amount}';
+  }
 }

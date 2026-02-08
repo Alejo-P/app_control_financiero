@@ -129,6 +129,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                   builder: (context) => PresupuestoFormPage(
                                     mode: PresupuestoFormMode.edit,
                                     presupuesto: DetallePresupuesto(
+                                      idPresupuesto: presupuesto.id!,
                                       categoria: categoryDetails['name'],
                                       categoriaId: presupuesto.categoryId,
                                       montoPresupuestado: presupuesto.amount,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class DetallePresupuesto {
   final String categoria;
   final int categoriaId;
+  final int idPresupuesto;
   final IconData icon;
   final Color iconColor;
   final DateTime fechaPresupuesto;
@@ -11,6 +12,7 @@ class DetallePresupuesto {
   DetallePresupuesto({
     required this.categoria,
     required this.categoriaId,
+    required this.idPresupuesto,
     required this.icon,
     required this.iconColor,
     required this.fechaPresupuesto,
@@ -21,6 +23,7 @@ class DetallePresupuesto {
     return DetallePresupuesto(
       categoria: map['categoria'],
       categoriaId: map['categoriaId'],
+      idPresupuesto: map['idPresupuesto'],
       icon: IconData(map['iconCodePoint'], fontFamily: 'MaterialIcons'),
       iconColor: Color(map['iconColorValue']),
       fechaPresupuesto: DateTime.parse(map['fechaPresupuesto']),

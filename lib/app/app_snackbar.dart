@@ -57,18 +57,19 @@ class AppSnackbar {
           margin: const EdgeInsets.all(16),
           behavior: SnackBarBehavior.floating,
           elevation: 6,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8)
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           backgroundColor: backgroundColor,
           content: Row(
             children: [
               Icon(icon, color: Colors.white),
               const SizedBox(width: 8),
-              Expanded(child: Text(message)),
+              Expanded(
+                child: Text(message, style: TextStyle(color: Colors.white)),
+              ),
             ],
           ),
           showCloseIcon: true,
+          closeIconColor: Colors.white,
           duration: Duration(seconds: durationSeconds),
         ),
       );
