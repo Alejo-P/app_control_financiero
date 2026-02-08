@@ -55,11 +55,14 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     final gastosAcumulados = _appState.getGastoAcumuladoPorCategoriaEnMes(
       categoryId,
     );
+    final movimientos = _appState.getMovimientosPresupuestoByCategoriaId(categoryId);
+
     return {
       'name': categoria?.name ?? 'Categoría Desconocida',
       'icon': categoria?.iconData ?? Icons.category,
       'iconColor': categoria?.iconColor ?? Colors.grey,
       'spent': gastosAcumulados,
+      'movements': movimientos,
     };
   }
 
@@ -136,6 +139,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                       icon: categoryDetails['icon'],
                                       iconColor: categoryDetails['iconColor'],
                                       fechaPresupuesto: presupuesto.date,
+                                      movimientos: categoryDetails['movements'],
                                     ),
                                     ingresoPresupuestado:
                                         appState.totalIngresoPresupuestado ?? 0.0,

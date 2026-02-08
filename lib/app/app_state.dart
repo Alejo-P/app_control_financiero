@@ -67,6 +67,7 @@ class AppState extends ChangeNotifier {
   double? get totalIngresoPresupuestado => _totalIngresoPresupuestado;
   double? get variacionAhorro => _variacionAhorro;
   List<DateTime> get uniqueMovementDates => _uniqueMovementDates;
+  List<DateTime> get uniqueBudgetMovementDates => _fetchUniqueBudgetMovementDates();
   List<String> get uniqueTipeCategoryNames => _uniqueTipeCategoryNames;
 
   List<Categoria> get categorias => _categoriasRepository.categorias;
@@ -238,10 +239,30 @@ class AppState extends ChangeNotifier {
     return dates;
   }
 
+  // Obtener todas las fechas únicas de movimientos presupuestos
+  List<DateTime> _fetchUniqueBudgetMovementDates() {
+    final dates = movimientosPresupuestos
+        .map((m) => DateTime(m.date.year, m.date.month, m.date.day))
+        .toSet()
+        .toList();
+    dates.sort((a, b) => b.compareTo(a));
+    return dates;
+  }
+
   // Obtener movimientos por categoria (id)
   List<Movimiento> getMovimientosByCategoriaId(int categoriaId) {
     return movimientos.where((m) => m.categoryID == categoriaId).toList();
   }
+
+  // Obtener movimientos (para presupuesto) por categoria (id)
+  List<Movimiento> getMovimientosPresupuestoByCategoriaId(int categoriaId) {
+    return movimientosPresupuestos
+        .where((m) => m.categoryID == categoriaId)
+        .toList();
+  }
+
+  // Obtener movimientos presupuestos filtrados por fecha (mes y año) 
+
 
   // Obtener movimientos agrupados por fecha
   Map<DateTime, List<Movimiento>> _fetchMovimientosPorFecha() {
@@ -275,7 +296,7 @@ class AppState extends ChangeNotifier {
   // Obtener movimientos filtrados por fecha (mes y año)
   List<Movimiento> getMovimientosByDateAndFilter(
     DateTime fecha,
-    MovimientoFiltro filtro,
+    {MovimientoFiltro filtro = MovimientoFiltro.todos}
   ) {
     final movimientos = _movimientosPorFecha[fecha] ?? [];
 
@@ -359,9 +380,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     await loadMovementsByMonthAndYear(month);
-
-    // Agregar un delay de 1 segundo para mejorar la experiencia de usuario
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 300));
 
     _isLoadingMonth = false;
     notifyListeners();
@@ -373,9 +392,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     await loadPresupuestosByMonthAndYear(month);
-
-    // Agregar un delay de 1 segundo para mejorar la experiencia de usuario
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 300));
 
     _isLoadingBudget = false;
     notifyListeners();

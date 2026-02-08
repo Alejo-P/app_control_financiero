@@ -77,7 +77,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
     final movimientosFiltradosDelMes = fechasMovimientos
         .expand(
           (fecha) =>
-              appState.getMovimientosByDateAndFilter(fecha, selectedFilter),
+              appState.getMovimientosByDateAndFilter(fecha, filtro: selectedFilter),
         )
         .toList();
 
@@ -165,7 +165,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
                             final movimientosFiltrados = appState
                                 .getMovimientosByDateAndFilter(
                                   fecha,
-                                  selectedFilter,
+                                  filtro: selectedFilter,
                                 );
 
                             if (movimientosFiltrados.isEmpty) {

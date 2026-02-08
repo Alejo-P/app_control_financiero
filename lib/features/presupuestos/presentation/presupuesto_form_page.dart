@@ -5,7 +5,9 @@ import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
+import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
@@ -33,6 +35,7 @@ class PresupuestoFormPage extends StatefulWidget {
 
 class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   bool _hasUnsavedChanges = false;
+  List<Movimiento> movimientos = [];
   final meses = monthNames;
   final anios = generateYearList(DateTime.now().year, 10);
   late DateTime fechaPresupuesto;
@@ -55,6 +58,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
       categoriaSeleccionada = widget.presupuesto!.categoriaId;
+      movimientos = widget.presupuesto!.movimientos;
       fechaPresupuesto = widget.presupuesto!.fechaPresupuesto;
       presupuestoId = widget.presupuesto!.idPresupuesto;
       _presupuestoAmountController.text = widget.presupuesto!.montoPresupuestado
@@ -268,6 +272,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
               orElse: () => throw Exception('Categoría no encontrada'),
             ),
           ];
+    final appState = context.watch<AppState>();
+    final fechasMovimientos = appState.uniqueBudgetMovementDates;
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -477,6 +483,46 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                         isEditable: ingresoDisponible.monto > 0,
                         showLabel: false,
                       ),
+
+                      if (movimientos.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        const Divider(),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Movimientos asociados a este presupuesto',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...fechasMovimientos.map((fecha) {
+                          // Filtrar movimientos por fecha y filtro seleccionado
+                          final movimientosFiltrados = movimientos
+                              .where((mov) => isSameDay(mov.date, fecha))
+                              .toList();
+
+                          if (movimientosFiltrados.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return TransactionsContainer(
+                            date: fecha,
+                            movimientos: movimientosFiltrados,
+                          );
+                        }),
+                        Center(
+                          child: Text(
+                            '${movimientos.length} movimientos en este presupuesto',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.grey[600]),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ],
                   ),
                 ),

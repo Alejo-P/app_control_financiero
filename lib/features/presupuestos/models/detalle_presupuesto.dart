@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:flutter/material.dart';
 
 class DetallePresupuesto {
@@ -8,6 +9,7 @@ class DetallePresupuesto {
   final Color iconColor;
   final DateTime fechaPresupuesto;
   final double montoPresupuestado;
+  final List<Movimiento> movimientos;
 
   DetallePresupuesto({
     required this.categoria,
@@ -17,6 +19,7 @@ class DetallePresupuesto {
     required this.iconColor,
     required this.fechaPresupuesto,
     required this.montoPresupuestado,
+    this.movimientos = const [],
   });
 
   factory DetallePresupuesto.fromMap(Map<String, dynamic> map) {
@@ -28,6 +31,9 @@ class DetallePresupuesto {
       iconColor: Color(map['iconColorValue']),
       fechaPresupuesto: DateTime.parse(map['fechaPresupuesto']),
       montoPresupuestado: map['montoPresupuestado'],
+      movimientos: (map['movimientos'] as List<dynamic>)
+          .map((mov) => Movimiento.fromMap(mov))
+          .toList(),
     );
   }
 }
