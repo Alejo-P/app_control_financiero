@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:flutter/material.dart';
 
 /// Modelo que representa el detalle de un movimiento financiero.
@@ -9,6 +10,8 @@ class DetalleMovimiento {
   final TipoMovimiento movementType;
   final DateTime date;
   final String? categoryName;
+  final IconData categoryIcon;
+  final Color? categoryColor;
   final bool isEnabledRepeatMovement;
   final bool repeatMovement;
   final int? categoryId;
@@ -21,6 +24,8 @@ class DetalleMovimiento {
     required this.amount,
     required this.movementType,
     required this.date,
+    required this.categoryIcon,
+    required this.categoryColor,
     this.categoryName,
     this.isEnabledRepeatMovement = false,
     this.repeatMovement = false,
@@ -40,6 +45,8 @@ class DetalleMovimiento {
           : TipoMovimiento.gasto,
       date: DateTime.parse(map['fecha']),
       note: map['nota'],
+      categoryIcon: map['categoriaIcono'] != null ? IconMapper.fromName(map['categoriaIcono']) : Icons.category,
+      categoryColor: map['categoriaColor'] != null ? Color(map['categoriaColor']) : null,
       categoryName: map['categoria'] != null ? map['categoria'] as String : null,
       isEnabledRepeatMovement: map['enabledRepeatMovement'] == 1,
       repeatMovement: map['repeatMovement'] == 1,

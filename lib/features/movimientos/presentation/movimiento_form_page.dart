@@ -35,6 +35,8 @@ class MovimientoFormPage extends StatefulWidget {
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
   int categoryId = -1;
   int movementId = 0;
+  IconData categoryIcon = Icons.category;
+  Color categoryColor = Colors.blue;
   String categoryName = 'Sin categoría';
   TimeOfDay movementTime = TimeOfDay.now();
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
@@ -73,6 +75,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       movementTime = widget.movimiento!.time!;
       movementId = widget.movimiento!.id!;
       categoryName = widget.movimiento!.categoryName ?? 'Sin categoría';
+      categoryIcon = widget.movimiento!.categoryIcon;
+      categoryColor = widget.movimiento!.categoryColor ?? Colors.blue;
       isEnabledRepeatMovement = widget.movimiento!.isEnabledRepeatMovement;
       repeatMovement = widget.movimiento!.repeatMovement;
       _initialValueIsEnabledRepeatMovement = widget.movimiento!.repeatMovement;
@@ -131,6 +135,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       _hasUnsavedChanges = true;
       categoryId = categoria.id!;
       categoryName = categoria.name;
+      categoryIcon = categoria.iconData;
+      categoryColor = categoria.iconColor;
       isEnabledRepeatMovement = categoria.enabledRepeatMovement;
     });
   }
@@ -195,7 +201,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         repeatMovement = false;
       });
     }
-    
+
     if (!mounted) return;
 
     final confirmed = await showConfirmAddDialog(
@@ -367,8 +373,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                             borderRadius: BorderRadius.circular(12),
                             child: DetailCategoryCard(
                               categoryName: 'Categoría',
-                              categoryIcon: Icons.category,
-                              iconColor: Colors.blue,
+                              categoryIcon: categoryIcon,
+                              iconColor: categoryColor,
                               currentValue: categoryName,
                             ),
                           ),
