@@ -4,18 +4,19 @@ class AppTheme {
   static final ThemeData light = ThemeData(
     primarySwatch: Colors.blue,
     primaryColor: Colors.blue,
-    colorScheme: ColorScheme.fromSwatch(
-      primarySwatch: Colors.blue,
-      cardColor: Colors.white,
-      backgroundColor: Color.fromARGB(255, 239, 239, 239),
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: Colors.black,
-      secondary: Colors.blue,
-      surface: Colors.white,
-      onPrimary: Colors.white,
-      onSurface: Colors.black87,
-    ),
+    colorScheme:
+        ColorScheme.fromSwatch(
+          primarySwatch: Colors.blue,
+          cardColor: Colors.white,
+          backgroundColor: Color.fromARGB(255, 239, 239, 239),
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: Colors.black,
+          secondary: Colors.blue,
+          surface: Colors.white,
+          onPrimary: Colors.white,
+          onSurface: Colors.black87,
+        ),
     scaffoldBackgroundColor: Color.fromARGB(255, 239, 239, 239),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
@@ -50,6 +51,24 @@ class AppTheme {
       headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
       headlineSmall: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
     ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue; // Color del thumb cuando el switch está activado
+        }
+        return Colors.grey; // Color del thumb cuando el switch está desactivado
+      }),
+      trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue.withValues(
+            alpha: 0.5,
+          ); // Color del track cuando el switch está activado
+        }
+        return Colors.grey.withValues(
+          alpha: 0.5,
+        ); // Color del track cuando el switch está desactivado
+      }),
+    ),
     useMaterial3: true,
   );
 
@@ -57,18 +76,19 @@ class AppTheme {
     brightness: Brightness.dark,
     primarySwatch: Colors.blue,
     primaryColor: Colors.blue,
-    colorScheme: ColorScheme.fromSwatch(
-      primarySwatch: Colors.blue,
-      cardColor: Color.fromARGB(255, 48, 48, 48),
-      backgroundColor: Color.fromARGB(255, 34, 34, 34),
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: Colors.white,
-      secondary: Colors.blue,
-      surface: Color.fromARGB(255, 48, 48, 48),
-      onPrimary: Colors.black,
-      onSurface: Colors.white70,
-    ),
+    colorScheme:
+        ColorScheme.fromSwatch(
+          primarySwatch: Colors.blue,
+          cardColor: Color.fromARGB(255, 48, 48, 48),
+          backgroundColor: Color.fromARGB(255, 34, 34, 34),
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: Colors.white,
+          secondary: Colors.blue,
+          surface: Color.fromARGB(255, 48, 48, 48),
+          onPrimary: Colors.black,
+          onSurface: Colors.white70,
+        ),
     scaffoldBackgroundColor: Color.fromARGB(255, 34, 34, 34),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.black,
@@ -102,6 +122,24 @@ class AppTheme {
       headlineLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
       headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
       headlineSmall: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue; // Color del thumb cuando el switch está activado
+        }
+        return Colors.grey; // Color del thumb cuando el switch está desactivado
+      }),
+      trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue.withValues(
+            alpha: 0.5,
+          ); // Color del track cuando el switch está activado
+        }
+        return Colors.grey.withValues(
+          alpha: 0.5,
+        ); // Color del track cuando el switch está desactivado
+      }),
     ),
     useMaterial3: true,
   );

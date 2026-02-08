@@ -39,6 +39,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   bool isDefault = false;
   bool isEditing = false;
   bool isEnabledRepeatMovement = false;
+  bool _initialValueIsEnabledRepeatMovement = false;
   int categoryTypeID = -1;
   String categoryTypeName = 'Sin seleccionar';
   String selectedTipeMovement = 'gasto';
@@ -67,10 +68,13 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       selectedColor = categoria.color ?? categoryColors.first;
       movementsByCategory = categoria.totalMovements ?? 0;
       categoryTypeName = categoria.categoryTypeName;
+      categoryTypeID = categoria.categoryTypeID;
       selectedTipeMovement = categoria.movementType == TipoMovimiento.ingreso
           ? 'ingreso'
           : 'gasto';
       isDefault = categoria.isDefault;
+      isEnabledRepeatMovement = categoria.enabledRepeatMovement;
+      _initialValueIsEnabledRepeatMovement = categoria.enabledRepeatMovement;
       isEditing = true;
     }
 
@@ -220,9 +224,17 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   }
 
   void _toggleRepeatMovement(bool value) {
+    if (_initialValueIsEnabledRepeatMovement && movementsByCategory > 0) {
+      AppSnackbar.warning(
+        context,
+        'No puedes cambiar esta opción porque esta categoría tiene movimientos asociados.',
+      );
+      return;
+    }
+
     setState(() {
       isEnabledRepeatMovement = value;
-      _hasUnsavedChanges = true;
+      _hasUnsavedChanges = value != _initialValueIsEnabledRepeatMovement;
     });
   }
 
@@ -374,16 +386,15 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                               showArrow: (!isDefault && !isEditing),
                             ),
                           ),
-                          // Configurar si mostrar en la vista de creacion de movimeintos, al seleccionar esta categoria se pueda activar la opcion de repetir el movimiento cada mes
                           DetailCategoryCard(
-                            categoryName: 'Repetir movimiento cada mes',
+                            categoryName: 'Permitir repetir movimientos cada mes',
                             categoryIcon: Icons.repeat,
                             iconColor: Colors.green,
                             showArrow: false,
                             trailing: Switch(
                               value: isEnabledRepeatMovement,
                               onChanged: (value) {
-                                if (isDefault || isEditing) return;
+                                if (isDefault) return;
                                 _toggleRepeatMovement(value);
                               },
                             ),

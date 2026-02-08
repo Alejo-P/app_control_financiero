@@ -40,6 +40,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
   bool _hasUnsavedChanges = false;
   bool isEnabledRepeatMovement = false;
+  bool _initialValueIsEnabledRepeatMovement = false;
   bool repeatMovement = false;
   late DateTime selectedDate;
   late List<Categoria> categorias;
@@ -73,6 +74,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       movementId = widget.movimiento!.id!;
       categoryName = widget.movimiento!.categoryName ?? 'Sin categoría';
       isEnabledRepeatMovement = widget.movimiento!.isEnabledRepeatMovement;
+      repeatMovement = widget.movimiento!.repeatMovement;
+      _initialValueIsEnabledRepeatMovement = widget.movimiento!.repeatMovement;
       tipoMovimiento = widget.movimiento!.movementType;
     }
 
@@ -128,6 +131,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       _hasUnsavedChanges = true;
       categoryId = categoria.id!;
       categoryName = categoria.name;
+      isEnabledRepeatMovement = categoria.enabledRepeatMovement;
     });
   }
 
@@ -175,6 +179,25 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       return;
     }
 
+    // Si el movimiento tiene activado los movimientos recurrentes y se usa una categoria que no los permite, indicar que se desactivaran los movimientos recurrentes
+    if (repeatMovement && !isEnabledRepeatMovement) {
+      final shouldContinue = await showConfirmDialog(
+        context,
+        title: 'Desactivar movimiento recurrente',
+        content: 'La categoría seleccionada no permite movimientos recurrentes. ¿Desea continuar y desactivar esta opción?',
+      );
+
+      if (shouldContinue != true) {
+        return;
+      }
+
+      setState(() {
+        repeatMovement = false;
+      });
+    }
+    
+    if (!mounted) return;
+
     final confirmed = await showConfirmAddDialog(
       context,
       titleModal: 'Confirmar movimiento',
@@ -189,7 +212,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         if (_noteController.text.trim().isNotEmpty)
           Text('Nota: ${_noteController.text.trim()}'),
         
-        if (isEnabledRepeatMovement)
+        if (repeatMovement)
           Text('El movimiento se repetirá mensualmente'),
       ],
     );
@@ -257,6 +280,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   void _toggleRepeatMovement(bool value) {
     setState(() {
       repeatMovement = value;
+      _hasUnsavedChanges = value != _initialValueIsEnabledRepeatMovement;
     });
   }
 
@@ -369,6 +393,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                       if (isEnabledRepeatMovement)
                         WidgetsContainer(
                           title: 'Movimiento recurrente',
+                          description: 'Este movimiento se repetirá mensualmente en la fecha seleccionada.',
                           padding: const EdgeInsets.all(12),
                           children: [
                             DetailCategoryCard(

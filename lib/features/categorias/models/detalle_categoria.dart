@@ -9,6 +9,8 @@ class DetalleCategoria {
   final Color? color;
   final TipoMovimiento movementType;
   final String categoryTypeName;
+  final int categoryTypeID;
+  final bool enabledRepeatMovement;
   final int? totalMovements;
   final bool isDefault;
 
@@ -19,8 +21,10 @@ class DetalleCategoria {
     this.color,
     required this.movementType,
     required this.categoryTypeName,
+    required this.categoryTypeID,
     this.description = '',
     this.totalMovements,
+    this.enabledRepeatMovement = false,
     this.isDefault = false,
   });
 
@@ -35,7 +39,9 @@ class DetalleCategoria {
           ? TipoMovimiento.ingreso
           : TipoMovimiento.gasto,
       categoryTypeName: map['categoryTypeName'],
+      categoryTypeID: map['categoryTypeID'],
       totalMovements: map['totalMovements'],
+      enabledRepeatMovement: map['enabledRepeatMovement'] == 1,
       isDefault: map['isDefault'] ?? false,
     );
   }
