@@ -22,7 +22,7 @@ class CategoryCard extends StatelessWidget {
     final progress = spent / total;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Card(
         color: spent > total ? Colors.red[50] : null,
         shape: RoundedRectangleBorder(

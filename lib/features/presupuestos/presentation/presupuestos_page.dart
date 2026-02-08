@@ -124,7 +124,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             presupuesto.categoryId,
                           );
 
-                          return InkWell(
+                          return GestureDetector(
                             onTap: () {
                               Navigator.push(
                                 context,

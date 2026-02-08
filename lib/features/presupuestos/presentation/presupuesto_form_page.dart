@@ -212,6 +212,17 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       return;
     }
 
+    final confirm = await showConfirmDialog(
+      context,
+      title: widget.mode == PresupuestoFormMode.create
+          ? 'Crear presupuesto'
+          : 'Actualizar presupuesto',
+      content: widget.mode == PresupuestoFormMode.create
+          ? '¿Deseas crear este presupuesto?'
+          : '¿Deseas actualizar este presupuesto?',
+    );
+    if (confirm != true) return;
+
     final nuevoPresupuesto = Presupuesto(
       id: widget.mode == PresupuestoFormMode.edit ? presupuestoId : null,
       categoryId: categoriaSeleccionada,
