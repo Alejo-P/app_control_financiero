@@ -19,12 +19,12 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = spent / total;
+    final progress = total == 0 ? 0.0 : (spent / total);
+    final percentageText = '${(progress * 100).toStringAsFixed(0)}%';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Card(
-        color: spent > total ? Colors.red[50] : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
@@ -38,28 +38,22 @@ class CategoryCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  IconContainer(
-                    icon: icon,
-                    color: color,
-                    size: 26,
-                  ),
+                  IconContainer(icon: icon, color: color, size: 26),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            title,
-                            style:
-                                const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16
-                                )
+                          title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         Text(
                           'Restante: \$${(total - spent).toStringAsFixed(2)}',
-                          style:
-                              const TextStyle(color: Colors.grey),
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       ],
                     ),
@@ -82,17 +76,36 @@ class CategoryCard extends StatelessWidget {
                         style: const TextStyle(color: Colors.grey),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: progress.clamp(0.0, 1.0),
-                backgroundColor: Colors.grey.shade300,
-                minHeight: 7,
-                borderRadius: BorderRadius.circular(3),
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(color),
+              SizedBox(
+                height: 14,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        value: progress.clamp(0.0, 1.0),
+                        backgroundColor: Colors.grey.shade300,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(3),
+                        valueColor: AlwaysStoppedAnimation<Color>(color),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      percentageText,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

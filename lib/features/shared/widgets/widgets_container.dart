@@ -25,29 +25,22 @@ class WidgetsContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundThemeColor =
-        Theme.of(context).colorScheme.surface; // Color de fondo del tema
+    final backgroundThemeColor = Theme.of(
+      context,
+    ).colorScheme.surface; // Color de fondo del tema
     final [r, g, b] = getRGBFromColor(backgroundThemeColor);
 
     return Container(
       padding: padding,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Text(
-                summaryAmount ?? '',
-                style: summaryAmountStyle,
-              ),
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
+              Text(summaryAmount ?? '', style: summaryAmountStyle),
             ],
           ),
           if (children != null) ...[
@@ -57,7 +50,7 @@ class WidgetsContainer extends StatelessWidget {
               decoration: BoxDecoration(
                 color: backgroundColor ?? backgroundThemeColor,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: borderColor),
+                border: Border.all(color: borderColor, width: 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: Color.fromRGBO(r, g, b, 0.15),

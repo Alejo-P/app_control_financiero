@@ -406,7 +406,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           title: 'Movimientos asociados',
                           description:
                               'Esta categoría tiene movimientos asociados.\nPara eliminarla, primero elimina o reasigna esos movimientos.',
-                          backgroundColor: Colors.orange.shade50,
                           borderColor: Colors.orange,
                           children: [
                             DetailCategoryCard(

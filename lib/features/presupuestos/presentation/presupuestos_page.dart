@@ -55,7 +55,9 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     final gastosAcumulados = _appState.getGastoAcumuladoPorCategoriaEnMes(
       categoryId,
     );
-    final movimientos = _appState.getMovimientosPresupuestoByCategoriaId(categoryId);
+    final movimientos = _appState.getMovimientosPresupuestoByCategoriaId(
+      categoryId,
+    );
 
     return {
       'name': categoria?.name ?? 'Categoría Desconocida',
@@ -64,6 +66,36 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
       'spent': gastosAcumulados,
       'movements': movimientos,
     };
+  }
+
+  List<Map<String, dynamic>> get sortedBudgets => getSortedPresupuestos();
+
+  List<Map<String, dynamic>> getSortedPresupuestos() {
+    final presupuestos = _appState.presupuestos;
+
+    // Combinar presupuestos con detalles de categoría y gasto acumulado
+    final categoriesWithSpending = presupuestos.map((presupuesto) {
+      final categoryDetails = getCategoryDetailsById(presupuesto.categoryId);
+      return {
+        'presupuesto': presupuesto,
+        'name': categoryDetails['name'],
+        'icon': categoryDetails['icon'],
+        'iconColor': categoryDetails['iconColor'],
+        'spent': categoryDetails['spent'],
+        'percentage': presupuesto.amount == 0
+            ? 0.0
+            : categoryDetails['spent'] / presupuesto.amount,
+      };
+    }).toList();
+
+    // Ordenar por porcentaje gastado (mayor a menor)
+    categoriesWithSpending.sort((a, b) {
+      final percentageA = a['percentage'] as double;
+      final percentageB = b['percentage'] as double;
+      return percentageB.compareTo(percentageA);
+    });
+
+    return categoriesWithSpending;
   }
 
   @override
@@ -119,7 +151,8 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                           ),
                         ),
                         SizedBox(height: 20),
-                        ...presupuestos.map((presupuesto) {
+                        ...sortedBudgets.map((budgetDetails) {
+                          final presupuesto = budgetDetails['presupuesto'];
                           final categoryDetails = getCategoryDetailsById(
                             presupuesto.categoryId,
                           );
@@ -142,7 +175,8 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                       movimientos: categoryDetails['movements'],
                                     ),
                                     ingresoPresupuestado:
-                                        appState.totalIngresoPresupuestado ?? 0.0,
+                                        appState.totalIngresoPresupuestado ??
+                                        0.0,
                                   ),
                                 ),
                               );
