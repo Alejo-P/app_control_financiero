@@ -9,6 +9,7 @@ class DetallePresupuesto {
   final Color iconColor;
   final DateTime fechaPresupuesto;
   final double montoPresupuestado;
+  final double totalPresupuestado;
   final List<Movimiento> movimientos;
 
   DetallePresupuesto({
@@ -19,6 +20,7 @@ class DetallePresupuesto {
     required this.iconColor,
     required this.fechaPresupuesto,
     required this.montoPresupuestado,
+    required this.totalPresupuestado,
     this.movimientos = const [],
   });
 
@@ -31,6 +33,7 @@ class DetallePresupuesto {
       iconColor: Color(map['iconColorValue']),
       fechaPresupuesto: DateTime.parse(map['fechaPresupuesto']),
       montoPresupuestado: map['montoPresupuestado'],
+      totalPresupuestado: map['totalPresupuestado'],
       movimientos: (map['movimientos'] as List<dynamic>)
           .map((mov) => Movimiento.fromMap(mov))
           .toList(),

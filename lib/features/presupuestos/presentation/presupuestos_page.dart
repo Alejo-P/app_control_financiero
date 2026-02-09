@@ -169,6 +169,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                       categoria: categoryDetails['name'],
                                       categoriaId: presupuesto.categoryId,
                                       montoPresupuestado: presupuesto.amount,
+                                      totalPresupuestado: ingresoPresupuestado?.monto ?? 0.0,
                                       icon: categoryDetails['icon'],
                                       iconColor: categoryDetails['iconColor'],
                                       fechaPresupuesto: presupuesto.date,
@@ -187,6 +188,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                               spent: categoryDetails['spent'],
                               total: presupuesto.amount,
                               color: categoryDetails['iconColor'],
+                              percentage: budgetDetails['percentage'],
                             ),
                           );
                         }),

@@ -41,6 +41,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   late DateTime fechaPresupuesto;
   late int categoriaSeleccionada;
   int presupuestoId = 0;
+  double ingresoPresupuestadoTotal = 0.0;
   late IngresoPresupuestado ingresoDisponible;
   final _presupuestoAmountController = TextEditingController();
   final _ingresoPresupuestadoController = TextEditingController();
@@ -69,7 +70,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       monto: widget.ingresoPresupuestado ?? 0.0,
       fecha: fechaPresupuesto,
     );
-    _ingresoPresupuestadoController.text = ingresoDisponible.monto
+
+    ingresoPresupuestadoTotal = widget.presupuesto?.totalPresupuestado ?? 0.0;
+    _ingresoPresupuestadoController.text = ingresoPresupuestadoTotal
         .toStringAsFixed(2);
 
     _presupuestoAmountController.addListener(_markAsDirty);
@@ -164,6 +167,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
         monto: appState.totalIngresoPresupuestado ?? value,
         fecha: fechaPresupuesto,
       );
+      ingresoPresupuestadoTotal =
+          appState.ingresoPresupuestado?.monto ?? value;
     });
 
     if (!mounted) return;

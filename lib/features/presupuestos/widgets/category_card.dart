@@ -6,6 +6,7 @@ class CategoryCard extends StatelessWidget {
   final String title;
   final double spent;
   final double total;
+  final double percentage;
   final Color color;
 
   const CategoryCard({
@@ -14,13 +15,13 @@ class CategoryCard extends StatelessWidget {
     required this.title,
     required this.spent,
     required this.total,
+    required this.percentage,
     required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    final progress = total == 0 ? 0.0 : (spent / total);
-    final percentageText = '${(progress * 100).toStringAsFixed(0)}%';
+    final percentageText = '${(percentage * 100).toStringAsFixed(0)}%';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -88,7 +89,7 @@ class CategoryCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: LinearProgressIndicator(
-                        value: progress.clamp(0.0, 1.0),
+                        value: percentage.clamp(0.0, 1.0),
                         backgroundColor: Colors.grey.shade300,
                         minHeight: 8,
                         borderRadius: BorderRadius.circular(3),

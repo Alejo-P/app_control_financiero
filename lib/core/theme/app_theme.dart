@@ -33,7 +33,11 @@ class AppTheme {
       buttonColor: Colors.blue,
       textTheme: ButtonTextTheme.primary,
     ),
-    dividerColor: Colors.grey[500],
+    dividerTheme: DividerThemeData(
+      thickness: 1,
+      space: 1,
+      color: Colors.grey[400]
+    ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold),
       displayMedium: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w600),
@@ -105,7 +109,11 @@ class AppTheme {
       buttonColor: Colors.blue,
       textTheme: ButtonTextTheme.primary,
     ),
-    dividerColor: Colors.grey[700],
+    dividerTheme: DividerThemeData(
+      thickness: 1,
+      space: 1,
+      color: Colors.grey[700],
+    ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold),
       displayMedium: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w600),

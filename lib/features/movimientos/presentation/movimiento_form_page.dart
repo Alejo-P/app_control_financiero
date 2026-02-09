@@ -304,10 +304,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-
     final appState = context.read<AppState>();
     categorias = appState.categorias;
     categoriasFiltradas = categorias
