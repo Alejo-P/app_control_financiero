@@ -10,10 +10,12 @@ import 'package:control_financiero/features/movimientos/widgets/ammount_input.da
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
+import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/widgets/category_button.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,6 +37,7 @@ class PresupuestoFormPage extends StatefulWidget {
 
 class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   bool _hasUnsavedChanges = false;
+  bool repeatBudget = false;
   List<Movimiento> movimientos = [];
   final meses = monthNames;
   final anios = generateYearList(DateTime.now().year, 10);
@@ -62,6 +65,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       movimientos = widget.presupuesto!.movimientos;
       fechaPresupuesto = widget.presupuesto!.fechaPresupuesto;
       presupuestoId = widget.presupuesto!.idPresupuesto;
+      repeatBudget = widget.presupuesto!.esRecurrente;
       _presupuestoAmountController.text = widget.presupuesto!.montoPresupuestado
           .toString();
     }
@@ -121,6 +125,12 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     });
   }
 
+  void _toggleRepeatBudget(bool value) {
+    setState(() {
+      repeatBudget = value;
+    });
+  }
+
   List<Categoria> get gategoriasSoloGastos {
     final appState = context.read<AppState>();
     return appState.categorias
@@ -167,8 +177,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
         monto: appState.totalIngresoPresupuestado ?? value,
         fecha: fechaPresupuesto,
       );
-      ingresoPresupuestadoTotal =
-          appState.ingresoPresupuestado?.monto ?? value;
+      ingresoPresupuestadoTotal = appState.ingresoPresupuestado?.monto ?? value;
     });
 
     if (!mounted) return;
@@ -196,7 +205,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       return;
     }
 
-    if (value > ingresoDisponible.monto) {
+    if (value > ingresoDisponible.monto && widget.mode == PresupuestoFormMode.create) {
       AppSnackbar.error(
         context,
         'El monto del presupuesto no puede exceder el ingreso disponible.',
@@ -204,7 +213,17 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       return;
     }
 
-    if (ingresoDisponible.monto <= 0) {
+    // Si estamos editando un presupuesto, permitir que el monto exceda el ingreso disponible solo si el nuevo monto es menor o igual al monto presupuestado originalmente (para evitar que el usuario reduzca el ingreso disponible al editar un presupuesto existente)
+    if (widget.mode == PresupuestoFormMode.edit &&
+        value > ingresoDisponible.monto + widget.presupuesto!.montoPresupuestado) {
+      AppSnackbar.error(
+        context,
+        'El monto del presupuesto no puede exceder el ingreso disponible.',
+      );
+      return;
+    }
+
+    if (ingresoDisponible.monto <= 0 && widget.mode == PresupuestoFormMode.create) {
       AppSnackbar.error(
         context,
         'El ingreso presupuestado debe ser mayor a 0.',
@@ -233,6 +252,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       categoryId: categoriaSeleccionada,
       amount: value,
       date: fechaPresupuesto,
+      repeatBudget: repeatBudget,
     );
 
     if (widget.mode == PresupuestoFormMode.create) {
@@ -496,8 +516,25 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                       ),
                       AmountInput(
                         controller: _presupuestoAmountController,
-                        isEditable: ingresoDisponible.monto > 0,
+                        isEditable: (ingresoDisponible.monto > 0 || widget.mode == PresupuestoFormMode.edit),
                         showLabel: false,
+                      ),
+
+                      WidgetsContainer(
+                        title: 'Repetir presupuesto mensualmente',
+                        description: 'Este presupuesto se repetirá automáticamente cada mes hasta que decidas eliminarlo.',
+                        padding: const EdgeInsets.all(12),
+                        children: [
+                          DetailCategoryCard(
+                            categoryName: 'Repetir presupuesto mensualmente',
+                            categoryIcon: Icons.repeat,
+                            iconColor: Colors.orange,
+                            trailing: Switch(
+                              value: repeatBudget,
+                              onChanged: _toggleRepeatBudget,
+                            ),
+                          ),
+                        ]
                       ),
 
                       if (movimientos.isNotEmpty) ...[
@@ -531,7 +568,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                         }),
                         Center(
                           child: Text(
-                            '${movimientos.length} movimientos en este presupuesto',
+                            '${movimientos.length} movimiento${movimientos.length != 1 ? 's' : ''} en este presupuesto',
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: Colors.grey[600]),

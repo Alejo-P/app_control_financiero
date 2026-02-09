@@ -139,7 +139,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                     child: Column(
                       children: [
                         SizedBox(
-                          height: 210, // ajusta a gusto
+                          height: 210,
                           child: SummaryCard(
                             title: 'Resumen de Presupuesto',
                             icon: Icons.calendar_month,
@@ -150,7 +150,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
+                        SizedBox(height: 8),
                         ...sortedBudgets.map((budgetDetails) {
                           final presupuesto = budgetDetails['presupuesto'];
                           final categoryDetails = getCategoryDetailsById(
@@ -174,6 +174,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                       iconColor: categoryDetails['iconColor'],
                                       fechaPresupuesto: presupuesto.date,
                                       movimientos: categoryDetails['movements'],
+                                      esRecurrente: presupuesto.repeatBudget,
                                     ),
                                     ingresoPresupuestado:
                                         appState.totalIngresoPresupuestado ??

@@ -10,6 +10,7 @@ class DetallePresupuesto {
   final DateTime fechaPresupuesto;
   final double montoPresupuestado;
   final double totalPresupuestado;
+  final bool esRecurrente;
   final List<Movimiento> movimientos;
 
   DetallePresupuesto({
@@ -21,6 +22,7 @@ class DetallePresupuesto {
     required this.fechaPresupuesto,
     required this.montoPresupuestado,
     required this.totalPresupuestado,
+    this.esRecurrente = false,
     this.movimientos = const [],
   });
 
@@ -34,6 +36,7 @@ class DetallePresupuesto {
       fechaPresupuesto: DateTime.parse(map['fechaPresupuesto']),
       montoPresupuestado: map['montoPresupuestado'],
       totalPresupuestado: map['totalPresupuestado'],
+      esRecurrente: map['esRecurrente'] ?? false,
       movimientos: (map['movimientos'] as List<dynamic>)
           .map((mov) => Movimiento.fromMap(mov))
           .toList(),

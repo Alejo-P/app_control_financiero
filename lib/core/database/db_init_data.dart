@@ -134,4 +134,8 @@ Future<void> runSeeds(Database db) async {
     }
     await setSeedVersion(db, currentVersion + 1);
   }
+  if (currentVersion < 6) {
+    await migratePresupuestosRepeatBudget(db);
+    await setSeedVersion(db, currentVersion + 1);
+  }
 }

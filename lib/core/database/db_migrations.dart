@@ -150,3 +150,31 @@ Future<void> migrateCategoriasEnabledRepeatMovement(Database db) async {
     }
   }
 }
+
+Future<void> migratePresupuestosRepeatBudget(Database db) async {
+  // Agregar la columna 'repeat_budget' si no existe
+  final columns = await db.rawQuery(
+    "PRAGMA table_info(${PresupuestosTable.table});",
+  );
+
+  final columnNames = columns.map((column) => column['name'] as String).toSet();
+
+  if (!columnNames.contains(PresupuestosTable.repeatBudget)) {
+    await db.execute('''
+      ALTER TABLE ${PresupuestosTable.table}
+      ADD COLUMN ${PresupuestosTable.repeatBudget}
+      INTEGER DEFAULT 0;
+    ''');
+
+    // Verificar integridad
+    final result = await db.rawQuery('PRAGMA foreign_key_check');
+    if (result.isNotEmpty) {
+      AppLogger.log(
+        'Foreign key check failed after migration: $result',
+        level: LogLevel.error,
+        tag: 'DBMigration',
+      );
+      throw Exception('Foreign key check failed: $result');
+    }
+  }
+}
