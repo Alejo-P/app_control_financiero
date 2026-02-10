@@ -23,12 +23,14 @@ class PresupuestoFormPage extends StatefulWidget {
   final PresupuestoFormMode mode;
   final DetallePresupuesto? presupuesto;
   final double? ingresoPresupuestado;
+  final double? totalIngresoPresupuestado;
 
   const PresupuestoFormPage({
     super.key,
     required this.mode,
     this.presupuesto,
     this.ingresoPresupuestado,
+    this.totalIngresoPresupuestado,
   });
 
   @override
@@ -75,7 +77,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       fecha: fechaPresupuesto,
     );
 
-    ingresoPresupuestadoTotal = widget.presupuesto?.totalPresupuestado ?? 0.0;
+    ingresoPresupuestadoTotal = widget.presupuesto?.totalPresupuestado != null
+        ? widget.presupuesto!.totalPresupuestado
+        : widget.totalIngresoPresupuestado ?? 0.0;
     _ingresoPresupuestadoController.text = ingresoPresupuestadoTotal
         .toStringAsFixed(2);
 
@@ -205,7 +209,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       return;
     }
 
-    if (value > ingresoDisponible.monto && widget.mode == PresupuestoFormMode.create) {
+    if (value > ingresoDisponible.monto &&
+        widget.mode == PresupuestoFormMode.create) {
       AppSnackbar.error(
         context,
         'El monto del presupuesto no puede exceder el ingreso disponible.',
@@ -215,7 +220,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     // Si estamos editando un presupuesto, permitir que el monto exceda el ingreso disponible solo si el nuevo monto es menor o igual al monto presupuestado originalmente (para evitar que el usuario reduzca el ingreso disponible al editar un presupuesto existente)
     if (widget.mode == PresupuestoFormMode.edit &&
-        value > ingresoDisponible.monto + widget.presupuesto!.montoPresupuestado) {
+        value >
+            ingresoDisponible.monto + widget.presupuesto!.montoPresupuestado) {
       AppSnackbar.error(
         context,
         'El monto del presupuesto no puede exceder el ingreso disponible.',
@@ -223,7 +229,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       return;
     }
 
-    if (ingresoDisponible.monto <= 0 && widget.mode == PresupuestoFormMode.create) {
+    if (ingresoDisponible.monto <= 0 &&
+        widget.mode == PresupuestoFormMode.create) {
       AppSnackbar.error(
         context,
         'El ingreso presupuestado debe ser mayor a 0.',
@@ -442,7 +449,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                 title: categoria.name,
                                 isSelected:
                                     categoriaSeleccionada == categoria.id,
-                                onTap: () => _onChangeCategoria(categoria.id!),
+                                onTap: () =>
+                                    _onChangeCategoria(categoria.id!),
                               ),
                             )
                             .toList(),
@@ -516,13 +524,16 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                       ),
                       AmountInput(
                         controller: _presupuestoAmountController,
-                        isEditable: (ingresoDisponible.monto > 0 || widget.mode == PresupuestoFormMode.edit),
+                        isEditable:
+                            (ingresoDisponible.monto > 0 ||
+                            widget.mode == PresupuestoFormMode.edit),
                         showLabel: false,
                       ),
 
                       WidgetsContainer(
                         title: 'Repetir presupuesto mensualmente',
-                        description: 'Este presupuesto se repetirá automáticamente cada mes hasta que decidas eliminarlo.',
+                        description:
+                            'Este presupuesto se repetirá automáticamente cada mes hasta que decidas eliminarlo.',
                         padding: const EdgeInsets.all(12),
                         children: [
                           DetailCategoryCard(
@@ -534,7 +545,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                               onChanged: _toggleRepeatBudget,
                             ),
                           ),
-                        ]
+                        ],
                       ),
 
                       if (movimientos.isNotEmpty) ...[

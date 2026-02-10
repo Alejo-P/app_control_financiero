@@ -129,6 +129,21 @@ class PresupuestosLocalDataSource {
     }
   }
 
+  // Obtener conteo de presupuestos para una categoria
+  Future<int> fetchPresupuestoCountByCategory(int categoryId) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      '''
+      SELECT COUNT(*) AS count
+      FROM ${PresupuestosTable.table}
+      WHERE ${PresupuestosTable.categoryId} = ?
+    ''',
+      [categoryId],
+    );
+
+    return result.first['count'] as int;
+  }
+
   // Agregar un nuevo presupuesto
   Future<OperationResult<int>> addPresupuesto(Presupuesto presupuesto) async {
     final db = await _dbHelper.database;

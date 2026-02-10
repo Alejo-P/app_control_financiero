@@ -3,24 +3,25 @@ import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
+import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 
 class CategoriasLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
   final MovimientosLocalDataSource _movimientosLocalDataSource =
       MovimientosLocalDataSource();
+  final PresupuestosLocalDataSource _presupuestosLocalDataSource =
+      PresupuestosLocalDataSource();
 
   // Obtener todas las categorías
   Future<List<Categoria>> fetchCategorias() async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
-      '''
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
         SELECT 
           c.*, 
           (SELECT COUNT(*) FROM ${MovimientosTable.table} m WHERE m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}) AS movements_count
         FROM ${CategoriasTable.table} c
         ORDER BY c.${CategoriasTable.name} ASC
-      ''',
-    );
+      ''');
 
     return maps.map(Categoria.fromMap).toList();
   }
@@ -121,6 +122,17 @@ class CategoriasLocalDataSource {
         success: false,
         message:
             'No se puede eliminar esta categoría. Tiene $movimientoCount${movimientoCount == 1 ? ' movimiento asociado.' : ' movimientos asociados.'}',
+      );
+    }
+
+    // Si tiene presupuestos asociados, no eliminar
+    final presupuestoCount = await _presupuestosLocalDataSource
+        .fetchPresupuestoCountByCategory(id);
+    if (presupuestoCount > 0) {
+      return OperationResult<void>(
+        success: false,
+        message:
+            'No se puede eliminar esta categoría. Tiene $presupuestoCount${presupuestoCount == 1 ? ' presupuesto asociado.' : ' presupuestos asociados.'}',
       );
     }
 

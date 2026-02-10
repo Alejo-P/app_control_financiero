@@ -41,6 +41,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                   mode: PresupuestoFormMode.create,
                   ingresoPresupuestado:
                       _appState.totalIngresoPresupuestado ?? 0.0,
+                  totalIngresoPresupuestado: _appState.ingresoPresupuestado?.monto ?? 0.0,
                 ),
               ),
             );

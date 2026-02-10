@@ -64,12 +64,19 @@ class _MonthSelectionState extends State<MonthSelection> {
   }
 
   void returnToday() {
+    if (widget.isLoading) {
+      return; // No permitir cambiar mes si está cargando
+    }
+
     if (isCurrentMonth(selectedDate)) {
       return; // Ya estamos en el mes actual
     }
+    // Solo tomar el año y mes actual para evitar problemas con días que no existen en meses anteriores
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month);
 
     setState(() {
-      selectedDate = DateTime.now();
+      selectedDate = today;
     });
 
     // Notificar el cambio de mes si se proporcionó un callback
@@ -116,7 +123,7 @@ class _MonthSelectionState extends State<MonthSelection> {
                   ),
                 ),
                 InkWell(
-                  onTap: isCurrent ? null : returnToday,
+                  onTap: (isCurrent || widget.isLoading) ? null : returnToday,
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     padding: const EdgeInsets.all(6),
@@ -124,9 +131,9 @@ class _MonthSelectionState extends State<MonthSelection> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'Ir a hoy',
+                      'Ir a mes actual',
                       style: TextStyle(
-                        color: isCurrent ? Colors.grey[600] : Colors.blueAccent,
+                        color: (isCurrent || widget.isLoading) ? Colors.grey[600] : Colors.blueAccent,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),

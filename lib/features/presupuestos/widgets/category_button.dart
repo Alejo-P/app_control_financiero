@@ -34,33 +34,27 @@ class CategoryButton extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(6.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Center(
-                child: Icon(
-                  icon,
-                  size: 40,
-                  color: isSelected ? colorScheme.primary : Colors.grey[600],
-                ),
+              Icon(
+                icon,
+                size: 40,
+                color: isSelected ? colorScheme.primary : Colors.grey[600],
               ),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: true,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: isSelected
-                          ? colorScheme.primary
-                          : Colors.grey[800],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+              const SizedBox(height: 6),
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isSelected ? colorScheme.primary : Colors.grey[600],
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

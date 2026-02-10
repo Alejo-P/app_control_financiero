@@ -14,14 +14,20 @@ class GridContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = children.length <= columns ? 125.0 : 250.0;
+    if (children.length == 1) {
+      return Center(child: children.first);
+    }
 
-    return GridView.count(
-      crossAxisCount: columns,
-      crossAxisSpacing: gap,
-      mainAxisSpacing: gap,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      children: children,
+    return SizedBox(
+      height: height,
+      child: GridView.count(
+        crossAxisCount: columns,
+        childAspectRatio: 0.9,
+        crossAxisSpacing: gap,
+        mainAxisSpacing: gap,
+        children: children,
+      ),
     );
   }
 }
