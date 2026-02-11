@@ -29,7 +29,7 @@ class IconContainer extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(size * 0.25),
         decoration: BoxDecoration(
-          color: Color.fromRGBO(r, g, b, 0.15),
+          color: Color.fromRGBO(r, g, b, 0.25),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: borderColor, width: borderWidth),
         ),

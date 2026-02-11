@@ -6,6 +6,7 @@ import 'package:control_financiero/features/movimientos/models/detalle_movimient
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
+import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
@@ -33,6 +34,8 @@ class MovimientoFormPage extends StatefulWidget {
 }
 
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
+  bool _canCloseWindow = false; // Variable para controlar el cierre sin cambios
+  bool _isLoading = false; // Variable para controlar el estado de carga
   int categoryId = -1;
   int movementId = 0;
   IconData categoryIcon = Icons.category;
@@ -40,13 +43,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   String categoryName = 'Sin categoría';
   TimeOfDay movementTime = TimeOfDay.now();
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
-  bool _hasUnsavedChanges = false;
   bool isEnabledRepeatMovement = false;
-  bool _initialValueIsEnabledRepeatMovement = false;
   bool repeatMovement = false;
   late DateTime selectedDate;
   late List<Categoria> categorias;
   late List<Categoria> categoriasFiltradas;
+  late DetalleMovimiento initialMovimiento;
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   final _titleController = TextEditingController();
@@ -58,7 +60,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     categoriasFiltradas = [];
     selectedDate = getCurrentDateWithoutTime();
 
-    if (widget.mode == MovimientoFormMode.create && widget.fechaInicial != null) {
+    if (widget.mode == MovimientoFormMode.create &&
+        widget.fechaInicial != null) {
       final fechaInicial = widget.fechaInicial ?? DateTime.now();
       final fechaNormalizada = normalizeDate(fechaInicial);
       selectedDate = !isCurrentMonth(fechaNormalizada)
@@ -66,27 +69,38 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           : getCurrentDateWithoutTime();
     }
 
-    if (widget.mode == MovimientoFormMode.edit && widget.movimiento != null) {
-      _amountController.text = widget.movimiento!.amount.toString();
-      _noteController.text = widget.movimiento!.note;
-      _titleController.text = widget.movimiento!.title;
-      categoryId = widget.movimiento!.categoryId!;
-      selectedDate = widget.movimiento!.date;
-      movementTime = widget.movimiento!.time!;
-      movementId = widget.movimiento!.id!;
-      categoryName = widget.movimiento!.categoryName ?? 'Sin categoría';
-      categoryIcon = widget.movimiento!.categoryIcon;
-      categoryColor = widget.movimiento!.categoryColor ?? Colors.blue;
-      isEnabledRepeatMovement = widget.movimiento!.isEnabledRepeatMovement;
-      repeatMovement = widget.movimiento!.repeatMovement;
-      _initialValueIsEnabledRepeatMovement = widget.movimiento!.repeatMovement;
-      tipoMovimiento = widget.movimiento!.movementType;
-    }
+    initialMovimiento = DetalleMovimiento(
+      id: widget.movimiento?.id ?? 0,
+      title: widget.movimiento?.title ?? '',
+      amount: widget.movimiento?.amount ?? 0.0,
+      movementType: widget.movimiento?.movementType ?? tipoMovimiento,
+      date: widget.movimiento?.date ?? selectedDate,
+      categoryIcon: widget.movimiento?.categoryIcon ?? categoryIcon,
+      categoryColor: widget.movimiento?.categoryColor ?? categoryColor,
+      categoryName: widget.movimiento?.categoryName ?? categoryName,
+      isEnabledRepeatMovement:
+          widget.movimiento?.isEnabledRepeatMovement ?? isEnabledRepeatMovement,
+      repeatMovement: widget.movimiento?.repeatMovement ?? repeatMovement,
+      categoryId: widget.movimiento?.categoryId ?? categoryId,
+      time: widget.movimiento?.time ?? movementTime,
+      note: widget.movimiento?.note ?? '',
+    );
 
-    // Escuchar cambios en los controladores de texto
-    _amountController.addListener(_markAsDirty);
-    _titleController.addListener(_markAsDirty);
-    _noteController.addListener(_markAsDirty);
+    _amountController.text = initialMovimiento.amount != 0.0
+        ? initialMovimiento.amount.toString()
+        : '';
+    _titleController.text = initialMovimiento.title;
+    _noteController.text = initialMovimiento.note;
+    categoryId = initialMovimiento.categoryId ?? -1;
+    selectedDate = initialMovimiento.date;
+    movementTime = initialMovimiento.time ?? TimeOfDay.now();
+    movementId = widget.movimiento?.id ?? 0;
+    categoryName = initialMovimiento.categoryName ?? 'Sin categoría';
+    categoryIcon = initialMovimiento.categoryIcon;
+    categoryColor = initialMovimiento.categoryColor ?? Colors.blue;
+    isEnabledRepeatMovement = initialMovimiento.isEnabledRepeatMovement;
+    repeatMovement = initialMovimiento.repeatMovement;
+    tipoMovimiento = initialMovimiento.movementType;
   }
 
   @override
@@ -98,23 +112,29 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     super.dispose();
   }
 
-  // Marca que hay cambios no guardados
-  void _markAsDirty() {
-    // Si el campo esta vacío, no marcar como sucio
-    if (_amountController.text.isEmpty &&
-        _titleController.text.isEmpty &&
-        _noteController.text.isEmpty) {
-      setState(() {
-        _hasUnsavedChanges = false;
-      });
-      return;
-    }
+  // Verificar si existe un cambio en los valores del formulario con respecto a los valores iniciales
+  bool _checkForChanges() {
+    if (_canCloseWindow) return true;
 
-    if (!_hasUnsavedChanges) {
-      setState(() {
-        _hasUnsavedChanges = true;
-      });
-    }
+    final original = initialMovimiento;
+    final current = DetalleMovimiento(
+      id: movementId,
+      title: _titleController.text.trim(),
+      amount:
+          double.tryParse(_amountController.text.trim().replaceAll(',', '.')) ??
+          0.0,
+      movementType: tipoMovimiento,
+      date: selectedDate,
+      categoryName: categoryName,
+      categoryIcon: categoryIcon,
+      categoryColor: categoryColor,
+      categoryId: categoryId,
+      time: movementTime,
+      note: _noteController.text.trim(),
+      isEnabledRepeatMovement: isEnabledRepeatMovement,
+      repeatMovement: repeatMovement,
+    );
+    return original != current;
   }
 
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
@@ -132,7 +152,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
   void _onCategoriaSelected(Categoria categoria) {
     setState(() {
-      _hasUnsavedChanges = true;
       categoryId = categoria.id!;
       categoryName = categoria.name;
       categoryIcon = categoria.iconData;
@@ -152,7 +171,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (picked != null && picked != selectedDate) {
       setState(() {
-        _hasUnsavedChanges = true;
         selectedDate = picked;
       });
     }
@@ -190,7 +208,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       final shouldContinue = await showConfirmDialog(
         context,
         title: 'Desactivar movimiento recurrente',
-        content: 'La categoría seleccionada no permite movimientos recurrentes. ¿Desea continuar y desactivar esta opción?',
+        content:
+            'La categoría seleccionada no permite movimientos recurrentes. ¿Desea continuar y desactivar esta opción?',
       );
 
       if (shouldContinue != true) {
@@ -217,15 +236,15 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         Text('Fecha: ${formatDate(selectedDate)}'),
         if (_noteController.text.trim().isNotEmpty)
           Text('Nota: ${_noteController.text.trim()}'),
-        
-        if (repeatMovement)
-          Text('El movimiento se repetirá mensualmente'),
+
+        if (repeatMovement) Text('El movimiento se repetirá mensualmente'),
       ],
     );
     if (confirmed != true) return;
 
     setState(() {
-      _hasUnsavedChanges = false;
+      _canCloseWindow = true; // Permitir cerrar sin preguntar por cambios
+      _isLoading = true; // Activar indicador de carga
     });
 
     // Crear el objeto Movimiento
@@ -249,6 +268,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     }
 
     if (!mounted) return;
+    setState(() {
+      _isLoading = false; // Desactivar indicador de carga
+    });
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
@@ -268,10 +290,17 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       content: '¿Estás seguro de que deseas eliminar este movimiento?',
     );
     if (confirmed != true) return;
+    setState(() {
+      _canCloseWindow = true; // Permitir cerrar sin preguntar por cambios
+      _isLoading = true; // Activar indicador de carga
+    });
 
     await appState.eliminarMovimiento(movementId, categoryId);
 
     if (!mounted) return;
+    setState(() {
+      _isLoading = false; // Desactivar indicador de carga
+    });
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
@@ -286,12 +315,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   void _toggleRepeatMovement(bool value) {
     setState(() {
       repeatMovement = value;
-      _hasUnsavedChanges = value != _initialValueIsEnabledRepeatMovement;
     });
   }
 
   Future<bool> _onWillPop() async {
-    if (!_hasUnsavedChanges) return true;
+    final hasChanges = _checkForChanges();
+    if (!hasChanges) return true;
 
     final shouldLeave = await showConfirmDialog(
       context,
@@ -322,104 +351,120 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           actions: [
             if (widget.mode == MovimientoFormMode.edit)
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
+                icon: Icon(
+                  Icons.delete,
+                  color: _isLoading ? Colors.grey : Colors.red,
+                ),
                 tooltip: 'Eliminar',
-                onPressed: () async {
-                  await _eliminarMovimiento();
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        await _eliminarMovimiento();
+                      },
               ),
 
             IconButton(
-              icon: const Icon(Icons.check, color: Colors.green),
+              icon: Icon(
+                Icons.check,
+                color: _isLoading ? Colors.grey : Colors.green,
+              ),
               tooltip: 'Guardar',
-              onPressed: () async {
-                await _guardarMovimiento();
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () async {
+                      await _guardarMovimiento();
+                    },
             ),
           ],
         ),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TipoMovimientoSelector(
-                tipoMovimiento: tipoMovimiento,
-                onChanged: _onChangeTipoMovimiento,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AmountInput(controller: _amountController),
-                      WidgetsContainer(
-                        title: 'Detalles del movimiento',
-                        padding: const EdgeInsets.all(12),
-                        children: [
-                          TextInputCard(
-                            textController: _titleController,
-                            placeholder: 'Titulo del movimiento',
-                            iconData: Icons.title,
-                            iconColor: Colors.grey.shade600,
-                            maxLines: 1,
-                            maxLength: 50,
-                          ),
-                          InkWell(
-                            onTap: () async =>
-                                await _openCategoriasModal(context),
-                            borderRadius: BorderRadius.circular(12),
-                            child: DetailCategoryCard(
-                              categoryName: 'Categoría',
-                              categoryIcon: categoryIcon,
-                              iconColor: categoryColor,
-                              currentValue: categoryName,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () => _selectDate(context),
-                            borderRadius: BorderRadius.circular(12),
-                            child: DetailCategoryCard(
-                              categoryName: 'Fecha',
-                              categoryIcon: Icons.calendar_today,
-                              iconColor: Colors.purple,
-                              currentValue: formatDate(selectedDate),
-                            ),
-                          ),
-                          TextInputCard(
-                            textController: _noteController,
-                            placeholder: 'Agregar una nota (opcional)',
-                            iconData: Icons.edit_note,
-                            iconColor: Colors.grey.shade600,
-                            maxLines: 3,
-                            maxLength: 200,
-                          ),
-                        ],
-                      ),
-                      if (isEnabledRepeatMovement)
-                        WidgetsContainer(
-                          title: 'Movimiento recurrente',
-                          description: 'Este movimiento se repetirá mensualmente en la fecha seleccionada.',
-                          padding: const EdgeInsets.all(12),
+          child: _isLoading
+              ? LoadingScreen(message: 'Guardando movimiento...')
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TipoMovimientoSelector(
+                      tipoMovimiento: tipoMovimiento,
+                      onChanged: _onChangeTipoMovimiento,
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            DetailCategoryCard(
-                              categoryName: 'Repetir movimiento mensualmente',
-                              categoryIcon: Icons.repeat,
-                              iconColor: Colors.orange,
-                              trailing: Switch(
-                                value: repeatMovement,
-                                onChanged: _toggleRepeatMovement,
-                              ),
+                            AmountInput(controller: _amountController),
+                            WidgetsContainer(
+                              title: 'Detalles del movimiento',
+                              padding: const EdgeInsets.all(12),
+                              children: [
+                                TextInputCard(
+                                  textController: _titleController,
+                                  placeholder: 'Titulo del movimiento',
+                                  iconData: Icons.title,
+                                  iconColor: Colors.grey.shade600,
+                                  maxLines: 1,
+                                  maxLength: 50,
+                                ),
+                                InkWell(
+                                  onTap: () async =>
+                                      await _openCategoriasModal(context),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: DetailCategoryCard(
+                                    categoryName: 'Categoría',
+                                    categoryIcon: categoryIcon,
+                                    iconColor: categoryColor,
+                                    currentValue: categoryName,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () => _selectDate(context),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: DetailCategoryCard(
+                                    categoryName: 'Fecha',
+                                    categoryIcon: Icons.calendar_today,
+                                    iconColor: Colors.purple,
+                                    currentValue: formatDate(selectedDate),
+                                  ),
+                                ),
+                                TextInputCard(
+                                  textController: _noteController,
+                                  placeholder: 'Agregar una nota (opcional)',
+                                  iconData: Icons.edit_note,
+                                  iconColor: Colors.grey.shade600,
+                                  maxLines: 3,
+                                  maxLength: 200,
+                                ),
+                              ],
                             ),
-                          ]
+                            if (isEnabledRepeatMovement)
+                              WidgetsContainer(
+                                title: 'Movimiento recurrente',
+                                description:
+                                    'Este movimiento se repetirá mensualmente en la fecha seleccionada.',
+                                padding: const EdgeInsets.all(12),
+                                children: [
+                                  DetailCategoryCard(
+                                    categoryName:
+                                        'Repetir movimiento mensualmente',
+                                    categoryIcon: Icons.repeat,
+                                    iconColor: Colors.orange,
+                                    trailing: Switch(
+                                      value: repeatMovement,
+                                      onChanged: _toggleRepeatMovement,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            InfoTipeMovementCard(
+                              tipoMovimiento: tipoMovimiento,
+                            ),
+                          ],
                         ),
-                      InfoTipeMovementCard(tipoMovimiento: tipoMovimiento),
-                    ],
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

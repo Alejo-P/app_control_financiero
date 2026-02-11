@@ -29,6 +29,9 @@ class WidgetsContainer extends StatelessWidget {
       context,
     ).colorScheme.surface; // Color de fondo del tema
     final [r, g, b] = getRGBFromColor(backgroundThemeColor);
+    final [rBorder, gBorder, bBorder] = getRGBFromColor(
+      borderColor ?? Colors.grey.shade600,
+    );
 
     return Container(
       padding: padding,
@@ -50,7 +53,10 @@ class WidgetsContainer extends StatelessWidget {
               decoration: BoxDecoration(
                 color: backgroundColor ?? backgroundThemeColor,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: borderColor ?? Colors.grey.shade600, width: 1.5),
+                border: Border.all(
+                  color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+                  width: 1.5,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Color.fromRGBO(r, g, b, 0.15),

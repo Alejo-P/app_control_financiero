@@ -59,7 +59,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
             const SizedBox(height: 8),
             Expanded(
               child: loadingInitialData
-                  ? LoadingScreen()
+                  ? LoadingScreen(message: 'Cargando categorías...')
                   : nombresTiposCategoria.isEmpty
                   ? _EmptyCategorias()
                   : SingleChildScrollView(
