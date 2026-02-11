@@ -294,6 +294,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
+      setState(() {
+        _canCloseWindow = false; // Volver a bloquear el cierre sin guardar
+      });
       return;
     }
 
@@ -326,6 +329,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
+      setState(() {
+        _canCloseWindow = false; // Volver a bloquear el cierre sin guardar
+      });
       return;
     }
 

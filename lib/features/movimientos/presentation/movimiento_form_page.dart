@@ -274,6 +274,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
+      setState(() {
+        _canCloseWindow = false; // Volver a bloquear el cierre sin guardar
+      });
       return;
     }
 
@@ -304,6 +307,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
+      setState(() {
+        _canCloseWindow = false; // Volver a bloquear el cierre sin guardar
+      });
       return;
     }
 

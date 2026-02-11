@@ -196,6 +196,9 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
+      setState(() {
+        _canCloseWindow = false;
+      });
       return;
     }
 
@@ -226,6 +229,9 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
+      setState(() {
+        _canCloseWindow = false;
+      });
       return;
     }
 
