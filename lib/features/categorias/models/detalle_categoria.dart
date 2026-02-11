@@ -1,7 +1,8 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-class DetalleCategoria {
+class DetalleCategoria extends Equatable {
   final int id;
   final String name;
   final String description;
@@ -14,7 +15,7 @@ class DetalleCategoria {
   final int? totalMovements;
   final bool isDefault;
 
-  DetalleCategoria({
+  const DetalleCategoria({
     required this.id,
     required this.name,
     this.icon,
@@ -27,6 +28,21 @@ class DetalleCategoria {
     this.enabledRepeatMovement = false,
     this.isDefault = false,
   });
+
+  @override
+  List<Object?> get props => [
+    id,
+    name,
+    icon,
+    color,
+    movementType,
+    categoryTypeName,
+    categoryTypeID,
+    description,
+    totalMovements,
+    enabledRepeatMovement,
+    isDefault
+  ];
 
   factory DetalleCategoria.fromMap(Map<String, dynamic> map) {
     return DetalleCategoria(

@@ -12,6 +12,7 @@ import 'package:control_financiero/features/categorias/widgets/tab_chip.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
+import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
@@ -35,7 +36,9 @@ class CategoriaFormPage extends StatefulWidget {
 class _CategoriaFormPageState extends State<CategoriaFormPage> {
   late Color selectedColor;
   late IconData selectedIcon;
-  bool _hasUnsavedChanges = false;
+  late DetalleCategoria initialCategoria;
+  bool _canCloseWindow = false;
+  bool _isLoading = false;
   bool isDefault = false;
   bool isEditing = false;
   bool isEnabledRepeatMovement = false;
@@ -59,27 +62,42 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     selectedColor = categoryColors.first;
     selectedIcon = categoryIcons.first;
 
+    initialCategoria = DetalleCategoria(
+      id: widget.categoriaExistente?.id ?? 0,
+      name: widget.categoriaExistente?.name ?? '',
+      description: widget.categoriaExistente?.description ?? '',
+      icon: widget.categoriaExistente?.icon,
+      color: widget.categoriaExistente?.color,
+      movementType: widget.categoriaExistente != null
+          ? (widget.categoriaExistente!.movementType)
+          : TipoMovimiento.gasto,
+      categoryTypeName: widget.categoriaExistente?.categoryTypeName ?? '',
+      categoryTypeID: widget.categoriaExistente?.categoryTypeID ?? -1,
+      enabledRepeatMovement:
+          widget.categoriaExistente?.enabledRepeatMovement ?? false,
+      isDefault: widget.categoriaExistente?.isDefault ?? false,
+    );
+
     if (widget.mode == CategoriaFormMode.edit &&
         widget.categoriaExistente != null) {
-      final categoria = widget.categoriaExistente!;
-      _categoryNameController.text = categoria.name;
-      _descriptionController.text = categoria.description;
-      selectedIcon = categoria.icon ?? categoryIcons.first;
-      selectedColor = categoria.color ?? categoryColors.first;
-      movementsByCategory = categoria.totalMovements ?? 0;
-      categoryTypeName = categoria.categoryTypeName;
-      categoryTypeID = categoria.categoryTypeID;
-      selectedTipeMovement = categoria.movementType == TipoMovimiento.ingreso
-          ? 'ingreso'
-          : 'gasto';
-      isDefault = categoria.isDefault;
-      isEnabledRepeatMovement = categoria.enabledRepeatMovement;
-      _initialValueIsEnabledRepeatMovement = categoria.enabledRepeatMovement;
       isEditing = true;
     }
 
-    _categoryNameController.addListener(_markAsDirty);
-    _descriptionController.addListener(_markAsDirty);
+    _categoryNameController.text = initialCategoria.name;
+    _descriptionController.text = initialCategoria.description;
+    selectedIcon = initialCategoria.icon ?? categoryIcons.first;
+    selectedColor = initialCategoria.color ?? categoryColors.first;
+    movementsByCategory = widget.categoriaExistente?.totalMovements ?? 0;
+    categoryTypeName = initialCategoria.categoryTypeName;
+    categoryTypeID = initialCategoria.categoryTypeID;
+    selectedTipeMovement =
+        initialCategoria.movementType == TipoMovimiento.ingreso
+        ? 'ingreso'
+        : 'gasto';
+    isDefault = initialCategoria.isDefault;
+    isEnabledRepeatMovement = initialCategoria.enabledRepeatMovement;
+    _initialValueIsEnabledRepeatMovement =
+        initialCategoria.enabledRepeatMovement;
   }
 
   @override
@@ -90,29 +108,11 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     super.dispose();
   }
 
-  void _markAsDirty() {
-    // Si el campo esta vacío, no marcar como sucio
-    if (_categoryNameController.text.isEmpty &&
-        _descriptionController.text.isEmpty) {
-      setState(() {
-        _hasUnsavedChanges = false;
-      });
-      return;
-    }
-
-    if (!_hasUnsavedChanges) {
-      setState(() {
-        _hasUnsavedChanges = true;
-      });
-    }
-  }
-
   void _onChangeTipoCategoria(TipoCategoria? tipoCategoria) {
     if (tipoCategoria != null) {
       setState(() {
         categoryTypeID = tipoCategoria.id!;
         categoryTypeName = tipoCategoria.name;
-        _hasUnsavedChanges = true;
       });
     }
   }
@@ -120,7 +120,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   void _onChangeTipoMovimiento(String tipoMovimiento) {
     setState(() {
       selectedTipeMovement = tipoMovimiento;
-      _hasUnsavedChanges = true;
     });
   }
 
@@ -163,7 +162,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     if (confirmed != true) return;
 
     setState(() {
-      _hasUnsavedChanges = false;
+      _canCloseWindow = true;
+      _isLoading = true;
     });
 
     final categoria = Categoria(
@@ -190,6 +190,9 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     }
 
     if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
@@ -209,10 +212,17 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       content: '¿Estás seguro de que deseas eliminar esta categoría?',
     );
     if (confirmed != true) return;
+    setState(() {
+      _canCloseWindow = true;
+      _isLoading = true;
+    });
 
     await appState.eliminarCategoria(widget.categoriaExistente!.id);
 
     if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
@@ -234,12 +244,31 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     setState(() {
       isEnabledRepeatMovement = value;
-      _hasUnsavedChanges = value != _initialValueIsEnabledRepeatMovement;
     });
   }
 
+  bool _checkForChanges() {
+    if (_canCloseWindow) return true;
+
+    final original = initialCategoria;
+    final current = DetalleCategoria(
+      id: original.id,
+      name: _categoryNameController.text.trim(),
+      description: _descriptionController.text.trim(),
+      icon: selectedIcon,
+      color: selectedColor,
+      movementType: tipoMovimientoSeleccionado,
+      categoryTypeName: categoryTypeName,
+      categoryTypeID: categoryTypeID,
+      enabledRepeatMovement: isEnabledRepeatMovement,
+      isDefault: isDefault,
+    );
+    return original != current;
+  }
+
   Future<bool> _onWillPop() async {
-    if (!_hasUnsavedChanges) return true;
+    final hasChanges = _checkForChanges();
+    if (!hasChanges) return true;
 
     final shouldLeave = await showConfirmDialog(
       context,
@@ -271,167 +300,183 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                 widget.categoriaExistente != null &&
                 !isDefault)
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
+                icon: Icon(
+                  Icons.delete,
+                  color: _isLoading ? Colors.grey : Colors.red,
+                ),
                 tooltip: 'Eliminar',
-                onPressed: () async {
-                  await _eliminarCategoria();
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        await _eliminarCategoria();
+                      },
               ),
 
             if (!isDefault)
               IconButton(
-                icon: const Icon(Icons.check, color: Colors.green),
+                icon: Icon(
+                  Icons.check,
+                  color: _isLoading ? Colors.grey : Colors.green,
+                ),
                 tooltip: 'Guardar',
-                onPressed: () async {
-                  await _guardarCategoria();
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        await _guardarCategoria();
+                      },
               ),
           ],
         ),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Center(
+          child: _isLoading
+              ? LoadingScreen(message: 'Guardando categoría...')
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
                         child: Column(
                           children: [
-                            IconContainer(
-                              icon: selectedIcon,
-                              color: selectedColor,
-                              size: 64,
-                              onTap: () {
-                                if (isDefault) return;
-                                _openIconColorPickerModal(context);
-                              },
-                            ),
-                            if (!isDefault) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                "Toca el ícono para cambiar",
-                                style: TextStyle(
-                                  color: selectedColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                ),
+                            Center(
+                              child: Column(
+                                children: [
+                                  IconContainer(
+                                    icon: selectedIcon,
+                                    color: selectedColor,
+                                    size: 64,
+                                    onTap: () {
+                                      if (isDefault) return;
+                                      _openIconColorPickerModal(context);
+                                    },
+                                  ),
+                                  if (!isDefault) ...[
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "Toca el ícono para cambiar",
+                                      style: TextStyle(
+                                        color: selectedColor,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      WidgetsContainer(
-                        title: 'Detalles de la categoría',
-                        children: [
-                          TextInputCard(
-                            textController: _categoryNameController,
-                            placeholder: 'Nombre de la categoría',
-                            iconData: Icons.label_outline,
-                            iconColor: Colors.grey.shade600,
-                            maxLines: 1,
-                            maxLength: 40,
-                            isEditable: !isDefault,
-                          ),
-                          TextInputCard(
-                            textController: _descriptionController,
-                            placeholder: 'Descripción (opcional)',
-                            iconData: Icons.description_outlined,
-                            iconColor: Colors.grey.shade600,
-                            maxLines: 3,
-                            maxLength: 80,
-                            isEditable: !isDefault,
-                          ),
-                        ],
-                      ),
-                      WidgetsContainer(
-                        title: 'Opciones adicionales',
-                        description: !isEditing
-                            ? 'Configura opciones adicionales para esta categoría.'
-                            : 'No puedes cambiar estas opciones para categorías predeterminadas o al editar.',
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              if (isDefault || isEditing) return;
-                              _openTipoCategoriasModal(context);
-                            },
-                            borderRadius: BorderRadius.circular(12),
-                            child: DetailCategoryCard(
-                              categoryName: 'Tipo de categoría',
-                              categoryIcon: Icons.category,
-                              iconColor: Colors.blue,
-                              currentValue: categoryTypeName,
-                              showArrow: (!isDefault && !isEditing),
                             ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              if (isDefault || isEditing) return;
-                              _onChangeTipoMovimiento(
-                                selectedTipeMovement == 'gasto'
-                                    ? 'ingreso'
-                                    : 'gasto',
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(12),
-                            child: DetailCategoryCard(
-                              categoryName: 'Tipo de movimiento',
-                              categoryIcon: selectedTipeMovement == 'gasto'
-                                  ? Icons.arrow_downward
-                                  : Icons.arrow_upward,
-                              iconColor: selectedTipeMovement == 'gasto'
-                                  ? Colors.red
-                                  : Colors.green,
-                              currentValue: selectedTipeMovement == 'gasto'
-                                  ? 'Gasto'
-                                  : 'Ingreso',
-                              showArrow: (!isDefault && !isEditing),
+                            WidgetsContainer(
+                              title: 'Detalles de la categoría',
+                              children: [
+                                TextInputCard(
+                                  textController: _categoryNameController,
+                                  placeholder: 'Nombre de la categoría',
+                                  iconData: Icons.label_outline,
+                                  iconColor: Colors.grey.shade600,
+                                  maxLines: 1,
+                                  maxLength: 40,
+                                  isEditable: !isDefault,
+                                ),
+                                TextInputCard(
+                                  textController: _descriptionController,
+                                  placeholder: 'Descripción (opcional)',
+                                  iconData: Icons.description_outlined,
+                                  iconColor: Colors.grey.shade600,
+                                  maxLines: 3,
+                                  maxLength: 80,
+                                  isEditable: !isDefault,
+                                ),
+                              ],
                             ),
-                          ),
-                          DetailCategoryCard(
-                            categoryName: 'Permitir repetir movimientos cada mes',
-                            categoryIcon: Icons.repeat,
-                            iconColor: Colors.green,
-                            showArrow: false,
-                            trailing: Switch(
-                              value: isEnabledRepeatMovement,
-                              onChanged: (value) {
-                                if (isDefault) return;
-                                _toggleRepeatMovement(value);
-                              },
+                            WidgetsContainer(
+                              title: 'Opciones adicionales',
+                              description: !isEditing
+                                  ? 'Configura opciones adicionales para esta categoría.'
+                                  : 'No puedes cambiar estas opciones para categorías predeterminadas o al editar.',
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    if (isDefault || isEditing) return;
+                                    _openTipoCategoriasModal(context);
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: DetailCategoryCard(
+                                    categoryName: 'Tipo de categoría',
+                                    categoryIcon: Icons.category,
+                                    iconColor: Colors.blue,
+                                    currentValue: categoryTypeName,
+                                    showArrow: (!isDefault && !isEditing),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    if (isDefault || isEditing) return;
+                                    _onChangeTipoMovimiento(
+                                      selectedTipeMovement == 'gasto'
+                                          ? 'ingreso'
+                                          : 'gasto',
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: DetailCategoryCard(
+                                    categoryName: 'Tipo de movimiento',
+                                    categoryIcon:
+                                        selectedTipeMovement == 'gasto'
+                                        ? Icons.arrow_downward
+                                        : Icons.arrow_upward,
+                                    iconColor: selectedTipeMovement == 'gasto'
+                                        ? Colors.red
+                                        : Colors.green,
+                                    currentValue:
+                                        selectedTipeMovement == 'gasto'
+                                        ? 'Gasto'
+                                        : 'Ingreso',
+                                    showArrow: (!isDefault && !isEditing),
+                                  ),
+                                ),
+                                DetailCategoryCard(
+                                  categoryName:
+                                      'Permitir repetir movimientos cada mes',
+                                  categoryIcon: Icons.repeat,
+                                  iconColor: Colors.green,
+                                  showArrow: false,
+                                  trailing: Switch(
+                                    value: isEnabledRepeatMovement,
+                                    onChanged: (value) {
+                                      if (isDefault) return;
+                                      _toggleRepeatMovement(value);
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      if (movementsByCategory > 0)
-                        WidgetsContainer(
-                          title: 'Movimientos asociados',
-                          description:
-                              'Esta categoría tiene movimientos asociados.\nPara eliminarla, primero elimina o reasigna esos movimientos.',
-                          borderColor: Colors.orange,
-                          children: [
-                            DetailCategoryCard(
-                              categoryName: 'Cantidad de movimientos asociados',
-                              categoryIcon: Icons.list_alt,
-                              iconColor: Colors.purple,
-                              currentValue:
-                                  '$movementsByCategory movimiento(s)',
-                              showArrow: false,
-                            ),
-                            // Aquí podrías agregar un botón o enlace para ver los movimientos asociados a esta categoría, si lo deseas.
-                          ],
-                        ),
+                            if (movementsByCategory > 0)
+                              WidgetsContainer(
+                                title: 'Movimientos asociados',
+                                description:
+                                    'Esta categoría tiene movimientos asociados.\nPara eliminarla, primero elimina o reasigna esos movimientos.',
+                                borderColor: Colors.orange,
+                                children: [
+                                  DetailCategoryCard(
+                                    categoryName:
+                                        'Cantidad de movimientos asociados',
+                                    categoryIcon: Icons.list_alt,
+                                    iconColor: Colors.purple,
+                                    currentValue:
+                                        '$movementsByCategory movimiento(s)',
+                                    showArrow: false,
+                                  ),
+                                  // Aquí podrías agregar un botón o enlace para ver los movimientos asociados a esta categoría, si lo deseas.
+                                ],
+                              ),
 
-                      if (widget.mode == CategoriaFormMode.edit)
-                        InfoCategoriaPredeterminada(isDefault: isDefault),
-                    ],
-                  ),
+                            if (widget.mode == CategoriaFormMode.edit)
+                              InfoCategoriaPredeterminada(isDefault: isDefault),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -571,7 +616,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     ).then((result) {
       if (result != null) {
         setState(() {
-          _hasUnsavedChanges = true;
           selectedIcon = result['icon'];
           selectedColor = result['color'];
         });
