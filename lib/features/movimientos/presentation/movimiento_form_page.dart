@@ -362,6 +362,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                             placeholder: 'Titulo del movimiento',
                             iconData: Icons.title,
                             iconColor: Colors.grey.shade600,
+                            maxLines: 1,
+                            maxLength: 50,
                           ),
                           InkWell(
                             onTap: () async =>
@@ -389,6 +391,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                             placeholder: 'Agregar una nota (opcional)',
                             iconData: Icons.edit_note,
                             iconColor: Colors.grey.shade600,
+                            maxLines: 3,
+                            maxLength: 200,
                           ),
                         ],
                       ),

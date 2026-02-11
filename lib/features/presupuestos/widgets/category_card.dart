@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,13 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final percentageText = '${(percentage * 100).toStringAsFixed(0)}%';
+    final remaining = total - spent;
+    final isOverBudget = spent > total;
+    final displayColor = isOverBudget ? Colors.red : Colors.grey.shade600;
+    final remainingText = isOverBudget
+        ? 'Sobrepasado: \$${(spent - total).toStringAsFixed(2)}'
+        : 'Restante: \$${remaining.toStringAsFixed(2)}';
+    final [r, g, b] = getRGBFromColor(displayColor);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -29,7 +37,7 @@ class CategoryCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: spent > total ? Colors.red : Colors.transparent,
+            color: Color.fromRGBO(r, g, b, 0.5),
             width: 1.5,
           ),
         ),
@@ -53,8 +61,8 @@ class CategoryCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Restante: \$${(total - spent).toStringAsFixed(2)}',
-                          style: const TextStyle(color: Colors.grey),
+                          remainingText,
+                          style: TextStyle(color: displayColor, fontSize: 13),
                         ),
                       ],
                     ),
@@ -66,9 +74,10 @@ class CategoryCard extends StatelessWidget {
                       Text(
                         '\$${spent.toStringAsFixed(2)}',
                         textAlign: TextAlign.right,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
+                          color: displayColor,
                         ),
                       ),
                       const SizedBox(height: 3),

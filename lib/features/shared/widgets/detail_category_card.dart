@@ -40,33 +40,36 @@ class DetailCategoryCard extends StatelessWidget {
         const SizedBox(width: 3),
         //Nombre categoria
         Expanded(
+          flex: 2,
           child: Text(
             categoryName,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
+        const SizedBox(width: 6),
 
         //Valor actual
-        if (currentValue != null && trailing == null) ...[
-          const SizedBox(width: 4),
-          IntrinsicWidth(
-            child: Container(
-              alignment: Alignment.centerRight,
+        if (currentValue != null && trailing == null)
+          Expanded(
+            flex: 3,
+            child: Tooltip(
+              message: currentValue!,
               child: Text(
                 currentValue!,
                 textAlign: TextAlign.right,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
             ),
           ),
-        ],
 
         if (trailing != null) ...[const SizedBox(width: 8), trailing!],
 
-        if (showArrow && trailing == null) ...[
-          const SizedBox(width: 3),
+        if (showArrow && trailing == null)
           Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
-        ],
       ],
     );
   }

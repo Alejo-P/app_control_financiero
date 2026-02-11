@@ -9,7 +9,7 @@ class WidgetsContainer extends StatelessWidget {
   final List<Widget>? children;
   final Color? backgroundColor;
   final EdgeInsetsGeometry padding;
-  final Color borderColor;
+  final Color? borderColor;
 
   const WidgetsContainer({
     super.key,
@@ -20,7 +20,7 @@ class WidgetsContainer extends StatelessWidget {
     this.children,
     this.backgroundColor,
     this.padding = const EdgeInsets.all(8),
-    this.borderColor = Colors.transparent,
+    this.borderColor,
   });
 
   @override
@@ -50,7 +50,7 @@ class WidgetsContainer extends StatelessWidget {
               decoration: BoxDecoration(
                 color: backgroundColor ?? backgroundThemeColor,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: borderColor, width: 1.5),
+                border: Border.all(color: borderColor ?? Colors.grey.shade600, width: 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: Color.fromRGBO(r, g, b, 0.15),

@@ -7,15 +7,9 @@ class NoteInputFormatter extends TextInputFormatter  {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-    final maxLength = 100;
 
     // Vacío es válido
     if (text.isEmpty) return newValue;
-
-    // Límite total de caracteres
-    if (text.length > maxLength) {
-      return oldValue;
-    }
 
     // Permitir letras, números, espacios y puntuación básica
     final regex = RegExp(

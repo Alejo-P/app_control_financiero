@@ -331,6 +331,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                             placeholder: 'Nombre de la categoría',
                             iconData: Icons.label_outline,
                             iconColor: Colors.grey.shade600,
+                            maxLines: 1,
+                            maxLength: 40,
                             isEditable: !isDefault,
                           ),
                           TextInputCard(
@@ -338,6 +340,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                             placeholder: 'Descripción (opcional)',
                             iconData: Icons.description_outlined,
                             iconColor: Colors.grey.shade600,
+                            maxLines: 3,
+                            maxLength: 80,
                             isEditable: !isDefault,
                           ),
                         ],
