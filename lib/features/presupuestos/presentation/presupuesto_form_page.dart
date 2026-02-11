@@ -15,6 +15,7 @@ import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/widgets/category_button.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -38,13 +39,15 @@ class PresupuestoFormPage extends StatefulWidget {
 }
 
 class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
-  bool _hasUnsavedChanges = false;
+  bool _canCloseWindow = false;
+  bool _isLoading = false;
   bool repeatBudget = false;
   List<Movimiento> movimientos = [];
   final meses = monthNames;
   final anios = generateYearList(DateTime.now().year, 10);
   late DateTime fechaPresupuesto;
   late int categoriaSeleccionada;
+  late DetallePresupuesto initialPresupuesto;
   int presupuestoId = 0;
   double ingresoPresupuestadoTotal = 0.0;
   late IngresoPresupuestado ingresoDisponible;
@@ -62,29 +65,43 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
     }
 
-    if (widget.mode == PresupuestoFormMode.edit && widget.presupuesto != null) {
-      categoriaSeleccionada = widget.presupuesto!.categoriaId;
-      movimientos = widget.presupuesto!.movimientos;
-      fechaPresupuesto = widget.presupuesto!.fechaPresupuesto;
-      presupuestoId = widget.presupuesto!.idPresupuesto;
-      repeatBudget = widget.presupuesto!.esRecurrente;
-      _presupuestoAmountController.text = widget.presupuesto!.montoPresupuestado
-          .toString();
-    }
+    initialPresupuesto = DetallePresupuesto(
+      categoria: widget.presupuesto?.categoria ?? '',
+      categoriaId: widget.presupuesto?.categoriaId ?? -1,
+      idPresupuesto: widget.presupuesto?.idPresupuesto ?? presupuestoId,
+      icon: widget.presupuesto != null
+          ? widget.presupuesto!.icon
+          : Icons.category,
+      iconColor: widget.presupuesto != null
+          ? widget.presupuesto!.iconColor
+          : Colors.grey,
+      fechaPresupuesto: widget.presupuesto?.fechaPresupuesto ?? DateTime.now(),
+      montoPresupuestado: widget.presupuesto?.montoPresupuestado ?? 0.0,
+      totalPresupuestado: widget.presupuesto?.totalPresupuestado != null
+          ? widget.presupuesto!.totalPresupuestado
+          : widget.totalIngresoPresupuestado ?? 0.0,
+      esRecurrente: widget.presupuesto?.esRecurrente ?? false,
+      movimientos: widget.presupuesto?.movimientos ?? [],
+    );
+
+    categoriaSeleccionada = initialPresupuesto.categoriaId;
+    movimientos = initialPresupuesto.movimientos;
+    fechaPresupuesto = initialPresupuesto.fechaPresupuesto;
+    presupuestoId = initialPresupuesto.idPresupuesto;
+    repeatBudget = initialPresupuesto.esRecurrente;
+    _presupuestoAmountController.text =
+        initialPresupuesto.montoPresupuestado > 0
+        ? initialPresupuesto.montoPresupuestado.toStringAsFixed(2)
+        : '';
 
     ingresoDisponible = IngresoPresupuestado(
       monto: widget.ingresoPresupuestado ?? 0.0,
       fecha: fechaPresupuesto,
     );
 
-    ingresoPresupuestadoTotal = widget.presupuesto?.totalPresupuestado != null
-        ? widget.presupuesto!.totalPresupuestado
-        : widget.totalIngresoPresupuestado ?? 0.0;
+    ingresoPresupuestadoTotal = initialPresupuesto.totalPresupuestado;
     _ingresoPresupuestadoController.text = ingresoPresupuestadoTotal
         .toStringAsFixed(2);
-
-    _presupuestoAmountController.addListener(_markAsDirty);
-    _ingresoPresupuestadoController.addListener(_markAsDirty);
   }
 
   @override
@@ -94,25 +111,23 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     super.dispose();
   }
 
-  void _markAsDirty() {
-    // Si el campo esta vacío, no marcar como sucio
-    if (_presupuestoAmountController.text.isEmpty &&
-        _ingresoPresupuestadoController.text.isEmpty) {
-      setState(() {
-        _hasUnsavedChanges = false;
-      });
-      return;
-    }
+  bool _checkForChanges() {
+    if (_canCloseWindow) return true;
 
-    if (!_hasUnsavedChanges) {
-      setState(() {
-        _hasUnsavedChanges = true;
-      });
-    }
+    final original = initialPresupuesto;
+    final current = initialPresupuesto.copyWith(
+      categoriaId: categoriaSeleccionada,
+      fechaPresupuesto: fechaPresupuesto,
+      montoPresupuestado:
+          double.tryParse(_presupuestoAmountController.text.trim()) ?? 0.0,
+      esRecurrente: repeatBudget,
+    );
+    return original != current;
   }
 
   Future<bool> _onWillPop() async {
-    if (!_hasUnsavedChanges) return true;
+    final hasChanges = _checkForChanges();
+    if (!hasChanges) return true;
 
     final shouldLeave = await showConfirmDialog(
       context,
@@ -221,7 +236,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     // Si estamos editando un presupuesto, permitir que el monto exceda el ingreso disponible solo si el nuevo monto es menor o igual al monto presupuestado originalmente (para evitar que el usuario reduzca el ingreso disponible al editar un presupuesto existente)
     if (widget.mode == PresupuestoFormMode.edit &&
         value >
-            ingresoDisponible.monto + widget.presupuesto!.montoPresupuestado) {
+            ingresoDisponible.monto + initialPresupuesto.montoPresupuestado) {
       AppSnackbar.error(
         context,
         'El monto del presupuesto no puede exceder el ingreso disponible.',
@@ -253,6 +268,10 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
           : '¿Deseas actualizar este presupuesto?',
     );
     if (confirm != true) return;
+    setState(() {
+      _canCloseWindow = true;
+      _isLoading = true;
+    });
 
     final nuevoPresupuesto = Presupuesto(
       id: widget.mode == PresupuestoFormMode.edit ? presupuestoId : null,
@@ -269,6 +288,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     }
 
     if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
@@ -290,10 +312,17 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     );
 
     if (shouldDelete != true) return;
+    setState(() {
+      _canCloseWindow = true;
+      _isLoading = true;
+    });
 
     await appState.eliminarPresupuesto(presupuestoId);
 
     if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
@@ -344,6 +373,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     if (categoriaSeleccionada == -1) {
       categoriaSeleccionada = categorias.first.id!;
+      initialPresupuesto = initialPresupuesto.copyWith(
+        categoriaId: categoriaSeleccionada,
+      );
     }
 
     return WillPopScope(
@@ -359,240 +391,260 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
             if (widget.mode == PresupuestoFormMode.edit)
               IconButton(
                 tooltip: 'Eliminar Presupuesto',
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () async {
-                  await _eliminarPresupuesto();
-                },
+                icon: Icon(
+                  Icons.delete,
+                  color: _isLoading ? Colors.grey : Colors.red,
+                ),
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        await _eliminarPresupuesto();
+                      },
               ),
 
             IconButton(
-              icon: const Icon(Icons.check, color: Colors.green),
+              icon: Icon(
+                Icons.check,
+                color: _isLoading ? Colors.grey : Colors.green,
+              ),
               tooltip: 'Guardar Presupuesto',
-              onPressed: () async {
-                await _guardarPresupuesto();
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () async {
+                      await _guardarPresupuesto();
+                    },
             ),
           ],
         ),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Periodo del presupuesto',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: const Text(
-                              'Ajustando el presupuesto para la siguiente fecha:',
+          child: _isLoading
+              ? LoadingScreen(message: 'Guardando categoría...')
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Periodo del presupuesto',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: const Text(
+                                    'Ajustando el presupuesto para la siguiente fecha:',
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  formatMonthYear(fechaPresupuesto),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            const Divider(),
+                            const SizedBox(height: 12),
+                            Text(
+                              widget.mode == PresupuestoFormMode.create
+                                  ? 'Selecciona una categoría'
+                                  : 'Categoría del presupuesto',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.mode == PresupuestoFormMode.create
+                                  ? 'El presupuesto se asignará a la categoría seleccionada.'
+                                  : 'El presupuesto actual está asignado a esta categoría.',
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            formatMonthYear(fechaPresupuesto),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                            const SizedBox(height: 12),
+                            // Aquí iría el listado de categorías con campos para ingresar el monto del presupuesto
+                            GridContainer(
+                              columns: 3,
+                              children: categorias
+                                  .map(
+                                    (categoria) => CategoryButton(
+                                      icon: categoria.iconData,
+                                      title: categoria.name,
+                                      isSelected:
+                                          categoriaSeleccionada == categoria.id,
+                                      onTap: () =>
+                                          _onChangeCategoria(categoria.id!),
+                                    ),
+                                  )
+                                  .toList(),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      Text(
-                        widget.mode == PresupuestoFormMode.create
-                            ? 'Selecciona una categoría'
-                            : 'Categoría del presupuesto',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.mode == PresupuestoFormMode.create
-                            ? 'El presupuesto se asignará a la categoría seleccionada.'
-                            : 'El presupuesto actual está asignado a esta categoría.',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 12),
-                      // Aquí iría el listado de categorías con campos para ingresar el monto del presupuesto
-                      GridContainer(
-                        columns: 3,
-                        children: categorias
-                            .map(
-                              (categoria) => CategoryButton(
-                                icon: categoria.iconData,
-                                title: categoria.name,
-                                isSelected:
-                                    categoriaSeleccionada == categoria.id,
-                                onTap: () =>
-                                    _onChangeCategoria(categoria.id!),
+                            const SizedBox(height: 12),
+                            Card(
+                              color: primaryColorWithOpacity,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                side: BorderSide(
+                                  color: colorScheme.primary,
+                                  width: 1.0,
+                                ),
                               ),
-                            )
-                            .toList(),
-                      ),
-                      const SizedBox(height: 12),
-                      Card(
-                        color: primaryColorWithOpacity,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          side: BorderSide(
-                            color: colorScheme.primary,
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.wallet_rounded,
-                                size: 40,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Disponible para este presupuesto',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: colorScheme.primary,
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.wallet_rounded,
+                                      size: 40,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.primary,
+                                    const SizedBox(width: 8),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Disponible para este presupuesto',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: colorScheme.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.primary,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: _mostrarModalIngresoPresupuestado,
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 30,
+                                        color: colorScheme.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(width: 8),
-                              GestureDetector(
-                                onTap: _mostrarModalIngresoPresupuestado,
-                                child: Icon(
-                                  Icons.edit,
-                                  size: 30,
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              'Monto del presupuesto',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            AmountInput(
+                              controller: _presupuestoAmountController,
+                              isEditable:
+                                  (ingresoDisponible.monto > 0 ||
+                                  widget.mode == PresupuestoFormMode.edit),
+                              showLabel: false,
+                            ),
+
+                            WidgetsContainer(
+                              title: 'Repetir presupuesto mensualmente',
+                              description:
+                                  'Este presupuesto se repetirá automáticamente cada mes hasta que decidas eliminarlo.',
+                              padding: const EdgeInsets.all(12),
+                              children: [
+                                DetailCategoryCard(
+                                  categoryName:
+                                      'Repetir presupuesto mensualmente',
+                                  categoryIcon: Icons.repeat,
+                                  iconColor: Colors.orange,
+                                  trailing: Switch(
+                                    value: repeatBudget,
+                                    onChanged: _toggleRepeatBudget,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            if (movimientos.isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              const Divider(),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Movimientos asociados a este presupuesto',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
                                   color: colorScheme.primary,
                                 ),
                               ),
+                              const SizedBox(height: 12),
+                              ...fechasMovimientos.map((fecha) {
+                                // Filtrar movimientos por fecha y filtro seleccionado
+                                final movimientosFiltrados = movimientos
+                                    .where((mov) => isSameDay(mov.date, fecha))
+                                    .toList();
+
+                                if (movimientosFiltrados.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                return TransactionsContainer(
+                                  date: fecha,
+                                  movimientos: movimientosFiltrados,
+                                );
+                              }),
+                              Center(
+                                child: Text(
+                                  '${movimientos.length} movimiento${movimientos.length != 1 ? 's' : ''} en este presupuesto',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(color: Colors.grey[600]),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
                             ],
-                          ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Monto del presupuesto',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      AmountInput(
-                        controller: _presupuestoAmountController,
-                        isEditable:
-                            (ingresoDisponible.monto > 0 ||
-                            widget.mode == PresupuestoFormMode.edit),
-                        showLabel: false,
-                      ),
-
-                      WidgetsContainer(
-                        title: 'Repetir presupuesto mensualmente',
-                        description:
-                            'Este presupuesto se repetirá automáticamente cada mes hasta que decidas eliminarlo.',
-                        padding: const EdgeInsets.all(12),
-                        children: [
-                          DetailCategoryCard(
-                            categoryName: 'Repetir presupuesto mensualmente',
-                            categoryIcon: Icons.repeat,
-                            iconColor: Colors.orange,
-                            trailing: Switch(
-                              value: repeatBudget,
-                              onChanged: _toggleRepeatBudget,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      if (movimientos.isNotEmpty) ...[
-                        const SizedBox(height: 10),
-                        const Divider(),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Movimientos asociados a este presupuesto',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ...fechasMovimientos.map((fecha) {
-                          // Filtrar movimientos por fecha y filtro seleccionado
-                          final movimientosFiltrados = movimientos
-                              .where((mov) => isSameDay(mov.date, fecha))
-                              .toList();
-
-                          if (movimientosFiltrados.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-
-                          return TransactionsContainer(
-                            date: fecha,
-                            movimientos: movimientosFiltrados,
-                          );
-                        }),
-                        Center(
-                          child: Text(
-                            '${movimientos.length} movimiento${movimientos.length != 1 ? 's' : ''} en este presupuesto',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.grey[600]),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

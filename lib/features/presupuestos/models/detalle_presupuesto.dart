@@ -1,7 +1,8 @@
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-class DetallePresupuesto {
+class DetallePresupuesto extends Equatable {
   final String categoria;
   final int categoriaId;
   final int idPresupuesto;
@@ -13,7 +14,7 @@ class DetallePresupuesto {
   final bool esRecurrente;
   final List<Movimiento> movimientos;
 
-  DetallePresupuesto({
+  const DetallePresupuesto({
     required this.categoria,
     required this.categoriaId,
     required this.idPresupuesto,
@@ -25,6 +26,46 @@ class DetallePresupuesto {
     this.esRecurrente = false,
     this.movimientos = const [],
   });
+
+  DetallePresupuesto copyWith({
+    String? categoria,
+    int? categoriaId,
+    int? idPresupuesto,
+    IconData? icon,
+    Color? iconColor,
+    DateTime? fechaPresupuesto,
+    double? montoPresupuestado,
+    double? totalPresupuestado,
+    bool? esRecurrente,
+    List<Movimiento>? movimientos,
+  }) {
+    return DetallePresupuesto(
+      categoria: categoria ?? this.categoria,
+      categoriaId: categoriaId ?? this.categoriaId,
+      idPresupuesto: idPresupuesto ?? this.idPresupuesto,
+      icon: icon ?? this.icon,
+      iconColor: iconColor ?? this.iconColor,
+      fechaPresupuesto: fechaPresupuesto ?? this.fechaPresupuesto,
+      montoPresupuestado: montoPresupuestado ?? this.montoPresupuestado,
+      totalPresupuestado: totalPresupuestado ?? this.totalPresupuestado,
+      esRecurrente: esRecurrente ?? this.esRecurrente,
+      movimientos: movimientos ?? this.movimientos,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    categoria,
+    categoriaId,
+    idPresupuesto,
+    icon,
+    iconColor,
+    fechaPresupuesto,
+    montoPresupuestado,
+    totalPresupuestado,
+    esRecurrente,
+    movimientos,
+  ];
 
   factory DetallePresupuesto.fromMap(Map<String, dynamic> map) {
     return DetallePresupuesto(
