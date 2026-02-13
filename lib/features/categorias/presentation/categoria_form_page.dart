@@ -595,9 +595,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                      ),
                       onPressed: () {
                         Navigator.pop(context, {
                           'icon': tempIcon,
@@ -607,7 +604,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                       child: const Text(
                         'Confirmar',
                         style: TextStyle(
-                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

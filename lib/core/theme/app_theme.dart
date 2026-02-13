@@ -36,7 +36,7 @@ class AppTheme {
     dividerTheme: DividerThemeData(
       thickness: 1,
       space: 1,
-      color: Colors.grey[400]
+      color: Colors.grey[400],
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold),
@@ -72,6 +72,28 @@ class AppTheme {
           alpha: 0.5,
         ); // Color del track cuando el switch está desactivado
       }),
+      trackOutlineColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue.withValues(
+            alpha: 0.6,
+          ); // Color del track cuando el switch está activado
+        }
+        return Colors.grey.withValues(
+          alpha: 0.6,
+        ); // Color del track cuando el switch está desactivado
+      }),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors
+              .white; // Color del track cuando el switch está desactivado
+        }),
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors
+              .black; // Color del track cuando el switch está desactivado
+        }),
+      ),
     ),
     useMaterial3: true,
   );
@@ -148,6 +170,27 @@ class AppTheme {
           alpha: 0.5,
         ); // Color del track cuando el switch está desactivado
       }),
+      trackOutlineColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue.withValues(
+            alpha: 0.6,
+          ); // Color del track cuando el switch está activado
+        }
+        return Colors.grey.withValues(
+          alpha: 0.6,
+        ); // Color del track cuando el switch está desactivado
+      }),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors
+              .black; // Color del track cuando el switch está desactivado
+        }),
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors.white;
+        }),
+      ),
     ),
     useMaterial3: true,
   );
