@@ -22,10 +22,13 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    
     final percentageText = '${(percentage * 100).toStringAsFixed(0)}%';
     final remaining = total - spent;
     final isOverBudget = spent > total;
-    final displayColor = isOverBudget ? Colors.red : Colors.grey.shade600;
+    final displayColor = isOverBudget ? Colors.red : colors.onSurface;
     final remainingText = isOverBudget
         ? 'Sobrepasado: \$${(spent - total).toStringAsFixed(2)}'
         : 'Restante: \$${remaining.toStringAsFixed(2)}';
@@ -83,7 +86,7 @@ class CategoryCard extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         'de \$${total.toStringAsFixed(2)}',
-                        style: const TextStyle(color: Colors.grey),
+                        style: TextStyle(color: colors.onSurface),
                       ),
                     ],
                   ),

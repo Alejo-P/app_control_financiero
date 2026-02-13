@@ -66,8 +66,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       id: widget.categoriaExistente?.id ?? 0,
       name: widget.categoriaExistente?.name ?? '',
       description: widget.categoriaExistente?.description ?? '',
-      icon: widget.categoriaExistente?.icon,
-      color: widget.categoriaExistente?.color,
+      icon: widget.categoriaExistente?.icon ?? selectedIcon,
+      color: widget.categoriaExistente?.color ?? selectedColor,
       movementType: widget.categoriaExistente != null
           ? (widget.categoriaExistente!.movementType)
           : TipoMovimiento.gasto,
