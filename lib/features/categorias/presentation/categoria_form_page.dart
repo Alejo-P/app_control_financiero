@@ -78,10 +78,9 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       isDefault: widget.categoriaExistente?.isDefault ?? false,
     );
 
-    if (widget.mode == CategoriaFormMode.edit &&
-        widget.categoriaExistente != null) {
-      isEditing = true;
-    }
+    isEditing =
+        (widget.mode == CategoriaFormMode.edit &&
+        widget.categoriaExistente != null);
 
     _categoryNameController.text = initialCategoria.name;
     _descriptionController.text = initialCategoria.description;
@@ -603,9 +602,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                       },
                       child: const Text(
                         'Confirmar',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
