@@ -27,9 +27,7 @@ class _AjustesPageState extends State<AjustesPage> {
   }
 
   void _toggleDarkMode(bool value) {
-    setState(() {
-      _appState.setDarkMode(value);
-    });
+    _appState.setDarkMode(value);
   }
 
   @override

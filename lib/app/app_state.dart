@@ -12,6 +12,7 @@ import 'package:control_financiero/features/presupuestos/models/presupuesto.dart
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class AppState extends ChangeNotifier {
   // Estado unico para movimientos
@@ -34,7 +35,13 @@ class AppState extends ChangeNotifier {
   ];
   String currentPageName = 'Movimientos';
   int currentTab = 0;
-  bool isDarkMode = false;
+
+  // Configuracion de caja para Hive
+  static const _settingsBox = 'settings';
+  static const _themeKey = 'dark_mode';
+
+  bool _isDarkMode = false;
+  bool get isDarkMode => _isDarkMode;
 
   List<AppBarAction> _appBarActions = [];
   List<AppBarAction> get appBarActions => _appBarActions;
@@ -67,7 +74,8 @@ class AppState extends ChangeNotifier {
   double? get totalIngresoPresupuestado => _totalIngresoPresupuestado;
   double? get variacionAhorro => _variacionAhorro;
   List<DateTime> get uniqueMovementDates => _uniqueMovementDates;
-  List<DateTime> get uniqueBudgetMovementDates => _fetchUniqueBudgetMovementDates();
+  List<DateTime> get uniqueBudgetMovementDates =>
+      _fetchUniqueBudgetMovementDates();
   List<String> get uniqueTipeCategoryNames => _uniqueTipeCategoryNames;
 
   List<Categoria> get categorias => _categoriasRepository.categorias;
@@ -87,7 +95,9 @@ class AppState extends ChangeNotifier {
 
   // Cargar datos iniciales de los repositorios
   Future<void> loadInitialData() async {
-  await Future.wait([
+    await initialize();
+    
+    await Future.wait([
       _tipoCategoriaRepository.fetchTipoCategorias(),
       _categoriasRepository.fetchCategorias(),
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
@@ -123,6 +133,18 @@ class AppState extends ChangeNotifier {
     _uniqueMovementDates = _fetchUniqueMovementDates();
 
     if (notify) notifyListeners();
+  }
+
+  Future<Box> _getSettingsBox() async {
+    if (!Hive.isBoxOpen(_settingsBox)) {
+      return await Hive.openBox(_settingsBox);
+    }
+    return Hive.box(_settingsBox);
+  }
+
+  Future<void> initialize() async {
+    final box = await _getSettingsBox();
+    _isDarkMode = box.get(_themeKey, defaultValue: false);
   }
 
   Future<void> loadPresupuestosByMonthAndYear(
@@ -261,8 +283,7 @@ class AppState extends ChangeNotifier {
         .toList();
   }
 
-  // Obtener movimientos presupuestos filtrados por fecha (mes y año) 
-
+  // Obtener movimientos presupuestos filtrados por fecha (mes y año)
 
   // Obtener movimientos agrupados por fecha
   Map<DateTime, List<Movimiento>> _fetchMovimientosPorFecha() {
@@ -295,9 +316,9 @@ class AppState extends ChangeNotifier {
 
   // Obtener movimientos filtrados por fecha (mes y año)
   List<Movimiento> getMovimientosByDateAndFilter(
-    DateTime fecha,
-    {MovimientoFiltro filtro = MovimientoFiltro.todos}
-  ) {
+    DateTime fecha, {
+    MovimientoFiltro filtro = MovimientoFiltro.todos,
+  }) {
     final movimientos = _movimientosPorFecha[fecha] ?? [];
 
     if (filtro == MovimientoFiltro.todos) return movimientos;
@@ -361,8 +382,12 @@ class AppState extends ChangeNotifier {
     return totalGastos;
   }
 
-  void setDarkMode(bool value) {
-    isDarkMode = value;
+  Future<void> setDarkMode(bool value) async {
+    _isDarkMode = value;
+
+    final box = await _getSettingsBox();
+    await box.put(_themeKey, value);
+
     notifyListeners();
   }
 
