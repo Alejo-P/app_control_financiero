@@ -17,12 +17,20 @@ class TabChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Colors.black;
-    final [r, g, b] = getRGBFromColor(color);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    final bgColor = isSelected
+        ? colors.primary
+        : colors.surface;
+
+    final contentColor = isSelected
+        ? colors.onPrimary
+        : colors.onSurface;
 
     return Card(
       elevation: 0,
-      color: (isSelected ? color : Color.fromRGBO(r, g, b, 0.1)),
+      color: bgColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
       child: InkWell(
         onTap: onTap,
@@ -36,7 +44,7 @@ class TabChip extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: isSelected ? Colors.white : color,
+                color: isSelected ? contentColor : colors.onSurface,
               ),
             ),
           ),
