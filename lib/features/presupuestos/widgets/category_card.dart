@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/utils/color_utils.dart';
+import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +42,10 @@ class CategoryCard extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5), width: 1.5),
+          side: BorderSide(
+            color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+            width: 1.5,
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -59,7 +63,7 @@ class CategoryCard extends StatelessWidget {
                           title,
                           style: textTheme.labelMedium!.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: colorScheme.primary
+                            color: colorScheme.primary,
                           ),
                         ),
                         Text(
@@ -99,12 +103,9 @@ class CategoryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: LinearProgressIndicator(
-                        value: percentage.clamp(0.0, 1.0),
-                        backgroundColor: Colors.grey.shade300,
-                        minHeight: 8,
-                        borderRadius: BorderRadius.circular(3),
-                        valueColor: AlwaysStoppedAnimation<Color>(color),
+                      child: CustomProgressBar(
+                        currentValue: percentage,
+                        color: color,
                       ),
                     ),
                     const SizedBox(width: 8),
