@@ -71,7 +71,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       movementType: widget.categoriaExistente != null
           ? (widget.categoriaExistente!.movementType)
           : TipoMovimiento.gasto,
-      categoryTypeName: widget.categoriaExistente?.categoryTypeName ?? '',
+      categoryTypeName: widget.categoriaExistente?.categoryTypeName ?? categoryTypeName,
       categoryTypeID: widget.categoriaExistente?.categoryTypeID ?? -1,
       enabledRepeatMovement:
           widget.categoriaExistente?.enabledRepeatMovement ?? false,
