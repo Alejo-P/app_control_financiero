@@ -38,9 +38,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => MovimientoSearchPage(),
-              ),
+              MaterialPageRoute(builder: (_) => MovimientoSearchPage()),
             );
           },
         ),
@@ -89,8 +87,10 @@ class _MovimientosPageState extends State<MovimientosPage> {
 
     final movimientosFiltradosDelMes = fechasMovimientos
         .expand(
-          (fecha) =>
-              appState.getMovimientosByDateAndFilter(fecha, filtro: selectedFilter),
+          (fecha) => appState.getMovimientosByDateAndFilter(
+            fecha,
+            filtro: selectedFilter,
+          ),
         )
         .toList();
 

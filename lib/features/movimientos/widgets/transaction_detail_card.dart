@@ -27,6 +27,7 @@ class TransactionDetailCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -45,9 +46,12 @@ class TransactionDetailCard extends StatelessWidget {
                     title,
                     style: textTheme.labelMedium!.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: colorScheme.primary
                     ),
                   ),
-                  Text(category, style: textTheme.labelSmall),
+                  Text(category, style: textTheme.labelSmall!.copyWith(
+                    color: colorScheme.onSurface
+                  )),
                 ],
               ),
             ),
@@ -62,14 +66,15 @@ class TransactionDetailCard extends StatelessWidget {
                   style: textTheme.labelMedium!.copyWith(
                     fontWeight: FontWeight.bold,
                     color: type == 'Ingreso' ? Colors.green : Colors.red,
-                  )
-
+                  ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   time.format(context),
                   textAlign: TextAlign.right,
-                  style: textTheme.labelSmall,
+                  style: textTheme.labelSmall!.copyWith(
+                    color: colorScheme.onSurface
+                  ),
                 ),
               ],
             ),

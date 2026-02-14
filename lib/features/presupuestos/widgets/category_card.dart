@@ -23,13 +23,13 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final textTheme = theme.textTheme;
-    
+    final colorScheme = theme.colorScheme;
+
     final percentageText = '${(percentage * 100).toStringAsFixed(0)}%';
     final remaining = total - spent;
     final isOverBudget = spent > total;
-    final displayColor = isOverBudget ? Colors.red : colors.onSurface;
+    final displayColor = isOverBudget ? Colors.red : colorScheme.onSurface;
     final remainingText = isOverBudget
         ? 'Sobrepasado: \$${(spent - total).toStringAsFixed(2)}'
         : 'Restante: \$${remaining.toStringAsFixed(2)}';
@@ -40,10 +40,7 @@ class CategoryCard extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: Color.fromRGBO(r, g, b, 0.5),
-            width: 1.5,
-          ),
+          side: BorderSide(color: Color.fromRGBO(r, g, b, 0.5), width: 1.5),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -60,13 +57,14 @@ class CategoryCard extends StatelessWidget {
                         Text(
                           title,
                           style: textTheme.labelMedium!.copyWith(
-                            fontWeight: FontWeight.bold
-                          )
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary
+                          ),
                         ),
                         Text(
                           remainingText,
                           style: textTheme.labelSmall!.copyWith(
-                            color: displayColor
+                            color: displayColor,
                           ),
                         ),
                       ],
@@ -80,13 +78,13 @@ class CategoryCard extends StatelessWidget {
                         '\$${spent.toStringAsFixed(2)}',
                         textAlign: TextAlign.right,
                         style: textTheme.labelMedium!.copyWith(
-                          color: displayColor
-                        )
+                          color: displayColor,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         'de \$${total.toStringAsFixed(2)}',
-                        style: TextStyle(color: colors.onSurface),
+                        style: TextStyle(color: colorScheme.onSurface),
                       ),
                     ],
                   ),
@@ -109,10 +107,7 @@ class CategoryCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      percentageText,
-                      style: textTheme.labelSmall
-                    ),
+                    Text(percentageText, style: textTheme.labelSmall),
                   ],
                 ),
               ),
