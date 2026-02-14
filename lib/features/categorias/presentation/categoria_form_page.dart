@@ -39,6 +39,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   late DetalleCategoria initialCategoria;
   bool _canCloseWindow = false;
   bool _isLoading = false;
+  String _action = "Guardando";
   bool isDefault = false;
   bool isEditing = false;
   bool isEnabledRepeatMovement = false;
@@ -71,7 +72,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       movementType: widget.categoriaExistente != null
           ? (widget.categoriaExistente!.movementType)
           : TipoMovimiento.gasto,
-      categoryTypeName: widget.categoriaExistente?.categoryTypeName ?? categoryTypeName,
+      categoryTypeName:
+          widget.categoriaExistente?.categoryTypeName ?? categoryTypeName,
       categoryTypeID: widget.categoriaExistente?.categoryTypeID ?? -1,
       enabledRepeatMovement:
           widget.categoriaExistente?.enabledRepeatMovement ?? false,
@@ -161,6 +163,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     if (confirmed != true) return;
 
     setState(() {
+      _action = "Guardando";
       _canCloseWindow = true;
       _isLoading = true;
     });
@@ -215,6 +218,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     );
     if (confirmed != true) return;
     setState(() {
+      _action = "Eliminando";
       _canCloseWindow = true;
       _isLoading = true;
     });
@@ -335,7 +339,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: _isLoading
-              ? LoadingScreen(message: 'Guardando categoría...')
+              ? LoadingScreen(message: '$_action categoría...')
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -623,19 +627,23 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   }
 
   void _openTipoCategoriasModal(BuildContext context) {
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      
       showDragHandle: true, // Muestra el indicador de arrastre
       builder: (_) {
+        final theme = Theme.of(context);
+        final colors = theme.colorScheme;
         // Si la lista de categorías está vacía, mostrar un mensaje
         if (tiposCategorias.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
               'No hay categorías disponibles.',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+              style: TextStyle(fontSize: 18, color: colors.primary),
             ),
           );
         }
@@ -645,12 +653,14 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           itemCount: tiposCategorias.length,
           separatorBuilder: (_, __) => const Divider(),
           itemBuilder: (context, index) {
+            final theme = Theme.of(context);
+            final colors = theme.colorScheme;
             final tipoCategoria = tiposCategorias[index];
 
             return ListTile(
               leading: IconContainer(
                 icon: Icons.category,
-                color: Colors.grey[800]!,
+                color: colors.primary,
                 size: 26,
               ),
               title: Text(

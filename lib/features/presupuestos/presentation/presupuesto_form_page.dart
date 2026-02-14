@@ -41,6 +41,7 @@ class PresupuestoFormPage extends StatefulWidget {
 class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   bool _canCloseWindow = false;
   bool _isLoading = false;
+  String _action = "Guardando";
   bool repeatBudget = false;
   List<Movimiento> movimientos = [];
   final meses = monthNames;
@@ -269,6 +270,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     );
     if (confirm != true) return;
     setState(() {
+      _action = "Guardando";
       _canCloseWindow = true;
       _isLoading = true;
     });
@@ -316,6 +318,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     if (shouldDelete != true) return;
     setState(() {
+      _action = "Eliminando";
       _canCloseWindow = true;
       _isLoading = true;
     });
@@ -425,7 +428,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: _isLoading
-              ? LoadingScreen(message: 'Guardando categoría...')
+              ? LoadingScreen(message: '$_action presupuesto...')
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

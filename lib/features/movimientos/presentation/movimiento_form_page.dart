@@ -45,6 +45,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
   bool isEnabledRepeatMovement = false;
   bool repeatMovement = false;
+  String _action = "Guardando";
   late DateTime selectedDate;
   late List<Categoria> categorias;
   late List<Categoria> categoriasFiltradas;
@@ -243,6 +244,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     if (confirmed != true) return;
 
     setState(() {
+      _action = "Guardando";
       _canCloseWindow = true; // Permitir cerrar sin preguntar por cambios
       _isLoading = true; // Activar indicador de carga
     });
@@ -294,6 +296,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     );
     if (confirmed != true) return;
     setState(() {
+      _action = "Eliminando";
       _canCloseWindow = true; // Permitir cerrar sin preguntar por cambios
       _isLoading = true; // Activar indicador de carga
     });
@@ -386,7 +389,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: _isLoading
-              ? LoadingScreen(message: 'Guardando movimiento...')
+              ? LoadingScreen(message: '$_action movimiento...')
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
