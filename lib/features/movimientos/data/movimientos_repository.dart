@@ -43,6 +43,11 @@ abstract class _MovimientosRepository {
   /// Obtener el conteo de movimientos por categoría
   /// @return Un mapa con el ID de la categoría como clave y la cantidad de movimientos como valor.
   Future<Map<int, int>> getMovementsCountByCategory();
+  
+  /// Obtener todos los movimientos asociados a una categoria
+  /// @parram categoryID El ID de la categoria a obtener los movimientos
+  /// @return Una lista de objetos Movimiento.
+  Future<List<Movimiento>> getMovementsByCategoryID(int categoryID);
 
   /// Agrega un nuevo movimiento financiero.
   /// @param movimiento El objeto Movimiento a agregar.
@@ -186,6 +191,11 @@ class MovimientosRepository implements _MovimientosRepository {
   @override
   Future<Map<int, int>> getMovementsCountByCategory() async {
     return await localDataSource.getMovementsCountByCategory();
+  }
+
+  @override
+  Future<List<Movimiento>> getMovementsByCategoryID(int categoryID) async {
+    return await localDataSource.getMovementsByCategoryID(categoryID);
   }
 
   @override

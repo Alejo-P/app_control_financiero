@@ -38,7 +38,9 @@ class _MovimientosPageState extends State<MovimientosPage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => MovimientoSearchPage()),
+              MaterialPageRoute(builder: (_) => MovimientoSearchPage(
+                listaCategorias: _appState.categorias,
+              )),
             );
           },
         ),

@@ -96,7 +96,7 @@ class AppState extends ChangeNotifier {
   // Cargar datos iniciales de los repositorios
   Future<void> loadInitialData() async {
     await initialize();
-    
+
     await Future.wait([
       _tipoCategoriaRepository.fetchTipoCategorias(),
       _categoriasRepository.fetchCategorias(),
@@ -267,6 +267,17 @@ class AppState extends ChangeNotifier {
         .map((m) => DateTime(m.date.year, m.date.month, m.date.day))
         .toSet()
         .toList();
+    dates.sort((a, b) => b.compareTo(a));
+    return dates;
+  }
+
+  // Obtener todas las fechas únicas de movimientos (pasando la lista de movimientos como parametro)
+  List<DateTime> fetchUniqueMovementDatesInList(List<Movimiento> listaMovimientos) {
+    final dates = listaMovimientos
+        .map((m) => DateTime(m.date.year, m.date.month, m.date.day))
+        .toSet()
+        .toList();
+
     dates.sort((a, b) => b.compareTo(a));
     return dates;
   }
@@ -446,6 +457,16 @@ class AppState extends ChangeNotifier {
       );
     }
     notifyListeners();
+  }
+
+  Future<List<Movimiento>> obtenerMovimientosPorCategoria(
+    int categoryID,
+  ) async {
+    final movimientos = _movimientosRepository.getMovementsByCategoryID(
+      categoryID,
+    );
+
+    return movimientos;
   }
 
   Future<void> agregarMovimiento(Movimiento movimiento) async {

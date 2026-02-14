@@ -115,6 +115,18 @@ class MovimientosLocalDataSource {
     };
   }
 
+  Future<List<Movimiento>> getMovementsByCategoryID(int categoryID) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      MovimientosTable.table,
+      where: "${MovimientosTable.categoryId} = ?",
+      whereArgs: [categoryID],
+      orderBy: '${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC',
+    );
+
+    return maps.map(Movimiento.fromMap).toList();
+  }
+
   // Agregar un nuevo movimiento
   Future<OperationResult<int>> addMovimiento(Movimiento movimiento) async {
     final db = await _dbHelper.database;
