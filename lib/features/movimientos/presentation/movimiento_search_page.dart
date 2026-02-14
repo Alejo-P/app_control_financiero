@@ -190,17 +190,33 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                           color: colors.surface,
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
-                            child: CategoryGrid(
-                              children: categorias.map((categoria) {
-                                return CategoryButton(
-                                  icon: categoria.iconData,
-                                  title: categoria.name,
-                                  isSelected:
-                                      categoriaSeleccionada == categoria.id,
-                                  onTap: () =>
-                                      _onChangeCategoria(categoria.id!),
-                                );
-                              }).toList(),
+                            child: Column(
+                              children: [
+                                CategoryGrid(
+                                  children: categorias.map((categoria) {
+                                    return CategoryButton(
+                                      icon: categoria.iconData,
+                                      title: categoria.name,
+                                      isSelected:
+                                          categoriaSeleccionada == categoria.id,
+                                      onTap: () =>
+                                          _onChangeCategoria(categoria.id!),
+                                    );
+                                  }).toList(),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "Desliza para ver mas categorias >",
+                                      textAlign: TextAlign.right,
+                                      style: textTheme.labelSmall!.copyWith(
+                                        color: colors.primary
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ),

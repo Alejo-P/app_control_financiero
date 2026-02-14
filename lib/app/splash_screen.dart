@@ -105,20 +105,22 @@ class _SplashScreenState extends State<SplashScreen>
                     width: 128,
                     height: 128,
                     decoration: BoxDecoration(
-                      color: primary,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: primary.withOpacity(0.3),
+                          color: Colors.black.withOpacity(0.3),
                           blurRadius: 25,
                           offset: const Offset(0, 10),
                         ),
                       ],
                     ),
-                    child: const Icon(
-                      Icons.account_balance_wallet,
-                      color: Colors.white,
-                      size: 72,
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Image.asset(
+                        'assets/icons/app_prod_icon.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),

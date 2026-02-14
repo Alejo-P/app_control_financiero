@@ -7,19 +7,12 @@ class CategoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final columns = 4;
     return SizedBox(
-      height: children.length <= columns ? 125.0 : 250.0,
-      child: GridView.builder(
-        shrinkWrap: true,
-        //physics: const NeverScrollableScrollPhysics(),
+      height: 90,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
         itemCount: children.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          mainAxisExtent: 100,
-        ),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final element = children[index];
           return element;
