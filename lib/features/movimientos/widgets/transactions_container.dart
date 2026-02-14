@@ -26,6 +26,9 @@ class TransactionsContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     final appState = context.watch<AppState>();
     final formattedDate = formatRelativeDateWithMonth(date);
     final totalAmount = movimientos.fold<double>(0.0, (total, mov) {
@@ -40,9 +43,9 @@ class TransactionsContainer extends StatelessWidget {
       summaryAmount: totalAmount < 0
           ? '-\$${totalAmount.abs().toStringAsFixed(2)}'
           : '+\$${totalAmount.toStringAsFixed(2)}',
-      summaryAmountStyle: TextStyle(
-        color: totalAmount < 0 ? Colors.red : Colors.green,
+      summaryAmountStyle: textTheme.labelMedium!.copyWith(
         fontWeight: FontWeight.bold,
+        color: totalAmount >= 0 ? Colors.green : Colors.red,
       ),
       children: movimientos.map((movimiento) {
         final categoria = appState.getCategoriaById(movimiento.categoryID);

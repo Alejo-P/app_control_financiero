@@ -25,6 +25,8 @@ class TransactionDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     return InkWell(
       onTap: onTap,
@@ -33,11 +35,7 @@ class TransactionDetailCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconContainer(
-              icon: icon,
-              color: iconColor,
-              size: 26,
-            ),
+            IconContainer(icon: icon, color: iconColor, size: 26),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -45,15 +43,11 @@ class TransactionDetailCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: textTheme.labelMedium!.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
                     ),
                   ),
-                  Text(
-                    category,
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
+                  Text(category, style: textTheme.labelSmall),
                 ],
               ),
             ),
@@ -65,17 +59,17 @@ class TransactionDetailCard extends StatelessWidget {
                       ? '+\$${spent.toStringAsFixed(2)}'
                       : '-\$${spent.toStringAsFixed(2)}',
                   textAlign: TextAlign.right,
-                  style: TextStyle(
+                  style: textTheme.labelMedium!.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
                     color: type == 'Ingreso' ? Colors.green : Colors.red,
-                  ),
+                  )
+
                 ),
                 const SizedBox(height: 3),
                 Text(
                   time.format(context),
                   textAlign: TextAlign.right,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: textTheme.labelSmall,
                 ),
               ],
             ),

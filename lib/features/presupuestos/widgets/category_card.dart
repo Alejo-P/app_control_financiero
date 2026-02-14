@@ -24,6 +24,7 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final textTheme = theme.textTheme;
     
     final percentageText = '${(percentage * 100).toStringAsFixed(0)}%';
     final remaining = total - spent;
@@ -58,14 +59,15 @@ class CategoryCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          style: textTheme.labelMedium!.copyWith(
+                            fontWeight: FontWeight.bold
+                          )
                         ),
                         Text(
                           remainingText,
-                          style: TextStyle(color: displayColor, fontSize: 13),
+                          style: textTheme.labelSmall!.copyWith(
+                            color: displayColor
+                          ),
                         ),
                       ],
                     ),
@@ -77,11 +79,9 @@ class CategoryCard extends StatelessWidget {
                       Text(
                         '\$${spent.toStringAsFixed(2)}',
                         textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: displayColor,
-                        ),
+                        style: textTheme.labelMedium!.copyWith(
+                          color: displayColor
+                        )
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -111,11 +111,7 @@ class CategoryCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       percentageText,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: textTheme.labelSmall
                     ),
                   ],
                 ),

@@ -48,8 +48,8 @@ class AppTheme {
       bodySmall: TextStyle(fontSize: 14.0),
 
       labelLarge: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.grey[600]),
-      labelMedium: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500, color: Colors.grey[600]),
-      labelSmall: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400, color: Colors.grey[600]),
+      labelMedium: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+      labelSmall: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w500, color: Colors.grey[600]),
 
       headlineLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
       headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
@@ -146,8 +146,8 @@ class AppTheme {
       bodySmall: TextStyle(fontSize: 14.0),
 
       labelLarge: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.grey[500]),
-      labelMedium: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500, color: Colors.grey[500]),
-      labelSmall: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w400, color: Colors.grey[500]),
+      labelMedium: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600, color: Colors.grey[500]),
+      labelSmall: TextStyle(fontSize: 13.0, fontWeight: FontWeight.w500, color: Colors.grey[500]),
 
       headlineLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
       headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
