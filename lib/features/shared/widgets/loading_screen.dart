@@ -7,6 +7,9 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Center(
       child: Container(
         alignment: Alignment.center,
@@ -16,12 +19,11 @@ class LoadingScreen extends StatelessWidget {
             CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(
-                message,
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: Colors.grey[600],
-                  fontStyle: FontStyle.italic,
-                ),
-                textAlign: TextAlign.center,
+              message,
+              style: textTheme.bodyMedium!.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
