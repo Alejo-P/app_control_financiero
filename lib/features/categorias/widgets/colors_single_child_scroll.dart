@@ -19,7 +19,6 @@ class ColorsSingleChildScroll extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-
     return GridContainer(
       columns: 5,
       gap: 12,

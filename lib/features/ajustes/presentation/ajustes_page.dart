@@ -109,7 +109,7 @@ class _AjustesPageState extends State<AjustesPage> {
                       SettingOptionCard(
                         title: 'Modo oscuro',
                         description:
-                            'Activa o desactiva el modo oscuro en la aplicación',
+                            '${!isDarkMode ? 'Activa' : 'Desactiva'} el modo oscuro en la aplicación',
                         icon: isDarkMode
                             ? Icons.dark_mode_outlined
                             : Icons.light_mode_outlined,

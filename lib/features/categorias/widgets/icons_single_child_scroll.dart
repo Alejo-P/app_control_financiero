@@ -17,6 +17,9 @@ class IconsSingleChildScroll extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return GridContainer(
       columns: 5,
       gap: 12,
@@ -25,7 +28,7 @@ class IconsSingleChildScroll extends StatelessWidget {
 
         return IconContainer(
           icon: icon,
-          color: isSelected ? tempColor : Colors.grey[700]!,
+          color: isSelected ? tempColor : colors.primary,
           borderColor: isSelected ? tempColor : Colors.transparent,
           borderWidth: isSelected ? 2 : 0,
           size: 32,
