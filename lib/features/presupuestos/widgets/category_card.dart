@@ -30,17 +30,18 @@ class CategoryCard extends StatelessWidget {
     final remaining = total - spent;
     final isOverBudget = spent > total;
     final displayColor = isOverBudget ? Colors.red : colorScheme.onSurface;
+    final borderColor = isOverBudget ? Colors.red : Colors.grey.shade600;
     final remainingText = isOverBudget
         ? 'Sobrepasado: \$${(spent - total).toStringAsFixed(2)}'
         : 'Restante: \$${remaining.toStringAsFixed(2)}';
-    final [r, g, b] = getRGBFromColor(displayColor);
+    final [rBorder, gBorder, bBorder] = getRGBFromColor(borderColor);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Color.fromRGBO(r, g, b, 0.5), width: 1.5),
+          side: BorderSide(color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5), width: 1.5),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
