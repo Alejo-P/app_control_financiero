@@ -3,6 +3,7 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_search_page.dart';
+import 'package:control_financiero/features/movimientos/presentation/notificaciones_page.dart';
 import 'package:control_financiero/features/movimientos/widgets/balance_summary_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/category_chip.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
@@ -33,14 +34,25 @@ class _MovimientosPageState extends State<MovimientosPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _appState.setAppBarActions([
         AppBarAction(
+          icon: Icons.notifications_active_outlined,
+          tooltip: 'Notificaciones',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => NotificacionesPage()),
+            );
+          },
+        ),
+        AppBarAction(
           icon: Icons.search,
           tooltip: 'Buscar movimiento',
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => MovimientoSearchPage(
-                listaCategorias: _appState.categorias,
-              )),
+              MaterialPageRoute(
+                builder: (_) =>
+                    MovimientoSearchPage(listaCategorias: _appState.categorias),
+              ),
             );
           },
         ),

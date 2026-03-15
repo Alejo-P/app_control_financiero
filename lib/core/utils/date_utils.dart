@@ -19,6 +19,13 @@ String getMonthName(DateTime date) {
   return monthNames[date.month - 1];
 }
 
+// Función para formatear una fecha como "dia mes"
+String formatDayMonth(DateTime date) {
+  final monthName = getMonthName(date);
+  final day = date.day.toString().padLeft(2, '0');
+  return '$day $monthName';
+}
+
 // Función para formatear una fecha como "Mes de Año"
 String formatMonthYear(DateTime date) {
   final monthName = getMonthName(date);
@@ -34,7 +41,6 @@ DateTime getCurrentDateWithoutTime() {
 DateTime normalizeDate(DateTime date) {
   return DateTime(date.year, date.month, 1);
 }
-
 
 // Función para formatear una fecha como "dd/MM/yyyy"
 String formatDate(DateTime date) {
@@ -76,7 +82,7 @@ bool isSameDay(DateTime a, DateTime b) {
 
 bool isSameMonth(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month;
-} 
+}
 
 bool isCurrentMonth(DateTime date) {
   final now = DateTime.now();
@@ -100,6 +106,6 @@ List<int> generateYearList(int startYear, int numberOfYears) {
   if (numberOfYears > 10) {
     numberOfYears = 10;
   }
-  
+
   return List<int>.generate(numberOfYears, (i) => startYear + i);
 }

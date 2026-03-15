@@ -337,7 +337,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
           child: _isLoading
               ? LoadingScreen(message: '$_action categoría...')
               : Column(
@@ -350,6 +350,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                             Center(
                               child: Column(
                                 children: [
+                                  const SizedBox(height: 8),
                                   IconContainer(
                                     icon: selectedIcon,
                                     color: selectedColor,
