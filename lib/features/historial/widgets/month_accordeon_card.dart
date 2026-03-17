@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -5,18 +6,23 @@ class MonthAccordionCard extends StatelessWidget {
   final DateTime month;
   final double balance;
   final Widget content;
+  final bool initialExpanded;
 
   const MonthAccordionCard({
     super.key,
     required this.month,
     required this.balance,
     required this.content,
+    this.initialExpanded = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    final borderColor = Colors.grey.shade600;
+    final [rBorder, gBorder, bBorder] = getRGBFromColor(borderColor);
 
     final balanceColor = balance >= 0
         ? Colors.green.shade600
@@ -32,11 +38,17 @@ class MonthAccordionCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+          width: 1.5,
+        ),
+      ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          initiallyExpanded: true,
+          initiallyExpanded: initialExpanded,
           iconColor: colorScheme.primary,
           collapsedIconColor: colorScheme.primary,
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
