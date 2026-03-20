@@ -24,19 +24,36 @@ class _MonthSelectionState extends State<MonthSelection> {
     return formatMonthYear(selectedDate);
   }
 
+  DateTime getMinAllowedDate() {
+    final now = DateTime.now();
+    return DateTime(now.year - 3, now.month);
+  }
+
+  bool isBeforeLimit(DateTime selectedDate) {
+    final minDate = getMinAllowedDate();
+    return normalizeDate(selectedDate).isBefore(minDate);
+  }
+
+  bool isAtLimit(DateTime selectedDate) {
+    final minDate = getMinAllowedDate();
+    return isSameMonth(selectedDate, minDate);
+  }
+
+  bool canGoBack(DateTime selectedDate) {
+    final minDate = getMinAllowedDate();
+    final current = normalizeDate(selectedDate);
+
+    return current.isAfter(minDate);
+  }
+
   bool isFutureMonth(DateTime selectedDate) {
     final now = DateTime.now();
-    final nextDate = DateTime(selectedDate.year, selectedDate.month + 1);
-    return (nextDate.year > now.year) ||
-        (nextDate.year == now.year && nextDate.month > now.month);
+    return normalizeDate(selectedDate).isAfter(normalizeDate(now));
   }
 
   bool isLimitPastMonth(DateTime selectedDate) {
-    final now = DateTime.now();
-    // Limite de solo 3 años en el pasado
-    final limitDate = DateTime(now.year - 3, now.month);
-    return (selectedDate.year == limitDate.year) &&
-        (selectedDate.month == limitDate.month);
+    return (isBeforeLimit(selectedDate) || isAtLimit(selectedDate)) &&
+        !canGoBack(selectedDate);
   }
 
   void changeMonth(int offset) {
@@ -48,7 +65,7 @@ class _MonthSelectionState extends State<MonthSelection> {
     if (offset < 0 && isLimitPastMonth(selectedDate)) {
       return; // No permitir retroceder más allá del límite
     }
-    
+
     if (offset > 0 && isFutureMonth(selectedDate)) {
       return; // No permitir avanzar a meses futuros
     }
@@ -105,10 +122,14 @@ class _MonthSelectionState extends State<MonthSelection> {
           textBaseline: TextBaseline.alphabetic,
           children: [
             IconButton(
-              onPressed: (widget.isLoading || isLimitPast) ? null : () => changeMonth(-1),
+              onPressed: (widget.isLoading || isLimitPast)
+                  ? null
+                  : () => changeMonth(-1),
               icon: Icon(
                 Icons.arrow_back_ios_new,
-                color: (widget.isLoading || isLimitPast) ? Colors.grey : Colors.blueAccent,
+                color: (widget.isLoading || isLimitPast)
+                    ? Colors.grey
+                    : Colors.blueAccent,
               ),
             ),
             Column(
@@ -133,7 +154,9 @@ class _MonthSelectionState extends State<MonthSelection> {
                     child: Text(
                       'Ir a mes actual',
                       style: TextStyle(
-                        color: (isCurrent || widget.isLoading) ? Colors.grey[600] : Colors.blueAccent,
+                        color: (isCurrent || widget.isLoading)
+                            ? Colors.grey[600]
+                            : Colors.blueAccent,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -143,10 +166,14 @@ class _MonthSelectionState extends State<MonthSelection> {
               ],
             ),
             IconButton(
-              onPressed: (widget.isLoading || isFuture) ? null : () => changeMonth(1),
+              onPressed: (widget.isLoading || isFuture)
+                  ? null
+                  : () => changeMonth(1),
               icon: Icon(
                 Icons.arrow_forward_ios,
-                color: (widget.isLoading || isFuture) ? Colors.grey : Colors.blueAccent,
+                color: (widget.isLoading || isFuture)
+                    ? Colors.grey
+                    : Colors.blueAccent,
               ),
             ),
           ],

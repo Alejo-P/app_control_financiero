@@ -39,7 +39,7 @@ DateTime getCurrentDateWithoutTime() {
 }
 
 DateTime normalizeDate(DateTime date) {
-  return DateTime(date.year, date.month, 1);
+  return DateTime(date.year, date.month);
 }
 
 // Función para formatear una fecha como "dd/MM/yyyy"

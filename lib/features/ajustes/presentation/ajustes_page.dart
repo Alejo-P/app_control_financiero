@@ -32,6 +32,10 @@ class _AjustesPageState extends State<AjustesPage> {
     _appState.setDarkMode(value);
   }
 
+  void _toggleNotifications(bool value) {
+    _appState.setNotifications(value);
+  }
+
   void exportarDatos() async {
     final appState = context.read<AppState>();
 
@@ -69,6 +73,7 @@ class _AjustesPageState extends State<AjustesPage> {
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final isDarkMode = appState.isDarkMode;
+    final isEnableNotifications = appState.isEnableNotifications;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
@@ -154,13 +159,15 @@ class _AjustesPageState extends State<AjustesPage> {
                       SettingOptionCard(
                         title: 'Notificaciones',
                         description:
-                            'Configura las notificaciones de la aplicación',
-                        icon: Icons.notifications_outlined,
+                            '${!isEnableNotifications ? 'Activa' : 'Desactiva'} las notificaciones de la aplicación',
+                        icon: isEnableNotifications
+                        ? Icons.notifications_outlined
+                        : Icons.notifications_off_outlined,
                         iconColor: Colors.teal,
-                        onTap: () {
-                          // Lógica para configurar notificaciones
-                          debugPrint('Configurar notificaciones');
-                        },
+                        trailing: Switch(
+                          value: isEnableNotifications,
+                          onChanged: _toggleNotifications,
+                        ),
                       ),
                       SettingOptionCard(
                         title: 'Sobre la aplicación',

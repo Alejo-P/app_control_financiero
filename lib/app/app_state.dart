@@ -46,9 +46,13 @@ class AppState extends ChangeNotifier {
   // Configuracion de caja para Hive
   static const _settingsBox = 'settings';
   static const _themeKey = 'dark_mode';
+  static const _notificationKey = 'enable_notifications';
 
   bool _isDarkMode = false;
   bool get isDarkMode => _isDarkMode;
+
+  bool _isEnableNotifications = true;
+  bool get isEnableNotifications => _isEnableNotifications;
 
   List<AppBarAction> _appBarActions = [];
   List<AppBarAction> get appBarActions => _appBarActions;
@@ -158,6 +162,7 @@ class AppState extends ChangeNotifier {
   Future<void> initialize() async {
     final box = await _getSettingsBox();
     _isDarkMode = box.get(_themeKey, defaultValue: false);
+    _isEnableNotifications = box.get(_notificationKey, defaultValue: true);
   }
 
   Future<void> loadPresupuestosByMonthAndYear(
@@ -419,6 +424,15 @@ class AppState extends ChangeNotifier {
 
     final box = await _getSettingsBox();
     await box.put(_themeKey, value);
+
+    notifyListeners();
+  }
+
+  Future<void> setNotifications(bool value) async {
+    _isEnableNotifications = value;
+
+    final box = await _getSettingsBox();
+    await box.put(_notificationKey, value);
 
     notifyListeners();
   }
