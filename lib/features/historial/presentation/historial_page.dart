@@ -125,6 +125,9 @@ class _HistorialPageState extends State<HistorialPage> {
                           content: AccordeonContent(
                             spent: monthData.spent,
                             totalIncome: monthData.income,
+                            onTapButton: () => {
+                              appState.gotoMovements(monthData.month)
+                            },
                           ),
                         );
                       }),

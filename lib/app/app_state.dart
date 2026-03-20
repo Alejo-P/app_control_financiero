@@ -467,6 +467,12 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> gotoMovements(DateTime dateSelected) async {
+    await changeMovementsMonth(dateSelected);
+    changeTab(0);
+    notifyListeners();
+  }
+
   void setAppBarActions(List<AppBarAction> actions) {
     _appBarActions = actions;
     notifyListeners();

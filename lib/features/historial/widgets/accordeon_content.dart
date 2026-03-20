@@ -1,19 +1,24 @@
+import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/historial/widgets/ammount_detail_card.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AccordeonContent extends StatelessWidget {
   final double totalIncome;
   final double spent;
+  final VoidCallback? onTapButton;
 
   const AccordeonContent({
     super.key,
     required this.spent,
     required this.totalIncome,
+    this.onTapButton,
   });
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
@@ -65,22 +70,24 @@ class AccordeonContent extends StatelessWidget {
           "Utilizado el ${(percentage * 100).toStringAsFixed(0)}% del total de ingresos",
         ),
         const SizedBox(height: 4),
-        ElevatedButton(
-          onPressed: () => {},
-          style: theme.elevatedButtonTheme.style?.copyWith(
-            shape: WidgetStateProperty.all(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+
+        if (onTapButton != null)
+          ElevatedButton(
+            onPressed: onTapButton,
+            style: theme.elevatedButtonTheme.style?.copyWith(
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Ver movimientos"),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward),
+              ],
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Ver movimientos"),
-              const SizedBox(width: 4),
-              Icon(Icons.arrow_forward),
-            ],
-          ),
-        ),
       ],
     );
   }
