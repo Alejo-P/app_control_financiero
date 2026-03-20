@@ -1,6 +1,8 @@
 import 'package:control_financiero/app/splash_screen.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
+import 'package:control_financiero/features/historial/data/historial_local_datasource.dart';
+import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
@@ -44,11 +46,14 @@ class _AppState extends State<App> {
       PresupuestosLocalDataSource(),
     );
 
+    final historialRepository = HistorialRepository(HistorialLocalDataSource());
+
     _appState = AppState(
       movimientosRepository,
       categoriasRepository,
       tipoCategoriasRepository,
       presupuestosRepository,
+      historialRepository,
     );
 
     _appState.loadInitialData();

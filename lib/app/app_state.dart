@@ -3,6 +3,8 @@ import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/historial/data/historial_repository.dart';
+import 'package:control_financiero/features/historial/models/month_data.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
@@ -27,6 +29,11 @@ class AppState extends ChangeNotifier {
   bool _isLoadingBudget = false;
   bool get isLoadingBudget => _isLoadingBudget;
 
+  // Estado unico para el historial
+  DateTime selectedHistoryMonth = DateTime.now();
+  bool _isLoadingHistory = false;
+  bool get isLoadingHistory => _isLoadingHistory;
+
   final List<String> pageNames = [
     'Movimientos',
     'Presupuesto',
@@ -50,12 +57,14 @@ class AppState extends ChangeNotifier {
   final CategoriasRepository _categoriasRepository;
   final TipoCategoriaRepository _tipoCategoriaRepository;
   final PresupuestosRepository _presupuestosRepository;
+  final HistorialRepository _historialRepository;
 
   AppState(
     this._movimientosRepository,
     this._categoriasRepository,
     this._tipoCategoriaRepository,
     this._presupuestosRepository,
+    this._historialRepository,
   );
 
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
@@ -89,6 +98,8 @@ class AppState extends ChangeNotifier {
       _presupuestosRepository.movimientos;
   double? get totalGastos => _totalGastos;
 
+  List<MonthData> get historialAnual => _historialRepository.historial;
+
   String transactionResultMessage = '';
   bool transactionSuccess = false;
   bool loadingInitialData = true;
@@ -102,6 +113,7 @@ class AppState extends ChangeNotifier {
       _categoriasRepository.fetchCategorias(),
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
       loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
+      _historialRepository.fetchYearHistory(selectedHistoryMonth),
     ]);
     await loadCategoryData(notify: false);
     loadingInitialData = false;
@@ -272,7 +284,9 @@ class AppState extends ChangeNotifier {
   }
 
   // Obtener todas las fechas únicas de movimientos (pasando la lista de movimientos como parametro)
-  List<DateTime> fetchUniqueMovementDatesInList(List<Movimiento> listaMovimientos) {
+  List<DateTime> fetchUniqueMovementDatesInList(
+    List<Movimiento> listaMovimientos,
+  ) {
     final dates = listaMovimientos
         .map((m) => DateTime(m.date.year, m.date.month, m.date.day))
         .toSet()
@@ -431,6 +445,18 @@ class AppState extends ChangeNotifier {
     await Future.delayed(const Duration(milliseconds: 300));
 
     _isLoadingBudget = false;
+    notifyListeners();
+  }
+
+  Future<void> changeHistoryYear(int year) async {
+    selectedHistoryMonth = DateTime(year);
+    _isLoadingHistory = true;
+    notifyListeners();
+
+    await _historialRepository.fetchYearHistory(selectedHistoryMonth);
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    _isLoadingHistory = false;
     notifyListeners();
   }
 

@@ -67,16 +67,20 @@ class AccordeonContent extends StatelessWidget {
         const SizedBox(height: 4),
         ElevatedButton(
           onPressed: () => {},
+          style: theme.elevatedButtonTheme.style?.copyWith(
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Ver movimientos"),
               const SizedBox(width: 4),
-              Icon(Icons.arrow_forward)
+              Icon(Icons.arrow_forward),
             ],
-          )
+          ),
         ),
-
       ],
     );
   }

@@ -76,7 +76,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       iconColor: widget.presupuesto != null
           ? widget.presupuesto!.iconColor
           : Colors.grey,
-      fechaPresupuesto: widget.presupuesto?.fechaPresupuesto ?? DateTime.now(),
+      fechaPresupuesto: widget.presupuesto?.fechaPresupuesto ?? fechaPresupuesto,
       montoPresupuestado: widget.presupuesto?.montoPresupuestado ?? 0.0,
       totalPresupuestado: widget.presupuesto?.totalPresupuestado != null
           ? widget.presupuesto!.totalPresupuestado

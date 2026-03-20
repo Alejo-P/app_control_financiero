@@ -6,14 +6,16 @@ class MonthAccordionCard extends StatelessWidget {
   final DateTime month;
   final double balance;
   final Widget content;
-  final bool initialExpanded;
+  final ExpansionTileController controller;
+  final ValueChanged<bool> onExpansionChanged;
 
   const MonthAccordionCard({
     super.key,
     required this.month,
     required this.balance,
     required this.content,
-    this.initialExpanded = false,
+    required this.onExpansionChanged,
+    required this.controller,
   });
 
   @override
@@ -48,7 +50,8 @@ class MonthAccordionCard extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          initiallyExpanded: initialExpanded,
+          controller: controller,
+          onExpansionChanged: onExpansionChanged,
           iconColor: colorScheme.primary,
           collapsedIconColor: colorScheme.primary,
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

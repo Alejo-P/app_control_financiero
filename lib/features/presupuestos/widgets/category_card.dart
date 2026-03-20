@@ -106,6 +106,9 @@ class CategoryCard extends StatelessWidget {
                       child: CustomProgressBar(
                         currentValue: percentage,
                         color: color,
+                        backgroundColor: colorScheme.onSurface.withOpacity(
+                          0.18,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),

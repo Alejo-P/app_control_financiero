@@ -100,8 +100,11 @@ DateTime getLastDayOfMonth(DateTime date) {
   return beginningNextMonth.subtract(const Duration(days: 1));
 }
 
-// Funcion que genere una lista de años desde una fecha inicial hasta el limite especificado
-List<int> generateYearList(int startYear, int numberOfYears) {
+/// Funcion que genere una lista de años desde una fecha inicial hasta el limite especificado
+/// @param startYear Año de inicio (ej; 2020)
+/// @param nuumberOfYears Cantidad de numeros a agregar a la lista. Por defecto y como limite es 10
+/// @ return Lista de numeros generada [2020, 2021, 2022, ...]
+List<int> generateYearList(int startYear, [int numberOfYears = 10]) {
   // Verificar que la lista no exceda los 10 elementos
   if (numberOfYears > 10) {
     numberOfYears = 10;
