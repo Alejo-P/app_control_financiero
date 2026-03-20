@@ -1,5 +1,7 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/historial/models/month_data.dart';
 import 'package:control_financiero/features/historial/widgets/accordeon_content.dart';
 import 'package:control_financiero/features/historial/widgets/month_accordeon_card.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -17,6 +19,8 @@ class _HistorialPageState extends State<HistorialPage> {
   late AppState _appState;
   int? expandedIndex;
   List<ExpansionTileController> controllers = [];
+  final ScrollController scrollController = ScrollController();
+  List<GlobalKey> itemKeys = [];
 
   @override
   void didChangeDependencies() {
@@ -35,23 +39,51 @@ class _HistorialPageState extends State<HistorialPage> {
     });
   }
 
-  void _initControllers(List history) {
+  void _initControllers(
+    List<MonthData> history,
+    DateTime selectedMovementsMonth,
+  ) {
     controllers = List.generate(
       history.length,
       (_) => ExpansionTileController(),
     );
+    itemKeys = List.generate(history.length, (_) => GlobalKey());
 
-    final now = DateTime.now();
+    int indexToExpand = -1;
 
-    final index = history.indexWhere(
-      (m) => m.month.year == now.year && m.month.month == now.month,
+    // 🥇 1. Buscar mes seleccionado
+    indexToExpand = history.indexWhere(
+      (m) => isSameMonth(m.month, selectedMovementsMonth),
     );
 
-    expandedIndex = index != -1 ? index : 0;
+    // 🥈 2. Si no existe, buscar mes actual
+    if (indexToExpand == -1) {
+      final now = DateTime.now();
+
+      indexToExpand = history.indexWhere((m) => isSameMonth(m.month, now));
+    }
+
+    // 🥉 3. Si tampoco existe → usar el primero
+    if (indexToExpand == -1 && history.isNotEmpty) {
+      indexToExpand = 0;
+    }
+
+    expandedIndex = indexToExpand;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (controllers.isNotEmpty) {
+      if (controllers.isNotEmpty && expandedIndex != null) {
         controllers[expandedIndex!].expand();
+
+        final context = itemKeys[expandedIndex!].currentContext;
+
+        if (context != null) {
+          Scrollable.ensureVisible(
+            context,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+            alignment: 0.2,
+          );
+        }
       }
     });
   }
@@ -74,6 +106,7 @@ class _HistorialPageState extends State<HistorialPage> {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final selectedMovementsMonth = appState.selectedMovementsMonth;
 
     final isLoading = appState.isLoadingHistory;
     final history = appState.historialAnual;
@@ -93,7 +126,7 @@ class _HistorialPageState extends State<HistorialPage> {
     }
 
     if (history.isNotEmpty && controllers.length != history.length) {
-      _initControllers(history);
+      _initControllers(history, selectedMovementsMonth);
     }
 
     return Padding(
@@ -108,26 +141,38 @@ class _HistorialPageState extends State<HistorialPage> {
                 : history.isEmpty
                 ? _EmptyHistorial()
                 : ListView(
+                    controller: scrollController,
                     children: [
                       ...history.asMap().entries.map((entry) {
                         final index = entry.key;
                         final monthData = entry.value;
 
-                        return MonthAccordionCard(
-                          controller: controllers[index],
-                          onExpansionChanged: (isExpanded) {
-                            if (isExpanded) {
-                              handleExpand(index);
-                            }
-                          },
-                          month: monthData.month,
-                          balance: monthData.balance,
-                          content: AccordeonContent(
-                            spent: monthData.spent,
-                            totalIncome: monthData.income,
-                            onTapButton: () => {
-                              appState.gotoMovements(monthData.month)
+                        final sameMonth = isSameMonth(
+                          monthData.month,
+                          appState.selectedMovementsMonth,
+                        );
+
+                        return Container(
+                          key: itemKeys[index],
+                          child: MonthAccordionCard(
+                            controller: controllers[index],
+                            isHighlighted: expandedIndex == index,
+                            onExpansionChanged: (isExpanded) {
+                              if (isExpanded) {
+                                handleExpand(index);
+                              }
                             },
+                            month: monthData.month,
+                            balance: monthData.balance,
+                            content: AccordeonContent(
+                              spent: monthData.spent,
+                              totalIncome: monthData.income,
+                              onTapButton: sameMonth
+                                  ? null
+                                  : () => {
+                                      appState.gotoMovements(monthData.month),
+                                    },
+                            ),
                           ),
                         );
                       }),
@@ -173,6 +218,10 @@ class _HistorialPageState extends State<HistorialPage> {
             const Text(
               "Seleccionar año",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              "Solo aparecerán aquellos que tengan movimientos registrados",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Expanded(

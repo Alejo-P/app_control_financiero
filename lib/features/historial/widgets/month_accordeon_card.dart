@@ -6,6 +6,7 @@ class MonthAccordionCard extends StatelessWidget {
   final DateTime month;
   final double balance;
   final Widget content;
+  final bool isHighlighted;
   final ExpansionTileController controller;
   final ValueChanged<bool> onExpansionChanged;
 
@@ -14,6 +15,7 @@ class MonthAccordionCard extends StatelessWidget {
     required this.month,
     required this.balance,
     required this.content,
+    this.isHighlighted = false,
     required this.onExpansionChanged,
     required this.controller,
   });
@@ -23,7 +25,7 @@ class MonthAccordionCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final borderColor = Colors.grey.shade600;
+    final borderColor = isHighlighted ? Colors.orange : Colors.grey.shade600;
     final [rBorder, gBorder, bBorder] = getRGBFromColor(borderColor);
 
     final balanceColor = balance >= 0
@@ -39,7 +41,7 @@ class MonthAccordionCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      elevation: 1,
+      elevation: isHighlighted ? 5 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(

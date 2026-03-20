@@ -1,8 +1,6 @@
-import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/historial/widgets/ammount_detail_card.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class AccordeonContent extends StatelessWidget {
   final double totalIncome;
@@ -18,7 +16,6 @@ class AccordeonContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
