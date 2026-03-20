@@ -1,6 +1,8 @@
+import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/ajustes/widgets/setting_option_card.dart';
 import 'package:control_financiero/features/categorias/presentation/categorias_page.dart';
+import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +32,39 @@ class _AjustesPageState extends State<AjustesPage> {
     _appState.setDarkMode(value);
   }
 
+  void exportarDatos() async {
+    final appState = context.read<AppState>();
+
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Exportar datos',
+      content: 'Se generará un archivo Excel en tu carpeta de descargas.',
+    );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    // 👇 Loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    await appState.exportarMovimientos();
+
+    if (!mounted) return;
+
+    Navigator.pop(context); // cerrar loading
+
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(context, appState.transactionResultMessage);
+      return;
+    }
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
@@ -55,10 +90,7 @@ class _AjustesPageState extends State<AjustesPage> {
                             'Exporta tus movimientos en un archivo .xlsx',
                         icon: Icons.table_view_outlined,
                         iconColor: Colors.orange,
-                        onTap: () {
-                          // Lógica para exportar datos a Excel
-                          debugPrint('Exportar datos a Excel');
-                        },
+                        onTap: exportarDatos,
                       ),
                       SettingOptionCard(
                         title: 'Respaldar datos',

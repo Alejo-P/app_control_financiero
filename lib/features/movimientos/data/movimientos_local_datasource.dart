@@ -179,4 +179,22 @@ class MovimientosLocalDataSource {
           : 'Error al eliminar el movimiento.',
     );
   }
+
+  Future<List<Map<String, dynamic>>> getMovimientosForExcel() async {
+    final db = await _dbHelper.database;
+
+    final result = db.rawQuery('''
+      SELECT
+        m.${MovimientosTable.title} AS 'Concepto',
+        m.${MovimientosTable.amount} AS 'Cantidad',
+        m.${MovimientosTable.date} AS 'Fecha transaccion',
+        c.${CategoriasTable.name} AS 'Categoria',
+        c.${CategoriasTable.movementType} AS 'Tipo movimiento',
+        m.${MovimientosTable.note} AS 'Descripcion'
+      FROM ${MovimientosTable.table} m
+      JOIN ${CategoriasTable.table} c ON m.${MovimientosTable.categoryId} = c.${CategoriasTable.id};
+    ''');
+
+    return result;
+  }
 }

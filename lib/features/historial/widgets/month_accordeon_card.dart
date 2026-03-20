@@ -25,7 +25,6 @@ class MonthAccordionCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-
     final balanceColor = balance >= 0
         ? Colors.green.shade600
         : Colors.red.shade600;

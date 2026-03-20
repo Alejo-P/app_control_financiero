@@ -473,6 +473,13 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> exportarMovimientos() async {
+    final result = await _movimientosRepository.exportarMovimientosExcel();
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    notifyListeners();
+  }
+
   void setAppBarActions(List<AppBarAction> actions) {
     _appBarActions = actions;
     notifyListeners();

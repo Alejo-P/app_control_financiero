@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/core/utils/excel_exporter.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
@@ -43,7 +44,7 @@ abstract class _MovimientosRepository {
   /// Obtener el conteo de movimientos por categoría
   /// @return Un mapa con el ID de la categoría como clave y la cantidad de movimientos como valor.
   Future<Map<int, int>> getMovementsCountByCategory();
-  
+
   /// Obtener todos los movimientos asociados a una categoria
   /// @parram categoryID El ID de la categoria a obtener los movimientos
   /// @return Una lista de objetos Movimiento.
@@ -226,6 +227,11 @@ class MovimientosRepository implements _MovimientosRepository {
       movimientos.removeWhere((m) => m.id == id);
     }
     return result;
+  }
+
+  Future<OperationResult> exportarMovimientosExcel() async {
+    final data = await localDataSource.getMovimientosForExcel();
+    return await ExcelExporter.exportarExcel(data);
   }
 
   // Metodos personalizados adicionales
