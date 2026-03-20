@@ -468,8 +468,8 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> gotoMovements(DateTime dateSelected) async {
-    await changeMovementsMonth(dateSelected);
     changeTab(0);
+    await changeMovementsMonth(dateSelected);
     notifyListeners();
   }
 
