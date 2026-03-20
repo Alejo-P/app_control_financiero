@@ -1,6 +1,5 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
-import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/historial/widgets/accordeon_content.dart';
 import 'package:control_financiero/features/historial/widgets/month_accordeon_card.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -149,9 +148,11 @@ class _HistorialPageState extends State<HistorialPage> {
       builder: (context) {
         final theme = Theme.of(context);
         final textTheme = theme.textTheme;
+        final years = appState.aniosDisponibles;
 
-        final now = DateTime.now();
-        final years = generateYearList(now.year - 3, 4);
+        if (years.isEmpty) {
+          return const Center(child: Text("No hay datos disponibles"));
+        }
 
         return Column(
           mainAxisSize: MainAxisSize.min,

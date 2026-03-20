@@ -99,6 +99,7 @@ class AppState extends ChangeNotifier {
   double? get totalGastos => _totalGastos;
 
   List<MonthData> get historialAnual => _historialRepository.historial;
+  List<int> get aniosDisponibles => _historialRepository.availableYears;
 
   String transactionResultMessage = '';
   bool transactionSuccess = false;
@@ -113,7 +114,7 @@ class AppState extends ChangeNotifier {
       _categoriasRepository.fetchCategorias(),
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
       loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
-      _historialRepository.fetchYearHistory(selectedHistoryMonth),
+      updateHistory(),
     ]);
     await loadCategoryData(notify: false);
     loadingInitialData = false;
@@ -170,6 +171,12 @@ class AppState extends ChangeNotifier {
     calculateTotalIngresoPresupuestado();
     _totalGastos = _presupuestosRepository.getTotalGastosByMonthAndYear(date);
     if (notify) notifyListeners();
+  }
+
+  Future<void> updateHistory() async {
+    await _historialRepository.fetchAvailableYears();
+    await _historialRepository.fetchYearHistory(selectedHistoryMonth);
+    notifyListeners();
   }
 
   int countMovementsByCategory(int categoryId) {
@@ -453,7 +460,7 @@ class AppState extends ChangeNotifier {
     _isLoadingHistory = true;
     notifyListeners();
 
-    await _historialRepository.fetchYearHistory(selectedHistoryMonth);
+    await updateHistory();
     await Future.delayed(const Duration(milliseconds: 300));
 
     _isLoadingHistory = false;
@@ -503,6 +510,7 @@ class AppState extends ChangeNotifier {
       await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+      await updateHistory();
     }
   }
 
@@ -514,6 +522,7 @@ class AppState extends ChangeNotifier {
       await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+      await updateHistory();
     }
   }
 
@@ -525,6 +534,7 @@ class AppState extends ChangeNotifier {
       await sincronizarContadoresCategorias();
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+      await updateHistory();
     }
   }
 

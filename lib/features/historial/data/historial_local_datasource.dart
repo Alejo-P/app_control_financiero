@@ -43,4 +43,16 @@ class HistorialLocalDataSource {
 
     return yearResults;
   }
+
+  Future<List<int>> fetchAvailableYears() async {
+    final db = await _dbHelper.database;
+
+    final results = await db.rawQuery('''
+      SELECT DISTINCT strftime('%Y', ${MovimientosTable.date}) AS year
+      FROM ${MovimientosTable.table}
+      ORDER BY year DESC;
+    ''');
+
+    return results.map((e) => int.parse(e['year'] as String)).toList();
+  }
 }

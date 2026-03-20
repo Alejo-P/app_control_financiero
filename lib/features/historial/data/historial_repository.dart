@@ -6,11 +6,16 @@ abstract class _HistorialRepository {
   /// @param date Fecha a la cual obtener la informacion
   /// @return Lista con el resumen de gastos e ingresos por mes
   Future<List<MonthData>> fetchYearHistory(DateTime date);
+
+  /// Obtener una lista de años con registros de movimientos
+  /// @return Lista con los años que contienen meses con movimientos registrados
+  Future<List<int>> fetchAvailableYears();
 }
 
 class HistorialRepository implements _HistorialRepository {
   final HistorialLocalDataSource localDataSource;
   final List<MonthData> historial = [];
+  final List<int> availableYears = [];
 
   HistorialRepository(this.localDataSource);
 
@@ -21,5 +26,14 @@ class HistorialRepository implements _HistorialRepository {
     historial.addAll(await localDataSource.fetchYearHistory(date));
 
     return historial;
+  }
+
+  @override
+  Future<List<int>> fetchAvailableYears() async {
+    availableYears.clear();
+
+    availableYears.addAll(await localDataSource.fetchAvailableYears());
+
+    return availableYears;
   }
 }
