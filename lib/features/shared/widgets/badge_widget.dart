@@ -13,7 +13,14 @@ class BadgeWidget extends StatelessWidget {
       children: [
         child,
         if (counter > 0)
-          Positioned(right: -6, top: -6, child: _BadgeCounter(count: counter)),
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Transform.translate(
+              offset: const Offset(6, -6),
+              child: _BadgeCounter(count: counter),
+            ),
+          ),
       ],
     );
   }

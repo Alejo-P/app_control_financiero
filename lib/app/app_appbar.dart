@@ -18,30 +18,40 @@ class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
         final hasLabel = action.labelValue.isNotEmpty;
         final hasTooltip = action.tooltipValue.isNotEmpty;
 
+        Widget widget;
+
         if (hasLabel) {
-          return BadgeWidget(
+          widget = BadgeWidget(
             counter: action.badgeCountValue,
             child: TextButton.icon(
               onPressed: action.onPressed,
               label: Text(action.labelValue),
-              icon: Icon(action.icon),
+              icon: Icon(action.icon, size: 26),
               style: TextButton.styleFrom(
-                //foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
           );
+        } else {
+          widget = BadgeWidget(
+            counter: action.badgeCountValue,
+            child: SizedBox(
+              height: 40,
+              width: 40,
+              child: IconButton(
+                icon: Icon(action.icon, size: 26),
+                onPressed: action.onPressed,
+                tooltip: hasTooltip ? action.tooltipValue : action.labelValue,
+              ),
+            ),
+          );
         }
 
-        return BadgeWidget(
-          counter: action.badgeCountValue,
-          child: IconButton(
-            icon: Icon(action.icon),
-            onPressed: action.onPressed,
-            tooltip: hasTooltip ? action.tooltipValue : action.labelValue,
-          ),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: widget,
         );
       }).toList(),
     );
