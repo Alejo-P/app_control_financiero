@@ -53,6 +53,19 @@ class IngresoPresupuestadoTable {
   static const date = 'date';
 }
 
+class NotificacionTable {
+  static const table = 'notificaciones';
+
+  static const id = 'id';
+  static const title = 'title';
+  static const description = 'description';
+  static const isRead = 'is_read';
+  static const icon = 'icon';
+  static const iconColor = 'icon_color';
+  static const extraData = 'extra_data';
+  static const createdAt = 'created_at';
+}
+
 class MetaTable {
   static const table = 'meta';
 
@@ -76,6 +89,21 @@ Future<void> createTables(Database db) async {
       CREATE TABLE ${MetaTable.table} (
         ${MetaTable.key} TEXT PRIMARY KEY,
         ${MetaTable.value} TEXT NOT NULL
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(NotificacionTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${NotificacionTable.table} (
+        ${NotificacionTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${NotificacionTable.title} TEXT NOT NULL,
+        ${NotificacionTable.description} TEXT,
+        ${NotificacionTable.icon} TEXT NOT NULL,
+        ${NotificacionTable.iconColor} INTEGER NOT NULL,
+        ${NotificacionTable.isRead} INTEGER NOT NULL DEFAULT 0,
+        ${NotificacionTable.extraData} TEXT,
+        ${NotificacionTable.createdAt} TEXT NOT NULL
       );
     ''');
   }

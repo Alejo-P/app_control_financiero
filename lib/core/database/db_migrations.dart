@@ -178,3 +178,20 @@ Future<void> migratePresupuestosRepeatBudget(Database db) async {
     }
   }
 }
+
+Future<void> migrateNotificationsCreatedAt(Database db) async {
+  // Agregar la columna 'created_at' si no existe
+  final columns = await db.rawQuery(
+    "PRAGMA table_info(${NotificacionTable.table});",
+  );
+
+  final columnNames = columns.map((column) => column['name'] as String).toSet();
+
+  if (!columnNames.contains(NotificacionTable.createdAt)) {
+    await db.execute('''
+      ALTER TABLE ${NotificacionTable.table}
+      ADD COLUMN ${NotificacionTable.createdAt}
+      TEXT;
+    ''');
+  }
+}

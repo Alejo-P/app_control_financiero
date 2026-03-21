@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/excel_exporter.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
@@ -109,7 +110,7 @@ class MovimientosRepository implements _MovimientosRepository {
     DateTime date,
   ) {
     final filteredMovements = movimientos
-        .where((m) => m.categoryID == categoryId && _isSameMonth(m.date, date))
+        .where((m) => m.categoryID == categoryId && isSameMonth(m.date, date))
         .toList();
     return filteredMovements;
   }
@@ -133,7 +134,7 @@ class MovimientosRepository implements _MovimientosRepository {
 
     try {
       for (var movimiento in movimientos) {
-        if (_isSameMonth(movimiento.date, date)) {
+        if (isSameMonth(movimiento.date, date)) {
           // Aquí se asume que los ingresos son positivos y los gastos negativos
           final categoria = await _categoriasLocalDataSource.fetchCategoriaById(
             movimiento.categoryID,
@@ -165,7 +166,7 @@ class MovimientosRepository implements _MovimientosRepository {
 
     try {
       for (var movimiento in movimientosMesPasado) {
-        if (_isSameMonth(movimiento.date, mesPasado)) {
+        if (isSameMonth(movimiento.date, mesPasado)) {
           // Aquí se asume que los ingresos son positivos y los gastos negativos
           final categoria = await _categoriasLocalDataSource.fetchCategoriaById(
             movimiento.categoryID,
@@ -232,10 +233,5 @@ class MovimientosRepository implements _MovimientosRepository {
   Future<OperationResult> exportarMovimientosExcel() async {
     final data = await localDataSource.getMovimientosForExcel();
     return await ExcelExporter.exportarExcel(data);
-  }
-
-  // Metodos personalizados adicionales
-  bool _isSameMonth(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month;
   }
 }

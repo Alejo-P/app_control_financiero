@@ -138,4 +138,11 @@ Future<void> runSeeds(Database db) async {
     await migratePresupuestosRepeatBudget(db);
     await setSeedVersion(db, currentVersion + 1);
   }
+  if (currentVersion < 7) {
+    await setSeedVersion(db, currentVersion + 1);
+  }
+  if (currentVersion < 8) {
+    await migrateNotificationsCreatedAt(db);
+    await setSeedVersion(db, currentVersion + 1);
+  }
 }

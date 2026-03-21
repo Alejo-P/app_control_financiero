@@ -8,6 +8,8 @@ import 'package:control_financiero/features/historial/models/month_data.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
+import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
+import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -33,6 +35,12 @@ class AppState extends ChangeNotifier {
   DateTime selectedHistoryMonth = DateTime.now();
   bool _isLoadingHistory = false;
   bool get isLoadingHistory => _isLoadingHistory;
+
+  // Estados para las notificaciones
+  bool _isLoadingNotif = false;
+  bool _hasMoreNotif = false;
+  bool get isLoadingNotif => _isLoadingNotif;
+  bool get hasMoreNotif => _hasMoreNotif;
 
   final List<String> pageNames = [
     'Movimientos',
@@ -62,6 +70,7 @@ class AppState extends ChangeNotifier {
   final TipoCategoriaRepository _tipoCategoriaRepository;
   final PresupuestosRepository _presupuestosRepository;
   final HistorialRepository _historialRepository;
+  final NotificacionRepository _notificacionRepository;
 
   AppState(
     this._movimientosRepository,
@@ -69,6 +78,7 @@ class AppState extends ChangeNotifier {
     this._tipoCategoriaRepository,
     this._presupuestosRepository,
     this._historialRepository,
+    this._notificacionRepository,
   );
 
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
@@ -105,6 +115,12 @@ class AppState extends ChangeNotifier {
   List<MonthData> get historialAnual => _historialRepository.historial;
   List<int> get aniosDisponibles => _historialRepository.availableYears;
 
+  List<Notificacion> get notificaciones =>
+      _notificacionRepository.notificaciones;
+  int notifSinLeer = 0;
+  int totalNotif = 0;
+  int offset = 0;
+
   String transactionResultMessage = '';
   bool transactionSuccess = false;
   bool loadingInitialData = true;
@@ -119,6 +135,7 @@ class AppState extends ChangeNotifier {
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
       loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
       updateHistory(),
+      loadNotifications(),
     ]);
     await loadCategoryData(notify: false);
     loadingInitialData = false;
@@ -181,6 +198,40 @@ class AppState extends ChangeNotifier {
   Future<void> updateHistory() async {
     await _historialRepository.fetchAvailableYears();
     await _historialRepository.fetchYearHistory(selectedHistoryMonth);
+    notifyListeners();
+  }
+
+  Future<void> loadNotifications() async {
+    await _notificacionRepository.fetchNotificaciones(offset: offset);
+    await updateCountersNotif();
+    offset += notificaciones.length;
+    notifyListeners();
+  }
+
+  Future<void> updateCountersNotif() async {
+    totalNotif = await _notificacionRepository.countNotificaciones();
+    notifSinLeer = await _notificacionRepository.getUnreadCount();
+    notifyListeners();
+  }
+
+  Future<void> fetchMoreNotifications() async {
+    if (_isLoadingNotif) return;
+
+    _isLoadingNotif = true;
+    notifyListeners();
+
+    final newData = await _notificacionRepository.fetchNotificaciones(
+      offset: offset,
+    );
+
+    if (newData.isEmpty) {
+      _hasMoreNotif = false;
+    } else {
+      offset += newData.length;
+      //notificaciones.addAll(newData);
+    }
+
+    _isLoadingNotif = false;
     notifyListeners();
   }
 
@@ -619,5 +670,34 @@ class AppState extends ChangeNotifier {
     if (result.success == true) {
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
     }
+  }
+
+  // ================================ NOTIFICACIONES CRUD =================================
+  Future<bool> insertarNotificacion(Notificacion notificacion) async {
+    final success = await _notificacionRepository.addNotificacion(notificacion);
+    if (success) {
+      await updateCountersNotif();
+    }
+
+    return success;
+  }
+
+  Future<bool> eliminarNotificacion(int id) async {
+    final success = await _notificacionRepository.deleteNotificacion(id);
+    if (success) {
+      await updateCountersNotif();
+    }
+
+    return success;
+  }
+
+  Future<void> marcarNotifLeida(int id) async {
+    await _notificacionRepository.markAsRead(id);
+    await updateCountersNotif();
+  }
+
+  Future<void> marcarTodaNotifLeida() async {
+    await _notificacionRepository.markAllRead();
+    await updateCountersNotif();
   }
 }

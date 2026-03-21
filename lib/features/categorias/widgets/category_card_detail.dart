@@ -1,4 +1,3 @@
-import 'package:control_financiero/features/shared/widgets/badge_counter.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
@@ -33,19 +32,7 @@ class CategoryCardDetail extends StatelessWidget {
           children: [
             Row(
               children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    IconContainer(icon: icon, color: color, size: 26),
-
-                    if (movementsCount > 0)
-                      Positioned(
-                        right: -6,
-                        top: -6,
-                        child: BadgeCounter(count: movementsCount),
-                      ),
-                  ],
-                ),
+                IconContainer(icon: icon, color: color, size: 26),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
