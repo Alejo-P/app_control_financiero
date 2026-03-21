@@ -2,6 +2,7 @@
 
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
@@ -130,16 +131,27 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
         itemBuilder: (context, index) {
           if (index < notifications.length) {
             final notif = notifications[index];
+            final borderColor = notif.isRead
+                ? Colors.grey.shade600
+                : Colors.orange;
+            final [rBorder, gBorder, bBorder] = getRGBFromColor(borderColor);
 
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.65),
+                  width: 1.5,
+                ),
+              ),
               child: InkWell(
                 onTap: () => _marcarComoLeido(notif),
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // 🔴 Indicador no leído
                       if (!notif.isRead)
@@ -148,7 +160,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
                           width: 8,
                           height: 8,
                           decoration: const BoxDecoration(
-                            color: Colors.blue,
+                            color: Colors.orange,
                             shape: BoxShape.circle,
                           ),
                         )
