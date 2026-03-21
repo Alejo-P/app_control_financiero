@@ -33,6 +33,7 @@ const Map<String, IconData> categoryIconsMap = {
   'phone_android': Icons.phone_android,
   'home_repair_service': Icons.home_repair_service,
   'build': Icons.build,
+  'compare_arrows_outlined': Icons.compare_arrows_outlined
 };
 
 // Lista para compatibilidad con código existente

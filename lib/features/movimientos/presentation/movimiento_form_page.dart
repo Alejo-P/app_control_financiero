@@ -1,10 +1,12 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
+import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
@@ -268,6 +270,16 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     } else {
       await appState.agregarMovimiento(movimiento);
     }
+
+    final notificacion = Notificacion(
+      title: 'Creacion de movimiento',
+      description: 'Creaste un nuevo movimiento',
+      iconName: IconMapper.toName(Icons.compare_arrows_outlined),
+      iconColorValue: Colors.blue.value,
+      createdAt: DateTime.now(),
+    );
+
+    await appState.insertarNotificacion(notificacion);
 
     if (!mounted) return;
     setState(() {

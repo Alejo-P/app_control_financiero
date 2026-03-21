@@ -115,8 +115,7 @@ class AppState extends ChangeNotifier {
   List<MonthData> get historialAnual => _historialRepository.historial;
   List<int> get aniosDisponibles => _historialRepository.availableYears;
 
-  List<Notificacion> get notificaciones =>
-      _notificacionRepository.notificaciones;
+  List<Notificacion> notificaciones = [];
   int notifSinLeer = 0;
   int totalNotif = 0;
   int offset = 0;
@@ -202,7 +201,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadNotifications() async {
-    await _notificacionRepository.fetchNotificaciones(offset: offset);
+    notificaciones = await _notificacionRepository.fetchNotificaciones(offset: offset);
     await updateCountersNotif();
     offset += notificaciones.length;
     notifyListeners();
@@ -674,30 +673,38 @@ class AppState extends ChangeNotifier {
 
   // ================================ NOTIFICACIONES CRUD =================================
   Future<bool> insertarNotificacion(Notificacion notificacion) async {
-    final success = await _notificacionRepository.addNotificacion(notificacion);
-    if (success) {
+    final result = await _notificacionRepository.addNotificacion(notificacion);
+    if (result.success) {
+      notificaciones.add(notificacion.copyWith(id: result.data!));
       await updateCountersNotif();
     }
 
-    return success;
+    return result.success;
   }
 
   Future<bool> eliminarNotificacion(int id) async {
     final success = await _notificacionRepository.deleteNotificacion(id);
     if (success) {
+      notificaciones.removeWhere((n) => n.id == id);
       await updateCountersNotif();
     }
 
     return success;
   }
 
-  Future<void> marcarNotifLeida(int id) async {
-    await _notificacionRepository.markAsRead(id);
+  Future<void> marcarNotifLeida(Notificacion notificacion) async {
+    await _notificacionRepository.markAsRead(notificacion.id!);
     await updateCountersNotif();
+    final index = notificaciones.indexWhere((n) => n.id! == notificacion.id!);
+    if (index != -1) {
+      notificaciones[index] = notificacion.copyWith(isRead: true);
+    }
   }
 
   Future<void> marcarTodaNotifLeida() async {
     await _notificacionRepository.markAllRead();
     await updateCountersNotif();
+
+    notificaciones = notificaciones.map((n) => n.copyWith(isRead: true)).toList();
   }
 }

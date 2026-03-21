@@ -1,6 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -43,10 +47,10 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     }
   }
 
-  Future<void> _marcarComoLeido(int id) async {
+  Future<void> _marcarComoLeido(Notificacion notificacion) async {
     final appState = context.read<AppState>();
 
-    await appState.marcarNotifLeida(id);
+    await appState.marcarNotifLeida(notificacion);
   }
 
   Future<void> _marcarTodoLeido() async {
@@ -127,35 +131,75 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
           if (index < notifications.length) {
             final notif = notifications[index];
 
-            return Dismissible(
-              key: ValueKey(notif.id),
-              direction: DismissDirection.endToStart,
-              onDismissed: (_) => _eliminarNotificacion(notif.id!),
-              background: Container(
-                color: Colors.red,
-                alignment: Alignment.centerRight,
-                padding: EdgeInsets.only(right: 16),
-                child: Icon(Icons.delete, color: Colors.white),
-              ),
-              child: Card(
-                child: ListTile(
-                  title: Text(
-                    notif.title,
-                    style: TextStyle(
-                      fontWeight: notif.isRead
-                          ? FontWeight.normal
-                          : FontWeight.bold,
-                    ),
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: InkWell(
+                onTap: () => _marcarComoLeido(notif),
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 🔴 Indicador no leído
+                      if (!notif.isRead)
+                        Container(
+                          margin: const EdgeInsets.only(right: 8, top: 6),
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 8),
+
+                      // 🎨 Icono
+                      IconContainer(
+                        icon: notif.iconData,
+                        color: Color(notif.iconColorValue),
+                        size: 28,
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      // 📝 Texto
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              notif.title,
+                              style: TextStyle(
+                                fontWeight: notif.isRead
+                                    ? FontWeight.normal
+                                    : FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              notif.description,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 13,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () => _eliminarNotificacion(notif.id!),
+                      ),
+                    ],
                   ),
-                  subtitle: Text(notif.description),
-                  leading: notif.isRead
-                      ? null
-                      : Icon(Icons.circle, size: 10, color: Colors.blue),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () => _eliminarNotificacion(notif.id!),
-                  ),
-                  onTap: () => _marcarComoLeido(notif.id!),
                 ),
               ),
             );

@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 
@@ -37,13 +38,10 @@ class NotificacionRepository {
     await localDataSource.markAllAsRead();
   }
 
-  Future<bool> addNotificacion(Notificacion notificacion) async {
+  Future<OperationResult<int>> addNotificacion(Notificacion notificacion) async {
     final result = await localDataSource.insertNotificacion(notificacion);
-    if (result.success) {
-      notificaciones.add(notificacion.copyWith(id: result.data!));
-    }
 
-    return result.success;
+    return result;
   }
 
   Future<bool> deleteNotificacion(int id) async {
