@@ -1,3 +1,5 @@
+import 'package:control_financiero/core/utils/date_utils.dart';
+
 enum LogLevel { debug, info, warning, error }
 
 class AppLogger {
@@ -6,7 +8,7 @@ class AppLogger {
     LogLevel level = LogLevel.info,
     String? tag,
   }) {
-    final now = DateTime.now().toIso8601String();
+    final now = currentDateTime.toIso8601String();
     final prefix = '[${level.name.toUpperCase()}]';
     final label = tag != null ? '[$tag]' : '';
 

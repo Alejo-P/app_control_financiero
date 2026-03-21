@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:excel/excel.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -77,7 +78,7 @@ class ExcelExporter {
 
       Directory directory = Directory('/storage/emulated/0/Download');
 
-      final now = DateTime.now();
+      final now = currentDateTime;
       final fileName = "reporte_${now.year}_${now.month}_${now.day}.xlsx";
       final path = "${directory.path}/$fileName";
 

@@ -58,7 +58,7 @@ class _HistorialPageState extends State<HistorialPage> {
 
     // 🥈 2. Si no existe, buscar mes actual
     if (indexToExpand == -1) {
-      final now = DateTime.now();
+      final now = currentDateTime;
 
       indexToExpand = history.indexWhere((m) => isSameMonth(m.month, now));
     }
@@ -116,7 +116,7 @@ class _HistorialPageState extends State<HistorialPage> {
     }
 
     if (expandedIndex == null && history.isNotEmpty) {
-      final now = DateTime.now();
+      final now = currentDateTime;
 
       final index = history.indexWhere(
         (m) => m.month.year == now.year && m.month.month == now.month,

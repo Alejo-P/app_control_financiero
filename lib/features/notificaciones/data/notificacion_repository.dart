@@ -9,13 +9,7 @@ class NotificacionRepository {
   NotificacionRepository(this.localDataSource);
 
   Future<List<Notificacion>> fetchNotificaciones({int offset = 0}) async {
-    notificaciones.clear();
-
-    notificaciones.addAll(
-      await localDataSource.fetchNotificaciones(offset: offset),
-    );
-
-    return notificaciones;
+    return await localDataSource.fetchNotificaciones(offset: offset);
   }
 
   Future<int> countNotificaciones() async {

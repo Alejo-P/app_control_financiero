@@ -2,12 +2,14 @@
 
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
-import 'package:control_financiero/core/utils/color_utils.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
+import 'package:control_financiero/features/notificaciones/widgets/notification_card.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
-import 'package:control_financiero/features/shared/widgets/icon_container.dart';
+import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 class NotificacionesPage extends StatefulWidget {
   const NotificacionesPage({super.key});
@@ -18,16 +20,21 @@ class NotificacionesPage extends StatefulWidget {
 
 class _NotificacionesPageState extends State<NotificacionesPage> {
   final ScrollController _scrollController = ScrollController();
+  late final Timer _timer;
 
   @override
   void initState() {
     super.initState();
 
     _scrollController.addListener(_onScroll);
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    _timer.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -82,11 +89,43 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     AppSnackbar.error(context, 'No se pudo eliminar la notificación');
   }
 
+  Map<String, List<Notificacion>> agruparNotificaciones(
+    List<Notificacion> notificaciones,
+  ) {
+    final Map<String, List<Notificacion>> grupos = {};
+
+    for (final notif in notificaciones) {
+      final label = getDateGroupLabel(notif.createdAt!);
+
+      if (!grupos.containsKey(label)) {
+        grupos[label] = [];
+      }
+
+      grupos[label]!.add(notif);
+    }
+
+    return grupos;
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final unReadNotif = appState.notifSinLeer;
     final notifications = appState.notificaciones;
+    final grouped = agruparNotificaciones(notifications);
+    final keys = grouped.keys.toList();
+    keys.sort((a, b) {
+      const orden = ['Hoy', 'Ayer', 'Esta semana'];
+
+      final ia = orden.indexOf(a);
+      final ib = orden.indexOf(b);
+
+      if (ia != -1 && ib != -1) return ia.compareTo(ib);
+      if (ia != -1) return -1;
+      if (ib != -1) return 1;
+
+      return b.compareTo(a); // fallback (meses/años)
+    });
 
     if (notifications.isEmpty) {
       return Scaffold(
@@ -127,93 +166,18 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       body: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        itemCount: notifications.length + 1,
+        itemCount: keys.length + 1,
         itemBuilder: (context, index) {
-          if (index < notifications.length) {
-            final notif = notifications[index];
-            final borderColor = notif.isRead
-                ? Colors.grey.shade600
-                : Colors.orange;
-            final [rBorder, gBorder, bBorder] = getRGBFromColor(borderColor);
+          if (index < keys.length) {
+            final key = keys[index];
+            final items = grouped[key]!;
 
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(
-                  color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.65),
-                  width: 1.5,
-                ),
-              ),
-              child: InkWell(
-                onTap: () => _marcarComoLeido(notif),
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // 🔴 Indicador no leído
-                      if (!notif.isRead)
-                        Container(
-                          margin: const EdgeInsets.only(right: 8, top: 6),
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.orange,
-                            shape: BoxShape.circle,
-                          ),
-                        )
-                      else
-                        const SizedBox(width: 8),
-
-                      // 🎨 Icono
-                      IconContainer(
-                        icon: notif.iconData,
-                        color: Color(notif.iconColorValue),
-                        size: 28,
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      // 📝 Texto
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              notif.title,
-                              style: TextStyle(
-                                fontWeight: notif.isRead
-                                    ? FontWeight.normal
-                                    : FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              notif.description,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 13,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () => _eliminarNotificacion(notif.id!),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            return WidgetsContainer(
+              padding: EdgeInsetsGeometry.all(4),
+              title: key,
+              children: items.map((notif) {
+                return _buildNotifItem(notif);
+              }).toList(),
             );
           }
 
@@ -230,6 +194,19 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
           }
         },
       ),
+    );
+  }
+
+  Widget _buildNotifItem(Notificacion notif) {
+    return NotificationCard(
+      title: notif.title,
+      description: notif.description,
+      iconData: notif.iconData,
+      iconColor: notif.iconColor,
+      createdAt: notif.createdAt!,
+      isRead: notif.isRead,
+      onTap: () => _marcarComoLeido(notif),
+      onDelete: () => _eliminarNotificacion(notif.id!),
     );
   }
 }

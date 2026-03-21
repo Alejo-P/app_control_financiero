@@ -65,7 +65,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (widget.mode == MovimientoFormMode.create &&
         widget.fechaInicial != null) {
-      final fechaInicial = widget.fechaInicial ?? DateTime.now();
+      final fechaInicial = widget.fechaInicial ?? currentDateTime;
       final fechaNormalizada = normalizeDate(fechaInicial);
       selectedDate = !isCurrentMonth(fechaNormalizada)
           ? fechaNormalizada
@@ -164,7 +164,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final currentDay = DateTime.now();
+    final currentDay = currentDateTime;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -276,7 +276,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       description: 'Creaste un nuevo movimiento',
       iconName: IconMapper.toName(Icons.compare_arrows_outlined),
       iconColorValue: Colors.blue.value,
-      createdAt: DateTime.now(),
+      createdAt: currentDateTime,
     );
 
     await appState.insertarNotificacion(notificacion);

@@ -25,7 +25,7 @@ class _MonthSelectionState extends State<MonthSelection> {
   }
 
   DateTime getMinAllowedDate() {
-    final now = DateTime.now();
+    final now = currentDateTime;
     return DateTime(now.year - 3, now.month);
   }
 
@@ -47,8 +47,12 @@ class _MonthSelectionState extends State<MonthSelection> {
   }
 
   bool isFutureMonth(DateTime selectedDate) {
-    final now = DateTime.now();
+    final now = currentDateTime;
     return normalizeDate(selectedDate).isAfter(normalizeDate(now));
+  }
+
+  bool isLimitFutureMonth(DateTime selectedDate) {
+    return isCurrentMonth(selectedDate) || isFutureMonth(selectedDate);
   }
 
   bool isLimitPastMonth(DateTime selectedDate) {
@@ -66,7 +70,7 @@ class _MonthSelectionState extends State<MonthSelection> {
       return; // No permitir retroceder más allá del límite
     }
 
-    if (offset > 0 && isFutureMonth(selectedDate)) {
+    if (offset > 0 && isLimitFutureMonth(selectedDate)) {
       return; // No permitir avanzar a meses futuros
     }
 
@@ -89,7 +93,7 @@ class _MonthSelectionState extends State<MonthSelection> {
       return; // Ya estamos en el mes actual
     }
     // Solo tomar el año y mes actual para evitar problemas con días que no existen en meses anteriores
-    final now = DateTime.now();
+    final now = currentDateTime;
     final today = DateTime(now.year, now.month);
 
     setState(() {
@@ -104,7 +108,7 @@ class _MonthSelectionState extends State<MonthSelection> {
 
   @override
   Widget build(BuildContext context) {
-    final isFuture = isFutureMonth(selectedDate);
+    final isFuture = isLimitFutureMonth(selectedDate);
     final isCurrent = isCurrentMonth(selectedDate);
     final isLimitPast = isLimitPastMonth(selectedDate);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;

@@ -14,6 +14,8 @@ const List<String> monthNames = [
   'Diciembre',
 ];
 
+DateTime get currentDateTime => DateTime.now();
+
 // Función para obtener el nombre del mes a partir de un DateTime
 String getMonthName(DateTime date) {
   return monthNames[date.month - 1];
@@ -34,7 +36,7 @@ String formatMonthYear(DateTime date) {
 
 // Funcion para obtener la fecha actual sin hora
 DateTime getCurrentDateWithoutTime() {
-  final now = DateTime.now();
+  final now = currentDateTime;
   return DateTime(now.year, now.month, now.day);
 }
 
@@ -85,7 +87,7 @@ bool isSameMonth(DateTime a, DateTime b) {
 }
 
 bool isCurrentMonth(DateTime date) {
-  final now = DateTime.now();
+  final now = currentDateTime;
   return date.year == now.year && date.month == now.month;
 }
 
@@ -111,4 +113,21 @@ List<int> generateYearList(int startYear, [int numberOfYears = 10]) {
   }
 
   return List<int>.generate(numberOfYears, (i) => startYear + i);
+}
+
+// Obtener etiqueta de una fecha especifica ('Hoy', 'Esta semana', etc)
+String getDateGroupLabel(DateTime date) {
+  final now = DateTime.now();
+  final diff = now.difference(date);
+
+  if (diff.inDays == 0) return 'Hoy';
+  if (diff.inDays == 1) return 'Ayer';
+  if (diff.inDays < 7) return 'Esta semana';
+
+  if (now.year == date.year) {
+    final monthName = getMonthName(date);
+    return monthName;
+  }
+
+  return '${date.year}';
 }

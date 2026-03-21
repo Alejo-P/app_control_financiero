@@ -20,19 +20,19 @@ import 'package:hive/hive.dart';
 
 class AppState extends ChangeNotifier {
   // Estado unico para movimientos
-  DateTime selectedMovementsMonth = DateTime.now();
+  DateTime selectedMovementsMonth = currentDateTime;
   DateTime get getSelectedMovementsMonth => selectedMovementsMonth;
   bool _isLoadingMonth = false;
   bool get isLoadingMonth => _isLoadingMonth;
 
   // Estado unico para presupuestos
-  DateTime selectedBudgetMonth = DateTime.now();
+  DateTime selectedBudgetMonth = currentDateTime;
   DateTime get getSelectedBudgetMonth => selectedBudgetMonth;
   bool _isLoadingBudget = false;
   bool get isLoadingBudget => _isLoadingBudget;
 
   // Estado unico para el historial
-  DateTime selectedHistoryMonth = DateTime.now();
+  DateTime selectedHistoryMonth = currentDateTime;
   bool _isLoadingHistory = false;
   bool get isLoadingHistory => _isLoadingHistory;
 
@@ -201,20 +201,31 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadNotifications() async {
-    notificaciones = await _notificacionRepository.fetchNotificaciones(offset: offset);
-    await updateCountersNotif();
-    offset += notificaciones.length;
+    offset = 0;
+
+    final data = await _notificacionRepository.fetchNotificaciones(
+      offset: offset,
+    );
+
+    notificaciones = data;
+
+    offset += data.length;
+
+    _hasMoreNotif = data.isNotEmpty;
+
+    await updateCountersNotif(notify: false);
+
     notifyListeners();
   }
 
-  Future<void> updateCountersNotif() async {
+  Future<void> updateCountersNotif({bool notify = true}) async {
     totalNotif = await _notificacionRepository.countNotificaciones();
     notifSinLeer = await _notificacionRepository.getUnreadCount();
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   Future<void> fetchMoreNotifications() async {
-    if (_isLoadingNotif) return;
+    if (_isLoadingNotif || !_hasMoreNotif) return;
 
     _isLoadingNotif = true;
     notifyListeners();
@@ -227,7 +238,9 @@ class AppState extends ChangeNotifier {
       _hasMoreNotif = false;
     } else {
       offset += newData.length;
-      //notificaciones.addAll(newData);
+      notificaciones.addAll(newData);
+
+      _hasMoreNotif = newData.isNotEmpty;
     }
 
     _isLoadingNotif = false;
@@ -675,7 +688,7 @@ class AppState extends ChangeNotifier {
   Future<bool> insertarNotificacion(Notificacion notificacion) async {
     final result = await _notificacionRepository.addNotificacion(notificacion);
     if (result.success) {
-      notificaciones.add(notificacion.copyWith(id: result.data!));
+      notificaciones.insert(0, notificacion.copyWith(id: result.data!));
       await updateCountersNotif();
     }
 
@@ -705,6 +718,8 @@ class AppState extends ChangeNotifier {
     await _notificacionRepository.markAllRead();
     await updateCountersNotif();
 
-    notificaciones = notificaciones.map((n) => n.copyWith(isRead: true)).toList();
+    notificaciones = notificaciones
+        .map((n) => n.copyWith(isRead: true))
+        .toList();
   }
 }

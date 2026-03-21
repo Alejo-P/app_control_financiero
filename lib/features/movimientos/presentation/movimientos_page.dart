@@ -32,11 +32,14 @@ class _MovimientosPageState extends State<MovimientosPage> {
     _appState = context.read<AppState>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final notifSinLeer = _appState.notifSinLeer;
       _appState.setAppBarActions([
         AppBarAction(
           icon: Icons.notifications_active_outlined,
-          badgeCount: _appState.notifSinLeer,
-          tooltip: 'Notificaciones',
+          badgeCount: notifSinLeer,
+          tooltip: notifSinLeer > 0
+              ? '$notifSinLeer notificaciones no leidas'
+              : 'Sin notificaciones',
           onPressed: () {
             Navigator.push(
               context,

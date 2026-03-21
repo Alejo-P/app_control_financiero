@@ -20,7 +20,7 @@ class TransactionsContainer extends StatelessWidget {
   });
 
   bool isCurrentMonth(DateTime date) {
-    final now = DateTime.now();
+    final now = currentDateTime;
     return date.year == now.year && date.month == now.month;
   }
 

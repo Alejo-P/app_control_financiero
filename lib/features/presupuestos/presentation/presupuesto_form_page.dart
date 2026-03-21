@@ -45,7 +45,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   bool repeatBudget = false;
   List<Movimiento> movimientos = [];
   final meses = monthNames;
-  final anios = generateYearList(DateTime.now().year, 10);
+  final anios = generateYearList(currentDateTime.year, 10);
   late DateTime fechaPresupuesto;
   late int categoriaSeleccionada;
   late DetallePresupuesto initialPresupuesto;
@@ -60,7 +60,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     super.initState();
     //late AppState appState;
     categoriaSeleccionada = -1;
-    fechaPresupuesto = DateTime.now();
+    fechaPresupuesto = currentDateTime;
 
     if (widget.mode == PresupuestoFormMode.create) {
       fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
