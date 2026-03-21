@@ -50,7 +50,7 @@ class Notificacion {
       id: map['id'],
       title: map['title'],
       description: map['description'] ?? '',
-      iconName: map['iconName'],
+      iconName: map['icon'],
       iconColorValue: map['icon_color'],
       isRead: map['is_read'] == 1,
       extraData: map['extra_data'] != null && map['extra_data'] != ''
@@ -67,7 +67,7 @@ class Notificacion {
       'id': id,
       'title': title,
       'description': description,
-      'iconName': iconName,
+      'icon': iconName,
       'icon_color': iconColorValue,
       'is_read': isRead ? 1 : 0,
       'extra_data': extraData != null ? jsonEncode(extraData) : null,
