@@ -49,6 +49,22 @@ class NotificacionLocalDataSource {
     return results.map((e) => Notificacion.fromMap(e)).toList();
   }
 
+  Future<Notificacion?> fetchNotificacionById(int id) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db.query(
+      NotificacionTable.table,
+      where: '${NotificacionTable.id} = ?',
+      whereArgs: [id],
+    );
+
+    if (result.isNotEmpty) {
+      return Notificacion.fromMap(result.first);
+    }
+
+    return null;
+  }
+
   Future<void> markAsRead(int id) async {
     final db = await _dbHelper.database;
 

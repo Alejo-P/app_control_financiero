@@ -686,6 +686,12 @@ class AppState extends ChangeNotifier {
   }
 
   // ================================ NOTIFICACIONES CRUD =================================
+  Future<Notificacion?> getNotificacionById(int id) async {
+    final result = await _notificacionRepository.fetchNotificacionById(id);
+
+    return result;
+  }
+
   Future<bool> insertarNotificacion(Notificacion notificacion) async {
     final result = await _notificacionRepository.addNotificacion(notificacion);
     if (result.success) {

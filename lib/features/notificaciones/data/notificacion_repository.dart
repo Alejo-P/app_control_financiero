@@ -12,6 +12,10 @@ class NotificacionRepository {
     return await localDataSource.fetchNotificaciones(offset: offset);
   }
 
+  Future<Notificacion?> fetchNotificacionById(int id) async {
+    return await localDataSource.fetchNotificacionById(id);
+  }
+
   Future<int> countNotificaciones() async {
     final count = await localDataSource.countNotificaciones();
 
@@ -32,7 +36,9 @@ class NotificacionRepository {
     await localDataSource.markAllAsRead();
   }
 
-  Future<OperationResult<int>> addNotificacion(Notificacion notificacion) async {
+  Future<OperationResult<int>> addNotificacion(
+    Notificacion notificacion,
+  ) async {
     final result = await localDataSource.insertNotificacion(notificacion);
 
     return result;

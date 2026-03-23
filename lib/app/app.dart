@@ -7,6 +7,7 @@ import 'package:control_financiero/features/movimientos/data/movimientos_local_d
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
+import 'package:control_financiero/features/notificaciones/presentation/notification_detail.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
@@ -76,6 +77,12 @@ class _AppState extends State<App> {
             debugShowCheckedModeBanner: false,
             title: appName,
             theme: appState.isDarkMode ? AppTheme.dark : AppTheme.light,
+
+            // Rutas (pendiente por usar en todas las vistas)
+            routes: {
+              '/notificacion-detalle': (context) => const NotificationDetail(),
+            },
+
             home: appState.loadingInitialData
                 ? const SplashScreen()
                 : const AppScaffold(),

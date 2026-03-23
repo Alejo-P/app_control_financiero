@@ -55,10 +55,12 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     }
   }
 
-  Future<void> _marcarComoLeido(Notificacion notificacion) async {
-    final appState = context.read<AppState>();
-
-    await appState.marcarNotifLeida(notificacion);
+  Future<void> _verDetallesNotificacion(int id) async {
+    Navigator.pushNamed(
+      context,
+      '/notificacion-detalle',
+      arguments: id,
+    );
   }
 
   Future<void> _marcarTodoLeido() async {
@@ -205,7 +207,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       iconColor: notif.iconColor,
       createdAt: notif.createdAt!,
       isRead: notif.isRead,
-      onTap: () => _marcarComoLeido(notif),
+      onTap: () => _verDetallesNotificacion(notif.id!),
       onDelete: () => _eliminarNotificacion(notif.id!),
     );
   }
