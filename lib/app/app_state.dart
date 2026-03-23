@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
+import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -690,6 +691,11 @@ class AppState extends ChangeNotifier {
     if (result.success) {
       notificaciones.insert(0, notificacion.copyWith(id: result.data!));
       await updateCountersNotif();
+
+      await NotificationService.showNotification(
+        title: notificacion.title,
+        body: notificacion.description,
+      );
     }
 
     return result.success;

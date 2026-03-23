@@ -34,7 +34,6 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
     final theme = Theme.of(context);
     final themeColors = theme.colorScheme;
     final [r, g, b] = getRGBFromColor(themeColors.onSurface);
-    debugPrint('TipoMovimientoSelector - build - tipoMovimiento: $tipoMovimiento');
 
     return Container(
       height: 50,
