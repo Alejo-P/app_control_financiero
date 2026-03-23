@@ -1,3 +1,5 @@
+import 'package:control_financiero/core/constants/app_routes.dart';
+import 'package:control_financiero/core/services/navigation_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -8,12 +10,22 @@ class NotificationService {
 
     const settings = InitializationSettings(android: android);
 
-    await _notifications.initialize(settings);
+    await _notifications.initialize(
+      settings,
+      onDidReceiveNotificationResponse: (response) {
+        final payload = response.payload;
+
+        if (payload != null) {
+          _handleNotificationTap(payload);
+        }
+      },
+    );
   }
 
   static Future<void> showNotification({
     required String title,
     required String body,
+    required int id,
   }) async {
     const androidDetails = AndroidNotificationDetails(
       'channel_id',
@@ -24,6 +36,17 @@ class NotificationService {
 
     const details = NotificationDetails(android: androidDetails);
 
-    await _notifications.show(0, title, body, details);
+    await _notifications.show(0, title, body, details, payload: 'notificacion:$id');
   }
+
+  static void _handleNotificationTap(String payload) {
+  if (payload.startsWith('notificacion:')) {
+    final id = int.parse(payload.split(':')[1]);
+
+    navigatorKey.currentState?.pushNamed(
+      AppRoutes.notifDetalleRoute,
+      arguments: id,
+    );
+  }
+}
 }

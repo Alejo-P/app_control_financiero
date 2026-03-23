@@ -701,6 +701,7 @@ class AppState extends ChangeNotifier {
       await NotificationService.showNotification(
         title: notificacion.title,
         body: notificacion.description,
+        id: result.data!
       );
     }
 
