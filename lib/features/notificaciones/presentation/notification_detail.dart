@@ -1,5 +1,6 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
+import 'package:control_financiero/features/notificaciones/widgets/notificacion_detail_card.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -56,17 +57,19 @@ class _NotificationDetailState extends State<NotificationDetail> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? LoadingScreen(message: 'Cargando detalles de la notificación...')
-        : notif == null
-        ? _EmptyNotificacion()
-        : Scaffold(
-            appBar: AppBar(title: Text('Detalle')),
-            body: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(notif!.description),
+    if (isLoading) {
+      return LoadingScreen(message: 'Cargando detalles de la notificación...');
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text(notif?.title ?? 'Detalle de notificación')),
+      body: notif == null
+          ? _EmptyNotificacion()
+          : Padding(
+              padding: const EdgeInsets.all(8),
+              child: NotificacionDetailCard(notif: notif!),
             ),
-          );
+    );
   }
 }
 

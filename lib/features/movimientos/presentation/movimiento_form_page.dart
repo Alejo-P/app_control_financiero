@@ -271,12 +271,21 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       await appState.agregarMovimiento(movimiento);
     }
 
+    if (!mounted) return;
+
     final notificacion = Notificacion(
       title: 'Creacion de movimiento',
       description: 'Creaste un nuevo movimiento',
       iconName: IconMapper.toName(Icons.compare_arrows_outlined),
       iconColorValue: Colors.blue.value,
       createdAt: currentDateTime,
+      extraData: {
+        "Concepto": movimiento.title,
+        'Monto': movimiento.amount,
+        'Nota': movimiento.note.isNotEmpty ? movimiento.note : '(Sin nota)',
+        'Fecha creacion': formatDate(movimiento.date), // <- DateTime
+        'Hora creacion': movimiento.time.format(context), // ,? TimeOfDay
+      },
     );
 
     await appState.insertarNotificacion(notificacion);
