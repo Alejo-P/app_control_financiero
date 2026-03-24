@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
 Future<bool?> showConfirmAddDialog(
@@ -31,8 +32,8 @@ Future<bool?> showConfirmAddDialog(
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancelar'),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+          CustomButton(
+            onTap: () => Navigator.pop(context, true),
             child: const Text('Confirmar'),
           ),
         ],
@@ -68,8 +69,8 @@ Future<bool?> showConfirmDialog(
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancelar'),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+          CustomButton(
+            onTap: () => Navigator.pop(context, true),
             child: const Text('Confirmar'),
           ),
         ],

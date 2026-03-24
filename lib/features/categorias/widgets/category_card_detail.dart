@@ -33,8 +33,7 @@ class CategoryCardDetail extends StatelessWidget {
           children: [
             Row(
               children: [
-                BadgeWidget( counter: 2, child: 
-                 IconContainer(icon: icon, color: color, size: 26)),
+                IconContainer(icon: icon, color: color, size: 26),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

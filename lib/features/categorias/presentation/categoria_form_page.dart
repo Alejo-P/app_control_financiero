@@ -10,6 +10,7 @@ import 'package:control_financiero/features/categorias/widgets/icons_single_chil
 import 'package:control_financiero/features/categorias/widgets/info_categoria_predeterminada.dart';
 import 'package:control_financiero/features/categorias/widgets/tab_chip.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -598,8 +599,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                   /// BOTÓN CONFIRMAR
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
+                    child: CustomButton(
+                      onTap: () {
                         Navigator.pop(context, {
                           'icon': tempIcon,
                           'color': tempColor,

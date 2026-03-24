@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/utils/relative_time.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
+import 'package:control_financiero/features/notificaciones/widgets/extra_data_table.dart';
 import 'package:flutter/material.dart';
 
 class NotificacionDetailCard extends StatelessWidget {
@@ -88,24 +89,11 @@ class NotificacionDetailCard extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              Text('Detalles adicionales', style: theme.textTheme.labelLarge),
+              Text('Detalles', style: theme.textTheme.labelLarge),
 
               const SizedBox(height: 8),
 
-              ...notif.extraData!.entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    children: [
-                      Text(
-                        '${entry.key}: ',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Expanded(child: Text(entry.value.toString())),
-                    ],
-                  ),
-                );
-              }),
+              ExtraDataTable(data: notif.extraData!),
             ],
           ],
         ),

@@ -10,6 +10,7 @@ import 'package:control_financiero/features/movimientos/widgets/ammount_input.da
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -674,8 +675,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar'),
             ),
-            ElevatedButton(
-              onPressed: _guardarIngresoPresupuesto,
+            CustomButton(
+              onTap: _guardarIngresoPresupuesto,
               child: const Text('Guardar'),
             ),
           ],

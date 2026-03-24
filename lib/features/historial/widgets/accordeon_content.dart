@@ -1,4 +1,5 @@
 import 'package:control_financiero/features/historial/widgets/ammount_detail_card.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -69,13 +70,8 @@ class AccordeonContent extends StatelessWidget {
         const SizedBox(height: 4),
 
         if (onTapButton != null)
-          ElevatedButton(
-            onPressed: onTapButton,
-            style: theme.elevatedButtonTheme.style?.copyWith(
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
+          CustomButton(
+            onTap: onTapButton,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

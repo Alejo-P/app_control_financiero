@@ -30,87 +30,75 @@ class NotificationCard extends StatelessWidget {
     final borderColor = isRead ? Colors.grey.shade600 : Colors.orange;
     final [rBorder, gBorder, bBorder] = getRGBFromColor(borderColor);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.65),
-          width: 1.5,
-        ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // 🔴 Indicador no leído
-              if (!isRead)
-                Container(
-                  margin: const EdgeInsets.only(right: 8, top: 6),
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.orange,
-                    shape: BoxShape.circle,
-                  ),
-                )
-              else
-                const SizedBox(width: 8),
-
-              // 🎨 Icono
-              IconContainer(icon: iconData, color: iconColor, size: 28),
-
-              const SizedBox(width: 12),
-
-              // 📝 Texto
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: isRead
-                            ? FontWeight.normal
-                            : FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(color: Colors.grey[500], fontSize: 13),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          formatRelativeTime(createdAt),
-                          textAlign: TextAlign.end,
-                          style: TextStyle(fontSize: 13),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 🔴 Indicador no leído
+            if (!isRead)
+              Container(
+                margin: const EdgeInsets.only(right: 8, top: 6),
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.orange,
+                  shape: BoxShape.circle,
                 ),
-              ),
+              )
+            else
+              const SizedBox(width: 8),
 
-              if (onDelete != null)
-                IconButton(icon: Icon(Icons.delete), onPressed: onDelete),
-            ],
-          ),
+            // 🎨 Icono
+            IconContainer(icon: iconData, color: iconColor, size: 28),
+
+            const SizedBox(width: 12),
+
+            // 📝 Texto
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        formatRelativeTime(createdAt),
+                        textAlign: TextAlign.end,
+                        style: TextStyle(fontSize: 13),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            if (onDelete != null)
+              IconButton(icon: Icon(Icons.delete), onPressed: onDelete),
+          ],
         ),
       ),
     );

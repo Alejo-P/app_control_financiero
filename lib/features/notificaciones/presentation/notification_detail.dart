@@ -18,12 +18,6 @@ class _NotificationDetailState extends State<NotificationDetail> {
   bool _loaded = false;
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_loaded) return;
