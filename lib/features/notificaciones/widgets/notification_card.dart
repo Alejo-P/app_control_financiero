@@ -1,4 +1,3 @@
-import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/relative_time.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
@@ -27,8 +26,6 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isRead ? Colors.grey.shade600 : Colors.orange;
-    final [rBorder, gBorder, bBorder] = getRGBFromColor(borderColor);
 
     return InkWell(
       onTap: onTap,
