@@ -106,7 +106,7 @@ class AppState extends ChangeNotifier {
 
   List<TipoCategoria> get tiposCategorias =>
       _tipoCategoriaRepository.tipoCategorias;
-  List<Movimiento> get movimientos => _movimientosRepository.movimientos;
+  List<Movimiento> movimientos = [];
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
   List<Movimiento> get movimientosPresupuestos =>
@@ -154,7 +154,9 @@ class AppState extends ChangeNotifier {
     DateTime date, {
     bool notify = true,
   }) async {
-    await _movimientosRepository.fetchMovimientosByMonthAndYear(date);
+    movimientos = await _movimientosRepository.fetchMovimientosByMonthAndYear(
+      date,
+    );
 
     _totalesMensuales = await _movimientosRepository.fetchTotalesMensuales(
       selectedMovementsMonth,
@@ -193,6 +195,16 @@ class AppState extends ChangeNotifier {
     calculateTotalIngresoPresupuestado();
     _totalGastos = _presupuestosRepository.getTotalGastosByMonthAndYear(date);
     if (notify) notifyListeners();
+  }
+
+  double getUsedBudgetPercentage(int categoryID) {
+    try {
+      final categoria = categorias.firstWhere((c) => c.id == categoryID);
+      //TODO: Comprobar si se excede el presupuesto de una categoria directamente en BD
+    } on Exception catch (e) {
+      return 0;
+    }
+    return 0;
   }
 
   Future<void> updateHistory() async {
@@ -692,17 +704,22 @@ class AppState extends ChangeNotifier {
     return result;
   }
 
-  Future<bool> insertarNotificacion(Notificacion notificacion) async {
+  Future<bool> insertarNotificacion(
+    Notificacion notificacion, {
+    bool showNotification = false,
+  }) async {
     final result = await _notificacionRepository.addNotificacion(notificacion);
     if (result.success) {
       notificaciones.insert(0, notificacion.copyWith(id: result.data!));
       await updateCountersNotif();
 
-      await NotificationService.showNotification(
-        title: notificacion.title,
-        body: notificacion.description,
-        id: result.data!
-      );
+      if (showNotification) {
+        await NotificationService.showNotification(
+          title: notificacion.title,
+          body: notificacion.description,
+          id: result.data!,
+        );
+      }
     }
 
     return result.success;

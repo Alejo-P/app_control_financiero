@@ -265,7 +265,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       repeatMovement: repeatMovement,
     );
 
-    if (widget.mode == MovimientoFormMode.edit) {
+    final isUpdateMovement = widget.mode == MovimientoFormMode.edit;
+
+    if (isUpdateMovement) {
       await appState.actualizarMovimiento(movimiento);
     } else {
       await appState.agregarMovimiento(movimiento);
@@ -274,8 +276,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     if (!mounted) return;
 
     final notificacion = Notificacion(
-      title: 'Creacion de movimiento',
-      description: 'Creaste un nuevo movimiento',
+      title:
+          '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
+      description:
+          '${isUpdateMovement ? 'Editaste' : 'Creaaste'} un nuevo movimiento',
       iconName: IconMapper.toName(Icons.compare_arrows_outlined),
       iconColorValue: Colors.blue.value,
       createdAt: currentDateTime,
@@ -283,8 +287,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         "Concepto": movimiento.title,
         'Monto': movimiento.amount,
         'Nota': movimiento.note.isNotEmpty ? movimiento.note : '(Sin nota)',
-        'Fecha creacion': formatDate(movimiento.date), // <- DateTime
-        'Hora creacion': movimiento.time.format(context), // ,? TimeOfDay
+        'Fecha creacion': formatDate(movimiento.date),
+        'Hora creacion': movimiento.time.format(context),
       },
     );
 
