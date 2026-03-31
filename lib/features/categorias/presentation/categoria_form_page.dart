@@ -606,10 +606,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           'color': tempColor,
                         });
                       },
-                      child: const Text(
-                        'Confirmar',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      text: 'Confirmar',
+                      icon: Icons.check,
                     ),
                   ),
                 ],

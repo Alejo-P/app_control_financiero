@@ -677,7 +677,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
             ),
             CustomButton(
               onTap: _guardarIngresoPresupuesto,
-              child: const Text('Guardar'),
+              text: 'Guardar',
+              icon: Icons.save,
             ),
           ],
         );

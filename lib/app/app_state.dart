@@ -197,14 +197,13 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  double getUsedBudgetPercentage(int categoryID) {
-    try {
-      final categoria = categorias.firstWhere((c) => c.id == categoryID);
-      //TODO: Comprobar si se excede el presupuesto de una categoria directamente en BD
-    } on Exception catch (e) {
-      return 0;
-    }
-    return 0;
+  Future<double> getUsedBudgetPercentage(int categoryID, DateTime date) async {
+    final presupuestoUsado = await _presupuestosRepository.fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(
+      categoryID,
+      date,
+    );
+    
+    return presupuestoUsado;
   }
 
   Future<void> updateHistory() async {

@@ -34,7 +34,8 @@ Future<bool?> showConfirmAddDialog(
           ),
           CustomButton(
             onTap: () => Navigator.pop(context, true),
-            child: const Text('Confirmar'),
+            text: 'Confirmar',
+            icon: Icons.check,
           ),
         ],
       );
@@ -64,6 +65,7 @@ Future<bool?> showConfirmDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -71,7 +73,7 @@ Future<bool?> showConfirmDialog(
           ),
           CustomButton(
             onTap: () => Navigator.pop(context, true),
-            child: const Text('Confirmar'),
+            text: 'Confirmar',
           ),
         ],
       );

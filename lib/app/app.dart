@@ -1,6 +1,7 @@
 import 'package:control_financiero/app/splash_screen.dart';
 import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/services/navigation_service.dart';
+import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/historial/data/historial_local_datasource.dart';
@@ -15,6 +16,7 @@ import 'package:control_financiero/features/presupuestos/data/presupuestos_repos
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/core/constants/app_strings.dart';
 import 'package:control_financiero/core/theme/app_theme.dart';
@@ -22,7 +24,9 @@ import 'app_state.dart';
 import 'app_scaffold.dart';
 
 class App extends StatefulWidget {
-  const App({super.key});
+  final NotificationAppLaunchDetails? notificationLaunchDetails;
+
+  const App({super.key, this.notificationLaunchDetails});
 
   @override
   State<App> createState() => _AppState();
@@ -34,6 +38,17 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.notificationLaunchDetails?.didNotificationLaunchApp ?? false) {
+      final payload =
+          widget.notificationLaunchDetails!.notificationResponse?.payload;
+
+      if (payload != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          NotificationService.handleNotificationTap(payload);
+        });
+      }
+    }
 
     final movimientosRepository = MovimientosRepository(
       MovimientosLocalDataSource(),
@@ -83,7 +98,8 @@ class _AppState extends State<App> {
 
             // Rutas (pendiente por usar en todas las vistas)
             routes: {
-              AppRoutes.notifDetalleRoute: (context) => const NotificationDetail(),
+              AppRoutes.notifDetalleRoute: (context) =>
+                  const NotificationDetail(),
             },
 
             home: appState.loadingInitialData

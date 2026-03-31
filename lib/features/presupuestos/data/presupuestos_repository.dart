@@ -112,6 +112,13 @@ class PresupuestosRepository implements _PresupuestosRepository {
     return resultado;
   }
 
+  Future<double> fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(int categoryId, DateTime date) async {
+    return await localDatasource.fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(
+      categoryId,
+      date,
+    );
+  }
+
   @override
   Future<OperationResult<int>> addPresupuesto(Presupuesto presupuesto) async {
     final result = await localDatasource.addPresupuesto(presupuesto);

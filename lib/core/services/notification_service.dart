@@ -16,7 +16,7 @@ class NotificationService {
         final payload = response.payload;
 
         if (payload != null) {
-          _handleNotificationTap(payload);
+          handleNotificationTap(payload);
         }
       },
     );
@@ -36,17 +36,27 @@ class NotificationService {
 
     const details = NotificationDetails(android: androidDetails);
 
-    await _notifications.show(0, title, body, details, payload: 'notificacion:$id');
-  }
-
-  static void _handleNotificationTap(String payload) {
-  if (payload.startsWith('notificacion:')) {
-    final id = int.parse(payload.split(':')[1]);
-
-    navigatorKey.currentState?.pushNamed(
-      AppRoutes.notifDetalleRoute,
-      arguments: id,
+    await _notifications.show(
+      0,
+      title,
+      body,
+      details,
+      payload: 'notificacion:$id',
     );
   }
-}
+
+  static Future<NotificationAppLaunchDetails?> getLaunchDetails() async {
+    return await _notifications.getNotificationAppLaunchDetails();
+  }
+
+  static void handleNotificationTap(String payload) {
+    if (payload.startsWith('notificacion:')) {
+      final id = int.parse(payload.split(':')[1]);
+
+      navigatorKey.currentState?.pushNamed(
+        AppRoutes.notifDetalleRoute,
+        arguments: id,
+      );
+    }
+  }
 }

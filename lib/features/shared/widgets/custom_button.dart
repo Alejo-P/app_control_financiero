@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 
+enum WidgetWidth { fitContent, fullWidth }
+
 class CustomButton extends StatelessWidget {
   final VoidCallback? onTap;
-  final Widget child;
+  final IconData? icon;
+  final String? text;
+  final WidgetWidth width;
 
-  const CustomButton({super.key, this.onTap, required this.child});
+  const CustomButton({
+    super.key,
+    this.onTap,
+    this.icon,
+    this.text,
+    this.width = WidgetWidth.fitContent,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +27,31 @@ class CustomButton extends StatelessWidget {
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
-      child: child,
+      child: icon != null && text != null
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: width == WidgetWidth.fullWidth
+                  ? MainAxisSize.max
+                  : MainAxisSize.min,
+              children: [
+                Icon(icon),
+                SizedBox(width: 6),
+                Text(
+                  text!,
+                  style: TextStyle().copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            )
+          : icon != null
+          ? Icon(icon)
+          : Text(
+              text!,
+              style: TextStyle().copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
     );
   }
 }

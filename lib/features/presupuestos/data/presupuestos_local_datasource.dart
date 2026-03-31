@@ -81,6 +81,50 @@ class PresupuestosLocalDataSource {
     }
   }
 
+  // Obtener porcentaje de presupuesto utilizado por categoría y mes
+  Future<double> fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(
+    int categoryId,
+    DateTime date,
+  ) async {
+    final db = await _dbHelper.database;
+    final String month = date.month.toString().padLeft(2, '0');
+    final int year = date.year;
+
+    // Obtener el presupuesto para la categoría y mes dados
+    final List<Map<String, dynamic>> presupuestoMaps = await db.query(
+      PresupuestosTable.table,
+      where:
+          "${PresupuestosTable.categoryId} = ? AND strftime('%Y-%m', ${PresupuestosTable.date}) = ?",
+      whereArgs: [categoryId, '$year-$month'],
+    );
+
+    if (presupuestoMaps.isEmpty) {
+      return 0.0; // No hay presupuesto definido, por lo tanto 0% utilizado
+    }
+
+    final double presupuestoMonto =
+        (presupuestoMaps.first[PresupuestosTable.amount] as num).toDouble();
+
+    // Obtener el total gastado para la categoría y mes dados
+    final List<Map<String, dynamic>> gastoMaps = await db.rawQuery(
+      '''
+      SELECT SUM(${MovimientosTable.amount}) AS total_gastado
+      FROM ${MovimientosTable.table}
+      WHERE ${MovimientosTable.categoryId} = ? AND strftime('%Y-%m', ${MovimientosTable.date}) = ?
+      ''',
+      [categoryId, '$year-$month'],
+    );
+
+    final double totalGastado =
+        (gastoMaps.first['total_gastado'] as num?)?.toDouble() ?? 0.0;
+
+    if (presupuestoMonto == 0) {
+      return 0.0; // Evitar división por cero
+    }
+
+    return (totalGastado / presupuestoMonto) * 100;
+  }
+
   // Agregar o actualizar ingreso presupuestado
   Future<OperationResult<int>> upsertIngresoPresupuestado(
     IngresoPresupuestado ingreso,

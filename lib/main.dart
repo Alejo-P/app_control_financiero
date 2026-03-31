@@ -6,5 +6,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 void main() async {
   await Hive.initFlutter();
   await NotificationService.init();
-  runApp(const App());
+
+  final details =
+      await NotificationService.getLaunchDetails();
+
+  runApp(App(notificationLaunchDetails: details));
 }
