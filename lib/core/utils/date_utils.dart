@@ -123,6 +123,7 @@ String getDateGroupLabel(DateTime date) {
   if (diff.inDays == 0) return 'Hoy';
   if (diff.inDays == 1) return 'Ayer';
   if (diff.inDays < 7) return 'Esta semana';
+  if (diff.inDays < 30) return 'Este mes';
 
   if (now.year == date.year) {
     final monthName = getMonthName(date);
