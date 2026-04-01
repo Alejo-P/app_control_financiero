@@ -129,8 +129,10 @@ class _HistorialPageState extends State<HistorialPage> {
       _initControllers(history, selectedMovementsMonth);
     }
 
+    final yearBalance = history.fold(0.0, (sum, item) => sum + item.balance);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Column(
         children: [
           Expanded(
@@ -179,6 +181,8 @@ class _HistorialPageState extends State<HistorialPage> {
                     ],
                   ),
           ),
+          if (!isLoading && history.isNotEmpty)
+            _YearBalanceCard(balance: yearBalance),
         ],
       ),
     );
@@ -254,6 +258,43 @@ class _HistorialPageState extends State<HistorialPage> {
       expandedIndex = null;
       appState.changeHistoryYear(selectedYear);
     }
+  }
+}
+
+class _YearBalanceCard extends StatelessWidget {
+  final double balance;
+
+  const _YearBalanceCard({required this.balance});
+
+  @override
+  Widget build(BuildContext context) {
+    final appState = context.read<AppState>();
+    final currentYear = appState.selectedHistoryMonth.year;
+    final isPositive = balance >= 0;
+
+    return Container(
+      margin: const EdgeInsets.all(0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Balance total para $currentYear",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            isPositive
+                ? "+\$${balance.abs().toStringAsFixed(2)}"
+                : "-\$${balance.abs().toStringAsFixed(2)}",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isPositive ? Colors.green : Colors.red,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
