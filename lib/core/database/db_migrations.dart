@@ -195,3 +195,20 @@ Future<void> migrateNotificationsCreatedAt(Database db) async {
     ''');
   }
 }
+
+Future<void> migrateNotificationsType(Database db) async {
+  // Agregar la columna 'type' si no existe
+  final columns = await db.rawQuery(
+    "PRAGMA table_info(${NotificacionTable.table});",
+  );
+
+  final columnNames = columns.map((column) => column['name'] as String).toSet();
+
+  if (!columnNames.contains(NotificacionTable.type)) {
+    await db.execute('''
+      ALTER TABLE ${NotificacionTable.table}
+      ADD COLUMN ${NotificacionTable.type}
+      TEXT NOT NULL DEFAULT 'general';
+    ''');
+  }
+}

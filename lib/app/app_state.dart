@@ -214,17 +214,14 @@ class AppState extends ChangeNotifier {
     DateTime date,
   ) async {
     final porcentajeUsado = await _getUsedBudgetPercentage(categoryId, date);
-    debugPrint('Porcentaje usado para categoria $categoryId: $porcentajeUsado');
 
     final configs = await _notificacionRepository
         .fetchGlobalEnabledThresholds();
-    debugPrint('Thresholds globales habilitados: $configs');
 
     final events = await _notificacionRepository
         .fetchBudgetNotificationEventsByCategoryIdAndDate(categoryId, date);
 
     final sentThresholds = events.map((e) => e.threshold).toSet();
-    debugPrint('Thresholds ya notificados para categoria $categoryId: $sentThresholds');
 
     final thresholdsToNotify = <double>[];
 
@@ -737,6 +734,11 @@ class AppState extends ChangeNotifier {
     return result;
   }
 
+  Future<bool> allNotificationsRead() async {
+    final unreadCount = await _notificacionRepository.getUnreadCount();
+    return unreadCount == 0;
+  }
+
   // TODO: Funcion para insertar el evento de notificacion de presupuesto alcanzado para evitar mostrar una notificacion cada que se exceda un threshold ya notificado
 
   Future<bool> insertarNotificacion(
@@ -753,9 +755,9 @@ class AppState extends ChangeNotifier {
           title: notificacion.title,
           body: notificacion.description,
           id: result.data!,
+          type: notificacion.type,
         );
       }
-
     }
 
     return result.success;
@@ -771,21 +773,50 @@ class AppState extends ChangeNotifier {
     return success;
   }
 
+  Future<void> ocultarNotificacion(int id) async {
+    await NotificationService.cancelNotification(id);
+
+    if (notifSinLeer == 0) {
+      await NotificationService.cancelNotification(
+        NotificationService.idSummary,
+      );
+    }
+  }
+
+  Future<void> ocultarTodasNotificaciones() async {
+    await NotificationService.cancelAllNotifications();
+  }
+
+  // Future<OperationResult<int>> insertarBudgetNotificationEvent(
+  //   BudgetNotificationEvent event,
+  // ) async {
+  //   final result = await _budgetNotificationEventRepository.addBudgetNotificationEvent(event);
+  //   return result;
+  // }
+
   Future<void> marcarNotifLeida(Notificacion notificacion) async {
+    if (notificacion.isRead == true) return;
+
     await _notificacionRepository.markAsRead(notificacion.id!);
-    await updateCountersNotif();
+    await NotificationService.cancelNotification(notificacion.id!);
     final index = notificaciones.indexWhere((n) => n.id! == notificacion.id!);
     if (index != -1) {
       notificaciones[index] = notificacion.copyWith(isRead: true);
     }
+    await updateCountersNotif();
   }
 
   Future<void> marcarTodaNotifLeida() async {
+    if (await allNotificationsRead()) return;
+
     await _notificacionRepository.markAllRead();
-    await updateCountersNotif();
+    for (var notif in notificaciones) {
+      await NotificationService.cancelNotification(notif.id!);
+    }
 
     notificaciones = notificaciones
         .map((n) => n.copyWith(isRead: true))
         .toList();
+    await updateCountersNotif();
   }
 }

@@ -6,6 +6,7 @@ class Notificacion {
   final int? id;
   final String title;
   final String description;
+  final String type;
   final bool isRead;
   final String iconName;
   final int iconColorValue;
@@ -17,6 +18,7 @@ class Notificacion {
     required this.title,
     required this.iconName,
     required this.iconColorValue,
+    required this.type,
     this.description = '',
     this.isRead = false,
     this.extraData,
@@ -29,6 +31,7 @@ class Notificacion {
     String? iconName,
     int? iconColorValue,
     String? description,
+    String? type,
     bool? isRead,
     Map<String, dynamic>? extraData,
     DateTime? createdAt,
@@ -39,6 +42,7 @@ class Notificacion {
       iconName: iconName ?? this.iconName,
       iconColorValue: iconColorValue ?? this.iconColorValue,
       description: description ?? this.description,
+      type: type ?? this.type,
       isRead: isRead ?? this.isRead,
       extraData: extraData ?? this.extraData,
       createdAt: createdAt ?? this.createdAt,
@@ -50,6 +54,7 @@ class Notificacion {
       id: map['id'],
       title: map['title'],
       description: map['description'] ?? '',
+      type: map['type'] ?? '',
       iconName: map['icon'],
       iconColorValue: map['icon_color'],
       isRead: map['is_read'] == 1,
@@ -67,6 +72,7 @@ class Notificacion {
       'id': id,
       'title': title,
       'description': description,
+      'type': type,
       'icon': iconName,
       'icon_color': iconColorValue,
       'is_read': isRead ? 1 : 0,

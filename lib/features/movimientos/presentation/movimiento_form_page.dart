@@ -280,6 +280,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
       description:
           '${isUpdateMovement ? 'Editaste' : 'Creaaste'} un nuevo movimiento',
+      type: 'movimiento',
       iconName: IconMapper.toName(Icons.compare_arrows_outlined),
       iconColorValue: Colors.blue.value,
       createdAt: currentDateTime,
@@ -297,7 +298,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       movimiento.categoryID,
       movimiento.date,
     );
-    debugPrint('Porcentages de presupuesto utilizados para esta categoria: $porcentagesPresupuesto');
 
     if (porcentagesPresupuesto.isNotEmpty) {
       for (final porcentaje in porcentagesPresupuesto) {
@@ -306,6 +306,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
             title: 'Alerta de presupuesto',
             description:
                 'Has alcanzado el $porcentaje% de tu presupuesto para la categoría $categoryName.',
+            type: 'presupuesto',
             iconName: IconMapper.toName(Icons.warning_amber_outlined),
             iconColorValue: Colors.red.value,
             createdAt: currentDateTime,

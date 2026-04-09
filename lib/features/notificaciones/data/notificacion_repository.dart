@@ -17,6 +17,10 @@ class NotificacionRepository {
     return await localDataSource.fetchNotificacionById(id);
   }
 
+  Future <Notificacion?> fetchLatestNotificacionByType(String type) async {
+    return await localDataSource.fetchLatestNotificacionByType(type);
+  }
+
   Future<List<double>> fetchGlobalEnabledThresholds() async {
     final budgetNotifications = await localDataSource.fetchGlobalEnabledThresholds();
     
@@ -50,6 +54,12 @@ class NotificacionRepository {
 
   Future<int> getUnreadCount() async {
     final count = await localDataSource.countUnreadNotificaciones();
+
+    return count;
+  }
+
+  Future<int> getUnreadCountByType(String type) async {
+    final count = await localDataSource.countUnreadNotificacionesByType(type);
 
     return count;
   }

@@ -24,7 +24,7 @@ class DBHelper {
 
     return await openDatabase(
       path,
-      version: 11,
+      version: 12,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },

@@ -59,6 +59,7 @@ class NotificacionTable {
   static const id = 'id';
   static const title = 'title';
   static const description = 'description';
+  static const type = 'type';
   static const isRead = 'is_read';
   static const icon = 'icon';
   static const iconColor = 'icon_color';
@@ -121,6 +122,7 @@ Future<void> createTables(Database db) async {
         ${NotificacionTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
         ${NotificacionTable.title} TEXT NOT NULL,
         ${NotificacionTable.description} TEXT,
+        ${NotificacionTable.type} TEXT NOT NULL,
         ${NotificacionTable.icon} TEXT NOT NULL,
         ${NotificacionTable.iconColor} INTEGER NOT NULL,
         ${NotificacionTable.isRead} INTEGER NOT NULL DEFAULT 0,

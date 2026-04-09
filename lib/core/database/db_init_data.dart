@@ -176,4 +176,8 @@ Future<void> runSeeds(Database db) async {
     }
     await setSeedVersion(db, currentVersion + 1);
   }
+  if (currentVersion < 10) {
+    await setSeedVersion(db, currentVersion + 1);
+    await migrateNotificationsType(db);
+  }
 }

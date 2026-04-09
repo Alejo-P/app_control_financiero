@@ -38,6 +38,24 @@ class NotificacionLocalDataSource {
     return count;
   }
 
+  Future<int> countUnreadNotificacionesByType(String type) async {
+    final db = await _dbHelper.database;
+
+    final int count =
+        Sqflite.firstIntValue(
+          await db.rawQuery(
+            '''
+            SELECT COUNT(*) FROM ${NotificacionTable.table}
+            WHERE ${NotificacionTable.isRead} = ? AND ${NotificacionTable.type} = ?
+            ''',
+            [0, type],
+          ),
+        ) ??
+        0;
+
+    return count;
+  }
+
   Future<List<Notificacion>> fetchNotificaciones({int offset = 0}) async {
     final db = await _dbHelper.database;
 
@@ -58,6 +76,24 @@ class NotificacionLocalDataSource {
       NotificacionTable.table,
       where: '${NotificacionTable.id} = ?',
       whereArgs: [id],
+    );
+
+    if (result.isNotEmpty) {
+      return Notificacion.fromMap(result.first);
+    }
+
+    return null;
+  }
+
+  Future<Notificacion?> fetchLatestNotificacionByType(String type) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db.query(
+      NotificacionTable.table,
+      where: '${NotificacionTable.type} = ?',
+      whereArgs: [type],
+      orderBy: '${NotificacionTable.createdAt} DESC',
+      limit: 1,
     );
 
     if (result.isNotEmpty) {
