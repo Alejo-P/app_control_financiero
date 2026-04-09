@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 
 class IconMapper {
   // Mapa String -> IconData (nombres exactos de Material Icons)
-  static final Map<String, IconData> _nameToIcon = categoryIconsMap;
+  static final Map<String, IconData> _nameToIcon = {
+    ...categoryIconsMap,
+    ...extraIconsMap,
+  };
 
   // Mapa inverso IconData -> String (usando codePoint como identificador)
   static final Map<int, String> _iconToName = {
     for (final entry in categoryIconsMap.entries) entry.value.codePoint: entry.key,
+    for (final entry in extraIconsMap.entries) entry.value.codePoint: entry.key,
   };
 
   /// Obtiene un IconData a partir de su nombre exacto de Material Icons

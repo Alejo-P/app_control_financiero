@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
@@ -197,13 +199,45 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  Future<double> getUsedBudgetPercentage(int categoryID, DateTime date) async {
-    final presupuestoUsado = await _presupuestosRepository.fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(
-      categoryID,
-      date,
-    );
-    
+  Future<double> _getUsedBudgetPercentage(int categoryID, DateTime date) async {
+    final presupuestoUsado = await _presupuestosRepository
+        .fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(
+          categoryID,
+          date,
+        );
+
     return presupuestoUsado;
+  }
+
+  Future<List<double>> getThresholdsToNotify(
+    int categoryId,
+    DateTime date,
+  ) async {
+    final porcentajeUsado = await _getUsedBudgetPercentage(categoryId, date);
+    debugPrint('Porcentaje usado para categoria $categoryId: $porcentajeUsado');
+
+    final configs = await _notificacionRepository
+        .fetchGlobalEnabledThresholds();
+    debugPrint('Thresholds globales habilitados: $configs');
+
+    final events = await _notificacionRepository
+        .fetchBudgetNotificationEventsByCategoryIdAndDate(categoryId, date);
+
+    final sentThresholds = events.map((e) => e.threshold).toSet();
+    debugPrint('Thresholds ya notificados para categoria $categoryId: $sentThresholds');
+
+    final thresholdsToNotify = <double>[];
+
+    for (final threshold in configs) {
+      final shouldNotify =
+          porcentajeUsado >= threshold && !sentThresholds.contains(threshold);
+
+      if (shouldNotify) {
+        thresholdsToNotify.add(threshold);
+      }
+    }
+
+    return thresholdsToNotify;
   }
 
   Future<void> updateHistory() async {
@@ -703,6 +737,8 @@ class AppState extends ChangeNotifier {
     return result;
   }
 
+  // TODO: Funcion para insertar el evento de notificacion de presupuesto alcanzado para evitar mostrar una notificacion cada que se exceda un threshold ya notificado
+
   Future<bool> insertarNotificacion(
     Notificacion notificacion, {
     bool showNotification = false,
@@ -712,13 +748,14 @@ class AppState extends ChangeNotifier {
       notificaciones.insert(0, notificacion.copyWith(id: result.data!));
       await updateCountersNotif();
 
-      if (showNotification) {
+      if (showNotification && (Platform.isAndroid || Platform.isIOS)) {
         await NotificationService.showNotification(
           title: notificacion.title,
           body: notificacion.description,
           id: result.data!,
         );
       }
+
     }
 
     return result.success;

@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/constants/app_strings.dart';
 import 'package:control_financiero/core/database/db_init_data.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -13,7 +14,7 @@ class DBHelper {
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    _database = await _initDB('control_financiero.db');
+    _database = await _initDB(appDBName);
     return _database!;
   }
 
@@ -23,7 +24,7 @@ class DBHelper {
 
     return await openDatabase(
       path,
-      version: 10,
+      version: 11,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },

@@ -119,6 +119,10 @@ List<int> generateYearList(int startYear, [int numberOfYears = 10]) {
 String getDateGroupLabel(DateTime date) {
   final now = DateTime.now();
   final diff = now.difference(date);
+  // Si corresponde al mes pasado, mostrar el nombre del mes
+  if (!isSameMonth(now, date) && now.year == date.year) {
+    return getMonthName(date);
+  }
 
   if (diff.inDays == 0) return 'Hoy';
   if (diff.inDays == 1) return 'Ayer';

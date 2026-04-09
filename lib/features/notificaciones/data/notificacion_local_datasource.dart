@@ -1,6 +1,8 @@
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
+import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
+import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -63,6 +65,181 @@ class NotificacionLocalDataSource {
     }
 
     return null;
+  }
+
+  Future<List<BudgetNotification>> fetchBudgetNotifications() async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> results = await db.query(
+      BudgetNotificationConfigTable.table,
+    );
+
+    return results.map((e) => BudgetNotification.fromMap(e)).toList();
+  }
+
+  Future<BudgetNotification?> fetchBudgetNotification(int id) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db.query(
+      BudgetNotificationConfigTable.table,
+      where: '${BudgetNotificationConfigTable.id} = ?',
+      whereArgs: [id],
+    );
+
+    if (result.isNotEmpty) {
+      return BudgetNotification.fromMap(result.first);
+    }
+
+    return null;
+  }
+
+  Future<List<BudgetNotification>> fetchGlobalEnabledThresholds() async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> results = await db.query(
+      BudgetNotificationConfigTable.table,
+      where: '${BudgetNotificationConfigTable.isEnabled} = ? AND ${BudgetNotificationConfigTable.categoryId} IS NULL',
+      whereArgs: [1],
+    );
+
+    return results.map((e) => BudgetNotification.fromMap(e)).toList();
+  }
+
+  Future<List<BudgetNotification>> fetchEnabledThresholdsByCategoryId(
+    int categoryID,
+  ) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db.query(
+      BudgetNotificationConfigTable.table,
+      where:
+          '${BudgetNotificationConfigTable.categoryId} = ? AND ${BudgetNotificationConfigTable.isEnabled} = ?',
+      whereArgs: [categoryID, 1],
+    );
+
+    if (result.isNotEmpty) {
+      return result.map((e) => BudgetNotification.fromMap(e)).toList();
+    }
+
+    return [];
+  }
+
+  Future<OperationResult<int>> insertOrUpdateBudgetNotification(
+    BudgetNotification notification,
+  ) async {
+    final db = await _dbHelper.database;
+
+    if (notification.id != null) {
+      // Actualizar
+      final result = await db.update(
+        BudgetNotificationConfigTable.table,
+        notification.toMap(),
+        where: '${BudgetNotificationConfigTable.id} = ?',
+        whereArgs: [notification.id],
+      );
+
+      return OperationResult<int>(
+        success: result > 0,
+        data: notification.id!,
+        message: '',
+      );
+    } else {
+      // Insertar
+      final id = await db.insert(
+        BudgetNotificationConfigTable.table,
+        notification.toMap(),
+      );
+
+      return OperationResult<int>(success: id > 0, data: id, message: '');
+    }
+  }
+
+  Future<OperationResult<int>> deleteBudgetNotification(int id) async {
+    final db = await _dbHelper.database;
+
+    final existing = await fetchBudgetNotification(id);
+    if (existing == null) {
+      return OperationResult<int>(
+        success: false,
+        data: 0,
+        message: 'Notificación no encontrada',
+      );
+    }
+
+    if (existing.isDefault) {
+      return OperationResult<int>(
+        success: false,
+        data: 0,
+        message: 'No se puede eliminar la configuración por defecto',
+      );
+    }
+
+    final result = await db.delete(
+      BudgetNotificationConfigTable.table,
+      where: '${BudgetNotificationConfigTable.id} = ?',
+      whereArgs: [id],
+    );
+
+    return OperationResult<int>(success: result > 0, data: result, message: '');
+  }
+
+  Future<List<BudgetNotificationEvent>> fetchBudgetNotificationEvents() async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> results = await db.query(
+      BudgetNotificationEventsTable.table,
+    );
+
+    return results.map((e) => BudgetNotificationEvent.fromMap(e)).toList();
+  }
+
+  Future<List<BudgetNotificationEvent>>
+  fetchBudgetNotificationEventsByCategoryIdAndDate(
+    int categoryId,
+    DateTime date,
+  ) async {
+    final db = await _dbHelper.database;
+
+    final result = await db.query(
+      BudgetNotificationEventsTable.table,
+      where:
+          '${BudgetNotificationEventsTable.categoryId} = ? AND ${BudgetNotificationEventsTable.year} = ? AND ${BudgetNotificationEventsTable.month} = ?',
+      whereArgs: [categoryId, date.year, date.month],
+    );
+
+    return result.map((e) => BudgetNotificationEvent.fromMap(e)).toList();
+  }
+
+  Future<OperationResult<int>> insertBudgetNotificationEvent(
+    BudgetNotificationEvent event,
+  ) async {
+    final db = await _dbHelper.database;
+
+    final id = await db.insert(
+      BudgetNotificationEventsTable.table,
+      event.toMap(),
+    );
+
+    return OperationResult<int>(success: id > 0, data: id, message: '');
+  }
+
+  Future<OperationResult<int>> updateBudgetNotificationEvent(
+    BudgetNotificationEvent event,
+  ) async {
+    final db = await _dbHelper.database;
+
+    final result = await db.update(
+      BudgetNotificationEventsTable.table,
+      event.toMap(),
+      where: '${BudgetNotificationEventsTable.id} = ?',
+      whereArgs: [event.id],
+    );
+
+    return OperationResult<int>(
+      success: result > 0,
+      data: event.id!,
+      message: '',
+    );
   }
 
   Future<void> markAsRead(int id) async {

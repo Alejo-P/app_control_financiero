@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
+import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 
 class NotificacionRepository {
@@ -14,6 +15,31 @@ class NotificacionRepository {
 
   Future<Notificacion?> fetchNotificacionById(int id) async {
     return await localDataSource.fetchNotificacionById(id);
+  }
+
+  Future<List<double>> fetchGlobalEnabledThresholds() async {
+    final budgetNotifications = await localDataSource.fetchGlobalEnabledThresholds();
+    
+    return budgetNotifications.map((n) => n.threshold).toList();
+  }
+
+  Future<List<double>> fetchEnabledThresholdsByCategoryId(
+    int categoryID,
+  ) async {
+    final budgetNotifications = await localDataSource.fetchEnabledThresholdsByCategoryId(
+      categoryID,
+    );
+    
+    return budgetNotifications.map((n) => n.threshold).toList();
+  }
+
+  Future<List<BudgetNotificationEvent>>
+  fetchBudgetNotificationEventsByCategoryIdAndDate(
+    int categoryId,
+    DateTime date,
+  ) async {
+    return await localDataSource
+        .fetchBudgetNotificationEventsByCategoryIdAndDate(categoryId, date);
   }
 
   Future<int> countNotificaciones() async {

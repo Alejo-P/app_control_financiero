@@ -33,61 +33,109 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  late final AppState _appState;
+  // late final AppState _appState;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final details = widget.notificationLaunchDetails;
 
-    if (widget.notificationLaunchDetails?.didNotificationLaunchApp ?? false) {
-      final payload =
-          widget.notificationLaunchDetails!.notificationResponse?.payload;
+      if (details?.didNotificationLaunchApp ?? false) {
+        final payload = details!.notificationResponse?.payload;
 
-      if (payload != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (payload != null) {
           NotificationService.handleNotificationTap(payload);
-        });
+        }
       }
-    }
+    });
 
-    final movimientosRepository = MovimientosRepository(
-      MovimientosLocalDataSource(),
-    );
+    // if (widget.notificationLaunchDetails?.didNotificationLaunchApp ?? false) {
+    //   final payload =
+    //       widget.notificationLaunchDetails!.notificationResponse?.payload;
 
-    final categoriasRepository = CategoriasRepository(
-      CategoriasLocalDataSource(),
-    );
+    //   if (payload != null) {
+    //     WidgetsBinding.instance.addPostFrameCallback((_) {
+    //       NotificationService.handleNotificationTap(payload);
+    //     });
+    //   }
+    // }
 
-    final tipoCategoriasRepository = TipoCategoriaRepository(
-      TipoCategoriaLocalDataSource(),
-    );
+    // final movimientosRepository = MovimientosRepository(
+    //   MovimientosLocalDataSource(),
+    // );
 
-    final presupuestosRepository = PresupuestosRepository(
-      PresupuestosLocalDataSource(),
-    );
+    // final categoriasRepository = CategoriasRepository(
+    //   CategoriasLocalDataSource(),
+    // );
 
-    final historialRepository = HistorialRepository(HistorialLocalDataSource());
+    // final tipoCategoriasRepository = TipoCategoriaRepository(
+    //   TipoCategoriaLocalDataSource(),
+    // );
 
-    final notificacionRepository = NotificacionRepository(
-      NotificacionLocalDataSource(),
-    );
+    // final presupuestosRepository = PresupuestosRepository(
+    //   PresupuestosLocalDataSource(),
+    // );
 
-    _appState = AppState(
-      movimientosRepository,
-      categoriasRepository,
-      tipoCategoriasRepository,
-      presupuestosRepository,
-      historialRepository,
-      notificacionRepository,
-    );
+    // final historialRepository = HistorialRepository(HistorialLocalDataSource());
 
-    _appState.loadInitialData();
+    // final notificacionRepository = NotificacionRepository(
+    //   NotificacionLocalDataSource(),
+    // );
+
+    // _appState = AppState(
+    //   movimientosRepository,
+    //   categoriasRepository,
+    //   tipoCategoriasRepository,
+    //   presupuestosRepository,
+    //   historialRepository,
+    //   notificacionRepository,
+    // );
+
+    // _appState.loadInitialData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _appState,
+    return ChangeNotifierProvider(
+      create: (_) {
+        final movimientosRepository = MovimientosRepository(
+          MovimientosLocalDataSource(),
+        );
+
+        final categoriasRepository = CategoriasRepository(
+          CategoriasLocalDataSource(),
+        );
+
+        final tipoCategoriasRepository = TipoCategoriaRepository(
+          TipoCategoriaLocalDataSource(),
+        );
+
+        final presupuestosRepository = PresupuestosRepository(
+          PresupuestosLocalDataSource(),
+        );
+
+        final historialRepository = HistorialRepository(
+          HistorialLocalDataSource(),
+        );
+
+        final notificacionRepository = NotificacionRepository(
+          NotificacionLocalDataSource(),
+        );
+
+        final appState = AppState(
+          movimientosRepository,
+          categoriasRepository,
+          tipoCategoriasRepository,
+          presupuestosRepository,
+          historialRepository,
+          notificacionRepository,
+        );
+
+        appState.loadInitialData();
+
+        return appState;
+      },
       child: Consumer<AppState>(
         builder: (context, appState, _) {
           return MaterialApp(

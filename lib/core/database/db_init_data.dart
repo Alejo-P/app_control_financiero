@@ -3,6 +3,7 @@ import 'package:control_financiero/core/database/db_migrations.dart';
 import 'package:control_financiero/core/database/db_seeds.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -93,6 +94,30 @@ final categoriasList = <Categoria>[
   ),
 ];
 
+final presupuestosNotif = [
+  BudgetNotification(
+    id: 1,
+    threshold: 0.5, // 50% del presupuesto
+    isEnabledNotification: true,
+    isDefault: true,
+    createdAt: DateTime.now(),
+  ),
+  BudgetNotification(
+    id: 2,
+    threshold: 0.85, // 85% del presupuesto
+    isEnabledNotification: true,
+    isDefault: true,
+    createdAt: DateTime.now(),
+  ),
+  BudgetNotification(
+    id: 3,
+    threshold: 1.0, // 100% del presupuesto
+    isEnabledNotification: true,
+    isDefault: true,
+    createdAt: DateTime.now(),
+  ),
+];
+
 Future<void> runSeeds(Database db) async {
   await createTables(db);
   final result = await db.query(
@@ -143,6 +168,12 @@ Future<void> runSeeds(Database db) async {
   }
   if (currentVersion < 8) {
     await migrateNotificationsCreatedAt(db);
+    await setSeedVersion(db, currentVersion + 1);
+  }
+  if (currentVersion < 9) {
+    for (var notif in presupuestosNotif) {
+      await upsertBudgetNotification(db, notif);
+    }
     await setSeedVersion(db, currentVersion + 1);
   }
 }

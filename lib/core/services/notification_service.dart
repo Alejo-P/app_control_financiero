@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/services/navigation_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -46,6 +48,10 @@ class NotificationService {
   }
 
   static Future<NotificationAppLaunchDetails?> getLaunchDetails() async {
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return null;
+    }
+    
     return await _notifications.getNotificationAppLaunchDetails();
   }
 

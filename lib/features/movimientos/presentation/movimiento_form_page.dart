@@ -291,8 +291,40 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         'Hora creacion': movimiento.time.format(context),
       },
     );
-
     await appState.insertarNotificacion(notificacion);
+
+    final porcentagesPresupuesto = await appState.getThresholdsToNotify(
+      movimiento.categoryID,
+      movimiento.date,
+    );
+    debugPrint('Porcentages de presupuesto utilizados para esta categoria: $porcentagesPresupuesto');
+
+    if (porcentagesPresupuesto.isNotEmpty) {
+      for (final porcentaje in porcentagesPresupuesto) {
+        await appState.insertarNotificacion(
+          Notificacion(
+            title: 'Alerta de presupuesto',
+            description:
+                'Has alcanzado el $porcentaje% de tu presupuesto para la categoría $categoryName.',
+            iconName: IconMapper.toName(Icons.warning_amber_outlined),
+            iconColorValue: Colors.red.value,
+            createdAt: currentDateTime,
+            extraData: {
+              'Categoría': categoryName,
+              'Porcentaje alcanzado': '$porcentaje%',
+              'Fecha': formatDate(movimiento.date),
+            },
+          ),
+          showNotification: true
+        );
+      }
+      if (!mounted) return;
+      AppSnackbar.info(
+        context,
+        'Has alcanzado el ${porcentagesPresupuesto.join(', ')}% de tu presupuesto para esta categoría.',
+      );
+    }
+
 
     if (!mounted) return;
     setState(() {

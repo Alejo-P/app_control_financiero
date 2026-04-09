@@ -66,6 +66,28 @@ class NotificacionTable {
   static const createdAt = 'created_at';
 }
 
+class BudgetNotificationConfigTable {
+  static const table = 'budget_notification_config';
+
+  static const id = 'id';
+  static const categoryId = 'category_id';
+  static const threshold = 'threshold'; // 0.5, 0.85, 1.0
+  static const isEnabled = 'is_enabled';
+  static const isDefault = 'is_default';
+  static const createdAt = 'created_at';
+}
+
+class BudgetNotificationEventsTable {
+  static const table = 'budget_notification_events';
+
+  static const id = 'id';
+  static const categoryId = 'category_id';
+  static const year = 'year';
+  static const month = 'month';
+  static const threshold = 'threshold';
+  static const createdAt = 'created_at';
+}
+
 class MetaTable {
   static const table = 'meta';
 
@@ -104,6 +126,35 @@ Future<void> createTables(Database db) async {
         ${NotificacionTable.isRead} INTEGER NOT NULL DEFAULT 0,
         ${NotificacionTable.extraData} TEXT,
         ${NotificacionTable.createdAt} TEXT NOT NULL
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(BudgetNotificationConfigTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${BudgetNotificationConfigTable.table} (
+        ${BudgetNotificationConfigTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${BudgetNotificationConfigTable.categoryId} INTEGER DEFAULT NULL,
+        ${BudgetNotificationConfigTable.threshold} REAL NOT NULL,
+        ${BudgetNotificationConfigTable.isEnabled} INTEGER NOT NULL DEFAULT 0,
+        ${BudgetNotificationConfigTable.isDefault} INTEGER NOT NULL DEFAULT 0,
+        ${BudgetNotificationConfigTable.createdAt} TEXT NOT NULL
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(BudgetNotificationEventsTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${BudgetNotificationEventsTable.table} (
+        ${BudgetNotificationEventsTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${BudgetNotificationEventsTable.categoryId} INTEGER NOT NULL,
+        ${BudgetNotificationEventsTable.year} INTEGER NOT NULL,
+        ${BudgetNotificationEventsTable.month} INTEGER NOT NULL,
+        ${BudgetNotificationEventsTable.threshold} REAL NOT NULL,
+        ${BudgetNotificationEventsTable.createdAt} TEXT NOT NULL,
+        UNIQUE(${BudgetNotificationEventsTable.categoryId}, ${BudgetNotificationEventsTable.year}, ${BudgetNotificationEventsTable.month}, ${BudgetNotificationEventsTable.threshold}),
+
+        FOREIGN KEY(${BudgetNotificationEventsTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
       );
     ''');
   }
