@@ -27,6 +27,22 @@ class MovimientosLocalDataSource {
     return maps.map(Movimiento.fromMap).toList();
   }
 
+  Future<Movimiento?> fetchMovimientoById(int id) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      MovimientosTable.table,
+      where: '${MovimientosTable.id} = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Movimiento.fromMap(maps.first);
+    } else {
+      AppLogger.log('Movimiento con ID $id no encontrado', level: LogLevel.warning);
+    }
+    return null;
+  }
+
   // Obtener cantidad de movimientos por categoría
   Future<int> fetchMovimientoCountByCategory(int categoryId) async {
     final db = await _dbHelper.database;

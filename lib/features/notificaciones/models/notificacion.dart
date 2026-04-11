@@ -11,6 +11,7 @@ class Notificacion {
   final String iconName;
   final int iconColorValue;
   final Map<String, dynamic>? extraData;
+  final int? objectId;
   final DateTime? createdAt;
 
   Notificacion({
@@ -22,6 +23,7 @@ class Notificacion {
     this.description = '',
     this.isRead = false,
     this.extraData,
+    this.objectId,
     this.createdAt,
   });
 
@@ -34,6 +36,7 @@ class Notificacion {
     String? type,
     bool? isRead,
     Map<String, dynamic>? extraData,
+    int? objectId,
     DateTime? createdAt,
   }) {
     return Notificacion(
@@ -45,6 +48,7 @@ class Notificacion {
       type: type ?? this.type,
       isRead: isRead ?? this.isRead,
       extraData: extraData ?? this.extraData,
+      objectId: objectId ?? this.objectId,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -58,6 +62,7 @@ class Notificacion {
       iconName: map['icon'],
       iconColorValue: map['icon_color'],
       isRead: map['is_read'] == 1,
+      objectId: map['object_id'],
       extraData: map['extra_data'] != null && map['extra_data'] != ''
           ? Map<String, dynamic>.from(jsonDecode(map['extra_data']))
           : null,
@@ -77,6 +82,7 @@ class Notificacion {
       'icon_color': iconColorValue,
       'is_read': isRead ? 1 : 0,
       'extra_data': extraData != null ? jsonEncode(extraData) : null,
+      'object_id': objectId,
       'created_at': createdAt?.toIso8601String(),
     };
   }

@@ -97,6 +97,10 @@ class MovimientosRepository implements _MovimientosRepository {
     return movimientos;
   }
 
+  Future<Movimiento?> fetchMovimientoById(int id) async {
+    return await localDataSource.fetchMovimientoById(id);
+  }
+
   @override
   Future<int> fetchMovimientoCountByCategory(int categoryId) async {
     final cantidadMovimientos = await localDataSource

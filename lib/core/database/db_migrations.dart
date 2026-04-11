@@ -212,3 +212,20 @@ Future<void> migrateNotificationsType(Database db) async {
     ''');
   }
 }
+
+Future<void> migrateNotificationsObjectId(Database db) async {
+  // Agregar la columna 'object_id' si no existe
+  final columns = await db.rawQuery(
+    "PRAGMA table_info(${NotificacionTable.table});",
+  );
+
+  final columnNames = columns.map((column) => column['name'] as String).toSet();
+
+  if (!columnNames.contains(NotificacionTable.objectId)) {
+    await db.execute('''
+      ALTER TABLE ${NotificacionTable.table}
+      ADD COLUMN ${NotificacionTable.objectId}
+      INTEGER;
+    ''');
+  }
+}

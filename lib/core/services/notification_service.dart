@@ -10,9 +10,12 @@ int getSummaryId(String type) {
   return type.codeUnits.fold(0, (a, b) => a + b);
 }
 
+bool _isMobile() {
+  return Platform.isAndroid || Platform.isIOS;
+}
+
 class NotificationService {
   static final _notifications = FlutterLocalNotificationsPlugin();
-  static final int idSummary = 9999;
   static final _notificationRepository = NotificacionRepository(NotificacionLocalDataSource());
 
   static Future<void> init() async {
@@ -94,15 +97,23 @@ class NotificationService {
   }
 
   static Future<void> cancelNotification(int id) async {
+    if (!_isMobile()) {
+      return;
+    }
+    
     await _notifications.cancel(id);
   }
 
   static Future<void> cancelAllNotifications() async {
+    if (!_isMobile()) {
+      return;
+    }
+
     await _notifications.cancelAll();
   }
 
   static Future<NotificationAppLaunchDetails?> getLaunchDetails() async {
-    if (!Platform.isAndroid && !Platform.isIOS) {
+    if (!_isMobile()) {
       return null;
     }
 

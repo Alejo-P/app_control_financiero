@@ -33,7 +33,6 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  // late final AppState _appState;
 
   @override
   void initState() {
@@ -49,50 +48,6 @@ class _AppState extends State<App> {
         }
       }
     });
-
-    // if (widget.notificationLaunchDetails?.didNotificationLaunchApp ?? false) {
-    //   final payload =
-    //       widget.notificationLaunchDetails!.notificationResponse?.payload;
-
-    //   if (payload != null) {
-    //     WidgetsBinding.instance.addPostFrameCallback((_) {
-    //       NotificationService.handleNotificationTap(payload);
-    //     });
-    //   }
-    // }
-
-    // final movimientosRepository = MovimientosRepository(
-    //   MovimientosLocalDataSource(),
-    // );
-
-    // final categoriasRepository = CategoriasRepository(
-    //   CategoriasLocalDataSource(),
-    // );
-
-    // final tipoCategoriasRepository = TipoCategoriaRepository(
-    //   TipoCategoriaLocalDataSource(),
-    // );
-
-    // final presupuestosRepository = PresupuestosRepository(
-    //   PresupuestosLocalDataSource(),
-    // );
-
-    // final historialRepository = HistorialRepository(HistorialLocalDataSource());
-
-    // final notificacionRepository = NotificacionRepository(
-    //   NotificacionLocalDataSource(),
-    // );
-
-    // _appState = AppState(
-    //   movimientosRepository,
-    //   categoriasRepository,
-    //   tipoCategoriasRepository,
-    //   presupuestosRepository,
-    //   historialRepository,
-    //   notificacionRepository,
-    // );
-
-    // _appState.loadInitialData();
   }
 
   @override

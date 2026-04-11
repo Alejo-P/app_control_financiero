@@ -281,6 +281,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       description:
           '${isUpdateMovement ? 'Editaste' : 'Creaaste'} un nuevo movimiento',
       type: 'movimiento',
+      objectId: movimiento.id,
       iconName: IconMapper.toName(Icons.compare_arrows_outlined),
       iconColorValue: Colors.blue.value,
       createdAt: currentDateTime,
@@ -319,13 +320,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           showNotification: true
         );
       }
-      if (!mounted) return;
-      AppSnackbar.info(
-        context,
-        'Has alcanzado el ${porcentagesPresupuesto.join(', ')}% de tu presupuesto para esta categoría.',
-      );
     }
-
 
     if (!mounted) return;
     setState(() {

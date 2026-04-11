@@ -635,6 +635,10 @@ class AppState extends ChangeNotifier {
     return movimientos;
   }
 
+  Future<Movimiento?> obtenerMovimientoPorId(int id) async {
+    return await _movimientosRepository.fetchMovimientoById(id);
+  }
+
   Future<void> agregarMovimiento(Movimiento movimiento) async {
     final result = await _movimientosRepository.addMovimiento(movimiento);
     transactionResultMessage = result.message;
@@ -775,12 +779,6 @@ class AppState extends ChangeNotifier {
 
   Future<void> ocultarNotificacion(int id) async {
     await NotificationService.cancelNotification(id);
-
-    if (notifSinLeer == 0) {
-      await NotificationService.cancelNotification(
-        NotificationService.idSummary,
-      );
-    }
   }
 
   Future<void> ocultarTodasNotificaciones() async {
@@ -810,9 +808,7 @@ class AppState extends ChangeNotifier {
     if (await allNotificationsRead()) return;
 
     await _notificacionRepository.markAllRead();
-    for (var notif in notificaciones) {
-      await NotificationService.cancelNotification(notif.id!);
-    }
+    await NotificationService.cancelAllNotifications();
 
     notificaciones = notificaciones
         .map((n) => n.copyWith(isRead: true))

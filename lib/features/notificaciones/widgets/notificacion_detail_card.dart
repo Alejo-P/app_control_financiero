@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/utils/relative_time.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/extra_data_table.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
 class NotificacionDetailCard extends StatelessWidget {
@@ -94,6 +95,25 @@ class NotificacionDetailCard extends StatelessWidget {
               const SizedBox(height: 8),
 
               ExtraDataTable(data: notif.extraData!),
+
+              if (notif.objectId != null) ...[
+                const SizedBox(height: 16),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CustomButton(
+                      onTap: () {
+                        // Handle button press
+                      },
+                      icon: Icons.open_in_new,
+                      text: 'Ver Detalles',
+                      //width: WidgetWidth.fullWidth,
+                    ),
+                  ],
+                ),
+              ],
             ],
           ],
         ),

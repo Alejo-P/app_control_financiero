@@ -64,6 +64,7 @@ class NotificacionTable {
   static const icon = 'icon';
   static const iconColor = 'icon_color';
   static const extraData = 'extra_data';
+  static const objectId = 'object_id';
   static const createdAt = 'created_at';
 }
 
@@ -127,6 +128,7 @@ Future<void> createTables(Database db) async {
         ${NotificacionTable.iconColor} INTEGER NOT NULL,
         ${NotificacionTable.isRead} INTEGER NOT NULL DEFAULT 0,
         ${NotificacionTable.extraData} TEXT,
+        ${NotificacionTable.objectId} INTEGER,
         ${NotificacionTable.createdAt} TEXT NOT NULL
       );
     ''');
