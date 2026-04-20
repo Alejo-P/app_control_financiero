@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 class TipoMovimientoSelector extends StatefulWidget {
   final TipoMovimiento tipoMovimiento;
   final ValueChanged<TipoMovimiento>? onChanged;
+  final bool isViewOnly;
 
   const TipoMovimientoSelector({
     super.key,
     required this.tipoMovimiento,
     this.onChanged,
+    this.isViewOnly = false,
   });
 
   @override
@@ -52,6 +54,8 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
             selectedTextColor: Colors.white,
             color: Colors.red,
             onTap: () {
+              if (tipoMovimiento == TipoMovimiento.gasto || widget.isViewOnly) return;
+
               setState(() {
                 tipoMovimiento = TipoMovimiento.gasto;
               });
@@ -65,6 +69,8 @@ class _TipoMovimientoSelectorState extends State<TipoMovimientoSelector> {
             selectedTextColor: Colors.white,
             color: Colors.green,
             onTap: () {
+              if (tipoMovimiento == TipoMovimiento.ingreso || widget.isViewOnly) return;
+              
               setState(() {
                 tipoMovimiento = TipoMovimiento.ingreso;
               });

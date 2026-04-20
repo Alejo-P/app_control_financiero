@@ -114,6 +114,7 @@ class NotificacionDetailCard extends StatelessWidget {
                             route = AppRoutes.movimientoFormRoute;
                             arguments = MovimientoFormArgs(
                               id: notif.objectId!,
+                              viewOnly: true,
                             );
                             break;
                           default:

@@ -35,6 +35,7 @@ class MovimientoFormPage extends StatefulWidget {
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
   DetalleMovimiento? detalleMovimiento;
   MovimientoFormMode modo = MovimientoFormMode.create;
+  bool isViewOnly = false;
   bool _isLoading = false; // Variable para controlar el estado de carga
   bool _loaded = false;
   bool _enableSaveButton = false;
@@ -74,6 +75,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         ModalRoute.of(context)!.settings.arguments as MovimientoFormArgs;
     final id = args.id;
     final fechaInicial = args.fechaInicial;
+    isViewOnly = args.viewOnly;
 
     if (modo == MovimientoFormMode.create && fechaInicial != null) {
       final fechaNormalizada = normalizeDate(fechaInicial);
@@ -184,8 +186,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
-    if (newTipoMovimiento == tipoMovimiento) return;
-
     setState(() {
       categoryId = -1;
       categoryName = 'Sin categoría';
@@ -444,12 +444,14 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            modo == MovimientoFormMode.create
+            isViewOnly
+                ? 'Detalle del movimiento'
+                : modo == MovimientoFormMode.create
                 ? 'Agregar Movimiento'
                 : 'Editar Movimiento',
           ),
           actions: [
-            if (modo == MovimientoFormMode.edit)
+            if (modo == MovimientoFormMode.edit && !isViewOnly)
               IconButton(
                 icon: Icon(
                   Icons.delete,
@@ -463,20 +465,21 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                       },
               ),
 
-            IconButton(
-              icon: Icon(
-                Icons.check,
-                color: (_isLoading || !_enableSaveButton)
-                    ? Colors.grey
-                    : Colors.green,
+            if (!isViewOnly)
+              IconButton(
+                icon: Icon(
+                  Icons.check,
+                  color: (_isLoading || !_enableSaveButton)
+                      ? Colors.grey
+                      : Colors.green,
+                ),
+                tooltip: 'Guardar',
+                onPressed: _isLoading || !_enableSaveButton
+                    ? null
+                    : () async {
+                        await _guardarMovimiento();
+                      },
               ),
-              tooltip: 'Guardar',
-              onPressed: _isLoading || !_enableSaveButton
-                  ? null
-                  : () async {
-                      await _guardarMovimiento();
-                    },
-            ),
           ],
         ),
         body: Padding(
@@ -491,6 +494,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                     TipoMovimientoSelector(
                       tipoMovimiento: tipoMovimiento,
                       onChanged: _onChangeTipoMovimiento,
+                      isViewOnly: isViewOnly,
                     ),
                     Expanded(
                       child: SingleChildScrollView(
@@ -501,6 +505,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                             children: [
                               AmountInput(
                                 controller: _amountController,
+                                isEditable: !isViewOnly,
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
                                     return 'El monto es obligatorio';
@@ -521,6 +526,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                   TextInputCard(
                                     textController: _titleController,
                                     placeholder: 'Titulo del movimiento',
+                                    isEditable: !isViewOnly,
                                     iconData: Icons.title,
                                     iconColor: Colors.grey.shade600,
                                     maxLines: 1,
@@ -534,29 +540,35 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                     },
                                   ),
                                   InkWell(
-                                    onTap: () async =>
-                                        await _openCategoriasModal(context),
+                                    onTap: () async => isViewOnly
+                                        ? null
+                                        : await _openCategoriasModal(context),
                                     borderRadius: BorderRadius.circular(12),
                                     child: DetailCategoryCard(
                                       categoryName: 'Categoría',
                                       categoryIcon: categoryIcon,
                                       iconColor: categoryColor,
                                       currentValue: categoryName,
+                                      showArrow: !isViewOnly,
                                     ),
                                   ),
                                   InkWell(
-                                    onTap: () => _selectDate(context),
+                                    onTap: () => isViewOnly
+                                        ? null
+                                        : _selectDate(context),
                                     borderRadius: BorderRadius.circular(12),
                                     child: DetailCategoryCard(
                                       categoryName: 'Fecha',
                                       categoryIcon: Icons.calendar_today,
                                       iconColor: Colors.purple,
                                       currentValue: formatDate(selectedDate),
+                                      showArrow: !isViewOnly,
                                     ),
                                   ),
                                   TextInputCard(
                                     textController: _noteController,
                                     placeholder: 'Agregar una nota (opcional)',
+                                    isEditable: !isViewOnly,
                                     iconData: Icons.edit_note,
                                     iconColor: Colors.grey.shade600,
                                     maxLines: 3,
@@ -584,7 +596,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                       iconColor: Colors.orange,
                                       trailing: Switch(
                                         value: repeatMovement,
-                                        onChanged: _toggleRepeatMovement,
+                                        onChanged: isViewOnly
+                                            ? null
+                                            : _toggleRepeatMovement,
                                       ),
                                     ),
                                   ],
