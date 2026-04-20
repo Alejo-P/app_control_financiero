@@ -1,4 +1,5 @@
 import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:control_financiero/app/app.dart';
@@ -18,7 +19,7 @@ void main() async {
   await NotificationService.init();
 
   final NotificationAppLaunchDetails? details;
-  tz.initializeTimeZones();
+  tz_data.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('America/Guayaquil'));
 
   if (Platform.isAndroid || Platform.isIOS) {
