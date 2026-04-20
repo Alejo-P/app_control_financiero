@@ -2,6 +2,7 @@
 
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/notification_card.dart';
@@ -58,7 +59,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
   Future<void> _verDetallesNotificacion(int id) async {
     Navigator.pushNamed(
       context,
-      '/notificacion-detalle',
+      AppRoutes.notifDetalleRoute,
       arguments: id,
     );
   }
@@ -117,7 +118,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     final grouped = agruparNotificaciones(notifications);
     final keys = grouped.keys.toList();
     keys.sort((a, b) {
-      const orden = ['Hoy', 'Ayer', 'Esta semana'];
+      const orden = ['Hoy', 'Ayer', 'Esta semana', 'Este mes'];
 
       final ia = orden.indexOf(a);
       final ib = orden.indexOf(b);

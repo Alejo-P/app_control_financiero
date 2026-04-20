@@ -1,7 +1,7 @@
+import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
-import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_search_page.dart';
 import 'package:control_financiero/features/notificaciones/presentation/notificaciones_page.dart';
 import 'package:control_financiero/features/movimientos/widgets/balance_summary_card.dart';
@@ -64,15 +64,21 @@ class _MovimientosPageState extends State<MovimientosPage> {
           icon: Icons.add,
           tooltip: 'Nuevo movimiento',
           onPressed: () {
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(
-                builder: (_) => MovimientoFormPage(
-                  mode: MovimientoFormMode.create,
-                  fechaInicial: _appState.selectedMovementsMonth,
-                ),
-              ),
+              AppRoutes.movimientoFormRoute,
+              arguments: -1, // Indica que es un nuevo movimiento
             );
+
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (_) => MovimientoFormPage(
+            //       mode: MovimientoFormMode.create,
+            //       fechaInicial: _appState.selectedMovementsMonth,
+            //     ),
+            //   ),
+            // );
           },
         ),
       ]);

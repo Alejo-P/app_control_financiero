@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/utils/relative_time.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/extra_data_table.dart';
@@ -105,7 +106,20 @@ class NotificacionDetailCard extends StatelessWidget {
                   children: [
                     CustomButton(
                       onTap: () {
-                        // Handle button press
+                        String route;
+                        switch (notif.type) {
+                          case 'movimiento':
+                            route = AppRoutes.movimientoFormRoute;
+                            break;
+                          default:
+                            route = AppRoutes.notifDetalleRoute;
+                        }
+                        
+                        Navigator.pushNamed(
+                          context,
+                          route,
+                          arguments: notif.objectId!,
+                        );
                       },
                       icon: Icons.open_in_new,
                       text: 'Ver Detalles',

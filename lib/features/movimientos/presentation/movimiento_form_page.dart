@@ -20,24 +20,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class MovimientoFormPage extends StatefulWidget {
-  final MovimientoFormMode mode;
-  final DetalleMovimiento? movimiento;
   final DateTime? fechaInicial;
 
-  const MovimientoFormPage({
-    super.key,
-    required this.mode,
-    this.movimiento,
-    this.fechaInicial,
-  });
+  const MovimientoFormPage({super.key, this.fechaInicial});
 
   @override
   State<MovimientoFormPage> createState() => _MovimientoFormPageState();
 }
 
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
-  bool _canCloseWindow = false; // Variable para controlar el cierre sin cambios
+  DetalleMovimiento? detalleMovimiento;
+  MovimientoFormMode modo = MovimientoFormMode.create;
   bool _isLoading = false; // Variable para controlar el estado de carga
+  bool _loaded = false;
+  bool _enableSaveButton = false;
   int categoryId = -1;
   int movementId = 0;
   IconData categoryIcon = Icons.category;
@@ -48,10 +44,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   bool isEnabledRepeatMovement = false;
   bool repeatMovement = false;
   String _action = "Guardando";
+  List<Categoria> categorias = [];
+  List<Categoria> categoriasFiltradas = [];
   late DateTime selectedDate;
-  late List<Categoria> categorias;
-  late List<Categoria> categoriasFiltradas;
-  late DetalleMovimiento initialMovimiento;
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   final _titleController = TextEditingController();
@@ -59,51 +54,71 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   void initState() {
     super.initState();
-    categorias = [];
-    categoriasFiltradas = [];
     selectedDate = getCurrentDateWithoutTime();
 
-    if (widget.mode == MovimientoFormMode.create &&
-        widget.fechaInicial != null) {
+    if (modo == MovimientoFormMode.create && widget.fechaInicial != null) {
       final fechaInicial = widget.fechaInicial ?? currentDateTime;
       final fechaNormalizada = normalizeDate(fechaInicial);
       selectedDate = !isCurrentMonth(fechaNormalizada)
           ? fechaNormalizada
           : getCurrentDateWithoutTime();
     }
+  }
 
-    initialMovimiento = DetalleMovimiento(
-      id: widget.movimiento?.id ?? 0,
-      title: widget.movimiento?.title ?? '',
-      amount: widget.movimiento?.amount ?? 0.0,
-      movementType: widget.movimiento?.movementType ?? tipoMovimiento,
-      date: widget.movimiento?.date ?? selectedDate,
-      categoryIcon: widget.movimiento?.categoryIcon ?? categoryIcon,
-      categoryColor: widget.movimiento?.categoryColor ?? categoryColor,
-      categoryName: widget.movimiento?.categoryName ?? categoryName,
-      isEnabledRepeatMovement:
-          widget.movimiento?.isEnabledRepeatMovement ?? isEnabledRepeatMovement,
-      repeatMovement: widget.movimiento?.repeatMovement ?? repeatMovement,
-      categoryId: widget.movimiento?.categoryId ?? categoryId,
-      time: widget.movimiento?.time ?? movementTime,
-      note: widget.movimiento?.note ?? '',
-    );
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loaded) return;
 
-    _amountController.text = initialMovimiento.amount != 0.0
-        ? initialMovimiento.amount.toString()
-        : '';
-    _titleController.text = initialMovimiento.title;
-    _noteController.text = initialMovimiento.note;
-    categoryId = initialMovimiento.categoryId ?? -1;
-    selectedDate = initialMovimiento.date;
-    movementTime = initialMovimiento.time ?? TimeOfDay.now();
-    movementId = widget.movimiento?.id ?? 0;
-    categoryName = initialMovimiento.categoryName ?? 'Sin categoría';
-    categoryIcon = initialMovimiento.categoryIcon;
-    categoryColor = initialMovimiento.categoryColor ?? Colors.blue;
-    isEnabledRepeatMovement = initialMovimiento.isEnabledRepeatMovement;
-    repeatMovement = initialMovimiento.repeatMovement;
-    tipoMovimiento = initialMovimiento.movementType;
+    final id = ModalRoute.of(context)!.settings.arguments as int;
+    if (id != -1) {
+      _load(id);
+    }
+
+    _loaded = true;
+  }
+
+  Future<void> _load(int id) async {
+    final appState = context.read<AppState>();
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final result = await appState.obtenerDetalleMovimientoPorId(id);
+    if (result != null) {
+      _amountController.text = result.amount != 0.0
+          ? result.amount.toString()
+          : '';
+      _titleController.text = result.title;
+      _noteController.text = result.note;
+      categoryId = result.categoryId ?? -1;
+      selectedDate = result.date;
+      movementTime = result.time ?? TimeOfDay.now();
+      movementId = result.id ?? 0;
+      categoryName = result.categoryName ?? 'Sin categoría';
+      categoryIcon = result.categoryIcon;
+      categoryColor = result.categoryColor ?? Colors.blue;
+      isEnabledRepeatMovement = result.isEnabledRepeatMovement;
+      repeatMovement = result.repeatMovement;
+      tipoMovimiento = result.movementType;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      detalleMovimiento = result;
+      _isLoading = false;
+
+      modo = result != null && id != -1
+          ? MovimientoFormMode.edit
+          : MovimientoFormMode.create;
+    });
+
+    _amountController.addListener(_checkEnableSaveButton);
+    _noteController.addListener(_checkEnableSaveButton);
+    _titleController.addListener(_checkEnableSaveButton);
+    _checkEnableSaveButton();
   }
 
   @override
@@ -117,9 +132,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
   // Verificar si existe un cambio en los valores del formulario con respecto a los valores iniciales
   bool _checkForChanges() {
-    if (_canCloseWindow) return true;
-
-    final original = initialMovimiento;
+    final original = detalleMovimiento;
     final current = DetalleMovimiento(
       id: movementId,
       title: _titleController.text.trim(),
@@ -137,12 +150,23 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       isEnabledRepeatMovement: isEnabledRepeatMovement,
       repeatMovement: repeatMovement,
     );
-    return original != current;
+
+    debugPrint('Original: $original \nCurrent: $current');
+    debugPrint('Has changes: ${(original != current)}');
+    return (original != current);
+  }
+
+  void _checkEnableSaveButton() {
+    final hasChanges = _checkForChanges();
+    setState(() {
+      _enableSaveButton = hasChanges;
+    });
   }
 
   void _onChangeTipoMovimiento(TipoMovimiento newTipoMovimiento) {
     if (newTipoMovimiento == tipoMovimiento) return;
 
+    _checkEnableSaveButton();
     setState(() {
       categoryId = -1;
       categoryName = 'Sin categoría';
@@ -154,6 +178,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   void _onCategoriaSelected(Categoria categoria) {
+    _checkEnableSaveButton();
     setState(() {
       categoryId = categoria.id!;
       categoryName = categoria.name;
@@ -173,6 +198,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     );
 
     if (picked != null && picked != selectedDate) {
+      _checkEnableSaveButton();
       setState(() {
         selectedDate = picked;
       });
@@ -237,8 +263,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         ),
         Text('Categoría: $categoryName'),
         Text('Fecha: ${formatDate(selectedDate)}'),
-        if (_noteController.text.trim().isNotEmpty)
-          Text('Nota: ${_noteController.text.trim()}'),
+        if (noteText.isNotEmpty)
+          Text('Nota: $noteText'),
 
         if (repeatMovement) Text('El movimiento se repetirá mensualmente'),
       ],
@@ -247,45 +273,39 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     setState(() {
       _action = "Guardando";
-      _canCloseWindow = true; // Permitir cerrar sin preguntar por cambios
       _isLoading = true; // Activar indicador de carga
     });
 
     // Crear el objeto Movimiento
     final movimiento = Movimiento(
-      id: widget.mode == MovimientoFormMode.edit ? movementId : null,
+      id: modo == MovimientoFormMode.edit ? movementId : null,
       title: titleText,
       categoryID: categoryId,
       amount: amount,
       date: selectedDate,
-      time: widget.mode == MovimientoFormMode.edit
-          ? movementTime
-          : TimeOfDay.now(),
+      time: modo == MovimientoFormMode.edit ? movementTime : TimeOfDay.now(),
       note: noteText,
       repeatMovement: repeatMovement,
     );
 
-    final isUpdateMovement = widget.mode == MovimientoFormMode.edit;
-
-    if (isUpdateMovement) {
-      await appState.actualizarMovimiento(movimiento);
-    } else {
-      await appState.agregarMovimiento(movimiento);
-    }
+    final isUpdateMovement = modo == MovimientoFormMode.edit;
+    final result = isUpdateMovement
+        ? await appState.actualizarMovimiento(movimiento)
+        : await appState.agregarMovimiento(movimiento);
 
     if (!mounted) return;
 
     final notificacion = Notificacion(
-      title:
-          '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
+      title: '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
       description:
-          '${isUpdateMovement ? 'Editaste' : 'Creaaste'} un nuevo movimiento',
+          '${isUpdateMovement ? 'Editaste' : 'Creaste'} un nuevo movimiento',
       type: 'movimiento',
-      objectId: movimiento.id,
+      objectId: result ?? movimiento.id!,
       iconName: IconMapper.toName(Icons.compare_arrows_outlined),
       iconColorValue: Colors.blue.value,
       createdAt: currentDateTime,
       extraData: {
+        "Categoría": categoryName,
         "Concepto": movimiento.title,
         'Monto': movimiento.amount,
         'Nota': movimiento.note.isNotEmpty ? movimiento.note : '(Sin nota)',
@@ -317,8 +337,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
               'Fecha': formatDate(movimiento.date),
             },
           ),
-          showNotification: true
+          showNotification: true,
         );
+
+        // TODO: Insertar el evento de notificacion aqui
       }
     }
 
@@ -329,9 +351,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
-      setState(() {
-        _canCloseWindow = false; // Volver a bloquear el cierre sin guardar
-      });
       return;
     }
 
@@ -350,7 +369,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     if (confirmed != true) return;
     setState(() {
       _action = "Eliminando";
-      _canCloseWindow = true; // Permitir cerrar sin preguntar por cambios
       _isLoading = true; // Activar indicador de carga
     });
 
@@ -363,9 +381,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
-      setState(() {
-        _canCloseWindow = false; // Volver a bloquear el cierre sin guardar
-      });
       return;
     }
 
@@ -406,12 +421,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.mode == MovimientoFormMode.create
+            modo == MovimientoFormMode.create
                 ? 'Agregar Movimiento'
                 : 'Editar Movimiento',
           ),
           actions: [
-            if (widget.mode == MovimientoFormMode.edit)
+            if (modo == MovimientoFormMode.edit)
               IconButton(
                 icon: Icon(
                   Icons.delete,
@@ -428,10 +443,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
             IconButton(
               icon: Icon(
                 Icons.check,
-                color: _isLoading ? Colors.grey : Colors.green,
+                color: (_isLoading || !_enableSaveButton) ? Colors.grey : Colors.green,
               ),
               tooltip: 'Guardar',
-              onPressed: _isLoading
+              onPressed: _isLoading || !_enableSaveButton
                   ? null
                   : () async {
                       await _guardarMovimiento();
@@ -443,6 +458,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: _isLoading
               ? LoadingScreen(message: '$_action movimiento...')
+              : detalleMovimiento == null && modo == MovimientoFormMode.edit
+              ? _EmptyMovimiento()
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -591,5 +608,36 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         _onCategoriaSelected(categoriaSeleccionada);
       }
     });
+  }
+}
+
+class _EmptyMovimiento extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.sentiment_dissatisfied_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'No se encontro el movimiento.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            'Posiblemente se busco un movimiento que no existe o fue eliminado.',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }

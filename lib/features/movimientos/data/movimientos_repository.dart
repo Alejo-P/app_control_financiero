@@ -5,6 +5,7 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/excel_exporter.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 
@@ -129,6 +130,10 @@ class MovimientosRepository implements _MovimientosRepository {
               m.date.day == date.day,
         )
         .toList();
+  }
+
+  Future<DetalleMovimiento?> fetchDetalleMovimientoById(int id) async {
+    return await localDataSource.fetchDetalleMovimientoById(id);
   }
 
   @override

@@ -8,6 +8,7 @@ import 'package:control_financiero/features/historial/data/historial_local_datas
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
+import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
 import 'package:control_financiero/features/notificaciones/presentation/notification_detail.dart';
@@ -33,7 +34,6 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-
   @override
   void initState() {
     super.initState();
@@ -103,6 +103,8 @@ class _AppState extends State<App> {
             routes: {
               AppRoutes.notifDetalleRoute: (context) =>
                   const NotificationDetail(),
+              AppRoutes.movimientoFormRoute: (context) =>
+                  const MovimientoFormPage(),
             },
 
             home: appState.loadingInitialData

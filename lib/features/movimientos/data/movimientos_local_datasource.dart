@@ -43,6 +43,39 @@ class MovimientosLocalDataSource {
     return null;
   }
 
+  Future<DetalleMovimiento?> fetchDetalleMovimientoById(int id) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+        SELECT
+          m.id AS id,
+          m.title AS titulo,
+          m.amount AS monto,
+          m.date as fecha,
+          m.time as hora,
+          m.note AS nota,
+          c.name AS categoria,
+          c.icon_name AS categoriaIcono,
+          c.icon_color_value AS categoriaColor,
+          c.movement_type AS tipoMovimiento,
+          c.enabled_repeat_movement as isEnabledRepeatMovement,
+          m.repeat_movement as repeatMovement,
+          c.id AS categoriaId
+        FROM movimientos m
+        JOIN categorias c ON m.category_id = c.id
+        WHERE m.id = ?
+      ''',
+      [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return DetalleMovimiento.fromMap(maps.first);
+    } else {
+      AppLogger.log('Detalle del movimiento con ID $id no encontrado', level: LogLevel.warning);
+    }
+    return null;
+  }
+
   // Obtener cantidad de movimientos por categoría
   Future<int> fetchMovimientoCountByCategory(int categoryId) async {
     final db = await _dbHelper.database;

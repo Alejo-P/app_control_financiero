@@ -79,15 +79,23 @@ class DetalleMovimiento extends Equatable {
           : TipoMovimiento.gasto,
       date: DateTime.parse(map['fecha']),
       note: map['nota'],
-      categoryIcon: map['categoriaIcono'] != null ? IconMapper.fromName(map['categoriaIcono']) : Icons.category,
-      categoryColor: map['categoriaColor'] != null ? Color(map['categoriaColor']) : null,
-      categoryName: map['categoria'] != null ? map['categoria'] as String : null,
+      categoryIcon: map['categoriaIcono'] != null
+          ? IconMapper.fromName(map['categoriaIcono'])
+          : Icons.category,
+      categoryColor: map['categoriaColor'] != null
+          ? Color(map['categoriaColor'])
+          : null,
+      categoryName: map['categoria'] != null
+          ? map['categoria'] as String
+          : null,
       isEnabledRepeatMovement: map['enabledRepeatMovement'] == 1,
       repeatMovement: map['repeatMovement'] == 1,
-      time: map['hora'] != null ? TimeOfDay(
-        hour: int.parse(map['time'].split(':')[0]),
-        minute: int.parse(map['time'].split(':')[1]),
-      ) : null,
+      time: map['hora'] != null
+          ? TimeOfDay(
+              hour: int.parse(map['hora'].split(':')[0]),
+              minute: int.parse(map['hora'].split(':')[1]),
+            )
+          : null,
       categoryId: map['categoriaId'] != null ? map['categoriaId'] as int : null,
     );
   }
@@ -98,7 +106,9 @@ class DetalleMovimiento extends Equatable {
       'id': id,
       'titulo': title,
       'monto': amount,
-      'tipoMovimiento': movementType == TipoMovimiento.ingreso ? 'ingreso' : 'gasto',
+      'tipoMovimiento': movementType == TipoMovimiento.ingreso
+          ? 'ingreso'
+          : 'gasto',
       'fecha': date.toIso8601String(),
       'nota': note,
       'categoriaIcono': IconMapper.toName(categoryIcon),
@@ -109,6 +119,11 @@ class DetalleMovimiento extends Equatable {
       'time': time != null ? '${time!.hour}:${time!.minute}' : null,
       'categoriaId': categoryId,
     };
+  }
+
+  @override
+  String toString() {
+    return 'DetalleMovimiento(id: $id, title: $title, amount: $amount, movementType: $movementType, date: $date, categoryName: $categoryName, categoryIcon: $categoryIcon, categoryColor: $categoryColor, isEnabledRepeatMovement: $isEnabledRepeatMovement, repeatMovement: $repeatMovement, categoryId: $categoryId, time: $time, note: $note)';
   }
 
   // Getter para comparar 2 objetos DetalleMovimiento por su contenido, no por su referencia

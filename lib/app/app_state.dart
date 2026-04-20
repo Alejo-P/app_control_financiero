@@ -9,6 +9,7 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
@@ -639,7 +640,11 @@ class AppState extends ChangeNotifier {
     return await _movimientosRepository.fetchMovimientoById(id);
   }
 
-  Future<void> agregarMovimiento(Movimiento movimiento) async {
+  Future<DetalleMovimiento?> obtenerDetalleMovimientoPorId(int id) async {
+    return await _movimientosRepository.fetchDetalleMovimientoById(id);
+  }
+
+  Future<int> agregarMovimiento(Movimiento movimiento) async {
     final result = await _movimientosRepository.addMovimiento(movimiento);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
@@ -649,9 +654,10 @@ class AppState extends ChangeNotifier {
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
       await updateHistory();
     }
+    return result.data ?? -1;
   }
 
-  Future<void> actualizarMovimiento(Movimiento movimiento) async {
+  Future<int?> actualizarMovimiento(Movimiento movimiento) async {
     final result = await _movimientosRepository.updateMovimiento(movimiento);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
@@ -661,6 +667,7 @@ class AppState extends ChangeNotifier {
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
       await updateHistory();
     }
+    return null;
   }
 
   Future<void> eliminarMovimiento(int id, int categoryId) async {
