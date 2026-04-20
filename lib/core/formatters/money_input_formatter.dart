@@ -7,7 +7,7 @@ class MoneyInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     String text = newValue.text;
-    final selection = newValue.selection;
+    TextSelection selection = newValue.selection;
     final maxLength = 10;
 
     // Vacío es válido
@@ -16,6 +16,7 @@ class MoneyInputFormatter extends TextInputFormatter {
     // 👉 Si empieza con ".", agregar "0"
     if (text.startsWith('.')) {
       text = '0$text';
+      selection = TextSelection.collapsed(offset: text.length);
     }
 
     // 👉 Evitar múltiples puntos
