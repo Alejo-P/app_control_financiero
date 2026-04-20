@@ -7,6 +7,7 @@ class NoteInputFormatter extends TextInputFormatter  {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
+    final selection = newValue.selection;
 
     // Vacío es válido
     if (text.isEmpty) return newValue;
@@ -35,7 +36,7 @@ class NoteInputFormatter extends TextInputFormatter  {
 
     return TextEditingValue(
       text: modifiedText,
-      selection: TextSelection.collapsed(offset: modifiedText.length),
+      selection: selection,
     );
   }
 }

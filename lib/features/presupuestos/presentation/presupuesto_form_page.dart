@@ -667,7 +667,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
         return AlertDialog(
           title: const Text('Ingreso presupuestado'),
           content: SizedBox(
-            height: 100,
+            height: 120,
             child: AmountInput(controller: _ingresoPresupuestadoController),
           ),
           actions: [
