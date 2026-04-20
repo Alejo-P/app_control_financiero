@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_search_page.dart';
 import 'package:control_financiero/features/notificaciones/presentation/notificaciones_page.dart';
@@ -67,7 +68,10 @@ class _MovimientosPageState extends State<MovimientosPage> {
             Navigator.pushNamed(
               context,
               AppRoutes.movimientoFormRoute,
-              arguments: -1, // Indica que es un nuevo movimiento
+              arguments: MovimientoFormArgs(
+                id: -1, // Indica que es un nuevo movimiento
+                fechaInicial: _appState.selectedMovementsMonth,
+              ),
             );
 
             // Navigator.push(

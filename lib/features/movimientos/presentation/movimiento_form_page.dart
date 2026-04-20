@@ -6,6 +6,7 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -46,7 +47,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   String _action = "Guardando";
   List<Categoria> categorias = [];
   List<Categoria> categoriasFiltradas = [];
-  late DateTime selectedDate;
+  DateTime selectedDate = getCurrentDateWithoutTime();
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
@@ -55,15 +56,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   void initState() {
     super.initState();
-    selectedDate = getCurrentDateWithoutTime();
-
-    if (modo == MovimientoFormMode.create && widget.fechaInicial != null) {
-      final fechaInicial = widget.fechaInicial ?? currentDateTime;
-      final fechaNormalizada = normalizeDate(fechaInicial);
-      selectedDate = !isCurrentMonth(fechaNormalizada)
-          ? fechaNormalizada
-          : getCurrentDateWithoutTime();
-    }
 
     _amountController.addListener(_checkEnableSaveButton);
     _noteController.addListener(_checkEnableSaveButton);
@@ -75,7 +67,18 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     super.didChangeDependencies();
     if (_loaded) return;
 
-    final id = ModalRoute.of(context)!.settings.arguments as int;
+    final args =
+        ModalRoute.of(context)!.settings.arguments as MovimientoFormArgs;
+    final id = args.id;
+    final fechaInicial = args.fechaInicial;
+
+    if (modo == MovimientoFormMode.create && fechaInicial != null) {
+      final fechaNormalizada = normalizeDate(fechaInicial);
+      selectedDate = !isCurrentMonth(fechaNormalizada)
+          ? fechaNormalizada
+          : getCurrentDateWithoutTime();
+    }
+
     if (id != -1) {
       _load(id);
     }
@@ -150,20 +153,22 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       isEnabledRepeatMovement: isEnabledRepeatMovement,
       repeatMovement: repeatMovement,
     );
-    final original = detalleMovimiento ?? DetalleMovimiento(
-      title: '',
-      amount: 0.0,
-      movementType: TipoMovimiento.gasto,
-      date: getCurrentDateWithoutTime(),
-      categoryName: 'Sin categoría',
-      categoryIcon: Icons.category,
-      categoryColor: Colors.blue,
-      categoryId: -1,
-      time: movementTime,
-      note: '',
-      isEnabledRepeatMovement: false,
-      repeatMovement: false,
-    );
+    final original =
+        detalleMovimiento ??
+        DetalleMovimiento(
+          title: '',
+          amount: 0.0,
+          movementType: TipoMovimiento.gasto,
+          date: selectedDate,
+          categoryName: 'Sin categoría',
+          categoryIcon: Icons.category,
+          categoryColor: Colors.blue,
+          categoryId: -1,
+          time: movementTime,
+          note: '',
+          isEnabledRepeatMovement: false,
+          repeatMovement: false,
+        );
 
     debugPrint('Original: $original \nCurrent: $current');
     debugPrint('Has changes: ${(original != current)}');
@@ -221,7 +226,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
   Future<void> _guardarMovimiento() async {
     if (!_formKey.currentState!.validate()) {
-      AppSnackbar.error(context, 'Por favor corrige los errores en el formulario');
+      AppSnackbar.error(
+        context,
+        'Por favor corrige los errores en el formulario',
+      );
       return;
     }
 
