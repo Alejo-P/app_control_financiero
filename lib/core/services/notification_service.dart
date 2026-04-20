@@ -1,10 +1,10 @@
-import 'dart:io';
-
+import 'package:timezone/timezone.dart' as tz;
 import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/services/navigation_service.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:io';
 
 int getSummaryId(String type) {
   return type.codeUnits.fold(0, (a, b) => a + b);
@@ -93,6 +93,36 @@ class NotificationService {
       'Toca para verlas',
       details,
       payload: 'notificacion_summary:$type',
+    );
+  }
+
+  static Future<void> scheduleNotification({
+    required String title,
+    required String body,
+    required int id,
+    required String type,
+    required DateTime scheduledDate,
+  }) async {
+    final androidDetails = AndroidNotificationDetails(
+      'channel_id',
+      'Notificaciones',
+      importance: Importance.max,
+      priority: Priority.high,
+      groupKey: 'notif_group_$type',
+    );
+    final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    final details = NotificationDetails(android: androidDetails);
+
+    await _notifications.zonedSchedule(
+      id,
+      title,
+      body,
+      tzDate,
+      details,
+      payload: 'notificacion:$id',
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 

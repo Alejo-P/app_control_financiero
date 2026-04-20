@@ -1,3 +1,4 @@
+import 'package:timezone/timezone.dart' as tz;
 import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:control_financiero/app/app.dart';
@@ -12,11 +13,13 @@ void main() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
-  
+
   await Hive.initFlutter();
   await NotificationService.init();
 
   final NotificationAppLaunchDetails? details;
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('America/Guayaquil'));
 
   if (Platform.isAndroid || Platform.isIOS) {
     details = await NotificationService.getLaunchDetails();

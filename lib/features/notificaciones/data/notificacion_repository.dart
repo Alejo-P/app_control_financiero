@@ -80,6 +80,22 @@ class NotificacionRepository {
     return result;
   }
 
+  Future<OperationResult<int>> addBudgetNotificationEvent(
+    BudgetNotificationEvent event,
+  ) async {
+    final result = await localDataSource.insertBudgetNotificationEvent(event);
+
+    return result;
+  }
+
+  Future<OperationResult<int>> updateBudgetNotificationEvent(
+    BudgetNotificationEvent event,
+  ) async {
+    final result = await localDataSource.updateBudgetNotificationEvent(event);
+
+    return result;
+  }
+
   Future<bool> deleteNotificacion(int id) async {
     final result = await localDataSource.deleteNotificacion(id);
     if (result.success) {

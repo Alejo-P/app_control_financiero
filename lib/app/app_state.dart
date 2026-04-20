@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
@@ -13,6 +11,7 @@ import 'package:control_financiero/features/movimientos/models/detalle_movimient
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
+import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
@@ -21,6 +20,7 @@ import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'dart:io';
 
 class AppState extends ChangeNotifier {
   // Estado unico para movimientos
@@ -750,7 +750,12 @@ class AppState extends ChangeNotifier {
     return unreadCount == 0;
   }
 
-  // TODO: Funcion para insertar el evento de notificacion de presupuesto alcanzado para evitar mostrar una notificacion cada que se exceda un threshold ya notificado
+  Future<bool> insertarBudgetNotificationEvent(
+    BudgetNotificationEvent event,
+  ) async {
+    final result = await _notificacionRepository.addBudgetNotificationEvent(event);
+    return result.success;
+  }
 
   Future<bool> insertarNotificacion(
     Notificacion notificacion, {
@@ -791,13 +796,6 @@ class AppState extends ChangeNotifier {
   Future<void> ocultarTodasNotificaciones() async {
     await NotificationService.cancelAllNotifications();
   }
-
-  // Future<OperationResult<int>> insertarBudgetNotificationEvent(
-  //   BudgetNotificationEvent event,
-  // ) async {
-  //   final result = await _budgetNotificationEventRepository.addBudgetNotificationEvent(event);
-  //   return result;
-  // }
 
   Future<void> marcarNotifLeida(Notificacion notificacion) async {
     if (notificacion.isRead == true) return;

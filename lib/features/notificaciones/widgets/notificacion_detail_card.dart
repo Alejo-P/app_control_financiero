@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/utils/relative_time.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/extra_data_table.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
@@ -107,18 +108,23 @@ class NotificacionDetailCard extends StatelessWidget {
                     CustomButton(
                       onTap: () {
                         String route;
+                        Object arguments;
                         switch (notif.type) {
                           case 'movimiento':
                             route = AppRoutes.movimientoFormRoute;
+                            arguments = MovimientoFormArgs(
+                              id: notif.objectId!,
+                            );
                             break;
                           default:
                             route = AppRoutes.notifDetalleRoute;
+                            arguments = notif.id!;
                         }
-                        
+
                         Navigator.pushNamed(
                           context,
                           route,
-                          arguments: notif.objectId!,
+                          arguments: arguments,
                         );
                       },
                       icon: Icons.open_in_new,

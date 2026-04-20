@@ -140,7 +140,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                     child: Column(
                       children: [
                         SizedBox(
-                          height: 210,
+                          height: 215,
                           child: SummaryCard(
                             title: 'Resumen de Presupuesto',
                             icon: Icons.calendar_month,

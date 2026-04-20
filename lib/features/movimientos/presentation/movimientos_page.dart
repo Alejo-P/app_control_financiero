@@ -159,7 +159,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
                       children: [
                         SizedBox(
                           width: double.infinity,
-                          height: 210,
+                          height: 215,
                           child: SummaryCard(
                             title:
                                 'Balance Mensual (${formatMonthYear(selectedMonth)})',

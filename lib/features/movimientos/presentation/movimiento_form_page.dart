@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -7,6 +9,7 @@ import 'package:control_financiero/features/movimientos/models/detalle_movimient
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
+import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -170,8 +173,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           repeatMovement: false,
         );
 
-    debugPrint('Original: $original \nCurrent: $current');
-    debugPrint('Has changes: ${(original != current)}');
     return (original != current);
   }
 
@@ -354,7 +355,15 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           showNotification: true,
         );
 
-        // TODO: Insertar el evento de notificacion aqui
+        await appState.insertarBudgetNotificationEvent(
+          BudgetNotificationEvent(
+            categoryId: movimiento.categoryID,
+            year: movimiento.date.year,
+            month: movimiento.date.month,
+            threshold: porcentaje,
+            createdAt: currentDateTime,
+          ),
+        );
       }
     }
 
