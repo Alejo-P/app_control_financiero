@@ -10,6 +10,8 @@ class TextInputCard extends StatefulWidget {
   final bool isEditable;
   final int maxLines;
   final int maxLength;
+  final String? Function(String?)? validator;
+
 
   const TextInputCard({
     super.key,
@@ -20,6 +22,7 @@ class TextInputCard extends StatefulWidget {
     this.isEditable = true,
     this.maxLines = 1,
     this.maxLength = 100,
+    this.validator,
   });
 
   @override
@@ -87,7 +90,7 @@ class _TextInputCardState extends State<TextInputCard> {
 
         const SizedBox(width: 3),
         Expanded(
-          child: TextField(
+          child: TextFormField(
             controller: widget.textController,
             focusNode: _focusNode,
             decoration: InputDecoration(
@@ -105,6 +108,7 @@ class _TextInputCardState extends State<TextInputCard> {
             maxLines: widget.maxLines,
             maxLength: widget.maxLength,
             enabled: widget.isEditable,
+            validator: widget.validator,
           ),
         ),
         const SizedBox(width: 8),

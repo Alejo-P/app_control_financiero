@@ -5,12 +5,14 @@ class AmountInput extends StatelessWidget {
   final TextEditingController controller;
   final bool isEditable;
   final bool showLabel;
+  final String? Function(String?)? validator;
 
   const AmountInput({
     super.key,
     required this.controller,
     this.isEditable = true,
     this.showLabel = true,
+    this.validator,
   });
 
   @override
@@ -41,7 +43,7 @@ class AmountInput extends StatelessWidget {
 
             // Input
             IntrinsicWidth(
-              child: TextField(
+              child: TextFormField(
                 controller: controller,
                 enabled: isEditable,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -63,6 +65,7 @@ class AmountInput extends StatelessWidget {
                 inputFormatters: [MoneyInputFormatter()],
                 cursorColor: colorScheme.primary,
                 textAlign: TextAlign.center,
+                validator: validator,
               ),
             ),
           ],
