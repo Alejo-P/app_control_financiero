@@ -1,10 +1,15 @@
+import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
+import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
 import 'package:control_financiero/features/presupuestos/widgets/total_budget_summary_card.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
+import 'package:control_financiero/features/shared/custom_icons/wallet_edit_icon.dart';
 import 'package:control_financiero/features/shared/widgets/summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +26,7 @@ class PresupuestosPage extends StatefulWidget {
 
 class _PresupuestosPageState extends State<PresupuestosPage> {
   late AppState _appState;
+  final _ingresoPresupuestadoController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -31,22 +37,32 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _appState.setAppBarActions([
         AppBarAction(
-          icon: Icons.add,
-          tooltip: 'Nuevo presupuesto',
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PresupuestoFormPage(
-                  mode: PresupuestoFormMode.create,
-                  ingresoPresupuestado:
-                      _appState.totalIngresoPresupuestado ?? 0.0,
-                  totalIngresoPresupuestado: _appState.ingresoPresupuestado?.monto ?? 0.0,
-                ),
-              ),
-            );
+          iconWidget: const WalletEditIcon(),
+          tooltip: 'Editar ingreso presupuestado',
+          onPressed: () async {
+            await _mostrarModalIngresoPresupuestado();
           },
         ),
+        
+        if (_appState.ingresoPresupuestado != null && _appState.ingresoPresupuestado!.monto > 0)
+          AppBarAction(
+            icon: Icons.add,
+            tooltip: 'Nuevo presupuesto',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PresupuestoFormPage(
+                    mode: PresupuestoFormMode.create,
+                    ingresoPresupuestado:
+                        _appState.totalIngresoPresupuestado ?? 0.0,
+                    totalIngresoPresupuestado:
+                        _appState.ingresoPresupuestado?.monto ?? 0.0,
+                  ),
+                ),
+              );
+            },
+          ),
       ]);
     });
   }
@@ -170,7 +186,8 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                       categoria: categoryDetails['name'],
                                       categoriaId: presupuesto.categoryId,
                                       montoPresupuestado: presupuesto.amount,
-                                      totalPresupuestado: ingresoPresupuestado?.monto ?? 0.0,
+                                      totalPresupuestado:
+                                          ingresoPresupuestado?.monto ?? 0.0,
                                       icon: categoryDetails['icon'],
                                       iconColor: categoryDetails['iconColor'],
                                       fechaPresupuesto: presupuesto.date,
@@ -200,6 +217,79 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _guardarIngresoPresupuesto() async {
+    // Lógica para guardar el ingreso presupuestado
+    final appState = context.read<AppState>();
+    final amountText = _ingresoPresupuestadoController.text.trim();
+    final fechaPresupuesto = appState.selectedBudgetMonth;
+    final totalGastos = appState.totalGastos ?? 0.0;
+    final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+    if (value <= 0) {
+      AppSnackbar.error(
+        context,
+        'El ingreso presupuestado debe ser mayor a 0.',
+      );
+      return;
+    }
+
+    if (value < totalGastos) {
+      AppSnackbar.error(
+        context,
+        'El ingreso presupuestado no puede ser menor al total de gastos (\$${totalGastos.toStringAsFixed(2)}).',
+      );
+      return;
+    }
+
+    final nuevoIngresoPresupuestado = IngresoPresupuestado(
+      monto: value,
+      fecha: fechaPresupuesto,
+    );
+
+    await appState.setIngresoPresupuestado(nuevoIngresoPresupuestado);
+
+    if (!mounted) return;
+
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(context, appState.transactionResultMessage);
+      return;
+    }
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
+
+    Navigator.pop(context, true);
+  }
+
+  Future<void> _mostrarModalIngresoPresupuestado() async {
+    final appState = context.read<AppState>();
+    final ingresoPresupuestado = appState.ingresoPresupuestado;
+    _ingresoPresupuestadoController.text = ingresoPresupuestado != null
+        ? ingresoPresupuestado.monto.toStringAsFixed(2)
+        : '';
+    final fechaPresupuesto = appState.selectedBudgetMonth;
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Ingreso presupuestado para ${formatMonthYear(fechaPresupuesto)}'),
+          content: SizedBox(
+            height: 120,
+            child: AmountInput(controller: _ingresoPresupuestadoController),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            CustomButton(
+              onTap: _guardarIngresoPresupuesto,
+              text: 'Guardar',
+            ),
+          ],
+        );
+      },
     );
   }
 }

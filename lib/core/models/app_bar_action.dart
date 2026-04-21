@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AppBarAction {
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final VoidCallback onPressed;
   final String? tooltip;
   final String? label;
   final int? badgeCount;
 
   AppBarAction({
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     required this.onPressed,
     this.tooltip,
     this.label,

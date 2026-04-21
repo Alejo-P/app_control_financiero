@@ -10,7 +10,6 @@ import 'package:control_financiero/features/movimientos/widgets/ammount_input.da
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
-import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -45,8 +44,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   String _action = "Guardando";
   bool repeatBudget = false;
   List<Movimiento> movimientos = [];
-  final meses = monthNames;
-  final anios = generateYearList(currentDateTime.year, 10);
   late DateTime fechaPresupuesto;
   late int categoriaSeleccionada;
   late DetallePresupuesto initialPresupuesto;
@@ -172,45 +169,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
               !categoriasConPresupuesto.contains(cat.id),
         )
         .toList();
-  }
-
-  Future<void> _guardarIngresoPresupuesto() async {
-    // Lógica para guardar el ingreso presupuestado
-    final appState = context.read<AppState>();
-    final amountText = _ingresoPresupuestadoController.text.trim();
-    final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
-    if (value <= 0) {
-      AppSnackbar.error(
-        context,
-        'El ingreso presupuestado debe ser mayor a 0.',
-      );
-      return;
-    }
-
-    final nuevoIngresoPresupuestado = IngresoPresupuestado(
-      monto: value,
-      fecha: fechaPresupuesto,
-    );
-
-    await appState.setIngresoPresupuestado(nuevoIngresoPresupuestado);
-    setState(() {
-      ingresoDisponible = IngresoPresupuestado(
-        monto: appState.totalIngresoPresupuestado ?? value,
-        fecha: fechaPresupuesto,
-      );
-      ingresoPresupuestadoTotal = appState.ingresoPresupuestado?.monto ?? value;
-    });
-
-    if (!mounted) return;
-
-    if (!appState.transactionSuccess) {
-      AppSnackbar.error(context, appState.transactionResultMessage);
-      return;
-    }
-
-    AppSnackbar.success(context, appState.transactionResultMessage);
-
-    Navigator.pop(context, true);
   }
 
   Future<void> _guardarPresupuesto() async {
@@ -544,7 +502,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'Disponible para este presupuesto',
+                                          'Monto disponible para este presupuesto',
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: colorScheme.primary,
@@ -560,15 +518,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                           ),
                                         ),
                                       ],
-                                    ),
-                                    const SizedBox(width: 8),
-                                    GestureDetector(
-                                      onTap: _mostrarModalIngresoPresupuestado,
-                                      child: Icon(
-                                        Icons.edit,
-                                        size: 30,
-                                        color: colorScheme.primary,
-                                      ),
                                     ),
                                   ],
                                 ),
@@ -657,32 +606,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                 ),
         ),
       ),
-    );
-  }
-
-  Future<void> _mostrarModalIngresoPresupuestado() async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Ingreso presupuestado'),
-          content: SizedBox(
-            height: 120,
-            child: AmountInput(controller: _ingresoPresupuestadoController),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            CustomButton(
-              onTap: _guardarIngresoPresupuesto,
-              text: 'Guardar',
-              icon: Icons.save,
-            ),
-          ],
-        );
-      },
     );
   }
 }

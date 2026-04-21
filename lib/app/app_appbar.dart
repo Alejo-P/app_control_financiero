@@ -26,7 +26,9 @@ class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
             child: TextButton.icon(
               onPressed: action.onPressed,
               label: Text(action.labelValue),
-              icon: Icon(action.icon, size: 26),
+              icon:
+                  action.iconWidget ??
+                  Icon(action.icon ?? Icons.help_outline, size: 26),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 minimumSize: Size.zero,
@@ -38,12 +40,16 @@ class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
           widget = BadgeWidget(
             counter: action.badgeCountValue,
             child: SizedBox(
-              height: 40,
-              width: 40,
+              height: 44,
+              width: 44,
               child: IconButton(
-                icon: Icon(action.icon, size: 26),
+                icon:
+                    action.iconWidget ??
+                    Icon(action.icon ?? Icons.help_outline, size: 26),
                 onPressed: action.onPressed,
-                tooltip: hasTooltip ? action.tooltipValue : action.labelValue,
+                tooltip: hasTooltip
+                    ? action.tooltipValue
+                    : (hasLabel ? action.labelValue : null),
               ),
             ),
           );
