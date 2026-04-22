@@ -11,9 +11,10 @@ import 'package:control_financiero/features/movimientos/data/movimientos_reposit
 import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
-import 'package:control_financiero/features/notificaciones/presentation/notification_detail.dart';
+import 'package:control_financiero/features/notificaciones/presentation/notification_detail_page.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
+import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:flutter/material.dart';
@@ -102,9 +103,11 @@ class _AppState extends State<App> {
             // Rutas (pendiente por usar en todas las vistas)
             routes: {
               AppRoutes.notifDetalleRoute: (context) =>
-                  const NotificationDetail(),
+                  const NotificationDetailPage(),
               AppRoutes.movimientoFormRoute: (context) =>
                   const MovimientoFormPage(),
+              AppRoutes.presupuestoFormRoute: (context) =>
+                  const PresupuestoFormPage(),
             },
 
             home: appState.loadingInitialData

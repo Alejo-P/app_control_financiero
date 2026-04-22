@@ -58,7 +58,7 @@ class MovimientosLocalDataSource {
           c.icon_name AS categoriaIcono,
           c.icon_color_value AS categoriaColor,
           c.movement_type AS tipoMovimiento,
-          c.enabled_repeat_movement as isEnabledRepeatMovement,
+          c.enabled_repeat_movement as enabledRepeatMovement,
           m.repeat_movement as repeatMovement,
           c.id AS categoriaId
         FROM movimientos m

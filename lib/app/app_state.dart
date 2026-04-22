@@ -14,6 +14,7 @@ import 'package:control_financiero/features/notificaciones/data/notificacion_rep
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
+import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
@@ -198,6 +199,21 @@ class AppState extends ChangeNotifier {
     calculateTotalIngresoPresupuestado();
     _totalGastos = _presupuestosRepository.getTotalGastosByMonthAndYear(date);
     if (notify) notifyListeners();
+  }
+
+  Future<Presupuesto?> fetchPresupuestoById(int id) async {
+    final presupuesto = await _presupuestosRepository.fetchPresupuestoById(id);
+    return presupuesto;
+  }
+
+  Future<DetallePresupuesto?> obtenerDetallePresupuestoPorId(int id) async {
+    final detallePresupuesto =
+        await _presupuestosRepository.fetchDetallePresupuestoById(id);
+    return detallePresupuesto;
+  }
+
+  Future<double> obtenerSumaPresupuestosPorFecha(DateTime date) async {
+    return await _presupuestosRepository.fetchPresupuestosAmountSumByMonthAndYear(date);
   }
 
   Future<double> _getUsedBudgetPercentage(int categoryID, DateTime date) async {
@@ -711,22 +727,24 @@ class AppState extends ChangeNotifier {
   }
 
   // ================================ PRESUPUESTOS CRUD =================================
-  Future<void> agregarPresupuesto(Presupuesto presupuesto) async {
+  Future<int> agregarPresupuesto(Presupuesto presupuesto) async {
     final result = await _presupuestosRepository.addPresupuesto(presupuesto);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
     }
+    return result.data ?? -1;
   }
 
-  Future<void> actualizarPresupuesto(Presupuesto presupuesto) async {
+  Future<int?> actualizarPresupuesto(Presupuesto presupuesto) async {
     final result = await _presupuestosRepository.updatePresupuesto(presupuesto);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
     }
+    return null;
   }
 
   Future<void> eliminarPresupuesto(int id) async {

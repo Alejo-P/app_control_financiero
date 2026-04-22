@@ -4,6 +4,7 @@ import 'package:control_financiero/features/categorias/data/categorias_local_dat
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
+import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 
@@ -67,6 +68,18 @@ class PresupuestosRepository implements _PresupuestosRepository {
     return await localDatasource.fetchIngresosPresupuestadosByMonthAndYear(
       date,
     );
+  }
+
+  Future<Presupuesto?> fetchPresupuestoById(int id) async {
+    return await localDatasource.fetchPresupuestoById(id);
+  }
+
+  Future<DetallePresupuesto?> fetchDetallePresupuestoById(int id) async {
+    return await localDatasource.fetchDetallePresupuestoById(id);
+  }
+
+  Future<double> fetchPresupuestosAmountSumByMonthAndYear(DateTime date) async {
+    return await localDatasource.fetchPresupuestosAmountSumByMonthAndYear(date);
   }
 
   @override

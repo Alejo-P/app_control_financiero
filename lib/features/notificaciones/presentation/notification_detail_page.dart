@@ -5,14 +5,14 @@ import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class NotificationDetail extends StatefulWidget {
-  const NotificationDetail({super.key});
+class NotificationDetailPage extends StatefulWidget {
+  const NotificationDetailPage({super.key});
 
   @override
-  State<NotificationDetail> createState() => _NotificationDetailState();
+  State<NotificationDetailPage> createState() => _NotificationDetailState();
 }
 
-class _NotificationDetailState extends State<NotificationDetail> {
+class _NotificationDetailState extends State<NotificationDetailPage> {
   Notificacion? notif;
   bool isLoading = false;
   bool _loaded = false;

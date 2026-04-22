@@ -96,6 +96,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     setState(() {
       _isLoading = true;
+      _action = "Cargando";
     });
 
     final result = await appState.obtenerDetalleMovimientoPorId(id);
@@ -313,7 +314,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     final notificacion = Notificacion(
       title: '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
       description:
-          '${isUpdateMovement ? 'Editaste' : 'Creaste'} un nuevo movimiento',
+          'El movimiento "${movimiento.title}" ha sido ${isUpdateMovement ? 'actualizado' : 'creado'} exitosamente.',
       type: 'movimiento',
       objectId: result ?? movimiento.id!,
       iconName: IconMapper.toName(Icons.compare_arrows_outlined),
@@ -326,6 +327,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         'Nota': movimiento.note.isNotEmpty ? movimiento.note : '(Sin nota)',
         'Fecha creacion': formatDate(movimiento.date),
         'Hora creacion': movimiento.time.format(context),
+        'Repetir mensualmente': movimiento.repeatMovement ? 'Sí' : 'No',
       },
     );
     await appState.insertarNotificacion(notificacion);
@@ -416,6 +418,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     setState(() {
       repeatMovement = value;
     });
+    _checkEnableSaveButton();
   }
 
   Future<bool> _onWillPop() async {

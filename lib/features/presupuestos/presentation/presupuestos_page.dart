@@ -1,11 +1,10 @@
 import 'package:control_financiero/app/app_snackbar.dart';
-import 'package:control_financiero/core/constants/presupuesto_constants.dart';
+import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
-import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
-import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
+import 'package:control_financiero/features/presupuestos/models/presupuesto_form_args.dart';
 import 'package:control_financiero/features/presupuestos/widgets/total_budget_summary_card.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -49,16 +48,13 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
             icon: Icons.add,
             tooltip: 'Nuevo presupuesto',
             onPressed: () {
-              Navigator.push(
+              Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => PresupuestoFormPage(
-                    mode: PresupuestoFormMode.create,
-                    ingresoPresupuestado:
-                        _appState.totalIngresoPresupuestado ?? 0.0,
-                    totalIngresoPresupuestado:
-                        _appState.ingresoPresupuestado?.monto ?? 0.0,
-                  ),
+                AppRoutes.presupuestoFormRoute,
+                arguments: PresupuestoFormArgs(
+                  id: -1,
+                  budgetedIncome: _appState.ingresoPresupuestado!,
+                  viewOnly: false,
                 ),
               );
             },
@@ -176,28 +172,13 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
 
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
+                              Navigator.pushNamed(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => PresupuestoFormPage(
-                                    mode: PresupuestoFormMode.edit,
-                                    presupuesto: DetallePresupuesto(
-                                      idPresupuesto: presupuesto.id!,
-                                      categoria: categoryDetails['name'],
-                                      categoriaId: presupuesto.categoryId,
-                                      montoPresupuestado: presupuesto.amount,
-                                      totalPresupuestado:
-                                          ingresoPresupuestado?.monto ?? 0.0,
-                                      icon: categoryDetails['icon'],
-                                      iconColor: categoryDetails['iconColor'],
-                                      fechaPresupuesto: presupuesto.date,
-                                      movimientos: categoryDetails['movements'],
-                                      esRecurrente: presupuesto.repeatBudget,
-                                    ),
-                                    ingresoPresupuestado:
-                                        appState.totalIngresoPresupuestado ??
-                                        0.0,
-                                  ),
+                                AppRoutes.presupuestoFormRoute,
+                                arguments: PresupuestoFormArgs(
+                                  id: presupuesto.id!,
+                                  budgetedIncome: appState.ingresoPresupuestado!,
+                                  viewOnly: false,
                                 ),
                               );
                             },

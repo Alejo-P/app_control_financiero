@@ -40,6 +40,7 @@ final Map<String, IconData> extraIconsMap = {
   'account_balance_wallet': Icons.account_balance_wallet,
   'bar_chart': Icons.bar_chart,
   'warning_amber_outlined': Icons.warning_amber_outlined,
+  'account_balance_wallet_rounded': Icons.account_balance_wallet_rounded,
 };
 
 // Lista para compatibilidad con código existente

@@ -1,10 +1,13 @@
+import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/app_routes.dart';
 import 'package:control_financiero/core/utils/relative_time.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/extra_data_table.dart';
+import 'package:control_financiero/features/presupuestos/models/presupuesto_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class NotificacionDetailCard extends StatelessWidget {
   final Notificacion notif;
@@ -14,6 +17,7 @@ class NotificacionDetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final appState = context.read<AppState>();
 
     return Card(
       shape: RoundedRectangleBorder(
@@ -114,6 +118,14 @@ class NotificacionDetailCard extends StatelessWidget {
                             route = AppRoutes.movimientoFormRoute;
                             arguments = MovimientoFormArgs(
                               id: notif.objectId!,
+                              viewOnly: true,
+                            );
+                            break;
+                          case 'presupuesto':
+                            route = AppRoutes.presupuestoFormRoute;
+                            arguments = PresupuestoFormArgs(
+                              id: notif.objectId!,
+                              budgetedIncome: appState.ingresoPresupuestado!,
                               viewOnly: true,
                             );
                             break;

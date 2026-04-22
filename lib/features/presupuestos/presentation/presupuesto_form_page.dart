@@ -1,15 +1,18 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
-import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
-import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
+import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
+import 'package:control_financiero/features/presupuestos/models/presupuesto_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -21,107 +24,141 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PresupuestoFormPage extends StatefulWidget {
-  final PresupuestoFormMode mode;
-  final DetallePresupuesto? presupuesto;
-  final double? ingresoPresupuestado;
-  final double? totalIngresoPresupuestado;
-
-  const PresupuestoFormPage({
-    super.key,
-    required this.mode,
-    this.presupuesto,
-    this.ingresoPresupuestado,
-    this.totalIngresoPresupuestado,
-  });
+  const PresupuestoFormPage({super.key});
 
   @override
   State<PresupuestoFormPage> createState() => _PresupuestoFormPageState();
 }
 
 class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
-  bool _canCloseWindow = false;
+  DetallePresupuesto? detallePresupuesto;
+  PresupuestoFormMode modo = PresupuestoFormMode.create;
+  bool isViewOnly = false;
+  bool _enableSaveButton = false;
+  bool _loaded = false;
   bool _isLoading = false;
   String _action = "Guardando";
   bool repeatBudget = false;
-  List<Movimiento> movimientos = [];
-  late DateTime fechaPresupuesto;
-  late int categoriaSeleccionada;
-  late DetallePresupuesto initialPresupuesto;
+  DateTime fechaPresupuesto = currentDateTime;
+  int categoriaSeleccionada = -1;
   int presupuestoId = 0;
-  double ingresoPresupuestadoTotal = 0.0;
-  late IngresoPresupuestado ingresoDisponible;
+  IngresoPresupuestado ingresoDisponible = IngresoPresupuestado(
+    monto: 0.0,
+    fecha: DateTime.now(),
+  );
   final _presupuestoAmountController = TextEditingController();
-  final _ingresoPresupuestadoController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    //late AppState appState;
-    categoriaSeleccionada = -1;
-    fechaPresupuesto = currentDateTime;
 
-    if (widget.mode == PresupuestoFormMode.create) {
-      fechaPresupuesto = context.read<AppState>().selectedBudgetMonth;
+    _presupuestoAmountController.addListener(_checkEnableSaveButton);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loaded) return;
+
+    final args =
+        ModalRoute.of(context)!.settings.arguments as PresupuestoFormArgs;
+    final id = args.id;
+    final budgetedIncome = args.budgetedIncome;
+    isViewOnly = args.viewOnly;
+
+    _load(id, budgetedIncome);
+
+    _loaded = true;
+  }
+
+  Future<void> _load(int id, IngresoPresupuestado budgetedIncome) async {
+    final appState = context.read<AppState>();
+
+    setState(() {
+      _isLoading = true;
+      _action = "Cargando";
+    });
+
+    final result = await appState.obtenerDetallePresupuestoPorId(id);
+    final sumaPresupuestos = await appState.obtenerSumaPresupuestosPorFecha(
+      result?.fechaPresupuesto ?? currentDateTime,
+    );
+    if (result != null) {
+      _presupuestoAmountController.text = result.montoPresupuestado != 0.0
+          ? result.montoPresupuestado.toStringAsFixed(2)
+          : '';
+      presupuestoId = result.id ?? 0;
+      categoriaSeleccionada = result.categoriaId;
+      fechaPresupuesto = result.fechaPresupuesto;
+      repeatBudget = result.esRecurrente;
+      _presupuestoAmountController.text = result.montoPresupuestado > 0
+          ? result.montoPresupuestado.toStringAsFixed(2)
+          : '';
     }
+    if (!mounted) return;
 
-    initialPresupuesto = DetallePresupuesto(
-      categoria: widget.presupuesto?.categoria ?? '',
-      categoriaId: widget.presupuesto?.categoriaId ?? -1,
-      idPresupuesto: widget.presupuesto?.idPresupuesto ?? presupuestoId,
-      icon: widget.presupuesto != null
-          ? widget.presupuesto!.icon
-          : Icons.category,
-      iconColor: widget.presupuesto != null
-          ? widget.presupuesto!.iconColor
-          : Colors.grey,
-      fechaPresupuesto: widget.presupuesto?.fechaPresupuesto ?? fechaPresupuesto,
-      montoPresupuestado: widget.presupuesto?.montoPresupuestado ?? 0.0,
-      totalPresupuestado: widget.presupuesto?.totalPresupuestado != null
-          ? widget.presupuesto!.totalPresupuestado
-          : widget.totalIngresoPresupuestado ?? 0.0,
-      esRecurrente: widget.presupuesto?.esRecurrente ?? false,
-      movimientos: widget.presupuesto?.movimientos ?? [],
-    );
+    setState(() {
+      ingresoDisponible = IngresoPresupuestado(
+        monto: budgetedIncome.monto - sumaPresupuestos,
+        fecha: fechaPresupuesto,
+      );
+      detallePresupuesto = result;
+      _isLoading = false;
 
-    categoriaSeleccionada = initialPresupuesto.categoriaId;
-    movimientos = initialPresupuesto.movimientos;
-    fechaPresupuesto = initialPresupuesto.fechaPresupuesto;
-    presupuestoId = initialPresupuesto.idPresupuesto;
-    repeatBudget = initialPresupuesto.esRecurrente;
-    _presupuestoAmountController.text =
-        initialPresupuesto.montoPresupuestado > 0
-        ? initialPresupuesto.montoPresupuestado.toStringAsFixed(2)
-        : '';
-
-    ingresoDisponible = IngresoPresupuestado(
-      monto: widget.ingresoPresupuestado ?? 0.0,
-      fecha: fechaPresupuesto,
-    );
-
-    ingresoPresupuestadoTotal = initialPresupuesto.totalPresupuestado;
-    _ingresoPresupuestadoController.text = ingresoPresupuestadoTotal
-        .toStringAsFixed(2);
+      modo = result != null && id != -1
+          ? PresupuestoFormMode.edit
+          : PresupuestoFormMode.create;
+    });
+    _checkEnableSaveButton();
   }
 
   @override
   void dispose() {
     _presupuestoAmountController.dispose();
-    _ingresoPresupuestadoController.dispose();
     super.dispose();
   }
 
   bool _checkForChanges() {
-    if (_canCloseWindow) return true;
+    final categorias = modo == PresupuestoFormMode.create
+        ? categoriasSinPresupuesto
+        : [
+            gategoriasSoloGastos.firstWhere(
+              (cat) => cat.id == detallePresupuesto!.categoriaId,
+              orElse: () => throw Exception('Categoría no encontrada'),
+            ),
+          ];
 
-    final original = initialPresupuesto;
-    final current = initialPresupuesto.copyWith(
+    final current = DetallePresupuesto(
+      id: detallePresupuesto?.id,
+      categoria: detallePresupuesto?.categoria ?? '',
       categoriaId: categoriaSeleccionada,
+      icon: detallePresupuesto?.icon ?? Icons.category,
+      iconColor: detallePresupuesto?.iconColor ?? Colors.grey,
       fechaPresupuesto: fechaPresupuesto,
       montoPresupuestado:
           double.tryParse(_presupuestoAmountController.text.trim()) ?? 0.0,
       esRecurrente: repeatBudget,
     );
+    final original =
+        detallePresupuesto ??
+        DetallePresupuesto(
+          categoria: '',
+          categoriaId: categorias.first.id!,
+          icon: Icons.category,
+          iconColor: Colors.grey,
+          fechaPresupuesto: fechaPresupuesto,
+          montoPresupuestado: 0.0,
+          esRecurrente: false,
+        );
+
     return original != current;
+  }
+
+  void _checkEnableSaveButton() {
+    final hasChanges = _checkForChanges();
+    setState(() {
+      _enableSaveButton = hasChanges;
+    });
   }
 
   Future<bool> _onWillPop() async {
@@ -141,12 +178,25 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     setState(() {
       categoriaSeleccionada = categoriaId;
     });
+    _checkEnableSaveButton();
   }
 
   void _toggleRepeatBudget(bool value) {
+    if (isViewOnly) return;
+    if (modo == PresupuestoFormMode.create &&
+        value &&
+        ingresoDisponible.monto <= 0) {
+      AppSnackbar.error(
+        context,
+        'No puedes activar la opción de repetir mensualmente porque el ingreso disponible es 0.',
+      );
+      return;
+    }
+
     setState(() {
       repeatBudget = value;
     });
+    _checkEnableSaveButton();
   }
 
   List<Categoria> get gategoriasSoloGastos {
@@ -184,8 +234,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       return;
     }
 
-    if (value > ingresoDisponible.monto &&
-        widget.mode == PresupuestoFormMode.create) {
+    if (value > ingresoDisponible.monto && modo == PresupuestoFormMode.create) {
       AppSnackbar.error(
         context,
         'El monto del presupuesto no puede exceder el ingreso disponible.',
@@ -194,9 +243,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     }
 
     // Si estamos editando un presupuesto, permitir que el monto exceda el ingreso disponible solo si el nuevo monto es menor o igual al monto presupuestado originalmente (para evitar que el usuario reduzca el ingreso disponible al editar un presupuesto existente)
-    if (widget.mode == PresupuestoFormMode.edit &&
+    if (modo == PresupuestoFormMode.edit &&
         value >
-            ingresoDisponible.monto + initialPresupuesto.montoPresupuestado) {
+            ingresoDisponible.monto + detallePresupuesto!.montoPresupuestado) {
       AppSnackbar.error(
         context,
         'El monto del presupuesto no puede exceder el ingreso disponible.',
@@ -204,8 +253,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       return;
     }
 
-    if (ingresoDisponible.monto <= 0 &&
-        widget.mode == PresupuestoFormMode.create) {
+    if (ingresoDisponible.monto <= 0 && modo == PresupuestoFormMode.create) {
       AppSnackbar.error(
         context,
         'El ingreso presupuestado debe ser mayor a 0.',
@@ -220,33 +268,51 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     final confirm = await showConfirmDialog(
       context,
-      title: widget.mode == PresupuestoFormMode.create
+      title: modo == PresupuestoFormMode.create
           ? 'Crear presupuesto'
           : 'Actualizar presupuesto',
-      content: widget.mode == PresupuestoFormMode.create
+      content: modo == PresupuestoFormMode.create
           ? '¿Deseas crear este presupuesto?'
           : '¿Deseas actualizar este presupuesto?',
     );
     if (confirm != true) return;
     setState(() {
       _action = "Guardando";
-      _canCloseWindow = true;
       _isLoading = true;
     });
 
     final nuevoPresupuesto = Presupuesto(
-      id: widget.mode == PresupuestoFormMode.edit ? presupuestoId : null,
+      id: modo == PresupuestoFormMode.edit ? presupuestoId : null,
       categoryId: categoriaSeleccionada,
       amount: value,
       date: fechaPresupuesto,
       repeatBudget: repeatBudget,
     );
 
-    if (widget.mode == PresupuestoFormMode.create) {
-      await appState.agregarPresupuesto(nuevoPresupuesto);
-    } else if (widget.mode == PresupuestoFormMode.edit) {
-      await appState.actualizarPresupuesto(nuevoPresupuesto);
-    }
+    final result = modo == PresupuestoFormMode.create
+        ? await appState.agregarPresupuesto(nuevoPresupuesto)
+        : await appState.actualizarPresupuesto(nuevoPresupuesto);
+
+    final notificacion = Notificacion(
+      title: modo == PresupuestoFormMode.create
+          ? 'Presupuesto creado'
+          : 'Presupuesto actualizado',
+      description:
+          'El presupuesto para ${formatMonthYear(fechaPresupuesto)} ha sido ${modo == PresupuestoFormMode.create ? 'creado' : 'actualizado'} exitosamente.',
+      type: 'presupuesto',
+      objectId: result ?? presupuestoId,
+      iconName: IconMapper.toName(Icons.account_balance_wallet_rounded),
+      iconColorValue: Colors.green.value,
+      createdAt: currentDateTime,
+      extraData: {
+        'Categoria': gategoriasSoloGastos
+            .firstWhere((cat) => cat.id == categoriaSeleccionada)
+            .name,
+        'Monto presupuestado': value,
+        'Repetir mensualmente': repeatBudget ? 'Sí' : 'No',
+      },
+    );
+    await appState.insertarNotificacion(notificacion);
 
     if (!mounted) return;
     setState(() {
@@ -255,9 +321,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
-      setState(() {
-        _canCloseWindow = false; // Volver a bloquear el cierre sin guardar
-      });
       return;
     }
 
@@ -278,7 +341,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     if (shouldDelete != true) return;
     setState(() {
       _action = "Eliminando";
-      _canCloseWindow = true;
       _isLoading = true;
     });
 
@@ -291,9 +353,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
-      setState(() {
-        _canCloseWindow = false; // Volver a bloquear el cierre sin guardar
-      });
       return;
     }
 
@@ -304,16 +363,14 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final categorias = widget.mode == PresupuestoFormMode.create
+    final categorias = modo == PresupuestoFormMode.create
         ? categoriasSinPresupuesto
         : [
             gategoriasSoloGastos.firstWhere(
-              (cat) => cat.id == widget.presupuesto!.categoriaId,
+              (cat) => cat.id == detallePresupuesto!.categoriaId,
               orElse: () => throw Exception('Categoría no encontrada'),
             ),
           ];
-    final appState = context.watch<AppState>();
-    final fechasMovimientos = appState.uniqueBudgetMovementDates;
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -324,7 +381,9 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       return Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.mode == PresupuestoFormMode.create
+            isViewOnly
+                ? 'Detalle de presupuesto'
+                : modo == PresupuestoFormMode.create
                 ? 'Nuevo Presupuesto'
                 : 'Editar Presupuesto',
           ),
@@ -341,9 +400,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     if (categoriaSeleccionada == -1) {
       categoriaSeleccionada = categorias.first.id!;
-      initialPresupuesto = initialPresupuesto.copyWith(
-        categoriaId: categoriaSeleccionada,
-      );
     }
 
     return WillPopScope(
@@ -351,12 +407,14 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.mode == PresupuestoFormMode.create
+            isViewOnly
+                ? 'Detalle de presupuesto'
+                : modo == PresupuestoFormMode.create
                 ? 'Nuevo Presupuesto'
                 : 'Editar Presupuesto',
           ),
           actions: [
-            if (widget.mode == PresupuestoFormMode.edit)
+            if (modo == PresupuestoFormMode.edit && !isViewOnly)
               IconButton(
                 tooltip: 'Eliminar Presupuesto',
                 icon: Icon(
@@ -370,24 +428,29 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                       },
               ),
 
-            IconButton(
-              icon: Icon(
-                Icons.check,
-                color: _isLoading ? Colors.grey : Colors.green,
+            if (!isViewOnly)
+              IconButton(
+                icon: Icon(
+                  Icons.check,
+                  color: (_isLoading || !_enableSaveButton)
+                      ? Colors.grey
+                      : Colors.green,
+                ),
+                tooltip: 'Guardar Presupuesto',
+                onPressed: (_isLoading || !_enableSaveButton)
+                    ? null
+                    : () async {
+                        await _guardarPresupuesto();
+                      },
               ),
-              tooltip: 'Guardar Presupuesto',
-              onPressed: _isLoading
-                  ? null
-                  : () async {
-                      await _guardarPresupuesto();
-                    },
-            ),
           ],
         ),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: _isLoading
               ? LoadingScreen(message: '$_action presupuesto...')
+              : detallePresupuesto == null && modo == PresupuestoFormMode.edit
+              ? _EmptyPresupuesto()
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -433,7 +496,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                             const Divider(),
                             const SizedBox(height: 12),
                             Text(
-                              widget.mode == PresupuestoFormMode.create
+                              modo == PresupuestoFormMode.create
                                   ? 'Selecciona una categoría'
                                   : 'Categoría del presupuesto',
                               textAlign: TextAlign.left,
@@ -444,7 +507,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.mode == PresupuestoFormMode.create
+                              modo == PresupuestoFormMode.create
                                   ? 'El presupuesto se asignará a la categoría seleccionada.'
                                   : 'El presupuesto actual está asignado a esta categoría.',
                               textAlign: TextAlign.left,
@@ -471,58 +534,60 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                   .toList(),
                             ),
                             const SizedBox(height: 12),
-                            Card(
-                              color: primaryColorWithOpacity,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                side: BorderSide(
-                                  color: colorScheme.primary,
-                                  width: 1.0,
+                            if (!isViewOnly)
+                              Card(
+                                color: primaryColorWithOpacity,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  side: BorderSide(
+                                    color: colorScheme.primary,
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.wallet_rounded,
+                                        size: 40,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Monto disponible para este presupuesto',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: colorScheme.primary,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: colorScheme.primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.wallet_rounded,
-                                      size: 40,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Monto disponible para este presupuesto',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: colorScheme.primary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: colorScheme.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
                             const SizedBox(height: 20),
                             const Text(
                               'Monto del presupuesto',
@@ -536,7 +601,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                               controller: _presupuestoAmountController,
                               isEditable:
                                   (ingresoDisponible.monto > 0 ||
-                                  widget.mode == PresupuestoFormMode.edit),
+                                      modo == PresupuestoFormMode.edit) &&
+                                  !isViewOnly,
                               showLabel: false,
                             ),
 
@@ -558,46 +624,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                 ),
                               ],
                             ),
-
-                            if (movimientos.isNotEmpty) ...[
-                              const SizedBox(height: 10),
-                              const Divider(),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Movimientos asociados a este presupuesto',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              ...fechasMovimientos.map((fecha) {
-                                // Filtrar movimientos por fecha y filtro seleccionado
-                                final movimientosFiltrados = movimientos
-                                    .where((mov) => isSameDay(mov.date, fecha))
-                                    .toList();
-
-                                if (movimientosFiltrados.isEmpty) {
-                                  return const SizedBox.shrink();
-                                }
-
-                                return TransactionsContainer(
-                                  date: fecha,
-                                  movimientos: movimientosFiltrados,
-                                );
-                              }),
-                              Center(
-                                child: Text(
-                                  '${movimientos.length} movimiento${movimientos.length != 1 ? 's' : ''} en este presupuesto',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: Colors.grey[600]),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                            ],
                           ],
                         ),
                       ),
@@ -605,6 +631,37 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                   ],
                 ),
         ),
+      ),
+    );
+  }
+}
+
+class _EmptyPresupuesto extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.sentiment_dissatisfied_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'No se encontro el movimiento.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            'Posiblemente se busco un movimiento que no existe o fue eliminado.',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

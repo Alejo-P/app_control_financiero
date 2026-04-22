@@ -2,6 +2,7 @@ import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 
@@ -38,6 +39,71 @@ class PresupuestosLocalDataSource {
     }
 
     return IngresoPresupuestado.fromMap(maps.first);
+  }
+
+  Future<Presupuesto?> fetchPresupuestoById(int id) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      PresupuestosTable.table,
+      where: '${PresupuestosTable.id} = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Presupuesto.fromMap(maps.first);
+    } else {
+      AppLogger.log(
+        'No se encontró presupuesto con ID $id',
+        level: LogLevel.warning,
+      );
+      return null;
+    }
+  }
+
+  Future<DetallePresupuesto?> fetchDetallePresupuestoById(int id) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+        SELECT
+          p.id AS id,
+          c.name AS categoria,
+          c.id AS categoriaId,
+          c.icon_name AS categoriaIcono,
+          c.icon_color_value AS categoriaColor,
+          p.repeat_budget AS esRecurrente,
+          p.amount AS montoPresupuestado,
+          p.date AS fechaPresupuesto
+        FROM ${PresupuestosTable.table} p
+        JOIN ${CategoriasTable.table} c ON p.category_id = c.id
+        WHERE p.id = ?
+      ''',
+      [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return DetallePresupuesto.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<double> fetchPresupuestosAmountSumByMonthAndYear(DateTime date) async {
+    final db = await _dbHelper.database;
+    final String month = date.month.toString().padLeft(2, '0');
+    final int year = date.year;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+      SELECT SUM(${PresupuestosTable.amount}) AS total_presupuestado
+      FROM ${PresupuestosTable.table}
+      WHERE strftime('%Y-%m', ${PresupuestosTable.date}) = ?
+      ''',
+      ['$year-$month'],
+    );
+
+    return (maps.first['total_presupuestado'] as num?)?.toDouble() ?? 0;
   }
 
   // Obtener todos los presupuestos del mes y año dados
@@ -122,7 +188,10 @@ class PresupuestosLocalDataSource {
       return 0.0; // Evitar división por cero
     }
 
-    return (totalGastado / presupuestoMonto).clamp(0.0, 1.0); // Retornar un valor entre 0.0 y 1.0
+    return (totalGastado / presupuestoMonto).clamp(
+      0.0,
+      1.0,
+    ); // Retornar un valor entre 0.0 y 1.0
   }
 
   // Agregar o actualizar ingreso presupuestado
