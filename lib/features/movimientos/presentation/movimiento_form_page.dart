@@ -2,6 +2,7 @@
 
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/constants/notificacion_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -315,7 +316,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       title: '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
       description:
           'El movimiento "${movimiento.title}" ha sido ${isUpdateMovement ? 'actualizado' : 'creado'} exitosamente.',
-      type: 'movimiento',
+      type: TipoNotificacion.movimiento,
       objectId: result ?? movimiento.id!,
       iconName: IconMapper.toName(Icons.compare_arrows_outlined),
       iconColorValue: Colors.blue.value,
@@ -344,7 +345,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
             title: 'Alerta de presupuesto',
             description:
                 'Has alcanzado el $porcentaje% de tu presupuesto para la categoría $categoryName.',
-            type: 'presupuesto',
+            type: TipoNotificacion.presupuesto,
             iconName: IconMapper.toName(Icons.warning_amber_outlined),
             iconColorValue: Colors.red.value,
             createdAt: currentDateTime,

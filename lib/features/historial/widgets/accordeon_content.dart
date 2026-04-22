@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/features/historial/widgets/ammount_detail_card.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
@@ -20,6 +21,7 @@ class AccordeonContent extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+    final [r, g, b] = getRGBFromColor(colorScheme.onSurface);
 
     final percentage = totalIncome == 0 ? 0 : (spent / totalIncome);
 
@@ -58,7 +60,7 @@ class AccordeonContent extends StatelessWidget {
               child: CustomProgressBar(
                 currentValue: percentage.toDouble(),
                 color: colorScheme.primary,
-                backgroundColor: colorScheme.onSurface.withOpacity(0.18),
+                backgroundColor: Color.fromRGBO(r, g, b, 0.18),
               ),
             ),
           ],

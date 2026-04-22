@@ -19,7 +19,7 @@ class NotificationService {
   static final _notificationRepository = NotificacionRepository(NotificacionLocalDataSource());
 
   static Future<void> init() async {
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const android = AndroidInitializationSettings('@drawable/ic_notification');
 
     const settings = InitializationSettings(android: android);
 
@@ -44,6 +44,7 @@ class NotificationService {
     final androidDetails = AndroidNotificationDetails(
       'channel_id',
       'Notificaciones',
+      icon: '@drawable/ic_notification',
       importance: Importance.max,
       priority: Priority.high,
       groupKey: 'notif_group_$type',
@@ -74,6 +75,7 @@ class NotificationService {
     final androidDetails = AndroidNotificationDetails(
       'channel_id',
       'Notificaciones',
+      icon: '@drawable/ic_notification',
       importance: Importance.max,
       priority: Priority.high,
       groupKey: 'notif_group_$type',
@@ -106,6 +108,7 @@ class NotificationService {
     final androidDetails = AndroidNotificationDetails(
       'channel_id',
       'Notificaciones',
+      icon: '@drawable/ic_notification',
       importance: Importance.max,
       priority: Priority.high,
       groupKey: 'notif_group_$type',

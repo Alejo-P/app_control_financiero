@@ -1,5 +1,7 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/app_routes.dart';
+import 'package:control_financiero/core/constants/notificacion_constants.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/relative_time.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
@@ -17,7 +19,7 @@ class NotificacionDetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appState = context.read<AppState>();
+    final [r, g, b] = getRGBFromColor(notif.iconColor);
 
     return Card(
       shape: RoundedRectangleBorder(
@@ -39,7 +41,7 @@ class NotificacionDetailCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: notif.iconColor.withOpacity(0.15),
+                  backgroundColor: Color.fromRGBO(r, g, b, .15),
                   child: Icon(notif.iconData, color: notif.iconColor),
                 ),
                 const SizedBox(width: 12),
@@ -111,28 +113,7 @@ class NotificacionDetailCard extends StatelessWidget {
                   children: [
                     CustomButton(
                       onTap: () {
-                        String route;
-                        Object arguments;
-                        switch (notif.type) {
-                          case 'movimiento':
-                            route = AppRoutes.movimientoFormRoute;
-                            arguments = MovimientoFormArgs(
-                              id: notif.objectId!,
-                              viewOnly: true,
-                            );
-                            break;
-                          case 'presupuesto':
-                            route = AppRoutes.presupuestoFormRoute;
-                            arguments = PresupuestoFormArgs(
-                              id: notif.objectId!,
-                              budgetedIncome: appState.ingresoPresupuestado!,
-                              viewOnly: true,
-                            );
-                            break;
-                          default:
-                            route = AppRoutes.notifDetalleRoute;
-                            arguments = notif.id!;
-                        }
+                        final [route, arguments] = _getRouteAndArguments(context);
 
                         Navigator.pushNamed(
                           context,
@@ -152,5 +133,32 @@ class NotificacionDetailCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<dynamic> _getRouteAndArguments(BuildContext context) {
+    final appState = context.read<AppState>();
+    String route;
+    Object arguments;
+    switch (notif.type) {
+      case TipoNotificacion.movimiento:
+        route = AppRoutes.movimientoFormRoute;
+        arguments = MovimientoFormArgs(
+          id: notif.objectId!,
+          viewOnly: true,
+        );
+        break;
+      case TipoNotificacion.presupuesto:
+        route = AppRoutes.presupuestoFormRoute;
+        arguments = PresupuestoFormArgs(
+          id: notif.objectId!,
+          budgetedIncome: appState.ingresoPresupuestado!,
+          viewOnly: true,
+        );
+        break;
+      default:
+        route = AppRoutes.notifDetalleRoute;
+        arguments = notif.id!;
+    }
+    return [route, arguments];
   }
 }

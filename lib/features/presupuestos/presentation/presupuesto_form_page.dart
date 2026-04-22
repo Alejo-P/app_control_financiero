@@ -3,6 +3,7 @@
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/constants/notificacion_constants.dart';
 import 'package:control_financiero/core/constants/presupuesto_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -299,7 +300,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
           : 'Presupuesto actualizado',
       description:
           'El presupuesto para ${formatMonthYear(fechaPresupuesto)} ha sido ${modo == PresupuestoFormMode.create ? 'creado' : 'actualizado'} exitosamente.',
-      type: 'presupuesto',
+      type: TipoNotificacion.presupuesto,
       objectId: result ?? presupuestoId,
       iconName: IconMapper.toName(Icons.account_balance_wallet_rounded),
       iconColorValue: Colors.green.value,
