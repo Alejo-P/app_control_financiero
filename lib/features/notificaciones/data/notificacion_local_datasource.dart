@@ -134,7 +134,8 @@ class NotificacionLocalDataSource {
 
     final List<Map<String, dynamic>> results = await db.query(
       BudgetNotificationConfigTable.table,
-      where: '${BudgetNotificationConfigTable.isEnabled} = ? AND ${BudgetNotificationConfigTable.categoryId} IS NULL',
+      where:
+          '${BudgetNotificationConfigTable.isEnabled} = ? AND ${BudgetNotificationConfigTable.categoryId} IS NULL',
       whereArgs: [1],
     );
 
@@ -313,6 +314,14 @@ class NotificacionLocalDataSource {
       where: 'id = ?',
       whereArgs: [id],
     );
+
+    return OperationResult<int>(success: result > 0, data: result, message: '');
+  }
+
+  Future<OperationResult<int>> deleteAllNotificaciones() async {
+    final db = await _dbHelper.database;
+
+    final result = await db.delete(NotificacionTable.table);
 
     return OperationResult<int>(success: result > 0, data: result, message: '');
   }

@@ -92,6 +92,28 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     AppSnackbar.error(context, 'No se pudo eliminar la notificación');
   }
 
+  Future<void> _eliminarTodasNotificaciones() async {
+    final appState = context.read<AppState>();
+
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Eliminar Todas las Notificaciones',
+      content: '¿Está seguro de eliminar todas las notificaciones?',
+    );
+
+    if (confirmed != true) return;
+
+    final success = await appState.eliminarTodasNotificaciones();
+    if (!mounted) return;
+
+    if (success) {
+      AppSnackbar.success(context, 'Todas las notificaciones han sido eliminadas');
+      return;
+    }
+
+    AppSnackbar.error(context, 'No se pudieron eliminar las notificaciones');
+  }
+
   Map<String, List<Notificacion>> agruparNotificaciones(
     List<Notificacion> notificaciones,
   ) {
@@ -163,6 +185,13 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
               icon: Icon(Icons.done_all),
               onPressed: _marcarTodoLeido,
               tooltip: 'Marcar todo como leído',
+            ),
+
+          if (notifications.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.delete_forever_outlined),
+              onPressed: _eliminarTodasNotificaciones,
+              tooltip: 'Eliminar todas las notificaciones',
             ),
         ],
       ),

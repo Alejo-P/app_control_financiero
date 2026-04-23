@@ -271,7 +271,7 @@ class AppState extends ChangeNotifier {
 
     offset += data.length;
 
-    _hasMoreNotif = data.isNotEmpty;
+    _hasMoreNotif = data.isNotEmpty && data.length >= 20;
 
     await updateCountersNotif(notify: false);
 
@@ -805,6 +805,16 @@ class AppState extends ChangeNotifier {
     }
 
     return success;
+  }
+
+  Future<bool> eliminarTodasNotificaciones() async {
+    final result = await _notificacionRepository.deleteAllNotificaciones();
+    if (result.success) {
+      notificaciones.clear();
+      await updateCountersNotif();
+    }
+
+    return result.success;
   }
 
   Future<void> ocultarNotificacion(int id) async {

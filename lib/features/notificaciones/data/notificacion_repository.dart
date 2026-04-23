@@ -5,7 +5,6 @@ import 'package:control_financiero/features/notificaciones/models/notificacion.d
 
 class NotificacionRepository {
   final NotificacionLocalDataSource localDataSource;
-  final List<Notificacion> notificaciones = [];
 
   NotificacionRepository(this.localDataSource);
 
@@ -98,10 +97,13 @@ class NotificacionRepository {
 
   Future<bool> deleteNotificacion(int id) async {
     final result = await localDataSource.deleteNotificacion(id);
-    if (result.success) {
-      notificaciones.removeWhere((n) => n.id == id);
-    }
 
     return result.success;
+  }
+
+  Future<OperationResult<int>> deleteAllNotificaciones() async {
+    final result = await localDataSource.deleteAllNotificaciones();
+
+    return result;
   }
 }
