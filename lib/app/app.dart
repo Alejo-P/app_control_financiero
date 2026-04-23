@@ -4,6 +4,7 @@ import 'package:control_financiero/core/services/navigation_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
+import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
 import 'package:control_financiero/features/historial/data/historial_local_datasource.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
@@ -108,6 +109,8 @@ class _AppState extends State<App> {
                   const MovimientoFormPage(),
               AppRoutes.presupuestoFormRoute: (context) =>
                   const PresupuestoFormPage(),
+              AppRoutes.categoriaFormRoute: (context) =>
+                  const CategoriaFormPage(),
             },
 
             home: appState.loadingInitialData

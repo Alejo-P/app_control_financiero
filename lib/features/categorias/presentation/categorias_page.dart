@@ -1,6 +1,6 @@
 import 'package:control_financiero/app/app_state.dart';
-import 'package:control_financiero/core/constants/categoria_constants.dart';
-import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
+import 'package:control_financiero/core/constants/app_routes.dart';
+import 'package:control_financiero/features/categorias/models/categoria_form_args.dart';
 import 'package:control_financiero/features/categorias/widgets/category_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
@@ -29,11 +29,11 @@ class _CategoriasPageState extends State<CategoriasPage> {
             icon: const Icon(Icons.add),
             tooltip: 'Nueva categoría',
             onPressed: () {
-              Navigator.push(
+              Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const CategoriaFormPage(mode: CategoriaFormMode.create),
+                AppRoutes.categoriaFormRoute,
+                arguments: CategoriaFormArgs(
+                  id: -1,
                 ),
               );
             },

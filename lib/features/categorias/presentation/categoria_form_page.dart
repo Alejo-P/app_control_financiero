@@ -4,6 +4,7 @@ import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/categorias/models/categoria_form_args.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
 import 'package:control_financiero/features/categorias/widgets/colors_single_child_scroll.dart';
 import 'package:control_financiero/features/categorias/widgets/icons_single_child_scroll.dart';
@@ -21,25 +22,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CategoriaFormPage extends StatefulWidget {
-  final CategoriaFormMode mode;
-  final DetalleCategoria? categoriaExistente;
-
-  const CategoriaFormPage({
-    super.key,
-    required this.mode,
-    this.categoriaExistente,
-  });
+  const CategoriaFormPage({super.key});
 
   @override
   State<CategoriaFormPage> createState() => _CategoriaFormPageState();
 }
 
 class _CategoriaFormPageState extends State<CategoriaFormPage> {
-  late Color selectedColor;
-  late IconData selectedIcon;
-  late DetalleCategoria initialCategoria;
-  bool _canCloseWindow = false;
+  DetalleCategoria? detalleCategoria;
+  CategoriaFormMode modo = CategoriaFormMode.create;
+  Color selectedColor = categoryColors.first;
+  IconData selectedIcon = categoryIcons.first;
+  bool _loaded = false;
   bool _isLoading = false;
+  bool _enableSaveButton = false;
   String _action = "Guardando";
   bool isDefault = false;
   bool isEditing = false;
@@ -52,54 +48,68 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       selectedTipeMovement == 'ingreso'
       ? TipoMovimiento.ingreso
       : TipoMovimiento.gasto;
-  late List<TipoCategoria> tiposCategorias;
-  late int movementsByCategory;
+  List<TipoCategoria> tiposCategorias = [];
+  int movementsByCategory = 0;
   final _categoryNameController = TextEditingController();
   final _descriptionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    movementsByCategory = 0;
-    selectedColor = categoryColors.first;
-    selectedIcon = categoryIcons.first;
+    
+    _categoryNameController.addListener(_checkEnableSaveButton);
+    _descriptionController.addListener(_checkEnableSaveButton);
+  }
 
-    initialCategoria = DetalleCategoria(
-      id: widget.categoriaExistente?.id ?? 0,
-      name: widget.categoriaExistente?.name ?? '',
-      description: widget.categoriaExistente?.description ?? '',
-      icon: widget.categoriaExistente?.icon ?? selectedIcon,
-      color: widget.categoriaExistente?.color ?? selectedColor,
-      movementType: widget.categoriaExistente != null
-          ? (widget.categoriaExistente!.movementType)
-          : TipoMovimiento.gasto,
-      categoryTypeName:
-          widget.categoriaExistente?.categoryTypeName ?? categoryTypeName,
-      categoryTypeID: widget.categoriaExistente?.categoryTypeID ?? -1,
-      enabledRepeatMovement:
-          widget.categoriaExistente?.enabledRepeatMovement ?? false,
-      isDefault: widget.categoriaExistente?.isDefault ?? false,
-    );
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loaded) return;
 
-    isEditing =
-        (widget.mode == CategoriaFormMode.edit &&
-        widget.categoriaExistente != null);
+    final args =
+        ModalRoute.of(context)!.settings.arguments as CategoriaFormArgs;
+    final id = args.id;
 
-    _categoryNameController.text = initialCategoria.name;
-    _descriptionController.text = initialCategoria.description;
-    selectedIcon = initialCategoria.icon ?? categoryIcons.first;
-    selectedColor = initialCategoria.color ?? categoryColors.first;
-    movementsByCategory = widget.categoriaExistente?.totalMovements ?? 0;
-    categoryTypeName = initialCategoria.categoryTypeName;
-    categoryTypeID = initialCategoria.categoryTypeID;
-    selectedTipeMovement =
-        initialCategoria.movementType == TipoMovimiento.ingreso
-        ? 'ingreso'
-        : 'gasto';
-    isDefault = initialCategoria.isDefault;
-    isEnabledRepeatMovement = initialCategoria.enabledRepeatMovement;
-    _initialValueIsEnabledRepeatMovement =
-        initialCategoria.enabledRepeatMovement;
+    _load(id);
+
+    _loaded = true;
+  }
+
+  Future<void> _load(int id) async {
+    final appState = context.read<AppState>();
+
+    setState(() {
+      _isLoading = true;
+      _action = "Cargando";
+    });
+
+    final result = await appState.obtenerDetalleCategoriaPorId(id);
+    if (result != null) {
+      _categoryNameController.text = result.name;
+      _descriptionController.text = result.description;
+      selectedIcon = result.icon ?? categoryIcons.first;
+      selectedColor = result.color ?? categoryColors.first;
+      movementsByCategory = result.totalMovements ?? 0;
+      categoryTypeName = result.categoryTypeName;
+      categoryTypeID = result.categoryTypeID;
+      selectedTipeMovement = result.movementType == TipoMovimiento.ingreso
+          ? 'ingreso'
+          : 'gasto';
+      isDefault = result.isDefault;
+      isEnabledRepeatMovement = result.enabledRepeatMovement;
+      _initialValueIsEnabledRepeatMovement = result.enabledRepeatMovement;
+    }
+    if (!mounted) return;
+
+    setState(() {
+      detalleCategoria = result;
+      _isLoading = false;
+
+      modo = result != null && id != -1
+          ? CategoriaFormMode.edit
+          : CategoriaFormMode.create;
+    });
+    _checkEnableSaveButton();
   }
 
   @override
@@ -116,6 +126,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
         categoryTypeID = tipoCategoria.id!;
         categoryTypeName = tipoCategoria.name;
       });
+      _checkEnableSaveButton();
     }
   }
 
@@ -123,6 +134,22 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     setState(() {
       selectedTipeMovement = tipoMovimiento;
     });
+    _checkEnableSaveButton();
+  }
+
+  void _toggleRepeatMovement(bool value) {
+    if (_initialValueIsEnabledRepeatMovement && movementsByCategory > 0) {
+      AppSnackbar.warning(
+        context,
+        'No puedes cambiar esta opción porque esta categoría tiene movimientos asociados.',
+      );
+      return;
+    }
+
+    setState(() {
+      isEnabledRepeatMovement = value;
+    });
+    _checkEnableSaveButton();
   }
 
   Future<void> _guardarCategoria() async {
@@ -165,15 +192,12 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     setState(() {
       _action = "Guardando";
-      _canCloseWindow = true;
       _isLoading = true;
     });
 
     final categoria = Categoria(
-      id:
-          widget.mode == CategoriaFormMode.edit &&
-              widget.categoriaExistente != null
-          ? widget.categoriaExistente!.id
+      id: modo == CategoriaFormMode.edit && detalleCategoria != null
+          ? detalleCategoria!.id
           : null,
       name: nombre,
       description: descripcion,
@@ -185,8 +209,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       isDefault: isDefault,
     );
 
-    if (widget.mode == CategoriaFormMode.edit &&
-        widget.categoriaExistente != null) {
+    if (modo == CategoriaFormMode.edit && detalleCategoria != null) {
       await appState.actualizarCategoria(categoria);
     } else {
       await appState.agregarCategoria(categoria);
@@ -199,9 +222,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
-      setState(() {
-        _canCloseWindow = false;
-      });
       return;
     }
 
@@ -220,11 +240,10 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     if (confirmed != true) return;
     setState(() {
       _action = "Eliminando";
-      _canCloseWindow = true;
       _isLoading = true;
     });
 
-    await appState.eliminarCategoria(widget.categoriaExistente!.id);
+    await appState.eliminarCategoria(detalleCategoria!.id!);
 
     if (!mounted) return;
     setState(() {
@@ -233,9 +252,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
-      setState(() {
-        _canCloseWindow = false;
-      });
       return;
     }
 
@@ -243,26 +259,9 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     Navigator.pop(context, true);
   }
 
-  void _toggleRepeatMovement(bool value) {
-    if (_initialValueIsEnabledRepeatMovement && movementsByCategory > 0) {
-      AppSnackbar.warning(
-        context,
-        'No puedes cambiar esta opción porque esta categoría tiene movimientos asociados.',
-      );
-      return;
-    }
-
-    setState(() {
-      isEnabledRepeatMovement = value;
-    });
-  }
-
   bool _checkForChanges() {
-    if (_canCloseWindow) return true;
-
-    final original = initialCategoria;
     final current = DetalleCategoria(
-      id: original.id,
+      id: detalleCategoria?.id,
       name: _categoryNameController.text.trim(),
       description: _descriptionController.text.trim(),
       icon: selectedIcon,
@@ -270,10 +269,36 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       movementType: tipoMovimientoSeleccionado,
       categoryTypeName: categoryTypeName,
       categoryTypeID: categoryTypeID,
+      totalMovements: detalleCategoria?.totalMovements ?? 0,
       enabledRepeatMovement: isEnabledRepeatMovement,
       isDefault: isDefault,
     );
+    final original =
+        detalleCategoria ??
+        DetalleCategoria(
+          id: null,
+          name: '',
+          description: '',
+          icon: categoryIcons.first,
+          color: categoryColors.first,
+          movementType: TipoMovimiento.gasto,
+          categoryTypeName: 'Sin seleccionar',
+          categoryTypeID: -1,
+          totalMovements: 0,
+          enabledRepeatMovement: false,
+          isDefault: false,
+        );
+
+    debugPrint('Original: $original\n Current: $current');
+    debugPrint('Has changes: ${original != current}');
     return original != current;
+  }
+
+  void _checkEnableSaveButton() {
+    final hasChanges = _checkForChanges();
+    setState(() {
+      _enableSaveButton = hasChanges;
+    });
   }
 
   Future<bool> _onWillPop() async {
@@ -299,15 +324,15 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.mode == CategoriaFormMode.create
+            modo == CategoriaFormMode.create
                 ? 'Agregar Categoría'
                 : isDefault
                 ? 'Ver Categoría'
                 : 'Editar Categoría',
           ),
           actions: [
-            if (widget.mode == CategoriaFormMode.edit &&
-                widget.categoriaExistente != null &&
+            if (modo == CategoriaFormMode.edit &&
+                detalleCategoria != null &&
                 !isDefault)
               IconButton(
                 icon: Icon(
@@ -326,10 +351,12 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
               IconButton(
                 icon: Icon(
                   Icons.check,
-                  color: _isLoading ? Colors.grey : Colors.green,
+                  color: (_isLoading || !_enableSaveButton)
+                      ? Colors.grey
+                      : Colors.green,
                 ),
                 tooltip: 'Guardar',
-                onPressed: _isLoading
+                onPressed: (_isLoading || !_enableSaveButton)
                     ? null
                     : () async {
                         await _guardarCategoria();
@@ -480,7 +507,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                                 ],
                               ),
 
-                            if (widget.mode == CategoriaFormMode.edit)
+                            if (modo == CategoriaFormMode.edit)
                               InfoCategoriaPredeterminada(isDefault: isDefault),
                           ],
                         ),
@@ -622,18 +649,18 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           selectedIcon = result['icon'];
           selectedColor = result['color'];
         });
+        _checkEnableSaveButton();
       }
     });
   }
 
   void _openTipoCategoriasModal(BuildContext context) {
-
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      
+
       showDragHandle: true, // Muestra el indicador de arrastre
       builder: (_) {
         final theme = Theme.of(context);

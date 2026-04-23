@@ -2,6 +2,7 @@ import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 
@@ -42,6 +43,36 @@ class CategoriasLocalDataSource {
 
     if (maps.isNotEmpty) {
       return Categoria.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<DetalleCategoria?> fetchDetalleCategoriaById(int id) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+        SELECT 
+          c.id AS id,
+          c.name AS name,
+          c.description AS description,
+          c.icon_name AS icon,
+          c.icon_color_value AS color,
+          c.movement_type AS movementType,
+          c.enabled_repeat_movement AS enabledRepeatMovement,
+          c.is_default AS isDefault,
+          ct.name AS categoryTypeName,
+          ct.id AS categoryTypeID,
+          (SELECT COUNT(*) FROM ${MovimientosTable.table} m WHERE m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}) AS totalMovements
+        FROM ${CategoriasTable.table} c
+        JOIN ${TipoCategoriasTable.table} ct ON c.${CategoriasTable.categoryTypeId} = ct.${TipoCategoriasTable.id}
+        WHERE c.${CategoriasTable.id} = ?
+      ''',
+      [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return DetalleCategoria.fromMap(maps.first);
     } else {
       return null;
     }

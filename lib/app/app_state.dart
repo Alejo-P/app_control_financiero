@@ -4,6 +4,7 @@ import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
@@ -699,6 +700,10 @@ class AppState extends ChangeNotifier {
   }
 
   // ================================ CATEGORIAS CRUD =================================
+  Future<DetalleCategoria?> obtenerDetalleCategoriaPorId(int id) async {
+    return await _categoriasRepository.fetchDetalleCategoriaById(id);
+  }
+
   Future<void> agregarCategoria(Categoria categoria) async {
     final result = await _categoriasRepository.addCategoria(categoria);
     transactionResultMessage = result.message;

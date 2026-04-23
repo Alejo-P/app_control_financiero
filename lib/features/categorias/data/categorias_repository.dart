@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
 
 abstract class _CategoriasRepository {
   /// Obtiene la lista de categorías.
@@ -43,6 +44,10 @@ class CategoriasRepository implements _CategoriasRepository {
     categorias.clear();
     categorias.addAll(await localDataSource.fetchCategorias());
     return categorias;
+  }
+
+  Future<DetalleCategoria?> fetchDetalleCategoriaById(int id) async {
+    return await localDataSource.fetchDetalleCategoriaById(id);
   }
 
   @override

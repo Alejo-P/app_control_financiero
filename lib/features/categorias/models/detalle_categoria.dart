@@ -1,9 +1,10 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 class DetalleCategoria extends Equatable {
-  final int id;
+  final int? id;
   final String name;
   final String description;
   final IconData? icon;
@@ -16,7 +17,7 @@ class DetalleCategoria extends Equatable {
   final bool isDefault;
 
   const DetalleCategoria({
-    required this.id,
+    this.id,
     required this.name,
     this.icon,
     this.color,
@@ -41,15 +42,17 @@ class DetalleCategoria extends Equatable {
     description,
     totalMovements,
     enabledRepeatMovement,
-    isDefault
+    isDefault,
   ];
 
   factory DetalleCategoria.fromMap(Map<String, dynamic> map) {
     return DetalleCategoria(
-      id: map['id'],
+      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
       name: map['name'],
       description: map['description'] ?? '',
-      icon: map['icon'] != null ? IconData(map['icon'], fontFamily: 'MaterialIcons') : null,
+      icon: map['icon'] != null
+          ? IconMapper.fromName(map['icon'])
+          : Icons.category,
       color: map['color'] != null ? Color(map['color']) : null,
       movementType: map['movementType'] == 'ingreso'
           ? TipoMovimiento.ingreso
@@ -58,7 +61,12 @@ class DetalleCategoria extends Equatable {
       categoryTypeID: map['categoryTypeID'],
       totalMovements: map['totalMovements'],
       enabledRepeatMovement: map['enabledRepeatMovement'] == 1,
-      isDefault: map['isDefault'] ?? false,
+      isDefault: map['isDefault'] == 1,
     );
+  }
+
+  @override
+  String toString() {
+    return 'DetalleCategoria{id: $id, name: $name, description: $description, icon: $icon, color: $color, movementType: $movementType, categoryTypeName: $categoryTypeName, categoryTypeID: $categoryTypeID, totalMovements: $totalMovements, enabledRepeatMovement: $enabledRepeatMovement, isDefault: $isDefault}';
   }
 }
