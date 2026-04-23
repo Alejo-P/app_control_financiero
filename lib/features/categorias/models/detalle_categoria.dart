@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:equatable/equatable.dart';
@@ -35,7 +37,7 @@ class DetalleCategoria extends Equatable {
     id,
     name,
     icon,
-    color,
+    color?.value,
     movementType,
     categoryTypeName,
     categoryTypeID,
