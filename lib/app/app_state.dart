@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
+import 'package:control_financiero/core/services/backup_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
@@ -136,7 +137,7 @@ class AppState extends ChangeNotifier {
 
     await Future.wait([
       _tipoCategoriaRepository.fetchTipoCategorias(),
-      _categoriasRepository.fetchCategorias(),
+      _categoriasRepository.fetchAllCategorias(),
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
       loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
       updateHistory(),
@@ -149,7 +150,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadCategoryData({bool notify = true}) async {
-    await _categoriasRepository.fetchCategorias();
+    await _categoriasRepository.fetchAllCategorias();
     _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
 
     if (notify) notifyListeners();
@@ -208,13 +209,14 @@ class AppState extends ChangeNotifier {
   }
 
   Future<DetallePresupuesto?> obtenerDetallePresupuestoPorId(int id) async {
-    final detallePresupuesto =
-        await _presupuestosRepository.fetchDetallePresupuestoById(id);
+    final detallePresupuesto = await _presupuestosRepository
+        .fetchDetallePresupuestoById(id);
     return detallePresupuesto;
   }
 
   Future<double> obtenerSumaPresupuestosPorFecha(DateTime date) async {
-    return await _presupuestosRepository.fetchPresupuestosAmountSumByMonthAndYear(date);
+    return await _presupuestosRepository
+        .fetchPresupuestosAmountSumByMonthAndYear(date);
   }
 
   Future<double> _getUsedBudgetPercentage(int categoryID, DateTime date) async {
@@ -628,6 +630,23 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> restoreFromBackup() async {
+    final result = await BackupService().restoreData();
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success) {
+      await loadInitialData();
+    }
+    notifyListeners();
+  }
+
+  Future<void> createBackup() async {
+    final result = await BackupService().backupData();
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    notifyListeners();
+  }
+
   // ================================= MOVIMIENTOS CRUD =================================
   Future<void> sincronizarContadoresCategorias() async {
     final counts = await _movimientosRepository.getMovementsCountByCategory();
@@ -776,7 +795,9 @@ class AppState extends ChangeNotifier {
   Future<bool> insertarBudgetNotificationEvent(
     BudgetNotificationEvent event,
   ) async {
-    final result = await _notificacionRepository.addBudgetNotificationEvent(event);
+    final result = await _notificacionRepository.addBudgetNotificationEvent(
+      event,
+    );
     return result.success;
   }
 

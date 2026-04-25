@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
+import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 
@@ -10,6 +11,10 @@ class NotificacionRepository {
 
   Future<List<Notificacion>> fetchNotificaciones({int offset = 0}) async {
     return await localDataSource.fetchNotificaciones(offset: offset);
+  }
+
+  Future<List<BudgetNotification>> fetchAllBudgetNotifications() async {
+    return await localDataSource.fetchAllBudgetNotifications();
   }
 
   Future<Notificacion?> fetchNotificacionById(int id) async {

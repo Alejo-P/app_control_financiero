@@ -14,13 +14,27 @@ class CategoriasLocalDataSource {
       PresupuestosLocalDataSource();
 
   // Obtener todas las categorías
-  Future<List<Categoria>> fetchCategorias() async {
+  Future<List<Categoria>> fetchAllCategorias() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
         SELECT 
           c.*, 
           (SELECT COUNT(*) FROM ${MovimientosTable.table} m WHERE m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}) AS movements_count
         FROM ${CategoriasTable.table} c
+        ORDER BY c.${CategoriasTable.name} ASC
+      ''');
+
+    return maps.map(Categoria.fromMap).toList();
+  }
+
+  Future<List<Categoria>> fetchAllNoDefaultCategorias() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+        SELECT 
+          c.*, 
+          (SELECT COUNT(*) FROM ${MovimientosTable.table} m WHERE m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}) AS movements_count
+        FROM ${CategoriasTable.table} c
+        WHERE c.${CategoriasTable.isDefault} = 0
         ORDER BY c.${CategoriasTable.name} ASC
       ''');
 
@@ -178,6 +192,19 @@ class CategoriasLocalDataSource {
       message: result > 0
           ? 'Categoría eliminada exitosamente.'
           : 'Error al eliminar la categoría.',
+    );
+  }
+
+  Future<OperationResult<int>> deleteAllCategorias() async {
+    final db = await _dbHelper.database;
+    final result = await db.delete(CategoriasTable.table);
+
+    return OperationResult<int>(
+      success: result > 0,
+      data: result,
+      message: result > 0
+          ? 'Todas las categorías eliminadas exitosamente.'
+          : 'Error al eliminar las categorías.',
     );
   }
 }

@@ -129,6 +129,20 @@ class NotificacionLocalDataSource {
     return null;
   }
 
+  Future<List<BudgetNotification>> fetchAllBudgetNotifications() async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db.query(
+      BudgetNotificationConfigTable.table,
+    );
+
+    if (result.isNotEmpty) {
+      return result.map((e) => BudgetNotification.fromMap(e)).toList();
+    }
+
+    return [];
+  }
+
   Future<List<BudgetNotification>> fetchGlobalEnabledThresholds() async {
     final db = await _dbHelper.database;
 
@@ -220,6 +234,14 @@ class NotificacionLocalDataSource {
     return OperationResult<int>(success: result > 0, data: result, message: '');
   }
 
+  Future<OperationResult<int>> deleteAllBudgetNotifications() async {
+    final db = await _dbHelper.database;
+
+    final result = await db.delete(BudgetNotificationConfigTable.table);
+
+    return OperationResult<int>(success: result > 0, data: result, message: '');
+  }
+
   Future<List<BudgetNotificationEvent>> fetchBudgetNotificationEvents() async {
     final db = await _dbHelper.database;
 
@@ -277,6 +299,14 @@ class NotificacionLocalDataSource {
       data: event.id!,
       message: '',
     );
+  }
+
+  Future<OperationResult<int>> deleteAllBudgetNotificationEvent() async {
+    final db = await _dbHelper.database;
+
+    final result = await db.delete(BudgetNotificationEventsTable.table);
+
+    return OperationResult<int>(success: result > 0, data: result, message: '');
   }
 
   Future<void> markAsRead(int id) async {

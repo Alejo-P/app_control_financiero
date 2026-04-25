@@ -79,6 +79,10 @@ class MovimientosRepository implements _MovimientosRepository {
 
   MovimientosRepository(this.localDataSource);
 
+  Future<List<Movimiento>> fetchAllMovimientos() async {
+    return await localDataSource.fetchAllMovimientos();
+  }
+
   @override
   Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
     movimientos.clear();

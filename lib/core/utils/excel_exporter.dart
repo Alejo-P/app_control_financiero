@@ -1,8 +1,8 @@
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/file_utils.dart';
 import 'package:excel/excel.dart';
-import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -70,27 +70,26 @@ class ExcelExporter {
 
   static Future<OperationResult> guardarExcel(Excel excel) async {
     try {
-      bool permiso = await solicitarPermiso();
+      // bool permiso = await solicitarPermiso();
 
-      if (!permiso) {
-        return OperationResult(success: false, message: "Permiso denegado");
-      }
+      // if (!permiso) {
+      //   return OperationResult(success: false, message: "Permiso denegado");
+      // }
 
-      Directory directory = Directory('/storage/emulated/0/Download');
+      //Directory directory = Directory('/storage/emulated/0/Download');
+      String? directory = await FileUtils.pickDirectory();
 
       final now = currentDateTime;
       final fileName = "reporte_${now.year}_${now.month}_${now.day}.xlsx";
-      final path = "${directory.path}/$fileName";
+      final path = "$directory/$fileName";
 
       final fileBytes = excel.encode();
 
-      File(path)
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(fileBytes!);
+      await FileUtils.writeFileBytes(path, fileBytes!);
 
       return OperationResult<void>(
         success: true,
-        message: "Archivo guardado en Downloads",
+        message: "Archivo creado correctamente",
       );
     } catch (e) {
       AppLogger.log("Error al guardar Excel: $e", level: LogLevel.error);

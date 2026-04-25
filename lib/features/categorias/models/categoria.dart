@@ -80,6 +80,7 @@ class Categoria {
   // Method to convert a Categoria to JSON
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'name': name,
       'description': description,
       'movement_type': movementType.name,

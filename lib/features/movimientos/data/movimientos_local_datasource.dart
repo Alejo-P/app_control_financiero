@@ -11,6 +11,16 @@ import 'package:sqflite/sqflite.dart';
 class MovimientosLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
 
+  Future<List<Movimiento>> fetchAllMovimientos() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      MovimientosTable.table,
+      orderBy: '${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC',
+    );
+
+    return maps.map(Movimiento.fromMap).toList();
+  }
+
   // Obtener todos los movimientos
   Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
     final db = await _dbHelper.database;
@@ -226,6 +236,19 @@ class MovimientosLocalDataSource {
       message: result > 0
           ? 'Movimiento eliminado exitosamente.'
           : 'Error al eliminar el movimiento.',
+    );
+  }
+
+  Future<OperationResult<int>> deleteAllMovimientos() async {
+    final db = await _dbHelper.database;
+    final result = await db.delete(MovimientosTable.table);
+
+    return OperationResult<int>(
+      success: result > 0,
+      data: result,
+      message: result > 0
+          ? 'Todos los movimientos eliminados exitosamente.'
+          : 'Error al eliminar los movimientos.',
     );
   }
 

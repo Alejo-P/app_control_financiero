@@ -41,6 +41,26 @@ class PresupuestosLocalDataSource {
     return IngresoPresupuestado.fromMap(maps.first);
   }
 
+  Future<List<Presupuesto>> fetchAllPresupuestos() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      PresupuestosTable.table,
+      orderBy: '${PresupuestosTable.date} ASC',
+    );
+
+    return maps.map((map) => Presupuesto.fromMap(map)).toList();
+  }
+
+  Future<List<IngresoPresupuestado>> fetchAllIngresosPresupuestados() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      IngresoPresupuestadoTable.table,
+      orderBy: '${IngresoPresupuestadoTable.date} ASC',
+    );
+
+    return maps.map((map) => IngresoPresupuestado.fromMap(map)).toList();
+  }
+
   Future<Presupuesto?> fetchPresupuestoById(int id) async {
     final db = await _dbHelper.database;
 
@@ -242,6 +262,14 @@ class PresupuestosLocalDataSource {
     }
   }
 
+  Future<OperationResult<int>> deleteAllIngresosPresupuestados() async {
+    final db = await _dbHelper.database;
+
+    final result = await db.delete(IngresoPresupuestadoTable.table);
+
+    return OperationResult<int>(success: result > 0, data: result, message: '');
+  }
+
   // Obtener conteo de presupuestos para una categoria
   Future<int> fetchPresupuestoCountByCategory(int categoryId) async {
     final db = await _dbHelper.database;
@@ -311,5 +339,12 @@ class PresupuestosLocalDataSource {
           ? 'Presupuesto eliminado exitosamente.'
           : 'Error al eliminar el presupuesto.',
     );
+  }
+
+  Future<OperationResult<int>> deleteAllPresupuestos() async {
+    final db = await _dbHelper.database;
+    final result = await db.delete(PresupuestosTable.table);
+
+    return OperationResult<int>(success: result > 0, data: result, message: '');
   }
 }

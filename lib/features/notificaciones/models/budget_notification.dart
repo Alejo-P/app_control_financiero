@@ -47,7 +47,6 @@ class BudgetNotification {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'threshold': threshold,
       'category_id': categoryId,
       'is_enabled': isEnabledNotification ? 1 : 0,

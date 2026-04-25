@@ -36,13 +36,13 @@ class _AjustesPageState extends State<AjustesPage> {
     _appState.setNotifications(value);
   }
 
-  void exportarDatos() async {
+  void exportarDatosExcel() async {
     final appState = context.read<AppState>();
 
     final confirmed = await showConfirmDialog(
       context,
       title: 'Exportar datos',
-      content: 'Se generará un archivo Excel en tu carpeta de descargas.',
+      content: 'Se generará un archivo Excel en la carpeta que elijas.',
     );
 
     if (confirmed != true) return;
@@ -56,6 +56,74 @@ class _AjustesPageState extends State<AjustesPage> {
     );
 
     await appState.exportarMovimientos();
+
+    if (!mounted) return;
+
+    Navigator.pop(context); // cerrar loading
+
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(context, appState.transactionResultMessage);
+      return;
+    }
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
+  }
+
+  void exportarDatosBackup() async {
+    final appState = context.read<AppState>();
+
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Exportar datos',
+      content: 'Se generará un archivo de respaldo en la carpeta que elijas.',
+    );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    // 👇 Loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    await appState.createBackup();
+
+    if (!mounted) return;
+
+    Navigator.pop(context); // cerrar loading
+
+    if (!appState.transactionSuccess) {
+      AppSnackbar.error(context, appState.transactionResultMessage);
+      return;
+    }
+
+    AppSnackbar.success(context, appState.transactionResultMessage);
+  }
+
+  void restaurarDatosBackup() async {
+    final appState = context.read<AppState>();
+
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Restaurar datos',
+      content:
+          'Se restaurarán tus datos desde un archivo de respaldo. Esto reemplazará tus datos actuales.',
+    );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    // 👇 Loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    // Restaurar datos
+    await appState.restoreFromBackup();
 
     if (!mounted) return;
 
@@ -95,17 +163,14 @@ class _AjustesPageState extends State<AjustesPage> {
                             'Exporta tus movimientos en un archivo .xlsx',
                         icon: Icons.table_view_outlined,
                         iconColor: Colors.orange,
-                        onTap: exportarDatos,
+                        onTap: exportarDatosExcel,
                       ),
                       SettingOptionCard(
                         title: 'Respaldar datos',
                         description: 'Crea una copia de seguridad de tus datos',
                         icon: Icons.backup_outlined,
                         iconColor: Colors.green,
-                        onTap: () {
-                          // Lógica para respaldar datos
-                          debugPrint('Respaldar datos');
-                        },
+                        onTap: exportarDatosBackup,
                       ),
                       SettingOptionCard(
                         title: 'Restaurar datos',
@@ -113,10 +178,7 @@ class _AjustesPageState extends State<AjustesPage> {
                             'Restaura tus datos desde una copia de seguridad',
                         icon: Icons.restore_outlined,
                         iconColor: Colors.red,
-                        onTap: () {
-                          // Lógica para restaurar datos
-                          debugPrint('Restaurar datos');
-                        },
+                        onTap: restaurarDatosBackup,
                       ),
                     ],
                   ),

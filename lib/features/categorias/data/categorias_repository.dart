@@ -6,7 +6,11 @@ import 'package:control_financiero/features/categorias/models/detalle_categoria.
 abstract class _CategoriasRepository {
   /// Obtiene la lista de categorías.
   /// @return Una lista de objetos Categoria.
-  Future<List<Categoria>> fetchCategorias();
+  Future<List<Categoria>> fetchAllCategorias();
+
+  /// Obtiene la lista de categorías no predeterminadas.
+  /// @return Una lista de objetos Categoria.
+  Future<List<Categoria>> fetchAllNoDefaultCategorias();
 
   /// Agrega una nueva categoría.
   /// @param categoria El objeto Categoria a agregar.
@@ -40,9 +44,15 @@ class CategoriasRepository implements _CategoriasRepository {
   CategoriasRepository(this.localDataSource);
 
   @override
-  Future<List<Categoria>> fetchCategorias() async {
+  Future<List<Categoria>> fetchAllCategorias() async {
     categorias.clear();
-    categorias.addAll(await localDataSource.fetchCategorias());
+    categorias.addAll(await localDataSource.fetchAllCategorias());
+    return categorias;
+  }
+
+  @override
+  Future<List<Categoria>> fetchAllNoDefaultCategorias() async {
+    final categorias = await localDataSource.fetchAllNoDefaultCategorias();
     return categorias;
   }
 

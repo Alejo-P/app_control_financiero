@@ -70,6 +70,10 @@ class PresupuestosRepository implements _PresupuestosRepository {
     );
   }
 
+  Future<List<Presupuesto>> fetchAllPresupuestos() async {
+    return await localDatasource.fetchAllPresupuestos();
+  }
+
   Future<Presupuesto?> fetchPresupuestoById(int id) async {
     return await localDatasource.fetchPresupuestoById(id);
   }
@@ -80,6 +84,10 @@ class PresupuestosRepository implements _PresupuestosRepository {
 
   Future<double> fetchPresupuestosAmountSumByMonthAndYear(DateTime date) async {
     return await localDatasource.fetchPresupuestosAmountSumByMonthAndYear(date);
+  }
+
+  Future<List<IngresoPresupuestado>> fetchAllIngresosPresupuestados() async {
+    return await localDatasource.fetchAllIngresosPresupuestados();
   }
 
   @override
