@@ -1,8 +1,11 @@
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/services/backup_service.dart';
+import 'package:control_financiero/core/utils/file_utils.dart';
 import 'package:control_financiero/features/ajustes/widgets/setting_option_card.dart';
 import 'package:control_financiero/features/categorias/presentation/categorias_page.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/input_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -75,11 +78,26 @@ class _AjustesPageState extends State<AjustesPage> {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Exportar datos',
-      content: 'Se generará un archivo de respaldo en la carpeta que elijas.',
+      content:
+          'Se generará un archivo de respaldo en la carpeta que elijas.\nDeberas especificar una clave de encriptación.',
     );
 
     if (confirmed != true) return;
+    final encryptKey = await showEncryptionKeyInputDialog(
+      context,
+      'Guarda esta clave en un lugar seguro. '
+      'La necesitarás para restaurar tu respaldo. '
+      'Si la pierdes, no podrás recuperar tus datos.',
+    );
+
     if (!mounted) return;
+    if (encryptKey == null) {
+      AppSnackbar.error(
+        context,
+        'Debes especificar una clave para ecriptar el archivo',
+      );
+      return;
+    }
 
     // 👇 Loading
     showDialog(
@@ -88,7 +106,7 @@ class _AjustesPageState extends State<AjustesPage> {
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    await appState.createBackup();
+    await appState.createBackup(encryptKey);
 
     if (!mounted) return;
 
@@ -109,11 +127,40 @@ class _AjustesPageState extends State<AjustesPage> {
       context,
       title: 'Restaurar datos',
       content:
-          'Se restaurarán tus datos desde un archivo de respaldo. Esto reemplazará tus datos actuales.',
+          'Se restaurarán tus datos desde un archivo de respaldo. Esto reemplazará tus datos actuales.\nDeberas especificar la clave de encriptación usada al exportar el archivo.',
     );
 
     if (confirmed != true) return;
+
+    final pickedFile = await FileUtils.pickFiles(['json']);
     if (!mounted) return;
+    if (pickedFile == null) {
+      AppSnackbar.error(context, 'No se selecciono un archivo');
+      return;
+    }
+
+    final isValidFile = await BackupService().checkBackupfile(pickedFile);
+    if (!mounted) return;
+    if (!isValidFile) {
+      AppSnackbar.error(context, 'El archivo seleccionado no contiene datos validos a importar');
+      return;
+    }
+
+    if (!mounted) return;
+    final encryptKey = await showEncryptionKeyInputDialog(
+      context,
+      'Ingresa la clave de encriptación usada al crear el respaldo.\n'
+      'Si es incorrecta, no se podrán restaurar los datos.',
+    );
+
+    if (!mounted) return;
+    if (encryptKey == null) {
+      AppSnackbar.error(
+        context,
+        'Debes especificar una clave para ecriptar el archivo',
+      );
+      return;
+    }
 
     // 👇 Loading
     showDialog(
@@ -123,7 +170,7 @@ class _AjustesPageState extends State<AjustesPage> {
     );
 
     // Restaurar datos
-    await appState.restoreFromBackup();
+    await appState.restoreFromBackup(encryptKey, pickedFile);
 
     if (!mounted) return;
 
@@ -223,8 +270,8 @@ class _AjustesPageState extends State<AjustesPage> {
                         description:
                             '${!isEnableNotifications ? 'Activa' : 'Desactiva'} las notificaciones de la aplicación',
                         icon: isEnableNotifications
-                        ? Icons.notifications_outlined
-                        : Icons.notifications_off_outlined,
+                            ? Icons.notifications_outlined
+                            : Icons.notifications_off_outlined,
                         iconColor: Colors.teal,
                         trailing: Switch(
                           value: isEnableNotifications,

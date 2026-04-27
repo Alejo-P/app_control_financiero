@@ -630,8 +630,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> restoreFromBackup() async {
-    final result = await BackupService().restoreData();
+  Future<void> restoreFromBackup(String encryptKey, String pickedFile) async {
+    final result = await BackupService().restoreData(encryptKey, pickedFile);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success) {
@@ -640,8 +640,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createBackup() async {
-    final result = await BackupService().backupData();
+  Future<void> createBackup(String encryptKey) async {
+    final result = await BackupService().backupData(encryptKey);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     notifyListeners();

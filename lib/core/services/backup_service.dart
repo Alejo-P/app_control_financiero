@@ -1,8 +1,7 @@
-import 'package:control_financiero/core/constants/app_strings.dart'
-    as app_strings;
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/encryption_helper.dart';
 import 'package:control_financiero/core/utils/file_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -26,11 +25,23 @@ class BackupService {
       NotificacionLocalDataSource();
   final int backupVersion = 1;
 
-  bool _checkBackupVersion(int version) {
-    // Implementa la lógica para verificar la compatibilidad de versiones aquí
-    // Por ejemplo, podrías comparar con una versión mínima soportada
+  Future<bool> checkBackupfile(String filePath) async {
+    try {
+      final content = await FileUtils.readFile(filePath);
+      final decoded = jsonDecode(content);
 
-    return version == backupVersion;
+      if (decoded is! Map<String, dynamic>) {
+        return false;
+      }
+
+      final int version = decoded['version'] is int
+          ? decoded['version'] as int
+          : 0;
+
+      return version == backupVersion;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<Map<String, dynamic>> _collectDataForBackup() async {
@@ -114,18 +125,17 @@ class BackupService {
     }
   }
 
-  Future<OperationResult<void>> backupData() async {
+  Future<OperationResult<void>> backupData(String key) async {
     try {
       final backupData = await _collectDataForBackup();
+      final jsonString = jsonEncode(backupData);
+      final encrypted = EncryptionHelper.encryptData(jsonString, key);
 
       final fileContent = {
         'version': backupVersion,
-        'timestamp': DateTime.now().toIso8601String(),
-        'app': app_strings.appName,
-        'data': backupData,
+        'iv': encrypted.iv,
+        'data': encrypted.data,
       };
-
-      final jsonString = jsonEncode(fileContent);
 
       final dir = await FileUtils.pickDirectory();
       if (dir == null) {
@@ -140,7 +150,7 @@ class BackupService {
           'backup_${currentDateTime.year}_${currentDateTime.month.toString().padLeft(2, '0')}_${currentDateTime.day.toString().padLeft(2, '0')}.json';
       String? outputFile = '$dir/$fileName';
 
-      await FileUtils.writeFile(outputFile, jsonString);
+      await FileUtils.writeFile(outputFile, jsonEncode(fileContent));
 
       return OperationResult(
         success: true,
@@ -157,29 +167,19 @@ class BackupService {
     }
   }
 
-  Future<OperationResult<void>> restoreData() async {
-    final pickedFile = await FileUtils.pickFiles(['json']);
-    if (pickedFile == null) {
-      return OperationResult(
-        success: false,
-        data: null,
-        message: 'No se seleccionó ningún archivo de respaldo.',
-      );
-    }
-
+  Future<OperationResult<void>> restoreData(String key, String filePath) async {
     try {
-      final content = await FileUtils.readFile(pickedFile);
-      final Map<String, dynamic> fileData = jsonDecode(content);
-      final int version = fileData['version'] != null
-          ? fileData['version'] as int
-          : 0;
-      if (!_checkBackupVersion(version)) {
-        throw Exception(
-          'Versión de respaldo no compatible. Versión encontrada: $version',
-        );
-      }
+      final content = await FileUtils.readFile(filePath);
 
-      final backupData = fileData['data'] as Map<String, dynamic>;
+      final Map fileData = jsonDecode(content);
+
+      final fileContent = EncryptionHelper.decryptData(
+        encryptedText: fileData['data'],
+        encryptKey: key,
+        ivBase64: fileData['iv'],
+      );
+      final backupData = jsonDecode(fileContent) as Map<String, dynamic>;
+
       await _clearExistingData();
       final restoreSuccess = await _restoreDataFromBackup(backupData);
       if (!restoreSuccess) {
