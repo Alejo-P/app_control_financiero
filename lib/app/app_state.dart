@@ -569,6 +569,9 @@ class AppState extends ChangeNotifier {
 
   void changeTab(int index) {
     if (currentTab == index) return;
+    if (index > pageNames.length) {
+      index = 0;
+    }
 
     currentTab = index;
     currentPageName = pageNames[index];
