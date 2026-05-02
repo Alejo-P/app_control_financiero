@@ -6,6 +6,19 @@ enum MovimientoFormMode { create, edit }
 
 enum MovimientoFiltro { todos, ingresos, gastos }
 
+extension TipoMovimientoMapper on TipoMovimiento {
+  static TipoMovimiento fromString(String value) {
+    switch (value.toLowerCase()) {
+      case 'ingreso':
+        return TipoMovimiento.ingreso;
+      case 'gasto':
+        return TipoMovimiento.gasto;
+      default:
+        throw Exception('TipoMovimiento desconocido: $value');
+    }
+  }
+}
+
 extension MovimientoFiltroUI on MovimientoFiltro {
   String get label => switch (this) {
     MovimientoFiltro.ingresos => 'Ingresos',

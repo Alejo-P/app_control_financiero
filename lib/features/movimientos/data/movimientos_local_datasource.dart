@@ -48,7 +48,10 @@ class MovimientosLocalDataSource {
     if (maps.isNotEmpty) {
       return Movimiento.fromMap(maps.first);
     } else {
-      AppLogger.log('Movimiento con ID $id no encontrado', level: LogLevel.warning);
+      AppLogger.log(
+        'Movimiento con ID $id no encontrado',
+        level: LogLevel.warning,
+      );
     }
     return null;
   }
@@ -81,7 +84,10 @@ class MovimientosLocalDataSource {
     if (maps.isNotEmpty) {
       return DetalleMovimiento.fromMap(maps.first);
     } else {
-      AppLogger.log('Detalle del movimiento con ID $id no encontrado', level: LogLevel.warning);
+      AppLogger.log(
+        'Detalle del movimiento con ID $id no encontrado',
+        level: LogLevel.warning,
+      );
     }
     return null;
   }
@@ -126,14 +132,8 @@ class MovimientosLocalDataSource {
       final List<Map<String, dynamic>> result = await db.rawQuery(
         '''
           SELECT
-            m.id AS id,
-            m.title AS title,
-            m.amount AS amount,
-            m.date as date,
-            m.note AS note,
-            c.name AS categoryName,
-            c.movement_type AS movementType,
-            c.id AS categoryId
+            m.amount as monto,
+            c.movement_type AS 'tipo movimiento'
           FROM movimientos m
           JOIN categorias c ON m.category_id = c.id
           WHERE strftime('%Y-%m', m.date) = ?
@@ -142,11 +142,16 @@ class MovimientosLocalDataSource {
       );
 
       for (final map in result) {
-        final detalleMovimento = DetalleMovimiento.fromMap(map);
-        if (detalleMovimento.movementType == TipoMovimiento.ingreso) {
-          ingresos += detalleMovimento.amount;
+        final monto = (map['monto'] as num?)?.toDouble() ?? 0;
+        final tipoStr = map['tipo movimiento'] as String;
+        final tipoMovimiento = TipoMovimientoMapper.fromString(
+          tipoStr,
+        );
+        
+        if (tipoMovimiento == TipoMovimiento.ingreso) {
+          ingresos += monto;
         } else {
-          gastos += detalleMovimento.amount;
+          gastos += monto;
         }
       }
     } on Exception catch (e) {

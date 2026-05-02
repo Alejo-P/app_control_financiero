@@ -517,9 +517,13 @@ class AppState extends ChangeNotifier {
     final actual = await _movimientosRepository.fetchTotalesMensuales(
       mesActual,
     );
-    final anterior = await _movimientosRepository
-        .fetchTotalesMensualesMesPasado(mesActual);
 
+    final mesAnterior = DateTime(mesActual.year, mesActual.month - 1);
+    final anterior = await _movimientosRepository.fetchTotalesMensuales(
+      mesAnterior,
+    );
+
+    if (anterior.ahorro == 0 && actual.ahorro == 0) return 0;
     if (anterior.ahorro == 0) return null;
 
     return ((actual.ahorro - anterior.ahorro) / anterior.ahorro) * 100;
