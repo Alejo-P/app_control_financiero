@@ -246,7 +246,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
   Future<void> _mostrarModalIngresoPresupuestado() async {
     final appState = context.read<AppState>();
     final ingresoPresupuestado = appState.ingresoPresupuestado;
-    _ingresoPresupuestadoController.text = ingresoPresupuestado != null
+    _ingresoPresupuestadoController.text = (ingresoPresupuestado != null && ingresoPresupuestado.monto > 0)
         ? ingresoPresupuestado.monto.toStringAsFixed(2)
         : '';
     final fechaPresupuesto = appState.selectedBudgetMonth;

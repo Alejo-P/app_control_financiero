@@ -2,6 +2,7 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/services/backup_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -51,7 +52,7 @@ class AppState extends ChangeNotifier {
 
   final List<String> pageNames = [
     'Movimientos',
-    'Presupuesto',
+    'Presupuestos',
     'Historial',
     'Más acciones',
   ];
@@ -108,11 +109,11 @@ class AppState extends ChangeNotifier {
       _fetchUniqueBudgetMovementDates();
   List<String> get uniqueTipeCategoryNames => _uniqueTipeCategoryNames;
 
-  List<Categoria> get categorias => _categoriasRepository.categorias;
-
   List<TipoCategoria> get tiposCategorias =>
       _tipoCategoriaRepository.tipoCategorias;
+
   List<Movimiento> movimientos = [];
+  List<Categoria> categorias = [];
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
   List<Movimiento> get movimientosPresupuestos =>
@@ -150,7 +151,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadCategoryData({bool notify = true}) async {
-    await _categoriasRepository.fetchAllCategorias();
+    categorias = await _categoriasRepository.fetchAllCategorias();
     _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
 
     if (notify) notifyListeners();
@@ -274,7 +275,7 @@ class AppState extends ChangeNotifier {
 
     offset += data.length;
 
-    _hasMoreNotif = data.isNotEmpty && data.length >= 20;
+    _hasMoreNotif = data.isNotEmpty && data.length >= 10;
 
     await updateCountersNotif(notify: false);
 
@@ -661,10 +662,15 @@ class AppState extends ChangeNotifier {
     for (var entry in counts.entries) {
       final categoryId = entry.key;
       final newCount = entry.value;
-      await _categoriasRepository.updateCategoryMovementCount(
-        categoryId,
-        newCount,
+      final index = categorias.indexWhere((c) => c.id == categoryId);
+      if (index == -1) {
+        AppLogger.log('Categoría con id $index no encontrada.');
+      }
+
+      final updatedCategoria = categorias[index].copyWith(
+        movementsCount: newCount,
       );
+      categorias[index] = updatedCategoria;
     }
     notifyListeners();
   }
@@ -735,6 +741,7 @@ class AppState extends ChangeNotifier {
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
+      categorias.add(categoria.copyWith(id: result.data!));
       await loadCategoryData();
     }
   }

@@ -28,7 +28,7 @@ class AppBottomNav extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.donut_large_outlined),
           activeIcon: Icon(Icons.donut_large, size: 30),
-          label: 'Presupuesto',
+          label: 'Presupuestos',
           tooltip: 'Pestaña de Presupuesto',
         ),
         BottomNavigationBarItem(
