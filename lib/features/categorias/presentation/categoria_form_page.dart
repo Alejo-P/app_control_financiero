@@ -56,7 +56,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   @override
   void initState() {
     super.initState();
-    
+
     _categoryNameController.addListener(_checkEnableSaveButton);
     _descriptionController.addListener(_checkEnableSaveButton);
   }
@@ -108,6 +108,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       modo = result != null && id != -1
           ? CategoriaFormMode.edit
           : CategoriaFormMode.create;
+
+      isEditing = modo == CategoriaFormMode.edit;
     });
     _checkEnableSaveButton();
   }
