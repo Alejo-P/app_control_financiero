@@ -4,7 +4,6 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/file_utils.dart';
 import 'package:excel/excel.dart';
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ExcelExporter {
   // Agrupar cada transaccion registrada por mes (para separarlo por tablas y tabs)
@@ -70,12 +69,6 @@ class ExcelExporter {
 
   static Future<OperationResult> guardarExcel(Excel excel) async {
     try {
-      // bool permiso = await solicitarPermiso();
-
-      // if (!permiso) {
-      //   return OperationResult(success: false, message: "Permiso denegado");
-      // }
-
       //Directory directory = Directory('/storage/emulated/0/Download');
       String? directory = await FileUtils.pickDirectory();
 
@@ -111,10 +104,5 @@ class ExcelExporter {
 
   String nombreMes(DateTime fecha) {
     return DateFormat('MMMM yyyy', 'es_ES').format(fecha);
-  }
-
-  static Future<bool> solicitarPermiso() async {
-    var status = await Permission.storage.request();
-    return status.isGranted;
   }
 }

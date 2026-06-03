@@ -116,6 +116,7 @@ class AppState extends ChangeNotifier {
   List<Categoria> categorias = [];
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
+  List<double> budgetThresholds = [];
   List<Movimiento> get movimientosPresupuestos =>
       _presupuestosRepository.movimientos;
   double? get totalGastos => _totalGastos;
@@ -142,6 +143,7 @@ class AppState extends ChangeNotifier {
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
       loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
       updateHistory(),
+      getAllThresholds(),
       loadNotifications(),
     ]);
     await loadCategoryData(notify: false);
@@ -256,6 +258,12 @@ class AppState extends ChangeNotifier {
     }
 
     return thresholdsToNotify;
+  }
+
+  Future<void> getAllThresholds() async {
+    final configs = await _notificacionRepository.fetchAllBudgetNotifications();
+    budgetThresholds = configs.map((n) => n.threshold).toList();
+    notifyListeners();
   }
 
   Future<void> updateHistory() async {

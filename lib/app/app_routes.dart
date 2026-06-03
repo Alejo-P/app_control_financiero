@@ -3,4 +3,7 @@ class AppRoutes {
   static const movimientoFormRoute = '/movimiento-form';
   static const presupuestoFormRoute = '/presupuesto-form';
   static const categoriaFormRoute = '/categoria-form';
+
+  static const ajustesRoute = '/ajustes';
+  static const notificationConfigRoute = '/ajustes/notificaciones';
 }

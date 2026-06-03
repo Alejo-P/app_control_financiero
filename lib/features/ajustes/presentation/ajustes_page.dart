@@ -1,3 +1,4 @@
+import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/services/backup_service.dart';
@@ -33,10 +34,6 @@ class _AjustesPageState extends State<AjustesPage> {
 
   void _toggleDarkMode(bool value) {
     _appState.setDarkMode(value);
-  }
-
-  void _toggleNotifications(bool value) {
-    _appState.setNotifications(value);
   }
 
   void exportarDatosExcel() async {
@@ -83,6 +80,7 @@ class _AjustesPageState extends State<AjustesPage> {
     );
 
     if (confirmed != true) return;
+    if (!mounted) return;
     final encryptKey = await showEncryptionKeyInputDialog(
       context,
       'Guarda esta clave en un lugar seguro. '
@@ -142,7 +140,10 @@ class _AjustesPageState extends State<AjustesPage> {
     final isValidFile = await BackupService().checkBackupfile(pickedFile);
     if (!mounted) return;
     if (!isValidFile) {
-      AppSnackbar.error(context, 'El archivo seleccionado no contiene datos validos a importar');
+      AppSnackbar.error(
+        context,
+        'El archivo seleccionado no contiene datos validos a importar',
+      );
       return;
     }
 
@@ -188,7 +189,6 @@ class _AjustesPageState extends State<AjustesPage> {
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final isDarkMode = appState.isDarkMode;
-    final isEnableNotifications = appState.isEnableNotifications;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
@@ -268,14 +268,12 @@ class _AjustesPageState extends State<AjustesPage> {
                       SettingOptionCard(
                         title: 'Notificaciones',
                         description:
-                            '${!isEnableNotifications ? 'Activa' : 'Desactiva'} las notificaciones de la aplicación',
-                        icon: isEnableNotifications
-                            ? Icons.notifications_outlined
-                            : Icons.notifications_off_outlined,
+                            'Configura las notificaciones de la aplicación',
+                        icon: Icons.notifications_outlined,
                         iconColor: Colors.teal,
-                        trailing: Switch(
-                          value: isEnableNotifications,
-                          onChanged: _toggleNotifications,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.notificationConfigRoute,
                         ),
                       ),
                       SettingOptionCard(

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 class IconContainer extends StatelessWidget {
   final Color color;
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final Color borderColor;
   final double size;
   final double borderWidth;
@@ -11,7 +12,8 @@ class IconContainer extends StatelessWidget {
 
   const IconContainer({
     super.key,
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     this.color = Colors.blue,
     this.size = 48,
     this.borderColor = Colors.transparent,
@@ -33,7 +35,7 @@ class IconContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: borderColor, width: borderWidth),
         ),
-        child: Icon(icon, size: iconSize, color: color),
+        child: iconWidget ?? Icon(icon, size: iconSize, color: color),
       ),
     );
   }

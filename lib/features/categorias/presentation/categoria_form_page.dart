@@ -291,8 +291,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           isDefault: false,
         );
 
-    debugPrint('Original: $original\n Current: $current');
-    debugPrint('Has changes: ${original != current}');
     return original != current;
   }
 

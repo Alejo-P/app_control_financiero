@@ -2,7 +2,7 @@
 
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
-import 'package:control_financiero/core/constants/app_routes.dart';
+import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/notification_card.dart';

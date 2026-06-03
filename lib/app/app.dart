@@ -1,7 +1,8 @@
 import 'package:control_financiero/app/splash_screen.dart';
-import 'package:control_financiero/core/constants/app_routes.dart';
+import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/services/navigation_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
+import 'package:control_financiero/features/ajustes/presentation/notification_config_page.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
@@ -111,6 +112,8 @@ class _AppState extends State<App> {
                   const PresupuestoFormPage(),
               AppRoutes.categoriaFormRoute: (context) =>
                   const CategoriaFormPage(),
+              AppRoutes.notificationConfigRoute: (context) =>
+                  const NotificationConfigPage(),
             },
 
             home: appState.loadingInitialData

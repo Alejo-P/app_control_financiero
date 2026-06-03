@@ -1,4 +1,4 @@
-import 'package:control_financiero/core/constants/app_routes.dart';
+import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';

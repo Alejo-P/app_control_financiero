@@ -1,5 +1,5 @@
 import 'package:control_financiero/app/app_state.dart';
-import 'package:control_financiero/core/constants/app_routes.dart';
+import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/categoria_form_args.dart';
 import 'package:control_financiero/features/categorias/widgets/category_card_detail.dart';
