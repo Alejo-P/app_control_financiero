@@ -1,4 +1,4 @@
-import 'package:control_financiero/core/formatters/money_input_formatter.dart';
+import 'package:control_financiero/core/formatters/number_input_formatter.dart';
 import 'package:flutter/material.dart';
 
 class AmountInput extends StatelessWidget {
@@ -62,7 +62,7 @@ class AmountInput extends StatelessWidget {
                   border: InputBorder.none,
                   isDense: true,
                 ),
-                inputFormatters: [MoneyInputFormatter()],
+                inputFormatters: [NumberInputFormatter()],
                 cursorColor: colorScheme.primary,
                 textAlign: TextAlign.center,
                 validator: validator,

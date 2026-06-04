@@ -14,6 +14,7 @@ import 'package:control_financiero/features/movimientos/models/detalle_movimient
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
+import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
@@ -116,7 +117,8 @@ class AppState extends ChangeNotifier {
   List<Categoria> categorias = [];
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
-  List<double> budgetThresholds = [];
+  List<BudgetNotification> budgetNotifications = [];
+  List<double> get budgetThresholds => budgetNotifications.map((n) => n.threshold).toList();
   List<Movimiento> get movimientosPresupuestos =>
       _presupuestosRepository.movimientos;
   double? get totalGastos => _totalGastos;
@@ -262,8 +264,42 @@ class AppState extends ChangeNotifier {
 
   Future<void> getAllThresholds() async {
     final configs = await _notificacionRepository.fetchAllBudgetNotifications();
-    budgetThresholds = configs.map((n) => n.threshold).toList();
+    // Ordenar por umbral de mayor a menor
+    configs.sort((a, b) => b.threshold.compareTo(a.threshold));
+    budgetNotifications = configs;
     notifyListeners();
+  }
+
+  Future<void> addOrUpdateBudgetNotification(BudgetNotification notification) async {
+    int newId = await _notificacionRepository.addOrUpdateBudgetNotification(notification);
+    if (notification.id == null) {
+      final newNotification = notification.copyWith(id: newId);
+      budgetNotifications.add(newNotification);
+      budgetNotifications.sort((a, b) => b.threshold.compareTo(a.threshold));
+    }
+    notifyListeners();
+  }
+
+  Future<void> updateBudgetNotification({
+    required int id,
+    bool? isEnabledNotification,
+  }) async {
+    final notification = budgetNotifications.firstWhere((n) => n.id == id);
+    final updatedNotification = notification.copyWith(
+      isEnabledNotification: isEnabledNotification ?? notification.isEnabledNotification,
+    );
+    budgetNotifications = budgetNotifications.map((n) => n.id == id ? updatedNotification : n).toList();
+    budgetNotifications.sort((a, b) => b.threshold.compareTo(a.threshold));
+
+    await addOrUpdateBudgetNotification(updatedNotification);
+  }
+
+  Future<void> deleteBudgetNotification(int id) async {
+    final success = await _notificacionRepository.deleteBudgetNotification(id);
+    if (success) {
+      budgetNotifications.removeWhere((n) => n.id == id);
+      notifyListeners();
+    }
   }
 
   Future<void> updateHistory() async {

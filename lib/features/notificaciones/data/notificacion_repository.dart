@@ -41,6 +41,18 @@ class NotificacionRepository {
     return budgetNotifications.map((n) => n.threshold).toList();
   }
 
+  Future<int> addOrUpdateBudgetNotification(BudgetNotification notification) async {
+    final result = await localDataSource.insertOrUpdateBudgetNotification(notification);
+
+    return result.data ?? 0;
+  }
+
+  Future<bool> deleteBudgetNotification(int id) async {
+    final result = await localDataSource.deleteBudgetNotification(id);
+
+    return result.success;
+  }
+
   Future<List<BudgetNotificationEvent>>
   fetchBudgetNotificationEventsByCategoryIdAndDate(
     int categoryId,

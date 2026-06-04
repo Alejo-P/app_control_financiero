@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 class TextInputCard extends StatefulWidget {
   final TextEditingController textController;
+  final TextInputType inputKeyboardType;
   final String? placeholder;
   final IconData? iconData;
   final Color? iconColor;
@@ -16,6 +17,7 @@ class TextInputCard extends StatefulWidget {
   const TextInputCard({
     super.key,
     required this.textController,
+    this.inputKeyboardType = TextInputType.text,
     this.placeholder,
     this.iconData,
     this.iconColor,
@@ -102,6 +104,7 @@ class _TextInputCardState extends State<TextInputCard> {
             ),
             style: const TextStyle(fontSize: 16),
             inputFormatters: [NoteInputFormatter()],
+            keyboardType: widget.inputKeyboardType,
             expands: false,
             textAlignVertical: TextAlignVertical.top,
             minLines: 1,
