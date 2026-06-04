@@ -340,18 +340,19 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (porcentagesPresupuesto.isNotEmpty) {
       for (final porcentaje in porcentagesPresupuesto) {
+        final porcentajeInt = (porcentaje * 100).toInt();
         await appState.insertarNotificacion(
           Notificacion(
             title: 'Alerta de presupuesto',
             description:
-                'Has alcanzado el $porcentaje% de tu presupuesto para la categoría $categoryName.',
+                'Has alcanzado el $porcentajeInt% del presupuesto en $categoryName.',
             type: TipoNotificacion.presupuesto,
             iconName: IconMapper.toName(Icons.warning_amber_outlined),
             iconColorValue: Colors.red.value,
             createdAt: currentDateTime,
             extraData: {
               'Categoría': categoryName,
-              'Porcentaje alcanzado': '$porcentaje%',
+              'Porcentaje alcanzado': '$porcentajeInt%',
               'Fecha': formatDate(movimiento.date),
             },
           ),
