@@ -4,6 +4,7 @@ import 'package:control_financiero/core/database/db_seeds.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
+import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -118,6 +119,30 @@ final presupuestosNotif = [
   ),
 ];
 
+final movementNotificationConfigs = [
+  MovementNotificationConfig(
+    id: 1,
+    typeKey: MovementNotificationConfig.createMovementKey,
+    isEnabled: true,
+    isDefault: true,
+    createdAt: DateTime.now(),
+  ),
+  MovementNotificationConfig(
+    id: 2,
+    typeKey: MovementNotificationConfig.editMovementKey,
+    isEnabled: true,
+    isDefault: true,
+    createdAt: DateTime.now(),
+  ),
+  MovementNotificationConfig(
+    id: 3,
+    typeKey: MovementNotificationConfig.deleteMovementKey,
+    isEnabled: true,
+    isDefault: true,
+    createdAt: DateTime.now(),
+  ),
+];
+
 Future<void> runSeeds(Database db) async {
   await createTables(db);
   final result = await db.query(
@@ -182,6 +207,12 @@ Future<void> runSeeds(Database db) async {
   }
   if (currentVersion < 11) {
     await migrateNotificationsObjectId(db);
+    await setSeedVersion(db, currentVersion + 1);
+  }
+  if (currentVersion < 12) {
+    for (var config in movementNotificationConfigs) {
+      await upsertMovementNotificationConfig(db, config);
+    }
     await setSeedVersion(db, currentVersion + 1);
   }
 }

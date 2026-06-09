@@ -2,6 +2,7 @@ import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
+import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 
 class NotificacionRepository {
@@ -21,30 +22,54 @@ class NotificacionRepository {
     return await localDataSource.fetchNotificacionById(id);
   }
 
-  Future <Notificacion?> fetchLatestNotificacionByType(String type) async {
+  Future<Notificacion?> fetchLatestNotificacionByType(String type) async {
     return await localDataSource.fetchLatestNotificacionByType(type);
   }
 
   Future<List<double>> fetchGlobalEnabledThresholds() async {
-    final budgetNotifications = await localDataSource.fetchGlobalEnabledThresholds();
-    
+    final budgetNotifications = await localDataSource
+        .fetchGlobalEnabledThresholds();
+
     return budgetNotifications.map((n) => n.threshold).toList();
   }
 
   Future<List<double>> fetchEnabledThresholdsByCategoryId(
     int categoryID,
   ) async {
-    final budgetNotifications = await localDataSource.fetchEnabledThresholdsByCategoryId(
-      categoryID,
-    );
-    
+    final budgetNotifications = await localDataSource
+        .fetchEnabledThresholdsByCategoryId(categoryID);
+
     return budgetNotifications.map((n) => n.threshold).toList();
   }
 
-  Future<int> addOrUpdateBudgetNotification(BudgetNotification notification) async {
-    final result = await localDataSource.insertOrUpdateBudgetNotification(notification);
+  Future<int> addOrUpdateBudgetNotification(
+    BudgetNotification notification,
+  ) async {
+    final result = await localDataSource.insertOrUpdateBudgetNotification(
+      notification,
+    );
 
     return result.data ?? 0;
+  }
+
+  Future<int> addOrUpdateMovementNotificationConfig(
+    MovementNotificationConfig config,
+  ) async {
+    final result = await localDataSource
+        .insertOrUpdateMovementNotificationConfig(config);
+
+    return result.data ?? 0;
+  }
+
+  Future<List<MovementNotificationConfig>>
+  fetchAllMovementNotificationConfigs() async {
+    return await localDataSource.fetchAllMovementNotificationConfigs();
+  }
+
+  Future<MovementNotificationConfig?> fetchMovementNotificationConfigByType(
+    String typeKey,
+  ) async {
+    return await localDataSource.fetchMovementNotificationConfigByType(typeKey);
   }
 
   Future<bool> deleteBudgetNotification(int id) async {

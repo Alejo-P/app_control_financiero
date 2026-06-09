@@ -11,6 +11,7 @@ import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
+import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -312,6 +313,16 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!mounted) return;
 
+    final showNotification =
+        appState
+            .getMovementNotificationConfigByType(
+              isUpdateMovement
+                  ? MovementNotificationConfig.editMovementKey
+                  : MovementNotificationConfig.createMovementKey,
+            )
+            ?.isEnabled ??
+        false;
+
     final notificacion = Notificacion(
       title: '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
       description:
@@ -331,7 +342,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         'Repetir mensualmente': movimiento.repeatMovement ? 'Sí' : 'No',
       },
     );
-    await appState.insertarNotificacion(notificacion);
+    await appState.insertarNotificacion(
+      notificacion,
+      showNotification: showNotification,
+    );
 
     final porcentagesPresupuesto = await appState.getThresholdsToNotify(
       movimiento.categoryID,
@@ -402,6 +416,43 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     await appState.eliminarMovimiento(movementId, categoryId);
 
     if (!mounted) return;
+
+    final showNotification = appState.getMovementNotificationConfigByType(
+      MovementNotificationConfig.deleteMovementKey,
+    )?.isEnabled ?? false;
+
+    final notificacion = Notificacion(
+      title: 'Eliminación de movimiento',
+      description:
+          'El movimiento "${detalleMovimiento?.title}" ha sido eliminado exitosamente.',
+      type: TipoNotificacion.movimiento,
+      iconName: IconMapper.toName(Icons.delete_outline),
+      iconColorValue: Colors.red.value,
+      createdAt: currentDateTime,
+      extraData: {
+        "Categoría": categoryName,
+        "Concepto": detalleMovimiento?.title ?? '',
+        'Monto': detalleMovimiento?.amount ?? 0.0,
+        'Nota': detalleMovimiento?.note.isNotEmpty == true
+            ? detalleMovimiento?.note
+            : '(Sin nota)',
+        'Fecha creacion': detalleMovimiento != null
+            ? formatDate(detalleMovimiento!.date)
+            : '',
+        'Hora creacion': detalleMovimiento != null
+            ? detalleMovimiento!.time!.format(context)
+            : '',
+        'Repetir mensualmente':
+            detalleMovimiento?.repeatMovement == true ? 'Sí' : 'No',
+      },
+    );
+
+    await appState.insertarNotificacion(
+      notificacion,
+      showNotification: showNotification,
+    );
+
+    if (!mounted) return;
     setState(() {
       _isLoading = false; // Desactivar indicador de carga
     });
@@ -443,6 +494,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     categoriasFiltradas = categorias
         .where((categoria) => categoria.movementType == tipoMovimiento)
         .toList();
+
+    
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -491,7 +544,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: _isLoading
               ? LoadingScreen(message: '$_action movimiento...')
-              : detalleMovimiento == null && modo == MovimientoFormMode.edit
+              : detalleMovimiento == null && (modo == MovimientoFormMode.edit || isViewOnly)
               ? _EmptyMovimiento()
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

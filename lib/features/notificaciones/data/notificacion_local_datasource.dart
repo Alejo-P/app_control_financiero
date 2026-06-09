@@ -3,6 +3,7 @@ import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
+import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -141,6 +142,82 @@ class NotificacionLocalDataSource {
     }
 
     return [];
+  }
+
+  Future<List<MovementNotificationConfig>>
+  fetchAllMovementNotificationConfigs() async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> results = await db.query(
+      MovementNotificationConfigTable.table,
+    );
+
+    return results.map((e) => MovementNotificationConfig.fromMap(e)).toList();
+  }
+
+  Future<MovementNotificationConfig?> fetchMovementNotificationConfigByType(
+    String typeKey,
+  ) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> result = await db.query(
+      MovementNotificationConfigTable.table,
+      where: '${MovementNotificationConfigTable.typeKey} = ?',
+      whereArgs: [typeKey],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return MovementNotificationConfig.fromMap(result.first);
+    }
+
+    return null;
+  }
+
+  Future<OperationResult<int>> insertOrUpdateMovementNotificationConfig(
+    MovementNotificationConfig config,
+  ) async {
+    final db = await _dbHelper.database;
+
+    if (config.id != null) {
+      final result = await db.update(
+        MovementNotificationConfigTable.table,
+        config.toMap(),
+        where: '${MovementNotificationConfigTable.id} = ?',
+        whereArgs: [config.id],
+      );
+
+      return OperationResult<int>(
+        success: result > 0,
+        data: config.id!,
+        message: '',
+      );
+    }
+
+    final updated = await db.update(
+      MovementNotificationConfigTable.table,
+      config.toMap(),
+      where: '${MovementNotificationConfigTable.typeKey} = ?',
+      whereArgs: [config.typeKey],
+    );
+
+    if (updated > 0) {
+      final existing = await fetchMovementNotificationConfigByType(
+        config.typeKey,
+      );
+      return OperationResult<int>(
+        success: true,
+        data: existing?.id,
+        message: '',
+      );
+    }
+
+    final id = await db.insert(
+      MovementNotificationConfigTable.table,
+      config.toMap(),
+    );
+
+    return OperationResult<int>(success: id > 0, data: id, message: '');
   }
 
   Future<List<BudgetNotification>> fetchGlobalEnabledThresholds() async {

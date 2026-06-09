@@ -79,6 +79,16 @@ class BudgetNotificationConfigTable {
   static const createdAt = 'created_at';
 }
 
+class MovementNotificationConfigTable {
+  static const table = 'movement_notification_config';
+
+  static const id = 'id';
+  static const typeKey = 'type_key';
+  static const isEnabled = 'is_enabled';
+  static const isDefault = 'is_default';
+  static const createdAt = 'created_at';
+}
+
 class BudgetNotificationEventsTable {
   static const table = 'budget_notification_events';
 
@@ -143,6 +153,18 @@ Future<void> createTables(Database db) async {
         ${BudgetNotificationConfigTable.isEnabled} INTEGER NOT NULL DEFAULT 0,
         ${BudgetNotificationConfigTable.isDefault} INTEGER NOT NULL DEFAULT 0,
         ${BudgetNotificationConfigTable.createdAt} TEXT NOT NULL
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(MovementNotificationConfigTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${MovementNotificationConfigTable.table} (
+        ${MovementNotificationConfigTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${MovementNotificationConfigTable.typeKey} TEXT NOT NULL UNIQUE,
+        ${MovementNotificationConfigTable.isEnabled} INTEGER NOT NULL DEFAULT 0,
+        ${MovementNotificationConfigTable.isDefault} INTEGER NOT NULL DEFAULT 0,
+        ${MovementNotificationConfigTable.createdAt} TEXT NOT NULL
       );
     ''');
   }

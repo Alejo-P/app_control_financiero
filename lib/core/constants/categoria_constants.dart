@@ -33,6 +33,15 @@ const Map<String, IconData> categoryIconsMap = {
   'phone_android': Icons.phone_android,
   'home_repair_service': Icons.home_repair_service,
   'build': Icons.build,
+  'directions_bike': Icons.directions_bike,
+  'local_library': Icons.local_library,
+  'local_cafe': Icons.local_cafe,
+  'local_bar': Icons.local_bar,
+  'credit_card': Icons.credit_card,
+  'account_balance': Icons.account_balance,
+  'account_balance_wallet': Icons.account_balance_wallet,
+  'card_giftcard': Icons.card_giftcard,
+  'person': Icons.person,
 };
 
 final Map<String, IconData> extraIconsMap = {
@@ -41,6 +50,7 @@ final Map<String, IconData> extraIconsMap = {
   'bar_chart': Icons.bar_chart,
   'warning_amber_outlined': Icons.warning_amber_outlined,
   'account_balance_wallet_rounded': Icons.account_balance_wallet_rounded,
+  'delete_outline': Icons.delete_outline,
 };
 
 // Lista para compatibilidad con código existente

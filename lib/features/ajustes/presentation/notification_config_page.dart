@@ -3,6 +3,7 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/ajustes/widgets/item_card.dart';
 import 'package:control_financiero/features/ajustes/widgets/section_title.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
+import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/number_input_card.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +101,7 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
 
     if (mounted) {
       _validateCustomThreshold(_customThresholdController.text);
-       AppSnackbar.success(context, 'Umbral eliminado exitosamente');
+      AppSnackbar.success(context, 'Umbral eliminado exitosamente');
     }
   }
 
@@ -124,25 +125,52 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
 
                   ItemCard(
                     title: 'Creación de movimientos',
-                    value: false,
+                    value:
+                        appState
+                            .getMovementNotificationConfigByType(
+                              MovementNotificationConfig.createMovementKey,
+                            )
+                            ?.isEnabled ??
+                        false,
                     onChanged: (value) {
-                      // Aquí puedes manejar el cambio de estado
+                      appState.updateMovementNotificationConfig(
+                        typeKey: MovementNotificationConfig.createMovementKey,
+                        isEnabled: value,
+                      );
                     },
                   ),
 
                   ItemCard(
                     title: 'Edición de movimientos',
-                    value: false,
+                    value:
+                        appState
+                            .getMovementNotificationConfigByType(
+                              MovementNotificationConfig.editMovementKey,
+                            )
+                            ?.isEnabled ??
+                        false,
                     onChanged: (value) {
-                      // Aquí puedes manejar el cambio de estado
+                      appState.updateMovementNotificationConfig(
+                        typeKey: MovementNotificationConfig.editMovementKey,
+                        isEnabled: value,
+                      );
                     },
                   ),
 
                   ItemCard(
                     title: 'Eliminación de movimientos',
-                    value: false,
+                    value:
+                        appState
+                            .getMovementNotificationConfigByType(
+                              MovementNotificationConfig.deleteMovementKey,
+                            )
+                            ?.isEnabled ??
+                        false,
                     onChanged: (value) {
-                      // Aquí puedes manejar el cambio de estado
+                      appState.updateMovementNotificationConfig(
+                        typeKey: MovementNotificationConfig.deleteMovementKey,
+                        isEnabled: value,
+                      );
                     },
                   ),
 

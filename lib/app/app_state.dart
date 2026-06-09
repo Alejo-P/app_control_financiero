@@ -16,6 +16,7 @@ import 'package:control_financiero/features/movimientos/models/totales_mensuales
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
+import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
@@ -118,7 +119,9 @@ class AppState extends ChangeNotifier {
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
   List<BudgetNotification> budgetNotifications = [];
-  List<double> get budgetThresholds => budgetNotifications.map((n) => n.threshold).toList();
+  List<MovementNotificationConfig> movementNotificationConfigs = [];
+  List<double> get budgetThresholds =>
+      budgetNotifications.map((n) => n.threshold).toList();
   List<Movimiento> get movimientosPresupuestos =>
       _presupuestosRepository.movimientos;
   double? get totalGastos => _totalGastos;
@@ -146,6 +149,7 @@ class AppState extends ChangeNotifier {
       loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
       updateHistory(),
       getAllThresholds(),
+      loadMovementNotificationConfigs(),
       loadNotifications(),
     ]);
     await loadCategoryData(notify: false);
@@ -243,6 +247,8 @@ class AppState extends ChangeNotifier {
     final configs = await _notificacionRepository
         .fetchGlobalEnabledThresholds();
 
+    configs.sort((a, b) => a.compareTo(b));
+
     final events = await _notificacionRepository
         .fetchBudgetNotificationEventsByCategoryIdAndDate(categoryId, date);
 
@@ -270,8 +276,61 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addOrUpdateBudgetNotification(BudgetNotification notification) async {
-    int newId = await _notificacionRepository.addOrUpdateBudgetNotification(notification);
+  Future<void> loadMovementNotificationConfigs() async {
+    final configs = await _notificacionRepository
+        .fetchAllMovementNotificationConfigs();
+    movementNotificationConfigs = configs;
+    notifyListeners();
+  }
+
+  MovementNotificationConfig? getMovementNotificationConfigByType(
+    String typeKey,
+  ) {
+    try {
+      return movementNotificationConfigs.firstWhere(
+        (config) => config.typeKey == typeKey,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> addOrUpdateMovementNotificationConfig(
+    MovementNotificationConfig config,
+  ) async {
+    int newId = await _notificacionRepository
+        .addOrUpdateMovementNotificationConfig(config);
+    if (config.id == null) {
+      final newConfig = config.copyWith(id: newId);
+      movementNotificationConfigs.add(newConfig);
+    } else {
+      movementNotificationConfigs = movementNotificationConfigs
+          .map(
+            (existing) =>
+                existing.typeKey == config.typeKey ? config : existing,
+          )
+          .toList();
+    }
+    notifyListeners();
+  }
+
+  Future<void> updateMovementNotificationConfig({
+    required String typeKey,
+    required bool isEnabled,
+  }) async {
+    final config = getMovementNotificationConfigByType(typeKey);
+    if (config == null) return;
+
+    final updatedConfig = config.copyWith(isEnabled: isEnabled);
+    await addOrUpdateMovementNotificationConfig(updatedConfig);
+  }
+
+  Future<void> addOrUpdateBudgetNotification(
+    BudgetNotification notification,
+  ) async {
+    int newId = await _notificacionRepository.addOrUpdateBudgetNotification(
+      notification,
+    );
     if (notification.id == null) {
       final newNotification = notification.copyWith(id: newId);
       budgetNotifications.add(newNotification);
@@ -286,9 +345,12 @@ class AppState extends ChangeNotifier {
   }) async {
     final notification = budgetNotifications.firstWhere((n) => n.id == id);
     final updatedNotification = notification.copyWith(
-      isEnabledNotification: isEnabledNotification ?? notification.isEnabledNotification,
+      isEnabledNotification:
+          isEnabledNotification ?? notification.isEnabledNotification,
     );
-    budgetNotifications = budgetNotifications.map((n) => n.id == id ? updatedNotification : n).toList();
+    budgetNotifications = budgetNotifications
+        .map((n) => n.id == id ? updatedNotification : n)
+        .toList();
     budgetNotifications.sort((a, b) => b.threshold.compareTo(a.threshold));
 
     await addOrUpdateBudgetNotification(updatedNotification);
