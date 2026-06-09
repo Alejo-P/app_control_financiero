@@ -97,6 +97,11 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
   Future<void> _deleteThreshold(int id) async {
     final appState = context.read<AppState>();
     await appState.deleteBudgetNotification(id);
+
+    if (mounted) {
+      _validateCustomThreshold(_customThresholdController.text);
+       AppSnackbar.success(context, 'Umbral eliminado exitosamente');
+    }
   }
 
   @override
