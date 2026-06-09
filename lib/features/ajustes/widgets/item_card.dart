@@ -4,7 +4,7 @@ class ItemCard extends StatelessWidget {
   final String title;
   final bool value;
   final bool showDeleteButton;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool?> onChanged;
   final VoidCallback? onDelete;
 
   const ItemCard({
@@ -24,6 +24,7 @@ class ItemCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         title: Text(
           title,
           maxLines: 2,
@@ -33,12 +34,14 @@ class ItemCard extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Switch(value: value, onChanged: onChanged),
             if (showDeleteButton)
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: onDelete,
+                tooltip: 'Eliminar umbral personalizado',
               ),
+            
+            Checkbox(value: value, onChanged: onChanged),
           ],
         ),
       ),

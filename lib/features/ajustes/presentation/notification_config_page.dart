@@ -135,7 +135,7 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
                     onChanged: (value) {
                       appState.updateMovementNotificationConfig(
                         typeKey: MovementNotificationConfig.createMovementKey,
-                        isEnabled: value,
+                        isEnabled: value!,
                       );
                     },
                   ),
@@ -152,7 +152,7 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
                     onChanged: (value) {
                       appState.updateMovementNotificationConfig(
                         typeKey: MovementNotificationConfig.editMovementKey,
-                        isEnabled: value,
+                        isEnabled: value!,
                       );
                     },
                   ),
@@ -169,7 +169,7 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
                     onChanged: (value) {
                       appState.updateMovementNotificationConfig(
                         typeKey: MovementNotificationConfig.deleteMovementKey,
-                        isEnabled: value,
+                        isEnabled: value!,
                       );
                     },
                   ),
