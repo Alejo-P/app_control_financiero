@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -113,11 +114,20 @@ class _MonthSelectionState extends State<MonthSelection> {
     final isLimitPast = isLimitPastMonth(selectedDate);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final backgroundThemeColor = Theme.of(context).colorScheme.surface;
+    final [rBorder, gBorder, bBorder] = getRGBFromColor(
+      Colors.grey.shade600,
+    );
 
     return Card(
       color: backgroundThemeColor,
       elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+          width: 1.5
+        )
+      ),
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Row(

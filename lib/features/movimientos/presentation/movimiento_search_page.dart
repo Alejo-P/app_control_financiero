@@ -1,4 +1,5 @@
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
@@ -113,6 +114,9 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     final colors = theme.colorScheme;
     final textTheme = theme.textTheme;
     final categorias = widget.listaCategorias;
+    final [rBorder, gBorder, bBorder] = getRGBFromColor(
+      Colors.grey.shade600,
+    );
 
     if (categorias.isEmpty) {
       return Scaffold(
@@ -155,6 +159,10 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
               elevation: 6,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+                  width: 1.5
+                ),
               ),
               color: colors.surface,
               child: Padding(
@@ -186,6 +194,10 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                           elevation: 6,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+                              width: 1.5
+                            ),
                           ),
                           color: colors.surface,
                           child: Padding(
