@@ -24,7 +24,7 @@ class ItemCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        contentPadding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
         title: Text(
           title,
           maxLines: 2,

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/services/navigation_service.dart';
@@ -133,6 +134,15 @@ class NotificationService {
     if (!_isMobile()) {
       return;
     }
+
+    final pending = await _notifications.pendingNotificationRequests();
+
+    debugPrint('Pendientes: ${pending.length}');
+
+    for (final p in pending) {
+      debugPrint('${p.id} - ${p.title}');
+    }
+    debugPrint('Cancelando notificación $id');
     
     await _notifications.cancel(id);
   }

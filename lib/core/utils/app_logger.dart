@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:flutter/material.dart';
 
 enum LogLevel { debug, info, warning, error }
 
@@ -14,6 +15,6 @@ class AppLogger {
 
     // Por ahora consola
     // Luego puedes redirigir a archivo o servicio remoto
-    print('$now $prefix$label $message');
+    debugPrint('$now $prefix$label $message');
   }
 }

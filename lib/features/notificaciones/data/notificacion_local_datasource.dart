@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
@@ -83,6 +84,10 @@ class NotificacionLocalDataSource {
       return Notificacion.fromMap(result.first);
     }
 
+    AppLogger.log(
+      'Notificación con id $id no encontrada en la base de datos',
+      level: LogLevel.warning,
+    );
     return null;
   }
 
