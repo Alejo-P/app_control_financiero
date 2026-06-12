@@ -73,16 +73,6 @@ class _MovimientosPageState extends State<MovimientosPage> {
                 fechaInicial: _appState.selectedMovementsMonth,
               ),
             );
-
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (_) => MovimientoFormPage(
-            //       mode: MovimientoFormMode.create,
-            //       fechaInicial: _appState.selectedMovementsMonth,
-            //     ),
-            //   ),
-            // );
           },
         ),
       ]);
@@ -175,24 +165,34 @@ class _MovimientosPageState extends State<MovimientosPage> {
                         SizedBox(height: 8),
                         SizedBox(
                           height: 35,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: categories.length,
-                            separatorBuilder: (context, index) =>
-                                SizedBox(width: 8),
-                            itemBuilder: (context, index) {
-                              final filtro = categories[index];
-
-                              return CategoryChip(
-                                label: filtro.label,
-                                selected: filtro == selectedFilter,
-                                icon: filtro.icon,
-                                iconColor: filtro.color,
-                                onTap: () {
-                                  appState.changeMovimientoFiltro(filtro);
-                                },
-                              );
-                            },
+                          child: Center(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  for (
+                                    var i = 0;
+                                    i < categories.length;
+                                    i++
+                                  ) ...[
+                                    CategoryChip(
+                                      label: categories[i].label,
+                                      selected: categories[i] == selectedFilter,
+                                      icon: categories[i].icon,
+                                      iconColor: categories[i].color,
+                                      onTap: () {
+                                        appState.changeMovimientoFiltro(
+                                          categories[i],
+                                        );
+                                      },
+                                    ),
+                                    if (i != categories.length - 1)
+                                      const SizedBox(width: 8),
+                                  ],
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                         SizedBox(height: 16),
