@@ -7,7 +7,13 @@ class LabelCard extends StatelessWidget {
   final Color? iconColor;
   final TextStyle? textStyle;
 
-  const LabelCard({super.key, required this.label, this.iconData, this.iconColor, this.textStyle});
+  const LabelCard({
+    super.key,
+    required this.label,
+    this.iconData,
+    this.iconColor,
+    this.textStyle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,22 +22,23 @@ class LabelCard extends StatelessWidget {
     return Row(
       children: [
         if (iconData != null) ...[
-            Container(
-              margin: const EdgeInsets.only(right: 10),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Color.fromRGBO(r, g, b, 0.15),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: Icon(
-                iconData,
-                size: 22,
-                color: iconColor ?? Colors.grey,
-              ),
+          Container(
+            margin: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(r, g, b, 0.15),
+              borderRadius: BorderRadius.circular(50),
             ),
+            child: Icon(iconData, size: 22, color: iconColor ?? Colors.grey),
+          ),
           const SizedBox(width: 8),
         ],
-        Text(label, style: textStyle),
+        Text(
+          label,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          style: textStyle,
+        ),
       ],
     );
   }

@@ -95,6 +95,28 @@ class _TextInputCardState extends State<TextInputCard> {
           child: TextFormField(
             controller: widget.textController,
             focusNode: _focusNode,
+            contextMenuBuilder: (context, editableTextState) {
+              final items = editableTextState.contextMenuButtonItems.map((item) {
+                final label = switch (item.type) {
+                  ContextMenuButtonType.cut => 'Cortar',
+                  ContextMenuButtonType.copy => 'Copiar',
+                  ContextMenuButtonType.paste => 'Pegar',
+                  ContextMenuButtonType.selectAll => 'Seleccionar todo',
+                  _ => item.label,
+                };
+
+                return ContextMenuButtonItem(
+                  onPressed: item.onPressed,
+                  label: label,
+                  type: item.type,
+                );
+              }).toList();
+
+              return AdaptiveTextSelectionToolbar.buttonItems(
+                anchors: editableTextState.contextMenuAnchors,
+                buttonItems: items,
+              );
+            },
             decoration: InputDecoration(
               border: InputBorder.none,
               hintStyle: TextStyle(color: Colors.grey),

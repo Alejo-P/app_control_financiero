@@ -5,7 +5,9 @@ import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento_search_filters.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/label_card.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,10 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
   List<Movimiento> listaMovimientos = [];
   List<Movimiento> movimientosFiltrados = [];
   List<DateTime> fechasUnicas = [];
+  DateTime? fechaInicio;
+  DateTime? fechaFin;
+  AgrupacionBusqueda agrupacion = AgrupacionBusqueda.ninguna;
+  final List<String> etiquetasSeleccionadas = [];
   bool _isLoading = false;
   int _requestId = 0;
   int categoriaSeleccionada = -1;
@@ -84,14 +90,16 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     if (categoriaSeleccionada == categoriaId) return;
 
     try {
-      final categoria = widget.listaCategorias.firstWhere((cat) => cat.id == categoriaId);
-      
+      final categoria = widget.listaCategorias.firstWhere(
+        (cat) => cat.id == categoriaId,
+      );
+
       setState(() {
         categoriaSeleccionada = categoriaId;
         iconoCategoriaSeleccionada = categoria.iconData;
         colorCategoriaSeleccionada = categoria.iconColor;
       });
-      
+
       await obtenerMovimientosPorcategoria(categoriaSeleccionada);
     } on Exception catch (e, stackTrace) {
       if (!mounted) return;
@@ -133,6 +141,28 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     });
 
     _onSearchTerm(); // Realizar el filtrado si hay termino a buscar
+  }
+
+  Future<void> _showDateRangePicker() async {
+    final now = DateTime.now();
+    final firstDate = DateTime(now.year - 5);
+    final lastDate = DateTime(now.year + 1);
+
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDateRange: (fechaInicio != null && fechaFin != null)
+          ? DateTimeRange(start: fechaInicio!, end: fechaFin!)
+          : null,
+    );
+
+    if (picked != null) {
+      setState(() {
+        fechaInicio = picked.start;
+        fechaFin = picked.end;
+      });
+    }
   }
 
   @override
@@ -214,7 +244,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         LabelCard(
-                          label: "Filtrar por categoría",
+                          label: "Categoría",
                           iconData: iconoCategoriaSeleccionada,
                           iconColor: colorCategoriaSeleccionada,
                           textStyle: textTheme.bodyMedium?.copyWith(
@@ -225,6 +255,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButtonFormField<int>(
+                            isExpanded: true,
                             value: categoriaSeleccionada,
                             decoration: InputDecoration(
                               border: dropDownBorder,
@@ -245,8 +276,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                                   children: [
                                     Icon(categoria.iconData, size: 20),
                                     const SizedBox(width: 12),
-                                    SizedBox(
-                                      width: 150,
+                                    Expanded(
                                       child: Text(
                                         categoria.name,
                                         overflow: TextOverflow.ellipsis,
@@ -262,21 +292,17 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                             }).toList(),
                             selectedItemBuilder: (context) {
                               return categorias.map((categoria) {
-                                return Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      width: 150,
-                                      child: Text(
-                                        categoria.name,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: colors.primary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
+                                return Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    categoria.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: colors.primary,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                  ],
+                                  ),
                                 );
                               }).toList();
                             },
@@ -285,6 +311,73 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                               _onChangeCategoria(value);
                             },
                           ),
+                        ),
+                      ],
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        LabelCard(
+                          label: "Rango de fecha",
+                          iconData: Icons.date_range,
+                          iconColor: Colors.grey.shade600,
+                          textStyle: textTheme.bodyMedium?.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        TextButton(
+                          onPressed: _showDateRangePicker,
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            backgroundColor: colors.primary.withOpacity(0.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            (fechaInicio != null && fechaFin != null)
+                                ? '${formatDate(fechaInicio!)} - ${formatDate(fechaFin!)}'
+                                : 'Seleccionar rango',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colors.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        LabelCard(
+                          label: "Etiquetas",
+                          iconData: Icons.label_outline,
+                          iconColor: Colors.grey.shade600,
+                          textStyle: textTheme.bodyMedium?.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Implementar input para etiquetas (puede ser un TextField con chips o un dropdown con selección múltiple)
+                        
+                      ],
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomButton(
+                          onTap: () {},
+                          icon: Icons.search_outlined,
+                          text: 'Buscar',
                         ),
                       ],
                     ),

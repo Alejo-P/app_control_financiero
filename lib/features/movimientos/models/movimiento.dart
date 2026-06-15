@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -48,30 +49,31 @@ class Movimiento {
   // Factory constructor to create a Movimiento from JSON
   factory Movimiento.fromMap(Map<String, dynamic> map) {
     return Movimiento(
-      id: map['id'] != null ? map['id'] as int : null,
-      title: map['title'],
-      categoryID: map['category_id'],
-      amount: map['amount'],
-      date: DateTime.parse(map['date']),
+      id: map[MovimientosTable.id] != null ? map[MovimientosTable.id] as int : null,
+      title: map[MovimientosTable.title],
+      categoryID: map[MovimientosTable.categoryId],
+      amount: map[MovimientosTable.amount],
+      date: DateTime.parse(map[MovimientosTable.date]),
       time: TimeOfDay(
-        hour: int.parse(map['time'].split(':')[0]),
-        minute: int.parse(map['time'].split(':')[1]),
+        hour: int.parse(map[MovimientosTable.time].split(':')[0]),
+        minute: int.parse(map[MovimientosTable.time].split(':')[1]),
       ),
-      note: map['note'],
-      repeatMovement: map['repeat_movement'] == 1,
+      note: map[MovimientosTable.note],
+      repeatMovement: map[MovimientosTable.repeatMovement] == 1,
     );
   }
 
   // Method to convert a Movimiento to JSON
   Map<String, dynamic> toMap() {
     return {
-      'title': title,
-      'category_id': categoryID,
-      'amount': amount,
-      'date': DateFormat('yyyy-MM-dd').format(date),
-      'time': '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
-      'note': note,
-      'repeat_movement': repeatMovement ? 1 : 0,
+      MovimientosTable.id: id,
+      MovimientosTable.title: title,
+      MovimientosTable.categoryId: categoryID,
+      MovimientosTable.amount: amount,
+      MovimientosTable.date: DateFormat('yyyy-MM-dd').format(date),
+      MovimientosTable.time: '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+      MovimientosTable.note: note,
+      MovimientosTable.repeatMovement: repeatMovement ? 1 : 0,
     };
   }
 

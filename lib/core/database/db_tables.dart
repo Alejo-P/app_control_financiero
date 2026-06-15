@@ -45,6 +45,22 @@ class MovimientosTable {
   static const repeatMovement = 'repeat_movement';
 }
 
+class EtiquetasTable {
+  static const table = 'etiquetas';
+
+  static const id = 'id';
+  static const name = 'name';
+  static const colorValue = 'color_value';
+}
+
+class MovimientoEtiquetaTable {
+  static const table = 'movimiento_etiqueta';
+
+  static const id = 'id';
+  static const movimientoId = 'movimiento_id';
+  static const etiquetaId = 'etiqueta_id';
+}
+
 class IngresoPresupuestadoTable {
   static const table = 'ingreso_presupuestado';
 
@@ -247,6 +263,28 @@ Future<void> createTables(Database db) async {
         ${PresupuestosTable.amount} REAL NOT NULL,
         ${PresupuestosTable.repeatBudget} INTEGER DEFAULT 0,
         FOREIGN KEY(${PresupuestosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(EtiquetasTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${EtiquetasTable.table} (
+        ${EtiquetasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${EtiquetasTable.name} TEXT NOT NULL,
+        ${EtiquetasTable.colorValue} INTEGER NOT NULL
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(MovimientoEtiquetaTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${MovimientoEtiquetaTable.table} (
+        ${MovimientoEtiquetaTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${MovimientoEtiquetaTable.movimientoId} INTEGER NOT NULL,
+        ${MovimientoEtiquetaTable.etiquetaId} INTEGER NOT NULL,
+        FOREIGN KEY(${MovimientoEtiquetaTable.movimientoId}) REFERENCES ${MovimientosTable.table}(${MovimientosTable.id}),
+        FOREIGN KEY(${MovimientoEtiquetaTable.etiquetaId}) REFERENCES ${EtiquetasTable.table}(${EtiquetasTable.id})
       );
     ''');
   }
