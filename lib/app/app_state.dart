@@ -7,6 +7,8 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
+import 'package:control_financiero/features/etiquetas/data/etiquetas_repository.dart';
+import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
@@ -64,18 +66,15 @@ class AppState extends ChangeNotifier {
   // Configuracion de caja para Hive
   static const _settingsBox = 'settings';
   static const _themeKey = 'dark_mode';
-  static const _notificationKey = 'enable_notifications';
 
   bool _isDarkMode = false;
   bool get isDarkMode => _isDarkMode;
-
-  bool _isEnableNotifications = true;
-  bool get isEnableNotifications => _isEnableNotifications;
 
   List<AppBarAction> _appBarActions = [];
   List<AppBarAction> get appBarActions => _appBarActions;
 
   final MovimientosRepository _movimientosRepository;
+  final EtiquetasRepository _etiquetasRepository;
   final CategoriasRepository _categoriasRepository;
   final TipoCategoriaRepository _tipoCategoriaRepository;
   final PresupuestosRepository _presupuestosRepository;
@@ -89,6 +88,7 @@ class AppState extends ChangeNotifier {
     this._presupuestosRepository,
     this._historialRepository,
     this._notificacionRepository,
+    this._etiquetasRepository,
   );
 
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
@@ -115,6 +115,7 @@ class AppState extends ChangeNotifier {
       _tipoCategoriaRepository.tipoCategorias;
 
   List<Movimiento> movimientos = [];
+  List<Etiqueta> etiquetas = [];
   List<Categoria> categorias = [];
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
@@ -145,6 +146,7 @@ class AppState extends ChangeNotifier {
     await Future.wait([
       _tipoCategoriaRepository.fetchTipoCategorias(),
       _categoriasRepository.fetchAllCategorias(),
+      loadAllTags(notify: false),
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
       loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
       updateHistory(),
@@ -186,6 +188,11 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
+  Future<void> loadAllTags({bool notify = false}) async {
+    etiquetas = await _etiquetasRepository.getAllEtiquetas();
+    if (notify) notifyListeners();
+  }
+
   Future<Box> _getSettingsBox() async {
     if (!Hive.isBoxOpen(_settingsBox)) {
       return await Hive.openBox(_settingsBox);
@@ -196,7 +203,6 @@ class AppState extends ChangeNotifier {
   Future<void> initialize() async {
     final box = await _getSettingsBox();
     _isDarkMode = box.get(_themeKey, defaultValue: false);
-    _isEnableNotifications = box.get(_notificationKey, defaultValue: true);
   }
 
   Future<void> loadPresupuestosByMonthAndYear(
@@ -665,15 +671,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setNotifications(bool value) async {
-    _isEnableNotifications = value;
-
-    final box = await _getSettingsBox();
-    await box.put(_notificationKey, value);
-
-    notifyListeners();
-  }
-
   void changeTab(int index) {
     if (currentTab == index) return;
     if (index > pageNames.length) {
@@ -795,8 +792,71 @@ class AppState extends ChangeNotifier {
     return await _movimientosRepository.fetchMovimientoById(id);
   }
 
+  Future<List<Movimiento>> obtenerMovimientosPorEtiqueta(int etiquetaId) async {
+    final movimientos = await _movimientosRepository.getMovimientosByEtiqueta(
+      etiquetaId,
+    );
+
+    if (movimientos == null) {
+      transactionResultMessage = 'Ocurrio un error al obtener los movmientos';
+      transactionSuccess = false;
+      notifyListeners();
+      return [];
+    }
+
+    return movimientos;
+  }
+
   Future<DetalleMovimiento?> obtenerDetalleMovimientoPorId(int id) async {
-    return await _movimientosRepository.fetchDetalleMovimientoById(id);
+    final detalle = await _movimientosRepository.fetchDetalleMovimientoById(id);
+    if (detalle == null) return null;
+
+    final etiquetasMovimiento = await _etiquetasRepository
+        .getEtiquetasForMovimiento(id);
+    return detalle.copyWith(tags: etiquetasMovimiento);
+  }
+
+  Future<void> syncMovimientoEtiquetas(
+    int movimientoId,
+    List<Etiqueta> selectedTags,
+  ) async {
+    try {
+      final currentTags = await _etiquetasRepository.getEtiquetasForMovimiento(
+        movimientoId,
+      );
+      final currentTagIds = currentTags.map((tag) => tag.id).toSet();
+      final selectedTagIds = selectedTags.map((tag) => tag.id).toSet();
+
+      final tagsToAdd = selectedTags.where(
+        (tag) => !currentTagIds.contains(tag.id),
+      );
+      final tagsToRemove = currentTags.where(
+        (tag) => !selectedTagIds.contains(tag.id),
+      );
+
+      for (final etiqueta in tagsToAdd) {
+        if (etiqueta.id != null) {
+          await _etiquetasRepository.assignEtiquetaToMovimiento(
+            movimientoId,
+            etiqueta.id!,
+          );
+        }
+      }
+
+      for (final etiqueta in tagsToRemove) {
+        if (etiqueta.id != null) {
+          await _etiquetasRepository.removeEtiquetaFromMovimiento(
+            movimientoId,
+            etiqueta.id!,
+          );
+        }
+      }
+    } catch (e) {
+      AppLogger.log(
+        'Error sincronizando etiquetas del movimiento: $e',
+        level: LogLevel.error,
+      );
+    }
   }
 
   Future<int> agregarMovimiento(Movimiento movimiento) async {

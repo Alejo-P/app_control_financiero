@@ -257,6 +257,22 @@ class MovimientosLocalDataSource {
     );
   }
 
+  Future<List<Movimiento>> getMovimientosByEtiqueta(int etiquetaId) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+        SELECT m.*
+        FROM ${MovimientosTable.table} m
+        JOIN ${MovimientoEtiquetaTable.table} me ON m.${MovimientosTable.id} = me.${MovimientoEtiquetaTable.movimientoId}
+        WHERE me.${MovimientoEtiquetaTable.etiquetaId} = ?
+        ORDER BY m.${MovimientosTable.date} DESC, m.${MovimientosTable.time} DESC
+      ''',
+      [etiquetaId],
+    );
+
+    return maps.map(Movimiento.fromMap).toList();
+  }
+
   Future<List<Map<String, dynamic>>> getMovimientosForExcel() async {
     final db = await _dbHelper.database;
 

@@ -271,7 +271,7 @@ Future<void> createTables(Database db) async {
     await db.execute('''
       CREATE TABLE ${EtiquetasTable.table} (
         ${EtiquetasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${EtiquetasTable.name} TEXT NOT NULL,
+        ${EtiquetasTable.name} TEXT UNIQUE NOT NULL,
         ${EtiquetasTable.colorValue} INTEGER NOT NULL
       );
     ''');

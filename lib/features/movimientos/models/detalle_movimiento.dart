@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
+import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,7 @@ class DetalleMovimiento extends Equatable {
   final int? categoryId;
   final TimeOfDay? time;
   final String note;
+  final List<Etiqueta> tags;
 
   const DetalleMovimiento({
     this.id = 0,
@@ -27,6 +29,7 @@ class DetalleMovimiento extends Equatable {
     required this.date,
     required this.categoryIcon,
     required this.categoryColor,
+    required this.tags,
     this.categoryName,
     this.isEnabledRepeatMovement = false,
     this.repeatMovement = false,
@@ -49,6 +52,7 @@ class DetalleMovimiento extends Equatable {
     int? categoryId,
     TimeOfDay? time,
     String? note,
+    List<Etiqueta>? tags,
   }) {
     return DetalleMovimiento(
       id: id ?? this.id,
@@ -65,6 +69,7 @@ class DetalleMovimiento extends Equatable {
       categoryId: categoryId ?? this.categoryId,
       time: time ?? this.time,
       note: note ?? this.note,
+      tags: tags ?? this.tags,
     );
   }
 
@@ -97,6 +102,7 @@ class DetalleMovimiento extends Equatable {
             )
           : null,
       categoryId: map['categoriaId'] != null ? map['categoriaId'] as int : null,
+      tags: map['etiquetas'] != null ? map['tags'] : null
     );
   }
 
@@ -118,12 +124,13 @@ class DetalleMovimiento extends Equatable {
       'repeatMovement': repeatMovement ? 1 : 0,
       'time': time != null ? '${time!.hour}:${time!.minute}' : null,
       'categoriaId': categoryId,
+      'tags': tags
     };
   }
 
   @override
   String toString() {
-    return 'DetalleMovimiento(id: $id, title: $title, amount: $amount, movementType: $movementType, date: $date, categoryName: $categoryName, categoryIcon: $categoryIcon, categoryColor: $categoryColor, isEnabledRepeatMovement: $isEnabledRepeatMovement, repeatMovement: $repeatMovement, categoryId: $categoryId, time: $time, note: $note)';
+    return 'DetalleMovimiento(id: $id, title: $title, amount: $amount, movementType: $movementType, date: $date, categoryName: $categoryName, categoryIcon: $categoryIcon, categoryColor: $categoryColor, isEnabledRepeatMovement: $isEnabledRepeatMovement, repeatMovement: $repeatMovement, categoryId: $categoryId, time: $time, note: $note, tags: $tags)';
   }
 
   // Getter para comparar 2 objetos DetalleMovimiento por su contenido, no por su referencia
@@ -142,5 +149,6 @@ class DetalleMovimiento extends Equatable {
     categoryId,
     time,
     note,
+    tags,
   ];
 }

@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/models/operation_result.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/excel_exporter.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
@@ -94,6 +95,25 @@ class MovimientosRepository {
   Future<OperationResult<void>> deleteMovimiento(int id) async {
     final result = await localDataSource.deleteMovimiento(id);
     return result;
+  }
+
+  /// Obtiene todos los movimientos asociados a una etiqueta específica.
+  /// @param etiquetaId El ID de la etiqueta.
+  /// @return Una lista de objetos Movimiento asociados a la etiqueta.
+  /// @throws Exception Si ocurre un error durante la obtención de los movimientos.
+  Future<List<Movimiento>?> getMovimientosByEtiqueta(int etiquetaId) async {
+    try {
+      final movimientos = await localDataSource.getMovimientosByEtiqueta(
+        etiquetaId,
+      );
+      return movimientos;
+    } catch (e) {
+      AppLogger.log(
+        'Error al obtener movimientos por etiqueta: $e',
+        level: LogLevel.error,
+      );
+      return null;
+    }
   }
 
   /// Obtiene la informacion necesaria sobre los movimeintos

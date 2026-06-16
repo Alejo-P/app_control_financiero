@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/database/db_tables.dart';
+import 'package:flutter/material.dart';
 
 class Etiqueta {
   final int id;
@@ -38,4 +39,6 @@ class Etiqueta {
       EtiquetasTable.colorValue: colorValue,
     };
   }
+
+  Color get color => Color(colorValue);
 }

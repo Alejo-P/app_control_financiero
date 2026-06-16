@@ -6,6 +6,7 @@ import 'package:control_financiero/core/constants/notificacion_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
@@ -48,10 +49,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   String categoryName = 'Sin categoría';
   TimeOfDay movementTime = TimeOfDay.now();
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
+  List<Etiqueta> etiquetasMovimientos = [];
   bool isEnabledRepeatMovement = false;
   bool repeatMovement = false;
   String _action = "Guardando";
   List<Categoria> categorias = [];
+  List<Etiqueta> etiquetasDisponibles = [];
   List<Categoria> categoriasFiltradas = [];
   DateTime selectedDate = getCurrentDateWithoutTime();
   final _formKey = GlobalKey<FormState>();
@@ -86,9 +89,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           : getCurrentDateWithoutTime();
     }
 
-    if (id != -1) {
-      _load(id);
-    }
+    _load(id);
 
     _loaded = true;
   }
@@ -100,6 +101,11 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       _isLoading = true;
       _action = "Cargando";
     });
+
+    if (appState.etiquetas.isEmpty) {
+      await appState.loadAllTags(notify: false);
+    }
+    etiquetasDisponibles = appState.etiquetas;
 
     final result = await appState.obtenerDetalleMovimientoPorId(id);
     if (result != null) {
@@ -118,6 +124,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       isEnabledRepeatMovement = result.isEnabledRepeatMovement;
       repeatMovement = result.repeatMovement;
       tipoMovimiento = result.movementType;
+      etiquetasMovimientos = result.tags;
     }
 
     if (!mounted) return;
@@ -160,6 +167,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       note: _noteController.text.trim(),
       isEnabledRepeatMovement: isEnabledRepeatMovement,
       repeatMovement: repeatMovement,
+      tags: etiquetasMovimientos,
     );
     final original =
         detalleMovimiento ??
@@ -176,6 +184,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           note: '',
           isEnabledRepeatMovement: false,
           repeatMovement: false,
+          tags: [],
         );
 
     return (original != current);
@@ -207,6 +216,22 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       categoryIcon = categoria.iconData;
       categoryColor = categoria.iconColor;
       isEnabledRepeatMovement = categoria.enabledRepeatMovement;
+    });
+    _checkEnableSaveButton();
+  }
+
+  void _toggleEtiqueta(Etiqueta etiqueta) {
+    setState(() {
+      final alreadySelected = etiquetasMovimientos.any(
+        (selected) => selected.id == etiqueta.id,
+      );
+      if (alreadySelected) {
+        etiquetasMovimientos.removeWhere(
+          (selected) => selected.id == etiqueta.id,
+        );
+      } else {
+        etiquetasMovimientos.add(etiqueta);
+      }
     });
     _checkEnableSaveButton();
   }
@@ -310,6 +335,14 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     final result = isUpdateMovement
         ? await appState.actualizarMovimiento(movimiento)
         : await appState.agregarMovimiento(movimiento);
+
+    final savedMovimientoId = isUpdateMovement ? movementId : result;
+    if (savedMovimientoId != null && savedMovimientoId > 0) {
+      await appState.syncMovimientoEtiquetas(
+        savedMovimientoId,
+        etiquetasMovimientos,
+      );
+    }
 
     if (!mounted) return;
 
@@ -417,9 +450,13 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
 
     if (!mounted) return;
 
-    final showNotification = appState.getMovementNotificationConfigByType(
-      MovementNotificationConfig.deleteMovementKey,
-    )?.isEnabled ?? false;
+    final showNotification =
+        appState
+            .getMovementNotificationConfigByType(
+              MovementNotificationConfig.deleteMovementKey,
+            )
+            ?.isEnabled ??
+        false;
 
     final notificacion = Notificacion(
       title: 'Eliminación de movimiento',
@@ -442,8 +479,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         'Hora creacion': detalleMovimiento != null
             ? detalleMovimiento!.time!.format(context)
             : '',
-        'Repetir mensualmente':
-            detalleMovimiento?.repeatMovement == true ? 'Sí' : 'No',
+        'Repetir mensualmente': detalleMovimiento?.repeatMovement == true
+            ? 'Sí'
+            : 'No',
       },
     );
 
@@ -495,8 +533,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         .where((categoria) => categoria.movementType == tipoMovimiento)
         .toList();
 
-    
-
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -544,7 +580,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: _isLoading
               ? LoadingScreen(message: '$_action movimiento...')
-              : detalleMovimiento == null && (modo == MovimientoFormMode.edit || isViewOnly)
+              : detalleMovimiento == null &&
+                    (modo == MovimientoFormMode.edit || isViewOnly)
               ? _EmptyMovimiento()
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -637,6 +674,63 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                       }
                                       return null;
                                     },
+                                  ),
+                                  WidgetsContainer(
+                                    title: 'Etiquetas',
+                                    description:
+                                        'Selecciona etiquetas para clasificar este movimiento.',
+                                    padding: const EdgeInsets.all(12),
+                                    children: [
+                                      etiquetasDisponibles.isEmpty
+                                          ? const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                              ),
+                                              child: Text(
+                                                'No hay etiquetas disponibles',
+                                                style: TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            )
+                                          : Wrap(
+                                              spacing: 8,
+                                              runSpacing: 8,
+                                              children: etiquetasDisponibles
+                                                  .map((etiqueta) {
+                                                    final isSelected =
+                                                        etiquetasMovimientos
+                                                            .any(
+                                                              (selected) =>
+                                                                  selected.id ==
+                                                                  etiqueta.id,
+                                                            );
+                                                    return FilterChip(
+                                                      label: Text(
+                                                        etiqueta.name,
+                                                      ),
+                                                      selected: isSelected,
+                                                      selectedColor: Color(
+                                                        etiqueta.colorValue,
+                                                      ).withOpacity(0.25),
+                                                      backgroundColor:
+                                                          Colors.grey.shade200,
+                                                      labelStyle: TextStyle(
+                                                        color: isSelected
+                                                            ? Colors.black
+                                                            : Colors.grey[800],
+                                                      ),
+                                                      onSelected: isViewOnly
+                                                          ? null
+                                                          : (_) =>
+                                                                _toggleEtiqueta(
+                                                                  etiqueta,
+                                                                ),
+                                                    );
+                                                  })
+                                                  .toList(),
+                                            ),
+                                    ],
                                   ),
                                 ],
                               ),
