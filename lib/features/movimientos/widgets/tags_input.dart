@@ -6,7 +6,6 @@ import 'package:textfield_tags/textfield_tags.dart';
 import 'package:flutter/material.dart';
 
 class TagsInput extends StatefulWidget {
-  final StringTagController tagsController;
   final String? placeholder;
   final bool isEditable;
   final List<Etiqueta> tags;
@@ -16,7 +15,6 @@ class TagsInput extends StatefulWidget {
 
   const TagsInput({
     super.key,
-    required this.tagsController,
     this.isEditable = true,
     this.placeholder,
     this.tags = const [],
@@ -30,19 +28,21 @@ class TagsInput extends StatefulWidget {
 }
 
 class _TagsInputState extends State<TagsInput> {
+  late final StringTagController _tagsController;
   late int _lastTagCount;
 
   @override
   void initState() {
     super.initState();
 
-    _lastTagCount = widget.tagsController.getTags?.length ?? 0;
+    _tagsController = StringTagController();
+    _lastTagCount = widget.tags.length;
 
-    widget.tagsController.addListener(_onTagsChanged);
+    _tagsController.addListener(_onTagsChanged);
   }
 
   void _onTagsChanged() {
-    final tags = widget.tagsController.getTags ?? [];
+    final tags = _tagsController.getTags ?? [];
 
     if (tags.length > _lastTagCount) {
       widget.onTagAdded?.call(tags.last);
@@ -53,29 +53,19 @@ class _TagsInputState extends State<TagsInput> {
 
   @override
   void dispose() {
-    widget.tagsController.removeListener(_onTagsChanged);
+    _tagsController.removeListener(_onTagsChanged);
+    _tagsController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant TagsInput oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.tags != widget.tags) {
-      widget.tagsController.clearTags();
-      for (final tag in widget.tags) {
-        widget.tagsController.addTag(tag.name);
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final tagsListLength = _tagsController.getTags?.length ?? widget.tags.length;
 
     return TextFieldTags<String>(
-      textfieldTagsController: widget.tagsController,
+      textfieldTagsController: _tagsController,
       initialTags: widget.tags.map((e) => e.name).toList(),
       textSeparators: const [' ', ','],
       validator: widget.validator,
@@ -83,7 +73,13 @@ class _TagsInputState extends State<TagsInput> {
         return InputCard(
           icon: Icons.label_outline,
           iconColor: theme.colorScheme.primary,
-
+          trailing: Text(
+            '$tagsListLength/5',
+            style: textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -112,16 +108,16 @@ class _TagsInputState extends State<TagsInput> {
                                 ),
                               ),
                               backgroundColor: etiqueta.color,
-                              deleteIcon: const Icon(Icons.close, size: 16),
+                              deleteIcon: widget.isEditable ? Icon(Icons.close, size: 16) : null,
                               materialTapTargetSize:
                                   MaterialTapTargetSize.shrinkWrap,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
-                              onDeleted: () {
+                              onDeleted: widget.isEditable ? () {
                                 widget.onTagRemoved?.call(tag);
                                 inputFieldValues.onTagRemoved(tag);
-                              },
+                              } : null,
                             );
                           }).toList(),
                         ),

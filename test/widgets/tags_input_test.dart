@@ -2,11 +2,9 @@ import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:control_financiero/features/movimientos/widgets/tags_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:textfield_tags/textfield_tags.dart';
 
 void main() {
   testWidgets('TagsInput renders the initial tags', (tester) async {
-    final controller = StringTagController();
     final tags = [
       Etiqueta(id: 1, name: 'Trabajo', colorValue: 0xFF123456),
       Etiqueta(id: 2, name: 'Urgente', colorValue: 0xFF654321),
@@ -15,7 +13,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: TagsInput(tagsController: controller, tags: tags, placeholder: 'Buscar etiquetas...'),
+          body: TagsInput(tags: tags, placeholder: 'Buscar etiquetas...'),
         ),
       ),
     );
@@ -27,13 +25,12 @@ void main() {
   testWidgets('TagsInput uses the etiqueta color for the chip background', (
     tester,
   ) async {
-    final controller = StringTagController();
     final tags = [Etiqueta(id: 1, name: 'Trabajo', colorValue: 0xFF123456)];
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: TagsInput(tagsController: controller, tags: tags),
+          body: TagsInput(tags: tags),
         ),
       ),
     );
@@ -46,14 +43,12 @@ void main() {
   testWidgets('TagsInput calls onTagAdded when a tag is submitted', (
     tester,
   ) async {
-    final controller = StringTagController();
     final addedTags = <String>[];
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: TagsInput(
-            tagsController: controller,
             onTagAdded: addedTags.add,
           ),
         ),
@@ -70,7 +65,6 @@ void main() {
   testWidgets('TagsInput calls onTagRemoved when a chip is deleted', (
     tester,
   ) async {
-    final controller = StringTagController();
     final removedTags = <String>[];
     final tags = [Etiqueta(id: 1, name: 'Trabajo', colorValue: 0xFF123456)];
 
@@ -78,7 +72,6 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: TagsInput(
-            tagsController: controller,
             tags: tags,
             onTagRemoved: removedTags.add,
           ),

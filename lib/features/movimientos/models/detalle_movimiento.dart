@@ -135,20 +135,27 @@ class DetalleMovimiento extends Equatable {
 
   // Getter para comparar 2 objetos DetalleMovimiento por su contenido, no por su referencia
   @override
-  List<Object?> get props => [
-    id,
-    title,
-    amount,
-    movementType,
-    date,
-    categoryName,
-    categoryIcon,
-    categoryColor,
-    isEnabledRepeatMovement,
-    repeatMovement,
-    categoryId,
-    time,
-    note,
-    tags,
-  ];
+  List<Object?> get props {
+    final tagValues = tags
+        .map((tag) => '${tag.id ?? ''}|${tag.name.toLowerCase()}|${tag.colorValue}')
+        .toList()
+      ..sort();
+
+    return [
+      id,
+      title,
+      amount,
+      movementType,
+      date,
+      categoryName,
+      categoryIcon,
+      categoryColor,
+      isEnabledRepeatMovement,
+      repeatMovement,
+      categoryId,
+      time,
+      note,
+      tagValues,
+    ];
+  }
 }
