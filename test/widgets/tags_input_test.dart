@@ -4,18 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  Widget buildTagsInput({
+    List<Etiqueta> tags = const [],
+    String? placeholder,
+    ValueChanged<String>? onTagAdded,
+    ValueChanged<String>? onTagRemoved,
+    String? Function(String?)? validator,
+  }) {
+    return MaterialApp(
+      home: Scaffold(
+        body: TagsInput(
+          tags: tags,
+          placeholder: placeholder,
+          onTagAdded: onTagAdded,
+          onTagRemoved: onTagRemoved,
+          validator: validator,
+        ),
+      ),
+    );
+  }
+
   testWidgets('TagsInput renders the initial tags', (tester) async {
     final tags = [
       Etiqueta(id: 1, name: 'Trabajo', colorValue: 0xFF123456),
       Etiqueta(id: 2, name: 'Urgente', colorValue: 0xFF654321),
     ];
-
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TagsInput(tags: tags, placeholder: 'Buscar etiquetas...'),
-        ),
-      ),
+      buildTagsInput(tags: tags, placeholder: 'Buscar etiquetas...'),
     );
 
     expect(find.text('Trabajo'), findsOneWidget);
@@ -27,13 +42,7 @@ void main() {
   ) async {
     final tags = [Etiqueta(id: 1, name: 'Trabajo', colorValue: 0xFF123456)];
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TagsInput(tags: tags),
-        ),
-      ),
-    );
+    await tester.pumpWidget(buildTagsInput(tags: tags));
 
     final chip = tester.widget<InputChip>(find.byType(InputChip));
 
@@ -45,19 +54,11 @@ void main() {
   ) async {
     final addedTags = <String>[];
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TagsInput(
-            onTagAdded: addedTags.add,
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(buildTagsInput(onTagAdded: addedTags.add));
 
     await tester.enterText(find.byType(TextField), 'Trabajo');
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(addedTags, ['Trabajo']);
   });
@@ -69,18 +70,11 @@ void main() {
     final tags = [Etiqueta(id: 1, name: 'Trabajo', colorValue: 0xFF123456)];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TagsInput(
-            tags: tags,
-            onTagRemoved: removedTags.add,
-          ),
-        ),
-      ),
+      buildTagsInput(tags: tags, onTagRemoved: removedTags.add),
     );
 
     await tester.tap(find.byIcon(Icons.close));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(removedTags, ['Trabajo']);
   });

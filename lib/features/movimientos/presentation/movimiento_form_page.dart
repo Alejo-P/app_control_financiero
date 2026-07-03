@@ -38,6 +38,8 @@ class MovimientoFormPage extends StatefulWidget {
 }
 
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
+  static const int _maxEtiquetasMovimiento = 5;
+
   DetalleMovimiento? detalleMovimiento;
   MovimientoFormMode modo = MovimientoFormMode.create;
   bool isViewOnly = false;
@@ -222,6 +224,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   void _agregarEtiqueta(Etiqueta etiqueta) {
+    if (etiquetasMovimientos.length >= _maxEtiquetasMovimiento) return;
+
     final existe = etiquetasMovimientos.any(
       (e) => e.name.toLowerCase() == etiqueta.name.toLowerCase(),
     );
@@ -705,14 +709,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                   ),
                                   TagsInput(
                                     tags: etiquetasMovimientos,
-                                    isEditable:
-                                        !isViewOnly &&
-                                        (etiquetasMovimientos.length < 5),
-                                    placeholder:
-                                        (!isViewOnly &&
-                                            etiquetasMovimientos.length < 5)
-                                        ? 'Agregar etiquetas...'
-                                        : 'No puedes agregar etiquetas',
+                                    isEditable: !isViewOnly,
+                                    maxTags: _maxEtiquetasMovimiento,
                                     validator: (tag) {
                                       final existe =
                                           tag != null &&
