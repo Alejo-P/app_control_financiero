@@ -26,6 +26,7 @@ dependencies:
   flutter_svg: ^2.2.4
   file_picker: ^11.0.2
   encrypt: ^5.0.3
+  textfield_tags: ^3.0.1
 
 dev_dependencies:
   flutter_test:

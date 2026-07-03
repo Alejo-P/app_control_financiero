@@ -2,6 +2,7 @@ import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/categoria_form_args.dart';
@@ -31,7 +32,7 @@ class CategoriaFormPage extends StatefulWidget {
 class _CategoriaFormPageState extends State<CategoriaFormPage> {
   DetalleCategoria? detalleCategoria;
   CategoriaFormMode modo = CategoriaFormMode.create;
-  Color selectedColor = categoryColors.first;
+  Color selectedColor = colors.first;
   IconData selectedIcon = categoryIcons.first;
   bool _loaded = false;
   bool _isLoading = false;
@@ -88,7 +89,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       _categoryNameController.text = result.name;
       _descriptionController.text = result.description;
       selectedIcon = result.icon ?? categoryIcons.first;
-      selectedColor = result.color ?? categoryColors.first;
+      selectedColor = result.color ?? colors.first;
       movementsByCategory = result.totalMovements ?? 0;
       categoryTypeName = result.categoryTypeName;
       categoryTypeID = result.categoryTypeID;
@@ -282,7 +283,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           name: '',
           description: '',
           icon: categoryIcons.first,
-          color: categoryColors.first,
+          color: colors.first,
           movementType: TipoMovimiento.gasto,
           categoryTypeName: 'Sin seleccionar',
           categoryTypeID: -1,

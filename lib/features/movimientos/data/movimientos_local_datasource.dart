@@ -3,6 +3,7 @@ import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
@@ -61,28 +62,49 @@ class MovimientosLocalDataSource {
     final List<Map<String, dynamic>> maps = await db.rawQuery(
       '''
         SELECT
-          m.id AS id,
-          m.title AS titulo,
-          m.amount AS monto,
-          m.date as fecha,
-          m.time as hora,
-          m.note AS nota,
-          c.name AS categoria,
-          c.icon_name AS categoriaIcono,
-          c.icon_color_value AS categoriaColor,
-          c.movement_type AS tipoMovimiento,
-          c.enabled_repeat_movement as enabledRepeatMovement,
-          m.repeat_movement as repeatMovement,
-          c.id AS categoriaId
-        FROM movimientos m
-        JOIN categorias c ON m.category_id = c.id
-        WHERE m.id = ?
+          m.${MovimientosTable.id} AS id,
+          m.${MovimientosTable.title} AS titulo,
+          m.${MovimientosTable.amount} AS monto,
+          m.${MovimientosTable.date} as fecha,
+          m.${MovimientosTable.time} as hora,
+          m.${MovimientosTable.note} AS nota,
+          c.${CategoriasTable.name} AS categoria,
+          c.${CategoriasTable.iconName} AS categoriaIcono,
+          c.${CategoriasTable.iconColorValue} AS categoriaColor,
+          c.${CategoriasTable.movementType} AS tipoMovimiento,
+          c.${CategoriasTable.enabledRepeatMovement} as enabledRepeatMovement,
+          m.${MovimientosTable.repeatMovement} as repeatMovement,
+          c.${CategoriasTable.id} AS categoriaId
+        FROM ${MovimientosTable.table} m
+        JOIN ${CategoriasTable.table} c ON m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}
+        WHERE m.${MovimientosTable.id} = ?
       ''',
       [id],
     );
 
     if (maps.isNotEmpty) {
-      return DetalleMovimiento.fromMap(maps.first);
+      final List<Map<String, dynamic>> etiquetaMaps = await db.rawQuery(
+        '''
+          SELECT e.${EtiquetasTable.id} AS id, e.${EtiquetasTable.name} AS nombre, e.${EtiquetasTable.colorValue} AS color
+          FROM ${EtiquetasTable.table} e
+          JOIN ${MovimientoEtiquetaTable.table} me ON e.${EtiquetasTable.id} = me.${MovimientoEtiquetaTable.etiquetaId}
+          WHERE me.${MovimientoEtiquetaTable.movimientoId} = ?
+        ''',
+        [id],
+      );
+
+      final List<Etiqueta> etiquetas = etiquetaMaps.map((map) {
+        return Etiqueta(
+          id: map['id'] as int,
+          name: map['nombre'] as String,
+          colorValue: map['color'] as int,
+        );
+      }).toList();
+
+      final DetalleMovimiento detalleMovimiento = DetalleMovimiento.fromMap(
+        maps.first,
+      ).copyWith(tags: etiquetas);
+      return detalleMovimiento;
     } else {
       AppLogger.log(
         'Detalle del movimiento con ID $id no encontrado',
@@ -144,10 +166,8 @@ class MovimientosLocalDataSource {
       for (final map in result) {
         final monto = (map['monto'] as num?)?.toDouble() ?? 0;
         final tipoStr = map['tipo movimiento'] as String;
-        final tipoMovimiento = TipoMovimientoMapper.fromString(
-          tipoStr,
-        );
-        
+        final tipoMovimiento = TipoMovimientoMapper.fromString(tipoStr);
+
         if (tipoMovimiento == TipoMovimiento.ingreso) {
           ingresos += monto;
         } else {

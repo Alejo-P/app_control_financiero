@@ -24,19 +24,20 @@ class MovimientoSearchPage extends StatefulWidget {
 }
 
 class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
-  final _searchController = TextEditingController();
   List<Movimiento> listaMovimientos = [];
   List<Movimiento> movimientosFiltrados = [];
   List<DateTime> fechasUnicas = [];
   DateTime? fechaInicio;
   DateTime? fechaFin;
   AgrupacionBusqueda agrupacion = AgrupacionBusqueda.ninguna;
-  final List<Etiqueta> etiquetasSeleccionadas = [];
+  List<Etiqueta> etiquetasSeleccionadas = [];
   bool _isLoading = false;
   int _requestId = 0;
   int categoriaSeleccionada = -1;
   IconData? iconoCategoriaSeleccionada;
   Color? colorCategoriaSeleccionada;
+
+  final _searchController = TextEditingController();
 
   @override
   void initState() {

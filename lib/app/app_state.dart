@@ -758,6 +758,24 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ================================= ETIQUETAS CRUD =================================
+  Future<int?> agregarEtiqueta(Etiqueta etiqueta) async {
+    final result = await _etiquetasRepository.insertEtiqueta(etiqueta);
+    if (result.success) {
+      etiquetas.add(etiqueta.copyWith(id: result.data!));
+      notifyListeners();
+    }
+    return result.data;
+  }
+
+  Future<void> eliminarEtiqueta(int id) async {
+    final result = await _etiquetasRepository.deleteEtiqueta(id);
+    if (result.success) {
+      etiquetas.removeWhere((etiqueta) => etiqueta.id == id);
+      notifyListeners();
+    }
+  }
+
   // ================================= MOVIMIENTOS CRUD =================================
   Future<void> sincronizarContadoresCategorias() async {
     final counts = await _movimientosRepository.getMovementsCountByCategory();
@@ -808,6 +826,8 @@ class AppState extends ChangeNotifier {
   }
 
   Future<DetalleMovimiento?> obtenerDetalleMovimientoPorId(int id) async {
+    if (id == -1) return null;
+    
     final detalle = await _movimientosRepository.fetchDetalleMovimientoById(id);
     if (detalle == null) return null;
 

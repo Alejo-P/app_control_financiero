@@ -1,4 +1,3 @@
-import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/features/categorias/widgets/color_container.dart';
 import 'package:control_financiero/features/shared/widgets/grid_container.dart';
@@ -17,16 +16,14 @@ class ColorsSingleChildScroll extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final colorsScheme = theme.colorScheme;
 
     return GridContainer(
       columns: 5,
       gap: 12,
-      children: categoryColors.map((color) {
+      children: colors.map((color) {
         final isSelected = compareColors(color, tempColor);
-        final borderColor = isSelected
-            ? colors.primary
-            : colors.surface;
+        final borderColor = isSelected ? colorsScheme.primary : colorsScheme.surface;
 
         return ColorContainer(
           size: 60,

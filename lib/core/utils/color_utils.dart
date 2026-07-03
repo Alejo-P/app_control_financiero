@@ -1,4 +1,26 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+
+const List<Color> colors = [
+  Colors.blue,
+  Colors.green,
+  Colors.red,
+  Colors.orange,
+  Colors.purple,
+  Colors.teal,
+  Colors.pink,
+  Colors.brown,
+  Colors.grey,
+  Colors.indigo,
+  Colors.cyan,
+  Colors.lime,
+  Colors.amber,
+  Colors.deepOrange,
+  Colors.lightBlue,
+  Colors.lightGreen,
+  Colors.deepPurple,
+  Colors.yellow,
+];
 
 List<int> getRGBFromColor(Color color) {
   // Convert Color components (0..1) to 0..255 ints to avoid deprecated accessors
@@ -12,3 +34,11 @@ List<int> getRGBFromColor(Color color) {
 // ignore: deprecated_member_use
 bool compareColors(Color a, Color b) => a.value == b.value;
 
+Color getRandomColor([List<Color>? from]) {
+  final colorsList = from ?? colors;
+  final limit = colorsList.length;
+  final index = Random().nextInt(limit);
+  final color = colorsList[index];
+
+  return color;
+}

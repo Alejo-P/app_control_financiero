@@ -1,13 +1,14 @@
 import 'package:control_financiero/core/database/db_tables.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
 class Etiqueta {
-  final int id;
+  final int? id;
   final String name;
   final int colorValue;
 
   Etiqueta({
-    required this.id,
+    this.id,
     required this.name,
     required this.colorValue,
   });
@@ -40,5 +41,8 @@ class Etiqueta {
     };
   }
 
-  Color get color => Color(colorValue);
+  Color get color {
+    final [r, g, b] = getRGBFromColor(Color(colorValue));
+    return Color.fromRGBO(r, g, b, 0.4);
+  }
 }

@@ -55,24 +55,3 @@ final Map<String, IconData> extraIconsMap = {
 
 // Lista para compatibilidad con código existente
 final List<IconData> categoryIcons = categoryIconsMap.values.toList();
-
-const List<Color> categoryColors = [
-  Colors.blue,
-  Colors.green,
-  Colors.red,
-  Colors.orange,
-  Colors.purple,
-  Colors.teal,
-  Colors.pink,
-  Colors.brown,
-  Colors.grey,
-  Colors.indigo,
-  Colors.cyan,
-  Colors.lime,
-  Colors.amber,
-  Colors.deepOrange,
-  Colors.lightBlue,
-  Colors.lightGreen,
-  Colors.deepPurple,
-  Colors.yellow,
-];

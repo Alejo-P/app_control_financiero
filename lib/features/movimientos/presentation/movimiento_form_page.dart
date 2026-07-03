@@ -3,6 +3,7 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/constants/notificacion_constants.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -11,6 +12,7 @@ import 'package:control_financiero/features/movimientos/models/detalle_movimient
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
+import 'package:control_financiero/features/movimientos/widgets/tags_input.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
@@ -25,6 +27,7 @@ import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:textfield_tags/textfield_tags.dart';
 
 class MovimientoFormPage extends StatefulWidget {
   final DateTime? fechaInicial;
@@ -54,18 +57,20 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   bool repeatMovement = false;
   String _action = "Guardando";
   List<Categoria> categorias = [];
-  List<Etiqueta> etiquetasDisponibles = [];
   List<Categoria> categoriasFiltradas = [];
   DateTime selectedDate = getCurrentDateWithoutTime();
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   final _titleController = TextEditingController();
+  final _etiquetaController = TextEditingController();
+  late StringTagController _tagsController;
 
   @override
   void initState() {
     super.initState();
 
+    _tagsController = StringTagController();
     _amountController.addListener(_checkEnableSaveButton);
     _noteController.addListener(_checkEnableSaveButton);
     _titleController.addListener(_checkEnableSaveButton);
@@ -105,7 +110,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     if (appState.etiquetas.isEmpty) {
       await appState.loadAllTags(notify: false);
     }
-    etiquetasDisponibles = appState.etiquetas;
 
     final result = await appState.obtenerDetalleMovimientoPorId(id);
     if (result != null) {
@@ -125,6 +129,10 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       repeatMovement = result.repeatMovement;
       tipoMovimiento = result.movementType;
       etiquetasMovimientos = result.tags;
+
+      for (final etiqueta in etiquetasMovimientos) {
+        _tagsController.addTag(etiqueta.name);
+      }
     }
 
     if (!mounted) return;
@@ -146,6 +154,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     _amountController.dispose();
     _noteController.dispose();
     _titleController.dispose();
+    _tagsController.dispose();
     super.dispose();
   }
 
@@ -220,20 +229,26 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     _checkEnableSaveButton();
   }
 
-  void _toggleEtiqueta(Etiqueta etiqueta) {
-    setState(() {
-      final alreadySelected = etiquetasMovimientos.any(
-        (selected) => selected.id == etiqueta.id,
-      );
-      if (alreadySelected) {
-        etiquetasMovimientos.removeWhere(
-          (selected) => selected.id == etiqueta.id,
-        );
-      } else {
+  void _agregarEtiqueta(Etiqueta etiqueta) {
+    final existe = etiquetasMovimientos.any(
+      (e) => e.name.toLowerCase() == etiqueta.name.toLowerCase(),
+    );
+
+    if (!existe) {
+      setState(() {
         etiquetasMovimientos.add(etiqueta);
-      }
+      });
+    }
+
+    _etiquetaController.clear();
+  }
+
+  void _eliminarEtiqueta(Etiqueta etiqueta) {
+    setState(() {
+      etiquetasMovimientos.removeWhere(
+        (e) => e.name.toLowerCase() == etiqueta.name.toLowerCase(),
+      );
     });
-    _checkEnableSaveButton();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -310,6 +325,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         if (noteText.isNotEmpty) Text('Nota: $noteText'),
 
         if (repeatMovement) Text('El movimiento se repetirá mensualmente'),
+
+        if (etiquetasMovimientos.isNotEmpty)
+          Text('Etiquetas: ${etiquetasMovimientos.join(", ")}'),
       ],
     );
     if (confirmed != true) return;
@@ -336,7 +354,25 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         ? await appState.actualizarMovimiento(movimiento)
         : await appState.agregarMovimiento(movimiento);
 
+    final etiquetasActualizadas = <Etiqueta>[];
+
+    for (final tag in etiquetasMovimientos) {
+      if (tag.id != null) {
+        etiquetasActualizadas.add(tag);
+        continue;
+      }
+
+      final tagId = await appState.agregarEtiqueta(tag);
+
+      etiquetasActualizadas.add(
+        Etiqueta(id: tagId, name: tag.name, colorValue: tag.colorValue),
+      );
+    }
+
+    etiquetasMovimientos = etiquetasActualizadas;
+
     final savedMovimientoId = isUpdateMovement ? movementId : result;
+
     if (savedMovimientoId != null && savedMovimientoId > 0) {
       await appState.syncMovimientoEtiquetas(
         savedMovimientoId,
@@ -528,6 +564,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
+    final etiquetas = appState.etiquetas;
     categorias = appState.categorias;
     categoriasFiltradas = categorias
         .where((categoria) => categoria.movementType == tipoMovimiento)
@@ -675,62 +712,38 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                       return null;
                                     },
                                   ),
-                                  WidgetsContainer(
-                                    title: 'Etiquetas',
-                                    description:
-                                        'Selecciona etiquetas para clasificar este movimiento.',
-                                    padding: const EdgeInsets.all(12),
-                                    children: [
-                                      etiquetasDisponibles.isEmpty
-                                          ? const Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                vertical: 8.0,
-                                              ),
-                                              child: Text(
-                                                'No hay etiquetas disponibles',
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            )
-                                          : Wrap(
-                                              spacing: 8,
-                                              runSpacing: 8,
-                                              children: etiquetasDisponibles
-                                                  .map((etiqueta) {
-                                                    final isSelected =
-                                                        etiquetasMovimientos
-                                                            .any(
-                                                              (selected) =>
-                                                                  selected.id ==
-                                                                  etiqueta.id,
-                                                            );
-                                                    return FilterChip(
-                                                      label: Text(
-                                                        etiqueta.name,
-                                                      ),
-                                                      selected: isSelected,
-                                                      selectedColor: Color(
-                                                        etiqueta.colorValue,
-                                                      ).withOpacity(0.25),
-                                                      backgroundColor:
-                                                          Colors.grey.shade200,
-                                                      labelStyle: TextStyle(
-                                                        color: isSelected
-                                                            ? Colors.black
-                                                            : Colors.grey[800],
-                                                      ),
-                                                      onSelected: isViewOnly
-                                                          ? null
-                                                          : (_) =>
-                                                                _toggleEtiqueta(
-                                                                  etiqueta,
-                                                                ),
-                                                    );
-                                                  })
-                                                  .toList(),
-                                            ),
-                                    ],
+                                  TagsInput(
+                                    tagsController: _tagsController,
+                                    tags: etiquetasMovimientos,
+                                    isEditable: !isViewOnly,
+                                    placeholder: 'Agregar etiquetas...',
+                                    validator: (tag) {
+                                      final existe =
+                                          _tagsController.getTags?.any(
+                                            (e) => e.toLowerCase() == tag?.toLowerCase(),
+                                          ) ??
+                                          false;
+
+                                      if (existe) {
+                                        return 'Etiqueta duplicada';
+                                      }
+
+                                      return null;
+                                    },
+                                    onTagAdded: (tagName) {
+                                      final existingTag = etiquetas.firstWhere(
+                                        (tag) => tag.name.toLowerCase() == tagName.toLowerCase(),
+                                        orElse: () => Etiqueta(name: tagName, colorValue: getRandomColor().value),
+                                      );
+                                      _agregarEtiqueta(existingTag);
+                                    },
+                                    onTagRemoved: (tagName) {
+                                      final etiqueta = etiquetasMovimientos.firstWhere(
+                                        (tag) => tag.name.toLowerCase() == tagName.toLowerCase(),
+                                        orElse: () => Etiqueta(name: tagName, colorValue: 0),
+                                      );
+                                      _eliminarEtiqueta(etiqueta);
+                                    },
                                   ),
                                 ],
                               ),

@@ -29,8 +29,8 @@ class DetalleMovimiento extends Equatable {
     required this.date,
     required this.categoryIcon,
     required this.categoryColor,
-    required this.tags,
     this.categoryName,
+    this.tags = const [],
     this.isEnabledRepeatMovement = false,
     this.repeatMovement = false,
     this.categoryId,
@@ -102,7 +102,7 @@ class DetalleMovimiento extends Equatable {
             )
           : null,
       categoryId: map['categoriaId'] != null ? map['categoriaId'] as int : null,
-      tags: map['etiquetas'] != null ? map['tags'] : null
+      tags: map['etiquetas'] != null ? map['tags'] : [],
     );
   }
 

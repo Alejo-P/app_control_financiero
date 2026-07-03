@@ -1,5 +1,5 @@
 import 'package:control_financiero/core/formatters/note_input_formatter.dart';
-import 'package:control_financiero/core/utils/color_utils.dart';
+import 'package:control_financiero/features/shared/widgets/input_card.dart';
 import 'package:flutter/material.dart';
 
 class TextInputCard extends StatefulWidget {
@@ -12,7 +12,6 @@ class TextInputCard extends StatefulWidget {
   final int maxLines;
   final int maxLength;
   final String? Function(String?)? validator;
-
 
   const TextInputCard({
     super.key,
@@ -68,83 +67,56 @@ class _TextInputCardState extends State<TextInputCard> {
 
   @override
   Widget build(BuildContext context) {
-    final [r, g, b] = getRGBFromColor(widget.iconColor ?? Colors.grey);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        //Categoria
-        if (widget.iconColor != null && widget.iconData != null)
-          Container(
-            margin: const EdgeInsets.only(right: 10),
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Color.fromRGBO(r, g, b, 0.15),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: Icon(
-              widget.iconData,
-              size: 22,
-              color: widget.iconColor ?? Colors.grey,
-            ),
-          ),
+    return InputCard(
+      icon: widget.iconData,
+      iconColor: widget.iconColor,
 
-        const SizedBox(width: 3),
-        Expanded(
-          child: TextFormField(
-            controller: widget.textController,
-            focusNode: _focusNode,
-            contextMenuBuilder: (context, editableTextState) {
-              final items = editableTextState.contextMenuButtonItems.map((item) {
-                final label = switch (item.type) {
-                  ContextMenuButtonType.cut => 'Cortar',
-                  ContextMenuButtonType.copy => 'Copiar',
-                  ContextMenuButtonType.paste => 'Pegar',
-                  ContextMenuButtonType.selectAll => 'Seleccionar todo',
-                  _ => item.label,
-                };
+      trailing: isFocused ? Text("$currentLength/${widget.maxLength}") : null,
 
-                return ContextMenuButtonItem(
-                  onPressed: item.onPressed,
-                  label: label,
-                  type: item.type,
-                );
-              }).toList();
+      child: TextFormField(
+        controller: widget.textController,
+        focusNode: _focusNode,
+        contextMenuBuilder: (context, editableTextState) {
+          final items = editableTextState.contextMenuButtonItems.map((item) {
+            final label = switch (item.type) {
+              ContextMenuButtonType.cut => 'Cortar',
+              ContextMenuButtonType.copy => 'Copiar',
+              ContextMenuButtonType.paste => 'Pegar',
+              ContextMenuButtonType.selectAll => 'Seleccionar todo',
+              _ => item.label,
+            };
 
-              return AdaptiveTextSelectionToolbar.buttonItems(
-                anchors: editableTextState.contextMenuAnchors,
-                buttonItems: items,
-              );
-            },
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintStyle: TextStyle(color: Colors.grey),
-              hintText: widget.placeholder,
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
-              counterText: '', // Oculta el contador predeterminado
-            ),
-            style: const TextStyle(fontSize: 16),
-            inputFormatters: [NoteInputFormatter()],
-            keyboardType: widget.inputKeyboardType,
-            expands: false,
-            textAlignVertical: TextAlignVertical.top,
-            minLines: 1,
-            maxLines: widget.maxLines,
-            maxLength: widget.maxLength,
-            enabled: widget.isEditable,
-            validator: widget.validator,
-          ),
+            return ContextMenuButtonItem(
+              onPressed: item.onPressed,
+              label: label,
+              type: item.type,
+            );
+          }).toList();
+
+          return AdaptiveTextSelectionToolbar.buttonItems(
+            anchors: editableTextState.contextMenuAnchors,
+            buttonItems: items,
+          );
+        },
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintStyle: TextStyle(color: Colors.grey),
+          hintText: widget.placeholder,
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          counterText: '', // Oculta el contador predeterminado
         ),
-        const SizedBox(width: 8),
-
-        // Contador de caracteres
-        if (widget.maxLength > 0 && isFocused)
-          Text(
-            '$currentLength/${widget.maxLength}',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          ),
-      ],
+        style: const TextStyle(fontSize: 16),
+        inputFormatters: [NoteInputFormatter()],
+        keyboardType: widget.inputKeyboardType,
+        expands: false,
+        textAlignVertical: TextAlignVertical.top,
+        minLines: 1,
+        maxLines: widget.maxLines,
+        maxLength: widget.maxLength,
+        enabled: widget.isEditable,
+        validator: widget.validator,
+      ),
     );
   }
 }
