@@ -92,7 +92,7 @@ class _AjustesPageState extends State<AjustesPage> {
     if (encryptKey == null) {
       AppSnackbar.error(
         context,
-        'Debes especificar una clave para ecriptar el archivo',
+        'Debes especificar una clave para encriptar el archivo',
       );
       return;
     }
@@ -158,7 +158,7 @@ class _AjustesPageState extends State<AjustesPage> {
     if (encryptKey == null) {
       AppSnackbar.error(
         context,
-        'Debes especificar una clave para ecriptar el archivo',
+        'Debes especificar una clave para desencriptar el archivo',
       );
       return;
     }
