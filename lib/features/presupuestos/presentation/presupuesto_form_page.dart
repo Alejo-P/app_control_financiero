@@ -14,10 +14,9 @@ import 'package:control_financiero/features/notificaciones/models/notificacion.d
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto_form_args.dart';
+import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
-import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
-import 'package:control_financiero/features/presupuestos/widgets/category_button.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
@@ -144,7 +143,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
         detallePresupuesto ??
         DetallePresupuesto(
           categoria: '',
-          categoriaId: categorias.first.id!,
+          categoriaId: categorias.isNotEmpty ? categorias.first.id! : -1,
           icon: Icons.category,
           iconColor: Colors.grey,
           fechaPresupuesto: fechaPresupuesto,
@@ -318,6 +317,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     if (!mounted) return;
     setState(() {
       _isLoading = false;
+      categoriaSeleccionada = -1;
+      _presupuestoAmountController.clear();
     });
 
     if (!appState.transactionSuccess) {
@@ -519,20 +520,14 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                             ),
                             const SizedBox(height: 12),
                             // Aquí iría el listado de categorías con campos para ingresar el monto del presupuesto
-                            GridContainer(
-                              columns: 3,
-                              children: categorias
-                                  .map(
-                                    (categoria) => CategoryButton(
-                                      icon: categoria.iconData,
-                                      title: categoria.name,
-                                      isSelected:
-                                          categoriaSeleccionada == categoria.id,
-                                      onTap: () =>
-                                          _onChangeCategoria(categoria.id!),
-                                    ),
-                                  )
-                                  .toList(),
+                            Row(
+                              children: [
+                                CategoryDropdown(
+                                  categorias: categorias,
+                                  selectedValue: categoriaSeleccionada,
+                                  onChangeCategory: _onChangeCategoria,
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 12),
                             if (!isViewOnly)

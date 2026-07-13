@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
@@ -7,6 +9,8 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_search_filters.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
+import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
+import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/shared/widgets/label_card.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:flutter/material.dart';
@@ -180,15 +184,28 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     _onSearchTerm(); // Realizar el filtrado si hay termino a buscar
   }
 
+  void _onClearDateRange() {
+    setState(() {
+      fechaInicio = null;
+      fechaFin = null;
+    });
+    _buscarMovimientos();
+  }
+
   Future<void> _showDateRangePicker() async {
     final now = DateTime.now();
     final firstDate = DateTime(now.year - 5);
-    final lastDate = DateTime(now.year + 1);
 
     final picked = await showDateRangePicker(
       context: context,
       firstDate: firstDate,
-      lastDate: lastDate,
+      lastDate: now,
+      helpText: 'Selecciona un rango de fechas',
+      fieldStartLabelText: 'Fecha de inicio',
+      fieldEndLabelText: 'Fecha de fin',
+      fieldStartHintText: 'Fecha de inicio',
+      fieldEndHintText: 'Fecha de fin',
+      saveText: 'Aceptar',
       initialDateRange: (fechaInicio != null && fechaFin != null)
           ? DateTimeRange(start: fechaInicio!, end: fechaFin!)
           : null,
@@ -210,11 +227,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     final textTheme = theme.textTheme;
     final categorias = widget.listaCategorias;
     final [rBorder, gBorder, bBorder] = getRGBFromColor(Colors.grey.shade600);
-
-    final dropDownBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide.none,
-    );
+    final isSelectedRange = fechaInicio != null && fechaFin != null;
 
     if (categorias.isEmpty) {
       return Scaffold(
@@ -291,64 +304,10 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Expanded(
-                          child: DropdownButtonFormField<int>(
-                            isExpanded: true,
-                            value: categoriaSeleccionada,
-                            decoration: InputDecoration(
-                              border: dropDownBorder,
-                              enabledBorder: dropDownBorder,
-                              focusedBorder: dropDownBorder,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              filled: true,
-                              fillColor: colors.primary.withOpacity(0.2),
-                            ),
-                            items: categorias.map((categoria) {
-                              return DropdownMenuItem<int>(
-                                value: categoria.id!,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(categoria.iconData, size: 20),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        categoria.name,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: colors.primary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            selectedItemBuilder: (context) {
-                              return categorias.map((categoria) {
-                                return Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    categoria.name,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: colors.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                );
-                              }).toList();
-                            },
-                            onChanged: (value) {
-                              if (value == null) return;
-                              _onChangeCategoria(value);
-                            },
-                          ),
+                        CategoryDropdown(
+                          categorias: categorias,
+                          selectedValue: categoriaSeleccionada,
+                          onChangeCategory: _onChangeCategoria,
                         ),
                       ],
                     ),
@@ -369,30 +328,62 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: TextButton(
-                            onPressed: _showDateRangePicker,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
+                          child: GridContainer(
+                            columns: isSelectedRange ? 2 : 1,
+                            height: 125.0,
+                            children: [
+                              if (isSelectedRange)
+                                TextButton(
+                                  onPressed: _showDateRangePicker,
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    backgroundColor:
+                                        colors.primary.withOpacity(0.2),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Editar rango",
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: colors.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+
+                              TextButton(
+                              onPressed: isSelectedRange ? _onClearDateRange : _showDateRangePicker,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                backgroundColor: colors.primary.withOpacity(0.2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
                               ),
-                              backgroundColor: colors.primary.withOpacity(0.2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                              child: Text(
+                                isSelectedRange
+                                    ? 'Eliminar rango'
+                                    : 'Seleccionar rango',
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                textAlign: TextAlign.left,
                               ),
                             ),
-                            child: Text(
-                              (fechaInicio != null && fechaFin != null)
-                                  ? '${formatDate(fechaInicio!)} - ${formatDate(fechaFin!)}'
-                                  : 'Seleccionar rango',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: colors.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              textAlign: TextAlign.left,
-                            ),
+                      ],
                           ),
                         ),
                       ],
@@ -410,6 +401,18 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                         const SizedBox(height: 12),
 
                         Text("Resultados", style: textTheme.labelLarge),
+
+                        if (isSelectedRange)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0, bottom: 12),
+                            child: Text(
+                              "Movimientos entre ${formatDate(fechaInicio!)} y ${formatDate(fechaFin!)}",
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey.shade600,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
 
                         if (movimientosFiltrados.isEmpty)
                           const _EmptyResults()
