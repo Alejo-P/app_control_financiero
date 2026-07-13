@@ -368,25 +368,27 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        TextButton(
-                          onPressed: _showDateRangePicker,
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                        Expanded(
+                          child: TextButton(
+                            onPressed: _showDateRangePicker,
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              backgroundColor: colors.primary.withOpacity(0.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
-                            backgroundColor: colors.primary.withOpacity(0.2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: Text(
-                            (fechaInicio != null && fechaFin != null)
-                                ? '${formatDate(fechaInicio!)} - ${formatDate(fechaFin!)}'
-                                : 'Seleccionar rango',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colors.primary,
-                              fontWeight: FontWeight.w500,
+                            child: Text(
+                              (fechaInicio != null && fechaFin != null)
+                                  ? '${formatDate(fechaInicio!)} - ${formatDate(fechaFin!)}'
+                                  : 'Seleccionar rango',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
