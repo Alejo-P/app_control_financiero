@@ -228,6 +228,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     final categorias = widget.listaCategorias;
     final [rBorder, gBorder, bBorder] = getRGBFromColor(Colors.grey.shade600);
     final isSelectedRange = fechaInicio != null && fechaFin != null;
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     if (categorias.isEmpty) {
       return Scaffold(
@@ -318,7 +319,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         LabelCard(
-                          label: "Rango de fecha",
+                          label: "Por fecha",
                           iconData: Icons.date_range,
                           iconColor: Colors.grey.shade600,
                           textStyle: textTheme.bodyMedium?.copyWith(
@@ -327,64 +328,100 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Expanded(
-                          child: GridContainer(
-                            columns: isSelectedRange ? 2 : 1,
-                            height: 125.0,
-                            children: [
-                              if (isSelectedRange)
-                                TextButton(
-                                  onPressed: _showDateRangePicker,
-                                  style: TextButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                    backgroundColor:
-                                        colors.primary.withOpacity(0.2),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 8.0,
+                          children: [
+                            if (isSelectedRange)
+                              TextButton(
+                                onPressed: _showDateRangePicker,
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
                                   ),
-                                  child: Text(
-                                    "Editar rango",
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: colors.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    textAlign: TextAlign.left,
+                                  backgroundColor: colors.primary.withOpacity(
+                                    0.2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
+                                child: isSmallScreen
+                                    ? Icon(
+                                        Icons.edit_calendar,
+                                        color: colors.primary,
+                                      )
+                                    : Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.edit_calendar,
+                                            color: colors.primary,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "Editar rango",
+                                            style: textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  color: colors.primary,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        ],
+                                      ),
+                              ),
 
-                              TextButton(
-                              onPressed: isSelectedRange ? _onClearDateRange : _showDateRangePicker,
+                            TextButton(
+                              onPressed: isSelectedRange
+                                  ? _onClearDateRange
+                                  : _showDateRangePicker,
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 12,
                                 ),
-                                backgroundColor: colors.primary.withOpacity(0.2),
+                                backgroundColor: colors.primary.withOpacity(
+                                  0.2,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
-                              child: Text(
-                                isSelectedRange
-                                    ? 'Eliminar rango'
-                                    : 'Seleccionar rango',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: colors.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                textAlign: TextAlign.left,
-                              ),
+                              child: isSmallScreen
+                                  ? Icon(
+                                      isSelectedRange
+                                          ? Icons.delete_outline
+                                          : Icons.date_range,
+                                      color: colors.primary,
+                                    )
+                                  : Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          isSelectedRange
+                                              ? Icons.delete_outline
+                                              : Icons.date_range,
+                                          color: colors.primary,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          isSelectedRange
+                                              ? 'Eliminar rango'
+                                              : 'Seleccionar rango',
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: colors.primary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
-                      ],
-                          ),
+                          ],
                         ),
                       ],
                     ),
@@ -404,7 +441,10 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
 
                         if (isSelectedRange)
                           Padding(
-                            padding: const EdgeInsets.only(top: 4.0, bottom: 12),
+                            padding: const EdgeInsets.only(
+                              top: 4.0,
+                              bottom: 12,
+                            ),
                             child: Text(
                               "Movimientos entre ${formatDate(fechaInicio!)} y ${formatDate(fechaFin!)}",
                               style: textTheme.bodyMedium?.copyWith(
