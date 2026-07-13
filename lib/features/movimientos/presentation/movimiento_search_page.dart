@@ -5,12 +5,12 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/responsive_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_search_filters.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
-import 'package:control_financiero/features/shared/widgets/grid_container.dart';
 import 'package:control_financiero/features/shared/widgets/label_card.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:flutter/material.dart';
@@ -228,7 +228,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     final categorias = widget.listaCategorias;
     final [rBorder, gBorder, bBorder] = getRGBFromColor(Colors.grey.shade600);
     final isSelectedRange = fechaInicio != null && fechaFin != null;
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     if (categorias.isEmpty) {
       return Scaffold(
@@ -348,7 +347,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                                child: isSmallScreen
+                                child: context.isPhone
                                     ? Icon(
                                         Icons.edit_calendar,
                                         color: colors.primary,
@@ -392,7 +391,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
-                              child: isSmallScreen
+                              child: context.isPhone
                                   ? Icon(
                                       isSelectedRange
                                           ? Icons.delete_outline
@@ -445,11 +444,13 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                               top: 4.0,
                               bottom: 12,
                             ),
-                            child: Text(
-                              "Movimientos entre ${formatDate(fechaInicio!)} y ${formatDate(fechaFin!)}",
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey.shade600,
-                                fontStyle: FontStyle.italic,
+                            child: Center(
+                              child: Text(
+                                "Movimientos entre ${formatDate(fechaInicio!)} y ${formatDate(fechaFin!)}",
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
