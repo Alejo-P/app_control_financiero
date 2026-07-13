@@ -3,7 +3,6 @@ class MovimientoSearchFilters {
   int? categoriaId;
   DateTime? fechaInicio;
   DateTime? fechaFin;
-  List<String> etiquetas;
   AgrupacionBusqueda agrupacion;
 
   MovimientoSearchFilters({
@@ -11,9 +10,8 @@ class MovimientoSearchFilters {
     this.categoriaId,
     this.fechaInicio,
     this.fechaFin,
-    this.etiquetas = const [],
     this.agrupacion = AgrupacionBusqueda.ninguna,
   });
 }
 
-enum AgrupacionBusqueda { ninguna, concepto, categoria, mes, etiqueta }
+enum AgrupacionBusqueda { ninguna, concepto, categoria, mes }

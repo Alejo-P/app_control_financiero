@@ -6,8 +6,6 @@ import 'package:control_financiero/features/ajustes/presentation/notification_co
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
-import 'package:control_financiero/features/etiquetas/data/etiquetas_local_datasource.dart';
-import 'package:control_financiero/features/etiquetas/data/etiquetas_repository.dart';
 import 'package:control_financiero/features/historial/data/historial_local_datasource.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
@@ -83,10 +81,6 @@ class _AppState extends State<App> {
           NotificacionLocalDataSource(),
         );
 
-        final etiquetasRepository = EtiquetasRepository(
-          EtiquetasLocalDataSource(),
-        );
-
         final appState = AppState(
           movimientosRepository,
           categoriasRepository,
@@ -94,7 +88,6 @@ class _AppState extends State<App> {
           presupuestosRepository,
           historialRepository,
           notificacionRepository,
-          etiquetasRepository,
         );
 
         appState.loadInitialData();

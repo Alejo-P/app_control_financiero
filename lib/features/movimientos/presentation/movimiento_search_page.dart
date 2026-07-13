@@ -5,7 +5,6 @@ import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
-import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_search_filters.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
@@ -30,7 +29,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
   DateTime? fechaInicio;
   DateTime? fechaFin;
   AgrupacionBusqueda agrupacion = AgrupacionBusqueda.ninguna;
-  List<Etiqueta> etiquetasSeleccionadas = [];
   bool _isLoading = false;
   int _requestId = 0;
   int categoriaSeleccionada = -1;
@@ -89,19 +87,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     _buscarMovimientos();
   }
 
-  void _toggleEtiqueta(Etiqueta etiqueta) {
-    setState(() {
-      final selectedIndex = etiquetasSeleccionadas.indexWhere(
-        (e) => e.id == etiqueta.id,
-      );
-      if (selectedIndex >= 0) {
-        etiquetasSeleccionadas.removeAt(selectedIndex);
-      } else {
-        etiquetasSeleccionadas.add(etiqueta);
-      }
-    });
-  }
-
   Future<void> _buscarMovimientos() async {
     final appState = context.read<AppState>();
     final requestId = ++_requestId;
@@ -109,27 +94,9 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
 
     List<Movimiento> movimientos = [];
 
-    if (etiquetasSeleccionadas.isNotEmpty) {
-      final movimientosPorEtiqueta = await Future.wait(
-        etiquetasSeleccionadas.map(
-          (etiqueta) => appState.obtenerMovimientosPorEtiqueta(etiqueta.id!),
-        ),
-      );
-
-      final movimientosUnicos = <int, Movimiento>{};
-      for (final lista in movimientosPorEtiqueta) {
-        for (final mov in lista) {
-          if (mov.id != null) {
-            movimientosUnicos[mov.id!] = mov;
-          }
-        }
-      }
-      movimientos = movimientosUnicos.values.toList();
-    } else {
-      movimientos = await appState.obtenerMovimientosPorCategoria(
-        categoriaSeleccionada,
-      );
-    }
+    movimientos = await appState.obtenerMovimientosPorCategoria(
+      categoriaSeleccionada,
+    );
 
     if (_searchController.text.trim().isNotEmpty) {
       final terminoLower = _searchController.text.trim().toLowerCase();
@@ -142,12 +109,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
       movimientos = movimientos.where((mov) {
         return !mov.date.isBefore(fechaInicio!) && !mov.date.isAfter(fechaFin!);
       }).toList();
-    }
-
-    if (categoriaSeleccionada != -1 && etiquetasSeleccionadas.isNotEmpty) {
-      movimientos = movimientos
-          .where((mov) => mov.categoryID == categoriaSeleccionada)
-          .toList();
     }
 
     if (!mounted) return;
@@ -427,71 +388,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            LabelCard(
-                              label: "Etiquetas",
-                              iconData: Icons.label_outline,
-                              iconColor: Colors.grey.shade600,
-                              textStyle: textTheme.bodyMedium?.copyWith(
-                                color: colors.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            if (etiquetasSeleccionadas.isNotEmpty)
-                              Text(
-                                '${etiquetasSeleccionadas.length} seleccionada(s)',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: colors.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Builder(
-                          builder: (context) {
-                            final etiquetasDisponibles = context
-                                .watch<AppState>()
-                                .etiquetas;
-                            if (etiquetasDisponibles.isEmpty) {
-                              return const Text(
-                                'No hay etiquetas cargadas',
-                                style: TextStyle(color: Colors.grey),
-                              );
-                            }
-                            return Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: etiquetasDisponibles.map((etiqueta) {
-                                final selected = etiquetasSeleccionadas.any(
-                                  (selectedTag) =>
-                                      selectedTag.id == etiqueta.id,
-                                );
-                                return FilterChip(
-                                  label: Text(etiqueta.name),
-                                  selected: selected,
-                                  selectedColor: etiqueta.color,
-                                  backgroundColor: Colors.grey.shade200,
-                                  labelStyle: TextStyle(
-                                    color: selected
-                                        ? Colors.black
-                                        : Colors.grey[800],
-                                  ),
-                                  onSelected: (_) => _toggleEtiqueta(etiqueta),
-                                );
-                              }).toList(),
-                            );
-                          },
                         ),
                       ],
                     ),

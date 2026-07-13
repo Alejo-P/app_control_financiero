@@ -3,16 +3,13 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/constants/notificacion_constants.dart';
-import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
-import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
-import 'package:control_financiero/features/movimientos/widgets/tags_input.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
@@ -38,8 +35,6 @@ class MovimientoFormPage extends StatefulWidget {
 }
 
 class _MovimientoFormPageState extends State<MovimientoFormPage> {
-  static const int _maxEtiquetasMovimiento = 5;
-
   DetalleMovimiento? detalleMovimiento;
   MovimientoFormMode modo = MovimientoFormMode.create;
   bool isViewOnly = false;
@@ -53,7 +48,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   String categoryName = 'Sin categoría';
   TimeOfDay movementTime = TimeOfDay.now();
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
-  List<Etiqueta> etiquetasMovimientos = [];
   bool isEnabledRepeatMovement = false;
   bool repeatMovement = false;
   String _action = "Guardando";
@@ -64,7 +58,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   final _titleController = TextEditingController();
-  final _etiquetaController = TextEditingController();
 
   @override
   void initState() {
@@ -106,10 +99,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       _action = "Cargando";
     });
 
-    if (appState.etiquetas.isEmpty) {
-      await appState.loadAllTags(notify: false);
-    }
-
     final result = await appState.obtenerDetalleMovimientoPorId(id);
     if (result != null) {
       _amountController.text = result.amount != 0.0
@@ -127,7 +116,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       isEnabledRepeatMovement = result.isEnabledRepeatMovement;
       repeatMovement = result.repeatMovement;
       tipoMovimiento = result.movementType;
-      etiquetasMovimientos = List<Etiqueta>.of(result.tags);
     }
 
     if (!mounted) return;
@@ -170,7 +158,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       note: _noteController.text.trim(),
       isEnabledRepeatMovement: isEnabledRepeatMovement,
       repeatMovement: repeatMovement,
-      tags: etiquetasMovimientos,
     );
     final original =
         detalleMovimiento ??
@@ -187,7 +174,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           note: '',
           isEnabledRepeatMovement: false,
           repeatMovement: false,
-          tags: [],
         );
 
     return (original != current);
@@ -219,32 +205,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       categoryIcon = categoria.iconData;
       categoryColor = categoria.iconColor;
       isEnabledRepeatMovement = categoria.enabledRepeatMovement;
-    });
-    _checkEnableSaveButton();
-  }
-
-  void _agregarEtiqueta(Etiqueta etiqueta) {
-    if (etiquetasMovimientos.length >= _maxEtiquetasMovimiento) return;
-
-    final existe = etiquetasMovimientos.any(
-      (e) => e.name.toLowerCase() == etiqueta.name.toLowerCase(),
-    );
-
-    if (!existe) {
-      setState(() {
-        etiquetasMovimientos.add(etiqueta);
-      });
-    }
-
-    _etiquetaController.clear();
-    _checkEnableSaveButton();
-  }
-
-  void _eliminarEtiqueta(Etiqueta etiqueta) {
-    setState(() {
-      etiquetasMovimientos.removeWhere(
-        (e) => e.name.toLowerCase() == etiqueta.name.toLowerCase(),
-      );
     });
     _checkEnableSaveButton();
   }
@@ -348,32 +308,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     final result = isUpdateMovement
         ? await appState.actualizarMovimiento(movimiento)
         : await appState.agregarMovimiento(movimiento);
-
-    final etiquetasActualizadas = <Etiqueta>[];
-
-    for (final tag in etiquetasMovimientos) {
-      if (tag.id != null) {
-        etiquetasActualizadas.add(tag);
-        continue;
-      }
-
-      final tagId = await appState.agregarEtiqueta(tag);
-
-      etiquetasActualizadas.add(
-        Etiqueta(id: tagId, name: tag.name, colorValue: tag.colorValue),
-      );
-    }
-
-    etiquetasMovimientos = etiquetasActualizadas;
-
-    final savedMovimientoId = isUpdateMovement ? movementId : result;
-
-    if (savedMovimientoId != null && savedMovimientoId > 0) {
-      await appState.syncMovimientoEtiquetas(
-        savedMovimientoId,
-        etiquetasMovimientos,
-      );
-    }
 
     if (!mounted) return;
 
@@ -559,7 +493,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   @override
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
-    final etiquetas = appState.etiquetas;
     categorias = appState.categorias;
     categoriasFiltradas = categorias
         .where((categoria) => categoria.movementType == tipoMovimiento)
@@ -705,51 +638,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                         return 'La nota no puede exceder los 200 caracteres';
                                       }
                                       return null;
-                                    },
-                                  ),
-                                  TagsInput(
-                                    tags: etiquetasMovimientos,
-                                    isEditable: !isViewOnly,
-                                    maxTags: _maxEtiquetasMovimiento,
-                                    validator: (tag) {
-                                      final existe =
-                                          tag != null &&
-                                          etiquetasMovimientos.any(
-                                            (e) =>
-                                                e.name.toLowerCase() ==
-                                                tag.toLowerCase(),
-                                          );
-
-                                      if (existe) {
-                                        return 'Etiqueta duplicada';
-                                      }
-
-                                      return null;
-                                    },
-                                    onTagAdded: (tagName) {
-                                      final existingTag = etiquetas.firstWhere(
-                                        (tag) =>
-                                            tag.name.toLowerCase() ==
-                                            tagName.toLowerCase(),
-                                        orElse: () => Etiqueta(
-                                          name: tagName,
-                                          colorValue: getRandomColor().value,
-                                        ),
-                                      );
-                                      _agregarEtiqueta(existingTag);
-                                    },
-                                    onTagRemoved: (tagName) {
-                                      final etiqueta = etiquetasMovimientos
-                                          .firstWhere(
-                                            (tag) =>
-                                                tag.name.toLowerCase() ==
-                                                tagName.toLowerCase(),
-                                            orElse: () => Etiqueta(
-                                              name: tagName,
-                                              colorValue: 0,
-                                            ),
-                                          );
-                                      _eliminarEtiqueta(etiqueta);
                                     },
                                   ),
                                 ],

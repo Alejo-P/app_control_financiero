@@ -3,7 +3,6 @@ import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
-import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
@@ -83,27 +82,9 @@ class MovimientosLocalDataSource {
     );
 
     if (maps.isNotEmpty) {
-      final List<Map<String, dynamic>> etiquetaMaps = await db.rawQuery(
-        '''
-          SELECT e.${EtiquetasTable.id} AS id, e.${EtiquetasTable.name} AS nombre, e.${EtiquetasTable.colorValue} AS color
-          FROM ${EtiquetasTable.table} e
-          JOIN ${MovimientoEtiquetaTable.table} me ON e.${EtiquetasTable.id} = me.${MovimientoEtiquetaTable.etiquetaId}
-          WHERE me.${MovimientoEtiquetaTable.movimientoId} = ?
-        ''',
-        [id],
-      );
-
-      final List<Etiqueta> etiquetas = etiquetaMaps.map((map) {
-        return Etiqueta(
-          id: map['id'] as int,
-          name: map['nombre'] as String,
-          colorValue: map['color'] as int,
-        );
-      }).toList();
-
       final DetalleMovimiento detalleMovimiento = DetalleMovimiento.fromMap(
         maps.first,
-      ).copyWith(tags: etiquetas);
+      );
       return detalleMovimiento;
     } else {
       AppLogger.log(
@@ -275,22 +256,6 @@ class MovimientosLocalDataSource {
           ? 'Todos los movimientos eliminados exitosamente.'
           : 'Error al eliminar los movimientos.',
     );
-  }
-
-  Future<List<Movimiento>> getMovimientosByEtiqueta(int etiquetaId) async {
-    final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
-      '''
-        SELECT m.*
-        FROM ${MovimientosTable.table} m
-        JOIN ${MovimientoEtiquetaTable.table} me ON m.${MovimientosTable.id} = me.${MovimientoEtiquetaTable.movimientoId}
-        WHERE me.${MovimientoEtiquetaTable.etiquetaId} = ?
-        ORDER BY m.${MovimientosTable.date} DESC, m.${MovimientosTable.time} DESC
-      ''',
-      [etiquetaId],
-    );
-
-    return maps.map(Movimiento.fromMap).toList();
   }
 
   Future<List<Map<String, dynamic>>> getMovimientosForExcel() async {

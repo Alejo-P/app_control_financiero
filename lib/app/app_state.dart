@@ -7,8 +7,6 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
-import 'package:control_financiero/features/etiquetas/data/etiquetas_repository.dart';
-import 'package:control_financiero/features/etiquetas/models/etiqueta.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
@@ -74,7 +72,6 @@ class AppState extends ChangeNotifier {
   List<AppBarAction> get appBarActions => _appBarActions;
 
   final MovimientosRepository _movimientosRepository;
-  final EtiquetasRepository _etiquetasRepository;
   final CategoriasRepository _categoriasRepository;
   final TipoCategoriaRepository _tipoCategoriaRepository;
   final PresupuestosRepository _presupuestosRepository;
@@ -88,7 +85,6 @@ class AppState extends ChangeNotifier {
     this._presupuestosRepository,
     this._historialRepository,
     this._notificacionRepository,
-    this._etiquetasRepository,
   );
 
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
@@ -115,7 +111,6 @@ class AppState extends ChangeNotifier {
       _tipoCategoriaRepository.tipoCategorias;
 
   List<Movimiento> movimientos = [];
-  List<Etiqueta> etiquetas = [];
   List<Categoria> categorias = [];
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
@@ -146,7 +141,6 @@ class AppState extends ChangeNotifier {
     await Future.wait([
       _tipoCategoriaRepository.fetchTipoCategorias(),
       _categoriasRepository.fetchAllCategorias(),
-      loadAllTags(notify: false),
       loadMovementsByMonthAndYear(selectedMovementsMonth, notify: false),
       loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false),
       updateHistory(),
@@ -185,11 +179,6 @@ class AppState extends ChangeNotifier {
 
     _uniqueMovementDates = _fetchUniqueMovementDates();
 
-    if (notify) notifyListeners();
-  }
-
-  Future<void> loadAllTags({bool notify = false}) async {
-    etiquetas = await _etiquetasRepository.getAllEtiquetas();
     if (notify) notifyListeners();
   }
 
@@ -758,24 +747,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================================= ETIQUETAS CRUD =================================
-  Future<int?> agregarEtiqueta(Etiqueta etiqueta) async {
-    final result = await _etiquetasRepository.insertEtiqueta(etiqueta);
-    if (result.success) {
-      etiquetas.add(etiqueta.copyWith(id: result.data!));
-      notifyListeners();
-    }
-    return result.data;
-  }
-
-  Future<void> eliminarEtiqueta(int id) async {
-    final result = await _etiquetasRepository.deleteEtiqueta(id);
-    if (result.success) {
-      etiquetas.removeWhere((etiqueta) => etiqueta.id == id);
-      notifyListeners();
-    }
-  }
-
   // ================================= MOVIMIENTOS CRUD =================================
   Future<void> sincronizarContadoresCategorias() async {
     final counts = await _movimientosRepository.getMovementsCountByCategory();
@@ -810,73 +781,11 @@ class AppState extends ChangeNotifier {
     return await _movimientosRepository.fetchMovimientoById(id);
   }
 
-  Future<List<Movimiento>> obtenerMovimientosPorEtiqueta(int etiquetaId) async {
-    final movimientos = await _movimientosRepository.getMovimientosByEtiqueta(
-      etiquetaId,
-    );
-
-    if (movimientos == null) {
-      transactionResultMessage = 'Ocurrio un error al obtener los movmientos';
-      transactionSuccess = false;
-      notifyListeners();
-      return [];
-    }
-
-    return movimientos;
-  }
-
   Future<DetalleMovimiento?> obtenerDetalleMovimientoPorId(int id) async {
     if (id == -1) return null;
-    
+
     final detalle = await _movimientosRepository.fetchDetalleMovimientoById(id);
-    if (detalle == null) return null;
-
-    final etiquetasMovimiento = await _etiquetasRepository
-        .getEtiquetasForMovimiento(id);
-    return detalle.copyWith(tags: etiquetasMovimiento);
-  }
-
-  Future<void> syncMovimientoEtiquetas(
-    int movimientoId,
-    List<Etiqueta> selectedTags,
-  ) async {
-    try {
-      final currentTags = await _etiquetasRepository.getEtiquetasForMovimiento(
-        movimientoId,
-      );
-      final currentTagIds = currentTags.map((tag) => tag.id).toSet();
-      final selectedTagIds = selectedTags.map((tag) => tag.id).toSet();
-
-      final tagsToAdd = selectedTags.where(
-        (tag) => !currentTagIds.contains(tag.id),
-      );
-      final tagsToRemove = currentTags.where(
-        (tag) => !selectedTagIds.contains(tag.id),
-      );
-
-      for (final etiqueta in tagsToAdd) {
-        if (etiqueta.id != null) {
-          await _etiquetasRepository.assignEtiquetaToMovimiento(
-            movimientoId,
-            etiqueta.id!,
-          );
-        }
-      }
-
-      for (final etiqueta in tagsToRemove) {
-        if (etiqueta.id != null) {
-          await _etiquetasRepository.removeEtiquetaFromMovimiento(
-            movimientoId,
-            etiqueta.id!,
-          );
-        }
-      }
-    } catch (e) {
-      AppLogger.log(
-        'Error sincronizando etiquetas del movimiento: $e',
-        level: LogLevel.error,
-      );
-    }
+    return detalle;
   }
 
   Future<int> agregarMovimiento(Movimiento movimiento) async {
