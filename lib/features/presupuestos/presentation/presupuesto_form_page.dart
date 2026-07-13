@@ -65,6 +65,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
     final id = args.id;
     final budgetedIncome = args.budgetedIncome;
     isViewOnly = args.viewOnly;
+    fechaPresupuesto = args.fechaPresupuesto ?? DateTime.now();
 
     _load(id, budgetedIncome);
 
@@ -81,7 +82,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
 
     final result = await appState.obtenerDetallePresupuestoPorId(id);
     final sumaPresupuestos = await appState.obtenerSumaPresupuestosPorFecha(
-      result?.fechaPresupuesto ?? currentDateTime,
+      result?.fechaPresupuesto ?? fechaPresupuesto,
     );
     if (result != null) {
       _presupuestoAmountController.text = result.montoPresupuestado != 0.0

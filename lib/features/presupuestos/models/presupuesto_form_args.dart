@@ -4,10 +4,12 @@ class PresupuestoFormArgs {
   final int id;
   final bool viewOnly;
   final IngresoPresupuestado budgetedIncome;
+  final DateTime? fechaPresupuesto;
 
   PresupuestoFormArgs({
     required this.id,
     this.viewOnly = false,
     required this.budgetedIncome,
+    this.fechaPresupuesto,
   });
 }

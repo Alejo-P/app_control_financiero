@@ -55,6 +55,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                   id: -1,
                   budgetedIncome: _appState.ingresoPresupuestado!,
                   viewOnly: false,
+                  fechaPresupuesto: _appState.selectedBudgetMonth,
                 ),
               );
             },
