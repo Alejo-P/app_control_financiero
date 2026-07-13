@@ -7,7 +7,6 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_search_filters.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
-import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/label_card.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:flutter/material.dart';
@@ -277,7 +276,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                       maxLength: 50,
                     ),
 
-                    const Divider(height: 20, thickness: 1.5),
+                    const SizedBox(height: 12),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -354,6 +353,8 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                       ],
                     ),
 
+                    const SizedBox(height: 12),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -388,17 +389,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomButton(
-                          onTap: _buscarMovimientos,
-                          icon: Icons.search_outlined,
-                          text: 'Buscar',
                         ),
                       ],
                     ),
