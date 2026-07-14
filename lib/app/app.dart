@@ -2,6 +2,7 @@ import 'package:control_financiero/app/splash_screen.dart';
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/services/navigation_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
+import 'package:control_financiero/features/ajustes/presentation/about_page.dart';
 import 'package:control_financiero/features/ajustes/presentation/notification_config_page.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
@@ -114,6 +115,7 @@ class _AppState extends State<App> {
                   const CategoriaFormPage(),
               AppRoutes.notificationConfigRoute: (context) =>
                   const NotificationConfigPage(),
+              AppRoutes.aboutRoute: (context) => const AboutPage(),
             },
 
             home: appState.loadingInitialData

@@ -282,10 +282,10 @@ class _AjustesPageState extends State<AjustesPage> {
                             'Información sobre la aplicación y su versión',
                         icon: Icons.info_outline,
                         iconColor: Colors.grey,
-                        onTap: () {
-                          // Lógica para mostrar información sobre la aplicación
-                          debugPrint('Información sobre la aplicación');
-                        },
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.aboutRoute,
+                        ),
                       ),
                     ],
                   ),

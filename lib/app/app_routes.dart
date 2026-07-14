@@ -6,4 +6,5 @@ class AppRoutes {
 
   static const ajustesRoute = '/ajustes';
   static const notificationConfigRoute = '/ajustes/notificaciones';
+  static const aboutRoute = '/ajustes/about';
 }
