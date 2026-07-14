@@ -149,7 +149,7 @@ Future<void> createTables(Database db) async {
       CREATE TABLE ${BudgetNotificationConfigTable.table} (
         ${BudgetNotificationConfigTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
         ${BudgetNotificationConfigTable.categoryId} INTEGER DEFAULT NULL,
-        ${BudgetNotificationConfigTable.threshold} REAL NOT NULL,
+        ${BudgetNotificationConfigTable.threshold} REAL UNIQUE NOT NULL,
         ${BudgetNotificationConfigTable.isEnabled} INTEGER NOT NULL DEFAULT 0,
         ${BudgetNotificationConfigTable.isDefault} INTEGER NOT NULL DEFAULT 0,
         ${BudgetNotificationConfigTable.createdAt} TEXT NOT NULL
