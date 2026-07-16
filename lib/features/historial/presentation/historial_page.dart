@@ -200,6 +200,7 @@ class _HistorialPageState extends State<HistorialPage> {
       builder: (context) {
         final theme = Theme.of(context);
         final textTheme = theme.textTheme;
+        final colorScheme = theme.colorScheme;
         final years = appState.aniosDisponibles;
 
         if (years.isEmpty) {
@@ -219,13 +220,18 @@ class _HistorialPageState extends State<HistorialPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               "Seleccionar año",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
+                fontSize: 16,
+              ),
             ),
-            const Text(
+            Text(
               "Solo aparecerán aquellos que tengan movimientos registrados",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: textTheme.labelSmall?.copyWith(color: Colors.grey[500]),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Expanded(
@@ -237,6 +243,7 @@ class _HistorialPageState extends State<HistorialPage> {
                     title: Text(
                       year.toString(),
                       style: textTheme.displayMedium?.copyWith(
+                        color: isSelected ? colorScheme.primary : colorScheme.onSurface,
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
