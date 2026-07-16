@@ -197,7 +197,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       ),
       body: ListView.builder(
         controller: _scrollController,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         itemCount: keys.length + 1,
         itemBuilder: (context, index) {
           if (index < keys.length) {
@@ -207,6 +207,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
             return WidgetsContainer(
               padding: EdgeInsetsGeometry.all(4),
               title: key,
+              showDivider: false,
               children: items.map((notif) {
                 return _buildNotifItem(notif);
               }).toList(),

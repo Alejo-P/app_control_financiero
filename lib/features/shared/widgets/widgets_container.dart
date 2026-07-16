@@ -10,6 +10,7 @@ class WidgetsContainer extends StatelessWidget {
   final Color? backgroundColor;
   final EdgeInsetsGeometry padding;
   final Color? borderColor;
+  final bool showDivider;
 
   const WidgetsContainer({
     super.key,
@@ -21,6 +22,7 @@ class WidgetsContainer extends StatelessWidget {
     this.backgroundColor,
     this.padding = const EdgeInsets.all(8),
     this.borderColor,
+    this.showDivider = true,
   });
 
   @override
@@ -53,10 +55,12 @@ class WidgetsContainer extends StatelessWidget {
               decoration: BoxDecoration(
                 color: backgroundColor ?? backgroundThemeColor,
                 borderRadius: BorderRadius.circular(8),
-                border: borderColor != null ? Border.all(
-                  color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
-                  width: 1.5,
-                ): null,
+                border: borderColor != null
+                    ? Border.all(
+                        color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+                        width: 1.5,
+                      )
+                    : null,
                 boxShadow: [
                   BoxShadow(
                     color: Color.fromRGBO(r, g, b, 0.15),
@@ -70,7 +74,10 @@ class WidgetsContainer extends StatelessWidget {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: children!.length,
-                separatorBuilder: (context, index) => const Divider(height: 8),
+                separatorBuilder: (context, index) => Divider(
+                  height: 8,
+                  color: showDivider ? Colors.grey : Colors.transparent,
+                ),
                 itemBuilder: (context, index) => children![index],
               ),
             ),

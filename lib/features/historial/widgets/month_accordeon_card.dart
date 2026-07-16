@@ -45,7 +45,7 @@ class MonthAccordionCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+          color: isHighlighted ? Color.fromRGBO(rBorder, gBorder, bBorder, 0.5) : Colors.transparent,
           width: 1.5,
         ),
       ),

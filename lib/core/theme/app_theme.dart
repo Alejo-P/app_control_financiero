@@ -16,6 +16,7 @@ class AppTheme {
           surface: Colors.white,
           onPrimary: Colors.white,
           onSurface: Colors.black54,
+          tertiary: Colors.grey[600],
         ),
     scaffoldBackgroundColor: Color.fromARGB(255, 239, 239, 239),
     appBarTheme: const AppBarTheme(
@@ -114,6 +115,7 @@ class AppTheme {
           surface: Color.fromARGB(255, 48, 48, 48),
           onPrimary: Colors.black,
           onSurface: Colors.white70,
+          tertiary: Colors.grey[400],
         ),
     scaffoldBackgroundColor: Color.fromARGB(255, 34, 34, 34),
     appBarTheme: const AppBarTheme(

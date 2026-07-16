@@ -31,7 +31,7 @@ class NotificationCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(4),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

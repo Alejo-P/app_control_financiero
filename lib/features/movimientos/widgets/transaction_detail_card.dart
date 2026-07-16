@@ -48,10 +48,16 @@ class TransactionDetailCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
-                  Text(category, style: textTheme.labelSmall!.copyWith(
+                  Text(category,
+                  style: textTheme.labelSmall!.copyWith(
                     color: colorScheme.onSurface
-                  )),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  ),
                 ],
               ),
             ),

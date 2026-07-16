@@ -7,6 +7,7 @@ import 'package:control_financiero/features/presupuestos/models/ingreso_presupue
 import 'package:control_financiero/features/presupuestos/models/presupuesto_form_args.dart';
 import 'package:control_financiero/features/presupuestos/widgets/total_budget_summary_card.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
+import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/custom_icons/wallet_edit_icon.dart';
 import 'package:control_financiero/features/shared/widgets/summary_card.dart';
@@ -42,8 +43,9 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
             await _mostrarModalIngresoPresupuestado();
           },
         ),
-        
-        if (_appState.ingresoPresupuestado != null && _appState.ingresoPresupuestado!.monto > 0)
+
+        if (_appState.ingresoPresupuestado != null &&
+            _appState.ingresoPresupuestado!.monto > 0)
           AppBarAction(
             icon: Icons.add,
             tooltip: 'Nuevo presupuesto',
@@ -112,9 +114,38 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     return categoriesWithSpending;
   }
 
+  List<Map<String, dynamic>> get categoriasSinPresupuestoConGasto {
+    final categoriasConPresupuesto = _appState.presupuestos
+        .map((presupuesto) => presupuesto.categoryId)
+        .toSet();
+
+    final categoriasConGasto = _appState.movimientosPresupuestos
+        .map((movimiento) => movimiento.categoryID)
+        .toSet();
+
+    return categoriasConGasto
+        .where((categoriaId) => !categoriasConPresupuesto.contains(categoriaId))
+        .map((categoriaId) {
+          final categoria = _appState.getCategoriaById(categoriaId);
+
+          return {
+            'id': categoriaId,
+            'name': categoria?.name ?? 'Categoría desconocida',
+            'icon': categoria?.iconData ?? Icons.category,
+            'iconColor': categoria?.iconColor ?? Colors.grey,
+            'spent': _appState.getGastoAcumuladoPorCategoriaEnMes(categoriaId),
+          };
+        })
+        .where((categoria) => (categoria['spent'] as double) > 0)
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final presupuestos = appState.presupuestos;
     final totalGastos = appState.totalGastos ?? 0.0;
 
@@ -164,7 +195,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         ...sortedBudgets.map((budgetDetails) {
                           final presupuesto = budgetDetails['presupuesto'];
                           final categoryDetails = getCategoryDetailsById(
@@ -178,7 +209,8 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                 AppRoutes.presupuestoFormRoute,
                                 arguments: PresupuestoFormArgs(
                                   id: presupuesto.id!,
-                                  budgetedIncome: appState.ingresoPresupuestado!,
+                                  budgetedIncome:
+                                      appState.ingresoPresupuestado!,
                                   viewOnly: false,
                                 ),
                               );
@@ -193,6 +225,56 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             ),
                           );
                         }),
+                        if (categoriasSinPresupuestoConGasto.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(child: Divider(color: colorScheme.tertiary)),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: Text(
+                                  'Gastos sin presupuesto',
+                                  style: textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ),
+                              Expanded(child: Divider(color: colorScheme.tertiary)),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          ...categoriasSinPresupuestoConGasto.map((categoria) {
+                            return ListTile(
+                              leading: IconContainer(
+                                icon: categoria['icon'],
+                                color: categoria['iconColor'],
+                                size:26,
+                              ),
+                              title: Text(
+                                categoria['name'],
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                style: textTheme.labelMedium!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              subtitle: Text(
+                                'Sin presupuesto asignado',
+                                style: textTheme.labelSmall,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              trailing: Text(
+                                '\$${(categoria['spent'] as double).toStringAsFixed(2)} gastados',
+                              ),
+                            );
+                          }),
+                        ],
                       ],
                     ),
                   ),
@@ -247,7 +329,8 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
   Future<void> _mostrarModalIngresoPresupuestado() async {
     final appState = context.read<AppState>();
     final ingresoPresupuestado = appState.ingresoPresupuestado;
-    _ingresoPresupuestadoController.text = (ingresoPresupuestado != null && ingresoPresupuestado.monto > 0)
+    _ingresoPresupuestadoController.text =
+        (ingresoPresupuestado != null && ingresoPresupuestado.monto > 0)
         ? ingresoPresupuestado.monto.toStringAsFixed(2)
         : '';
     final fechaPresupuesto = appState.selectedBudgetMonth;
@@ -255,7 +338,9 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Ingreso presupuestado para ${formatMonthYear(fechaPresupuesto)}'),
+          title: Text(
+            'Ingreso presupuestado para ${formatMonthYear(fechaPresupuesto)}',
+          ),
           content: SizedBox(
             height: 120,
             child: AmountInput(controller: _ingresoPresupuestadoController),
@@ -265,10 +350,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar'),
             ),
-            CustomButton(
-              onTap: _guardarIngresoPresupuesto,
-              text: 'Guardar',
-            ),
+            CustomButton(onTap: _guardarIngresoPresupuesto, text: 'Guardar'),
           ],
         );
       },

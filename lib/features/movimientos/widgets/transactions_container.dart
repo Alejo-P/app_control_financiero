@@ -47,6 +47,7 @@ class TransactionsContainer extends StatelessWidget {
         fontWeight: FontWeight.bold,
         color: totalAmount >= 0 ? Colors.green : Colors.red,
       ),
+      showDivider: false,
       children: movimientos.map((movimiento) {
         final categoria = appState.getCategoriaById(movimiento.categoryID);
 

@@ -43,7 +43,7 @@ class CategoryCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+            color: !isOverBudget ? Colors.transparent : Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
             width: 1.5,
           ),
         ),
