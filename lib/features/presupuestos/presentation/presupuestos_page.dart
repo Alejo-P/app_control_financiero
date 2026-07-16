@@ -249,6 +249,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                           const SizedBox(height: 8),
                           ...categoriasSinPresupuestoConGasto.map((categoria) {
                             return ListTile(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                               leading: IconContainer(
                                 icon: categoria['icon'],
                                 color: categoria['iconColor'],
@@ -270,7 +271,11 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                 maxLines: 1,
                               ),
                               trailing: Text(
-                                '\$${(categoria['spent'] as double).toStringAsFixed(2)} gastados',
+                                '\$${(categoria['spent'] as double).toStringAsFixed(2)}',
+                                style: textTheme.labelMedium!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                ),
                               ),
                             );
                           }),
