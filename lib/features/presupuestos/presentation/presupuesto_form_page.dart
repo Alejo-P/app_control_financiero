@@ -495,9 +495,10 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            const Divider(),
-                            const SizedBox(height: 12),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                              child: const Divider(),
+                            ),
                             Text(
                               modo == PresupuestoFormMode.create
                                   ? 'Selecciona una categoría'
@@ -520,7 +521,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            // Aquí iría el listado de categorías con campos para ingresar el monto del presupuesto
                             Row(
                               children: [
                                 CategoryDropdown(
@@ -537,10 +537,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                 shadowColor: Colors.transparent,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8.0),
-                                  side: BorderSide(
-                                    color: colorScheme.primary,
-                                    width: 1.0,
-                                  ),
+                                  side: BorderSide.none,
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
@@ -552,9 +549,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                       Icon(
                                         Icons.wallet_rounded,
                                         size: 40,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                                        color: colorScheme.primary,
                                       ),
                                       const SizedBox(width: 8),
                                       Column(

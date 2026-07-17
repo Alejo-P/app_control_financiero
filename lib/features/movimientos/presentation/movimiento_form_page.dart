@@ -582,6 +582,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                               WidgetsContainer(
                                 title: 'Detalles del movimiento',
                                 padding: const EdgeInsets.all(12),
+                                showDivider: false,
                                 children: [
                                   TextInputCard(
                                     textController: _titleController,

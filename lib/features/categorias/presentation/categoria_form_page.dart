@@ -405,6 +405,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                             ),
                             WidgetsContainer(
                               title: 'Detalles de la categoría',
+                              showDivider: false,
                               children: [
                                 TextInputCard(
                                   textController: _categoryNameController,
@@ -431,6 +432,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                               description: !isEditing
                                   ? 'Configura opciones adicionales para esta categoría.'
                                   : 'No puedes cambiar estas opciones para categorías predeterminadas o al editar.',
+                              showDivider: false,
                               children: [
                                 InkWell(
                                   onTap: () {
@@ -508,7 +510,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                                 ],
                               ),
 
-                            if (modo == CategoriaFormMode.edit)
+                            if (modo == CategoriaFormMode.edit && isDefault)
                               InfoCategoriaPredeterminada(isDefault: isDefault),
                           ],
                         ),

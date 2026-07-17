@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
 class InfoCategoriaPredeterminada extends StatelessWidget {
@@ -7,14 +8,17 @@ class InfoCategoriaPredeterminada extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+    final [r, g, b] = getRGBFromColor(isDefault ? Colors.orange : Colors.grey);
+
     return Center(
       child: IntrinsicWidth(
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(50),
-            color: isDefault
-                ? Colors.orange.shade100
-                : Colors.grey.shade200,
+            color: Color.fromRGBO(r, g, b, 0.5),
           ),
           alignment: Alignment.center,
           margin: const EdgeInsets.only(bottom: 12),
@@ -26,8 +30,8 @@ class InfoCategoriaPredeterminada extends StatelessWidget {
               Icon(
                 isDefault ? Icons.lock : Icons.lock_open,
                 color: isDefault
-                    ? Colors.orange.shade700
-                    : Colors.grey.shade700,
+                    ? colorScheme.primary
+                    : colorScheme.onSurface.withOpacity(0.6),
                 size: 18,
               ),
               const SizedBox(width: 6),
@@ -35,10 +39,10 @@ class InfoCategoriaPredeterminada extends StatelessWidget {
                 isDefault
                     ? 'Esta es una categoría predeterminada'
                     : 'Esta categoría no es predeterminada',
-                style: TextStyle(
+                style: textTheme.bodySmall?.copyWith(
                   color: isDefault
-                      ? Colors.orange.shade700
-                      : Colors.grey.shade700,
+                      ? colorScheme.primary
+                      : colorScheme.onSurface.withOpacity(0.6),
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                 ),
