@@ -23,6 +23,9 @@ class CategoryCardDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -40,15 +43,15 @@ class CategoryCardDetail extends StatelessWidget {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(
+                        style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
                       Text(
                         description.isEmpty ? '(Sin descripción)' : description,
-                        style: const TextStyle(
-                          color: Colors.grey,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.6),
                           fontSize: 14,
                         ),
                       ),
@@ -57,21 +60,17 @@ class CategoryCardDetail extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 if (isDefault) 
-                  Container(
+                  Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 4,
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                     child: Tooltip(
                       message: 'Categoría predeterminada',
-                      child: const Icon(
+                      child: Icon(
                         Icons.lock,
-                        size: 16,
-                        color: Colors.grey,
+                        size: 18,
+                        color: colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                   ),
