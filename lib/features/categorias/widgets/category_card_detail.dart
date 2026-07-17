@@ -70,7 +70,7 @@ class CategoryCardDetail extends StatelessWidget {
                       child: Icon(
                         Icons.lock,
                         size: 18,
-                        color: colorScheme.onSurface.withOpacity(0.6),
+                        color: colorScheme.primary.withOpacity(0.6),
                       ),
                     ),
                   ),

@@ -17,6 +17,9 @@ class _CategoriasPageState extends State<CategoriasPage> {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final nombresTiposCategoria = appState.uniqueTipeCategoryNames;
     final bool loadingInitialData = appState.loadingInitialData;
     final int cantidadCategorias = appState.getTotalCategoriasCount();
@@ -32,9 +35,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
               Navigator.pushNamed(
                 context,
                 AppRoutes.categoriaFormRoute,
-                arguments: CategoriaFormArgs(
-                  id: -1,
-                ),
+                arguments: CategoriaFormArgs(id: -1),
               );
             },
           ),
@@ -45,13 +46,22 @@ class _CategoriasPageState extends State<CategoriasPage> {
         child: Column(
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
               children: [
-                Icon(Icons.lock, color: Colors.grey[600]),
-                SizedBox(width: 8),
+                Icon(Icons.lock, color: colorScheme.onSurface.withOpacity(0.6)),
                 Expanded(
                   child: Text(
                     'Las categorías con este ícono no se pueden eliminar ni modificar.',
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.primary.withOpacity(0.6),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: loadingInitialData ? false : true,
+                    maxLines: 2,
                   ),
                 ),
               ],
@@ -76,8 +86,9 @@ class _CategoriasPageState extends State<CategoriasPage> {
                           const SizedBox(height: 8),
                           Text(
                             'Total de categorías: $cantidadCategorias',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.grey[600]),
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface.withOpacity(0.6),
+                            ),
                           ),
                           const SizedBox(height: 8),
                         ],
