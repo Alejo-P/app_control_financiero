@@ -24,7 +24,7 @@ class IngresoPresupuestado {
   factory IngresoPresupuestado.fromMap(Map<String, dynamic> map) {
     return IngresoPresupuestado(
       id: map['id'] != null ? map['id'] as int : null,
-      monto: map['amount'] as double,
+      monto: (map['amount'] as num).toDouble(),
       fecha: DateTime.parse(map['date']),
     );
   }
