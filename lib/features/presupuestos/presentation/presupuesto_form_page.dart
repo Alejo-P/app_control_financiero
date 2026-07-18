@@ -19,6 +19,7 @@ import 'package:control_financiero/features/shared/widgets/detail_category_card.
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
+import 'package:control_financiero/features/shared/widgets/not_found_state.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -452,8 +453,13 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: _isLoading
               ? LoadingScreen(message: '$_action presupuesto...')
-              : detallePresupuesto == null && modo == PresupuestoFormMode.edit
-              ? _EmptyPresupuesto()
+              : detallePresupuesto == null &&
+                    (modo == PresupuestoFormMode.edit || isViewOnly)
+              ? NotFoundState(
+                  title: 'Presupuesto no encontrado',
+                  message:
+                      'El presupuesto que buscas no existe o fue eliminado.',
+                )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -496,7 +502,10 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                               ],
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 0,
+                                vertical: 12,
+                              ),
                               child: const Divider(),
                             ),
                             Text(
@@ -623,37 +632,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                   ],
                 ),
         ),
-      ),
-    );
-  }
-}
-
-class _EmptyPresupuesto extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.sentiment_dissatisfied_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'No se encontro el movimiento.',
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            'Posiblemente se busco un movimiento que no existe o fue eliminado.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

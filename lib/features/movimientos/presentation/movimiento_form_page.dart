@@ -15,6 +15,7 @@ import 'package:control_financiero/features/notificaciones/models/movement_notif
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
+import 'package:control_financiero/features/shared/widgets/not_found_state.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
@@ -547,7 +548,11 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
               ? LoadingScreen(message: '$_action movimiento...')
               : detalleMovimiento == null &&
                     (modo == MovimientoFormMode.edit || isViewOnly)
-              ? _EmptyMovimiento()
+              ? NotFoundState(
+                  title: 'Movimiento no encontrado',
+                  message:
+                      'El movimiento que buscas no existe o fue eliminado.',
+                )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -738,36 +743,5 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         _onCategoriaSelected(categoriaSeleccionada);
       }
     });
-  }
-}
-
-class _EmptyMovimiento extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.sentiment_dissatisfied_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'No se encontro el movimiento.',
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            'Posiblemente se busco un movimiento que no existe o fue eliminado.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
   }
 }
