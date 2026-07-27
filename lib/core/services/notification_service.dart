@@ -17,7 +17,9 @@ bool _isMobile() {
 
 class NotificationService {
   static final _notifications = FlutterLocalNotificationsPlugin();
-  static final _notificationRepository = NotificacionRepository(NotificacionLocalDataSource());
+  static final _notificationRepository = NotificacionRepository(
+    NotificacionLocalDataSource(),
+  );
 
   static Future<void> init() async {
     const android = AndroidInitializationSettings('ic_notification');
@@ -61,7 +63,9 @@ class NotificationService {
       payload: 'notificacion:$id',
     );
 
-    final unreadCount = await _notificationRepository.getUnreadCountByType(type);
+    final unreadCount = await _notificationRepository.getUnreadCountByType(
+      type,
+    );
 
     if (unreadCount > 0) {
       await _showSummaryNotification(type, unreadCount);
@@ -70,8 +74,13 @@ class NotificationService {
     }
   }
 
-  static Future<void> _showSummaryNotification(String type, int unreadCount) async {
-    final latest = await _notificationRepository.fetchLatestNotificacionByType(type);
+  static Future<void> _showSummaryNotification(
+    String type,
+    int unreadCount,
+  ) async {
+    final latest = await _notificationRepository.fetchLatestNotificacionByType(
+      type,
+    );
 
     final androidDetails = AndroidNotificationDetails(
       'channel_id',
@@ -124,7 +133,7 @@ class NotificationService {
       tzDate,
       details,
       payload: 'notificacion:$id',
-      androidAllowWhileIdle: true,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
@@ -143,7 +152,7 @@ class NotificationService {
       debugPrint('${p.id} - ${p.title}');
     }
     debugPrint('Cancelando notificación $id');
-    
+
     await _notifications.cancel(id);
   }
 
