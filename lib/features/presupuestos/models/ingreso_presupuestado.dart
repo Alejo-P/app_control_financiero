@@ -1,19 +1,13 @@
+import 'package:control_financiero/core/database/db_tables.dart';
+
 class IngresoPresupuestado {
   final int? id;
   final double monto;
   final DateTime fecha;
 
-  IngresoPresupuestado({
-    this.id,
-    required this.monto,
-    required this.fecha,
-  });
+  IngresoPresupuestado({this.id, required this.monto, required this.fecha});
 
-  IngresoPresupuestado copyWith({
-    int? id,
-    double? monto,
-    DateTime? fecha,
-  }) {
+  IngresoPresupuestado copyWith({int? id, double? monto, DateTime? fecha}) {
     return IngresoPresupuestado(
       id: id ?? this.id,
       monto: monto ?? this.monto,
@@ -23,16 +17,18 @@ class IngresoPresupuestado {
 
   factory IngresoPresupuestado.fromMap(Map<String, dynamic> map) {
     return IngresoPresupuestado(
-      id: map['id'] != null ? map['id'] as int : null,
-      monto: (map['amount'] as num).toDouble(),
-      fecha: DateTime.parse(map['date']),
+      id: map[IngresoPresupuestadoTable.id] != null
+          ? map[IngresoPresupuestadoTable.id] as int
+          : null,
+      monto: (map[IngresoPresupuestadoTable.amount] as num).toDouble(),
+      fecha: DateTime.parse(map[IngresoPresupuestadoTable.date] as String),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'amount': monto,
-      'date': fecha.toIso8601String(),
+      IngresoPresupuestadoTable.amount: monto,
+      IngresoPresupuestadoTable.date: fecha.toIso8601String(),
     };
   }
 }

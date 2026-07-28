@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:flutter/material.dart';
 
@@ -59,42 +60,40 @@ class Categoria {
     return 'Categoria{id: $id, name: $name, description: $description, movementType: $movementType, categoryTypeID: $categoryTypeID, iconName: $iconName, iconColorValue: $iconColorValue, movementsCount: $movementsCount, enabledRepeatMovement: $enabledRepeatMovement, isDefault: $isDefault}';
   }
 
-  // Factory constructor to create a Categoria from JSON
   factory Categoria.fromMap(Map<String, dynamic> map) {
     return Categoria(
-      id: map['id'] != null ? map['id'] as int : null,
-      name: map['name'],
-      description: map['description'],
-      movementType: map['movement_type'] == 'ingreso'
+      id: map[CategoriasTable.id] != null
+          ? map[CategoriasTable.id] as int
+          : null,
+      name: map[CategoriasTable.name] as String,
+      description: map[CategoriasTable.description] as String? ?? '',
+      movementType: map[CategoriasTable.movementType] == 'ingreso'
           ? TipoMovimiento.ingreso
           : TipoMovimiento.gasto,
-      categoryTypeID: map['category_type_id'],
-      iconName: map['icon_name'],
-      iconColorValue: map['icon_color_value'],
+      categoryTypeID: map[CategoriasTable.categoryTypeId] as int,
+      iconName: map[CategoriasTable.iconName] as String,
+      iconColorValue: map[CategoriasTable.iconColorValue] as int,
       movementsCount: map['movements_count'] ?? 0,
-      enabledRepeatMovement: map['enabled_repeat_movement'] == 1,
-      isDefault: map['is_default'] == 1,
+      enabledRepeatMovement: map[CategoriasTable.enabledRepeatMovement] == 1,
+      isDefault: map[CategoriasTable.isDefault] == 1,
     );
   }
 
-  // Method to convert a Categoria to JSON
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'movement_type': movementType.name,
-      'category_type_id': categoryTypeID,
-      'icon_name': iconName,
-      'icon_color_value': iconColorValue,
-      'enabled_repeat_movement': enabledRepeatMovement ? 1 : 0,
-      'is_default': isDefault ? 1 : 0,
+      CategoriasTable.id: id,
+      CategoriasTable.name: name,
+      CategoriasTable.description: description,
+      CategoriasTable.movementType: movementType.name,
+      CategoriasTable.categoryTypeId: categoryTypeID,
+      CategoriasTable.iconName: iconName,
+      CategoriasTable.iconColorValue: iconColorValue,
+      CategoriasTable.enabledRepeatMovement: enabledRepeatMovement ? 1 : 0,
+      CategoriasTable.isDefault: isDefault ? 1 : 0,
     };
   }
 
-  // Method to get IconData from iconName
   IconData get iconData => IconMapper.fromName(iconName);
 
-  // Method to get Color from iconColorValue
   Color get iconColor => Color(iconColorValue);
 }

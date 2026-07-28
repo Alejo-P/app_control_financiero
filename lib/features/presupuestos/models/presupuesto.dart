@@ -1,3 +1,5 @@
+import 'package:control_financiero/core/database/db_tables.dart';
+
 class Presupuesto {
   final int? id;
   final int categoryId;
@@ -31,20 +33,22 @@ class Presupuesto {
 
   factory Presupuesto.fromMap(Map<String, dynamic> map) {
     return Presupuesto(
-      id: map['id'] != null ? map['id'] as int : null,
-      categoryId: map['category_id'],
-      date: DateTime.parse(map['date']),
-      amount: map['amount'],
-      repeatBudget: map['repeat_budget'] == 1,
+      id: map[PresupuestosTable.id] != null
+          ? map[PresupuestosTable.id] as int
+          : null,
+      categoryId: map[PresupuestosTable.categoryId] as int,
+      date: DateTime.parse(map[PresupuestosTable.date] as String),
+      amount: (map[PresupuestosTable.amount] as num).toDouble(),
+      repeatBudget: map[PresupuestosTable.repeatBudget] == 1,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'category_id': categoryId,
-      'date': date.toIso8601String(),
-      'amount': amount,
-      'repeat_budget': repeatBudget ? 1 : 0,
+      PresupuestosTable.categoryId: categoryId,
+      PresupuestosTable.date: date.toIso8601String(),
+      PresupuestosTable.amount: amount,
+      PresupuestosTable.repeatBudget: repeatBudget ? 1 : 0,
     };
   }
 

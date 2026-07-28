@@ -1,24 +1,24 @@
+import 'package:control_financiero/core/database/db_tables.dart';
+
 class TipoCategoria {
   final int? id;
   final String name;
   final String description;
 
-  TipoCategoria({
-    this.id,
-    required this.name,
-    required this.description,
-  });
+  TipoCategoria({this.id, required this.name, required this.description});
 
   factory TipoCategoria.fromMap(Map<String, dynamic> map) {
     return TipoCategoria(
-      id: map['id'] != null ? map['id'] as int : null,
-      name: map['name'],
-      description: map['description']
+      id: map[TipoCategoriasTable.id] != null
+          ? map[TipoCategoriasTable.id] as int
+          : null,
+      name: map[TipoCategoriasTable.name] as String,
+      description: map[TipoCategoriasTable.description] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toMap() => {
-    'name': name,
-    'description': description
+    TipoCategoriasTable.name: name,
+    TipoCategoriasTable.description: description,
   };
 }

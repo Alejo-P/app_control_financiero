@@ -2,7 +2,6 @@ import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
 class Movimiento {
   final int? id;
   final String title;
@@ -46,24 +45,24 @@ class Movimiento {
     );
   }
 
-  // Factory constructor to create a Movimiento from JSON
   factory Movimiento.fromMap(Map<String, dynamic> map) {
     return Movimiento(
-      id: map[MovimientosTable.id] != null ? map[MovimientosTable.id] as int : null,
-      title: map[MovimientosTable.title],
-      categoryID: map[MovimientosTable.categoryId],
-      amount: map[MovimientosTable.amount],
-      date: DateTime.parse(map[MovimientosTable.date]),
+      id: map[MovimientosTable.id] != null
+          ? map[MovimientosTable.id] as int
+          : null,
+      title: map[MovimientosTable.title] as String,
+      categoryID: map[MovimientosTable.categoryId] as int,
+      amount: (map[MovimientosTable.amount] as num).toDouble(),
+      date: DateTime.parse(map[MovimientosTable.date] as String),
       time: TimeOfDay(
-        hour: int.parse(map[MovimientosTable.time].split(':')[0]),
-        minute: int.parse(map[MovimientosTable.time].split(':')[1]),
+        hour: int.parse((map[MovimientosTable.time] as String).split(':')[0]),
+        minute: int.parse((map[MovimientosTable.time] as String).split(':')[1]),
       ),
-      note: map[MovimientosTable.note],
+      note: map[MovimientosTable.note] as String? ?? '',
       repeatMovement: map[MovimientosTable.repeatMovement] == 1,
     );
   }
 
-  // Method to convert a Movimiento to JSON
   Map<String, dynamic> toMap() {
     return {
       MovimientosTable.id: id,
@@ -71,13 +70,13 @@ class Movimiento {
       MovimientosTable.categoryId: categoryID,
       MovimientosTable.amount: amount,
       MovimientosTable.date: DateFormat('yyyy-MM-dd').format(date),
-      MovimientosTable.time: '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+      MovimientosTable.time:
+          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
       MovimientosTable.note: note,
       MovimientosTable.repeatMovement: repeatMovement ? 1 : 0,
     };
   }
 
-  // Funtion for debugging purposes
   @override
   String toString() {
     return 'Movimiento{id: $id, title: $title, categoryID: $categoryID, amount: $amount, date: $date, time: $time, note: $note}, repeatMovement: $repeatMovement}';

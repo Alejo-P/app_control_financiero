@@ -100,6 +100,20 @@ class BudgetNotificationEventsTable {
   static const createdAt = 'created_at';
 }
 
+class RecordatorioTable {
+  static const table = 'recordatorios';
+
+  static const id = 'id';
+  static const title = 'title';
+  static const description = 'description';
+  static const categoryId = 'category_id';
+  static const amount = 'amount';
+  static const scheduledAt = 'scheduled_at';
+  static const completed = 'completed';
+  static const enabled = 'enabled';
+  static const recurrencia = 'recurrencia';
+}
+
 class MetaTable {
   static const table = 'meta';
 
@@ -123,6 +137,54 @@ Future<void> createTables(Database db) async {
       CREATE TABLE ${MetaTable.table} (
         ${MetaTable.key} TEXT PRIMARY KEY,
         ${MetaTable.value} TEXT NOT NULL
+      );
+    ''');
+  }
+  if (!existingTableNames.contains(TipoCategoriasTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${TipoCategoriasTable.table} (
+        ${TipoCategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${TipoCategoriasTable.name} TEXT NOT NULL,
+        ${TipoCategoriasTable.description} TEXT
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(CategoriasTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${CategoriasTable.table} (
+        ${CategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${CategoriasTable.name} TEXT NOT NULL,
+        ${CategoriasTable.description} TEXT,
+        ${CategoriasTable.movementType} TEXT NOT NULL,
+        ${CategoriasTable.categoryTypeId} INTEGER NOT NULL,
+        ${CategoriasTable.iconName} TEXT NOT NULL,
+        ${CategoriasTable.iconColorValue} INTEGER NOT NULL,
+        ${CategoriasTable.enabledRepeatMovement} INTEGER DEFAULT 0,
+        ${CategoriasTable.isDefault} INTEGER DEFAULT 0,
+        FOREIGN KEY(${CategoriasTable.categoryTypeId}) REFERENCES ${TipoCategoriasTable.table}(${TipoCategoriasTable.id})
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(MovementNotificationConfigTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${MovementNotificationConfigTable.table} (
+        ${MovementNotificationConfigTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${MovementNotificationConfigTable.typeKey} TEXT NOT NULL UNIQUE,
+        ${MovementNotificationConfigTable.isEnabled} INTEGER NOT NULL DEFAULT 0,
+        ${MovementNotificationConfigTable.isDefault} INTEGER NOT NULL DEFAULT 0,
+        ${MovementNotificationConfigTable.createdAt} TEXT NOT NULL
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(IngresoPresupuestadoTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${IngresoPresupuestadoTable.table} (
+        ${IngresoPresupuestadoTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${IngresoPresupuestadoTable.amount} REAL NOT NULL,
+        ${IngresoPresupuestadoTable.date} TEXT NOT NULL
       );
     ''');
   }
@@ -157,18 +219,6 @@ Future<void> createTables(Database db) async {
     ''');
   }
 
-  if (!existingTableNames.contains(MovementNotificationConfigTable.table)) {
-    await db.execute('''
-      CREATE TABLE ${MovementNotificationConfigTable.table} (
-        ${MovementNotificationConfigTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${MovementNotificationConfigTable.typeKey} TEXT NOT NULL UNIQUE,
-        ${MovementNotificationConfigTable.isEnabled} INTEGER NOT NULL DEFAULT 0,
-        ${MovementNotificationConfigTable.isDefault} INTEGER NOT NULL DEFAULT 0,
-        ${MovementNotificationConfigTable.createdAt} TEXT NOT NULL
-      );
-    ''');
-  }
-
   if (!existingTableNames.contains(BudgetNotificationEventsTable.table)) {
     await db.execute('''
       CREATE TABLE ${BudgetNotificationEventsTable.table} (
@@ -179,45 +229,7 @@ Future<void> createTables(Database db) async {
         ${BudgetNotificationEventsTable.threshold} REAL NOT NULL,
         ${BudgetNotificationEventsTable.createdAt} TEXT NOT NULL,
         UNIQUE(${BudgetNotificationEventsTable.categoryId}, ${BudgetNotificationEventsTable.year}, ${BudgetNotificationEventsTable.month}, ${BudgetNotificationEventsTable.threshold}),
-
         FOREIGN KEY(${BudgetNotificationEventsTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
-      );
-    ''');
-  }
-
-  if (!existingTableNames.contains(TipoCategoriasTable.table)) {
-    await db.execute('''
-      CREATE TABLE ${TipoCategoriasTable.table} (
-        ${TipoCategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${TipoCategoriasTable.name} TEXT NOT NULL,
-        ${TipoCategoriasTable.description} TEXT
-      );
-    ''');
-  }
-
-  if (!existingTableNames.contains(IngresoPresupuestadoTable.table)) {
-    await db.execute('''
-      CREATE TABLE ${IngresoPresupuestadoTable.table} (
-        ${IngresoPresupuestadoTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${IngresoPresupuestadoTable.amount} REAL NOT NULL,
-        ${IngresoPresupuestadoTable.date} TEXT NOT NULL
-      );
-    ''');
-  }
-
-  if (!existingTableNames.contains(CategoriasTable.table)) {
-    await db.execute('''
-      CREATE TABLE ${CategoriasTable.table} (
-        ${CategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${CategoriasTable.name} TEXT NOT NULL,
-        ${CategoriasTable.description} TEXT,
-        ${CategoriasTable.movementType} TEXT NOT NULL,
-        ${CategoriasTable.categoryTypeId} INTEGER NOT NULL,
-        ${CategoriasTable.iconName} TEXT NOT NULL,
-        ${CategoriasTable.iconColorValue} INTEGER NOT NULL,
-        ${CategoriasTable.enabledRepeatMovement} INTEGER DEFAULT 0,
-        ${CategoriasTable.isDefault} INTEGER DEFAULT 0,
-        FOREIGN KEY(${CategoriasTable.categoryTypeId}) REFERENCES ${TipoCategoriasTable.table}(${TipoCategoriasTable.id})
       );
     ''');
   }
@@ -247,6 +259,23 @@ Future<void> createTables(Database db) async {
         ${PresupuestosTable.amount} REAL NOT NULL,
         ${PresupuestosTable.repeatBudget} INTEGER DEFAULT 0,
         FOREIGN KEY(${PresupuestosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
+      );
+    ''');
+  }
+
+  if (!existingTableNames.contains(RecordatorioTable.table)) {
+    await db.execute('''
+      CREATE TABLE ${RecordatorioTable.table} (
+        ${RecordatorioTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${RecordatorioTable.title} TEXT NOT NULL,
+        ${RecordatorioTable.description} TEXT,
+        ${RecordatorioTable.categoryId} INTEGER,
+        ${RecordatorioTable.amount} REAL,
+        ${RecordatorioTable.scheduledAt} TEXT NOT NULL,
+        ${RecordatorioTable.completed} INTEGER DEFAULT 0,
+        ${RecordatorioTable.enabled} INTEGER DEFAULT 1,
+        ${RecordatorioTable.recurrencia} TEXT DEFAULT 'ninguno',
+        FOREIGN KEY(${RecordatorioTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
       );
     ''');
   }
