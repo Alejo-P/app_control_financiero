@@ -246,6 +246,19 @@ class _AjustesPageState extends State<AjustesPage> {
                           );
                         },
                       ),
+                      SettingOptionCard(
+                        title: 'Recordatorios',
+                        description:
+                            'Gestiona los recordatorios de tus movimientos',
+                        icon: Icons.alarm_outlined,
+                        iconColor: Colors.blue,
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.recordatoriosRoute,
+                          );
+                        },
+                      ),
                     ],
                   ),
                   WidgetsContainer(
