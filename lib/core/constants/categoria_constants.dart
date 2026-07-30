@@ -34,6 +34,7 @@ const Map<String, IconData> categoryIconsMap = {
   'home_repair_service': Icons.home_repair_service,
   'build': Icons.build,
   'directions_bike': Icons.directions_bike,
+  'pedal_bike': Icons.pedal_bike,
   'local_library': Icons.local_library,
   'local_cafe': Icons.local_cafe,
   'local_bar': Icons.local_bar,
@@ -42,6 +43,8 @@ const Map<String, IconData> categoryIconsMap = {
   'account_balance_wallet': Icons.account_balance_wallet,
   'card_giftcard': Icons.card_giftcard,
   'person': Icons.person,
+  'lightbulb': Icons.lightbulb,
+  'bolt': Icons.bolt
 };
 
 final Map<String, IconData> extraIconsMap = {

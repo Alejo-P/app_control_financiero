@@ -1,179 +1,69 @@
-import 'package:control_financiero/features/shared/widgets/icon_container.dart';
+import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
+import 'package:control_financiero/features/recordatorios/widgets/recordatorio_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RecordatoriosPage extends StatelessWidget {
   const RecordatoriosPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
+    final appState = context.watch<AppState>();
+    final recordatorios = appState.recordatorios;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recordatorios'),
-        actions: [
-          // if (unReadNotif > 0)
-          //   IconButton(
-          //     icon: Icon(Icons.done_all),
-          //     onPressed: _marcarTodoLeido,
-          //     tooltip: 'Marcar todo como leído',
-          //   ),
-
-          // if (notifications.isNotEmpty)
-          //   IconButton(
-          //     icon: Icon(Icons.delete_forever_outlined),
-          //     onPressed: _eliminarTodasNotificaciones,
-          //     tooltip: 'Eliminar todas las notificaciones',
-          //   ),
-        ],
+        title: const Text('Recordatorios'),
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-        child: Card(
-          elevation: 4,
-          child: Padding(
-            padding: EdgeInsetsGeometry.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    spacing: 10,
-                    children: [
-                      IconContainer(
-                        icon: Icons.alarm_outlined,
-                        color: Colors.blue,
-                        size: 24,
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 4,
-                          children: [
-                            Text(
-                              'Solo ejemplo de un texto muy largo para ver como se comporta el texto en la pantalla y si se ajusta correctamente al espacio disponible.',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 4,
-                              children: [
-                                Icon(
-                                  Icons.calendar_month_outlined,
-                                  size: 16,
-                                  color: colorScheme.secondary,
-                                ),
-                                Text(
-                                  '29/07/2026',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.primary,
-                                  ),
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        value: true,
-                        onChanged: (value) {
-                          // Handle switch change
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Card(
-                          color: colorScheme.surface,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.category_outlined,
-                                  color: colorScheme.secondary,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    'Categoría ejemplo muy larga',
-                                    style: textTheme.labelSmall?.copyWith(
-                                      color: colorScheme.primary,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.repeat_outlined,
-                                  color: colorScheme.secondary,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    'Mensual',
-                                    style: textTheme.labelSmall?.copyWith(
-                                      color: colorScheme.primary,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
+        child: appState.loadingInitialData
+            ? const LoadingScreen(message: 'Cargando recordatorios...')
+            : recordatorios.isEmpty ? _EmptyRecordatorios()
+            : ListView.separated(
+                itemCount: recordatorios.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final recordatorio = recordatorios[index];
+                  return RecordatorioCard(
+                    icon: recordatorio.categoryIcon,
+                    iconColor: recordatorio.categoryColor,
+                    isEnabled: recordatorio.isEnabled,
+                    categoryName: recordatorio.categoryName,
+                    recurrency: recordatorio.recurrency,
+                    createdAt: recordatorio.scheduledAt,
+                    title: recordatorio.title,
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class _EmptyRecordatorios extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.hourglass_disabled_rounded, size: 80, color: Colors.grey[400]),
+          const SizedBox(height: 24),
+          Text(
+            'No hay recordatorios establecidos.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
           ),
-        ),
+          Text(
+            'Establece un recordatorio nuevo para algun movimiento futuro.',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

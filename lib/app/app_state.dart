@@ -22,6 +22,8 @@ import 'package:control_financiero/features/presupuestos/data/presupuestos_repos
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
+import 'package:control_financiero/features/recordatorios/data/recordatorios_repository.dart';
+import 'package:control_financiero/features/recordatorios/models/info_card_recordatorio.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:flutter/material.dart';
@@ -77,6 +79,7 @@ class AppState extends ChangeNotifier {
   final PresupuestosRepository _presupuestosRepository;
   final HistorialRepository _historialRepository;
   final NotificacionRepository _notificacionRepository;
+  final RecordatoriosRepository _recordatoriosRepository;
 
   AppState(
     this._movimientosRepository,
@@ -85,6 +88,7 @@ class AppState extends ChangeNotifier {
     this._presupuestosRepository,
     this._historialRepository,
     this._notificacionRepository,
+    this._recordatoriosRepository,
   );
 
   MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
@@ -112,6 +116,7 @@ class AppState extends ChangeNotifier {
 
   List<Movimiento> movimientos = [];
   List<Categoria> categorias = [];
+  List<InfoCardRecordatorio> recordatorios = [];
 
   List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
   List<BudgetNotification> budgetNotifications = [];
@@ -149,6 +154,7 @@ class AppState extends ChangeNotifier {
       loadNotifications(),
     ]);
     await loadCategoryData(notify: false);
+    await loadRecordatiosData(notify: false);
     loadingInitialData = false;
 
     notifyListeners();
@@ -157,6 +163,12 @@ class AppState extends ChangeNotifier {
   Future<void> loadCategoryData({bool notify = true}) async {
     categorias = await _categoriasRepository.fetchAllCategorias();
     _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
+
+    if (notify) notifyListeners();
+  }
+
+  Future<void> loadRecordatiosData({bool notify = true}) async {
+    recordatorios = await _recordatoriosRepository.fetchAllRecordatorios();
 
     if (notify) notifyListeners();
   }
