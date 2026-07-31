@@ -1,4 +1,5 @@
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/recordatorios/widgets/recordatorio_card.dart';
 import 'package:flutter/material.dart';
@@ -13,14 +14,13 @@ class RecordatoriosPage extends StatelessWidget {
     final recordatorios = appState.recordatorios;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recordatorios'),
-      ),
+      appBar: AppBar(title: const Text('Recordatorios')),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
         child: appState.loadingInitialData
             ? const LoadingScreen(message: 'Cargando recordatorios...')
-            : recordatorios.isEmpty ? _EmptyRecordatorios()
+            : recordatorios.isEmpty
+            ? _EmptyRecordatorios()
             : ListView.separated(
                 itemCount: recordatorios.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -34,6 +34,15 @@ class RecordatoriosPage extends StatelessWidget {
                     recurrency: recordatorio.recurrency,
                     createdAt: recordatorio.scheduledAt,
                     title: recordatorio.title,
+                    onDelete: () async {
+                      final confirm = await showConfirmDialog(
+                        context,
+                        title: 'Eliminar recordatorio',
+                        content:
+                            'Va a eliminar el recordatorio \'${recordatorio.title}\'',
+                      );
+                      if (confirm == true) print('Eliminando ${recordatorio.title}');
+                    },
                   );
                 },
               ),
@@ -49,7 +58,11 @@ class _EmptyRecordatorios extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.hourglass_disabled_rounded, size: 80, color: Colors.grey[400]),
+          Icon(
+            Icons.hourglass_disabled_rounded,
+            size: 80,
+            color: Colors.grey[400],
+          ),
           const SizedBox(height: 24),
           Text(
             'No hay recordatorios establecidos.',

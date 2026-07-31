@@ -48,6 +48,10 @@ Future<bool?> showConfirmDialog(
   required String title,
   required String content,
 }) {
+  final theme = Theme.of(context);
+  final textTheme = theme.textTheme;
+  final colorScheme = theme.colorScheme;
+
   return showDialog<bool>(
     context: context,
     barrierDismissible: false, // obliga a elegir
@@ -55,7 +59,8 @@ Future<bool?> showConfirmDialog(
       return AlertDialog(
         title: Text(
           title,
-          style: const TextStyle(
+          style: textTheme.displayLarge?.copyWith(
+            color: colorScheme.primary,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
