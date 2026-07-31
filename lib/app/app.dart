@@ -20,6 +20,7 @@ import 'package:control_financiero/features/presupuestos/data/presupuestos_repos
 import 'package:control_financiero/features/presupuestos/presentation/presupuesto_form_page.dart';
 import 'package:control_financiero/features/recordatorios/data/recordatorios_local_datasource.dart';
 import 'package:control_financiero/features/recordatorios/data/recordatorios_repository.dart';
+import 'package:control_financiero/features/recordatorios/presentation/recordatorio_form_page.dart';
 import 'package:control_financiero/features/recordatorios/presentation/recordatorios_page.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
@@ -126,6 +127,8 @@ class _AppState extends State<App> {
               AppRoutes.aboutRoute: (context) => const AboutPage(),
               AppRoutes.recordatoriosRoute: (context) =>
                   const RecordatoriosPage(),
+              AppRoutes.recordatorioFormRoute: (context) =>
+                  const RecordatorioFormPage(),
             },
 
             home: appState.loadingInitialData

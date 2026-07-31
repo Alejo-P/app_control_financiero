@@ -10,7 +10,8 @@ class RecordatorioCard extends StatelessWidget {
   final String recurrency;
   final DateTime createdAt;
   final bool isEnabled;
-  final ValueChanged<bool>? onTap;
+  final VoidCallback? onTap;
+  final ValueChanged<bool>? onChange;
   final VoidCallback? onDelete;
 
   const RecordatorioCard({
@@ -23,36 +24,40 @@ class RecordatorioCard extends StatelessWidget {
     required this.createdAt,
     required this.isEnabled,
     this.onTap,
+    this.onChange,
     this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: EdgeInsetsGeometry.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            HeaderRecordatorioCard(
-              icon: icon,
-              iconColor: iconColor,
-              title: title,
-              createdAt: createdAt,
-              onDelete: onDelete,
-              isEnabled: isEnabled,
-              onTap: onTap,
-            ),
-            Divider(),
-            FooterRecordatorioCard(
-              categoryName: categoryName,
-              recurrency: recurrency,
-            ),
-          ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.all(Radius.circular(15)),
+      child: Card(
+        elevation: 4,
+        child: Padding(
+          padding: EdgeInsetsGeometry.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              HeaderRecordatorioCard(
+                icon: icon,
+                iconColor: iconColor,
+                title: title,
+                createdAt: createdAt,
+                onDelete: onDelete,
+                isEnabled: isEnabled,
+                onTap: onChange,
+              ),
+              Divider(),
+              FooterRecordatorioCard(
+                categoryName: categoryName,
+                recurrency: recurrency,
+              ),
+            ],
+          ),
         ),
       ),
     );

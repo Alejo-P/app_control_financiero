@@ -1,3 +1,4 @@
+import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -34,6 +35,12 @@ class RecordatoriosPage extends StatelessWidget {
                     recurrency: recordatorio.recurrency,
                     createdAt: recordatorio.scheduledAt,
                     title: recordatorio.title,
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.recordatorioFormRoute,
+                      );
+                    },
                     onDelete: () async {
                       final confirm = await showConfirmDialog(
                         context,
@@ -41,7 +48,8 @@ class RecordatoriosPage extends StatelessWidget {
                         content:
                             'Va a eliminar el recordatorio \'${recordatorio.title}\'',
                       );
-                      if (confirm == true) print('Eliminando ${recordatorio.title}');
+
+                      if (confirm != true) return;
                     },
                   );
                 },

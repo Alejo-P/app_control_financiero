@@ -9,4 +9,5 @@ class AppRoutes {
   static const aboutRoute = '/ajustes/about';
 
   static const recordatoriosRoute = '/recordatorios';
+  static const recordatorioFormRoute = '/recordatorio-form';
 }
