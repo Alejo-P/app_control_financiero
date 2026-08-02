@@ -4,9 +4,7 @@ import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
-import 'package:control_financiero/features/shared/widgets/label_card.dart';
 import 'package:control_financiero/features/shared/widgets/labeled_form_field.dart';
-import 'package:control_financiero/features/shared/widgets/number_input.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
@@ -87,9 +85,6 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colors = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: Text('Crear recordatorio')),
