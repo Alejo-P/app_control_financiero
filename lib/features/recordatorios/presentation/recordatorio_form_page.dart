@@ -1,9 +1,12 @@
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
+import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
+import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/shared/widgets/labeled_form_field.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
@@ -19,10 +22,14 @@ class RecordatorioFormPage extends StatefulWidget {
 
 class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
   bool _isLoading = false; // Variable para controlar el estado de carga
+  bool isViewOnly =
+      false; // Variable para controlar si el formulario es solo lectura
   IconData? iconoCategoriaSeleccionada;
   Color? colorCategoriaSeleccionada;
   int categoriaSeleccionada = -1;
   List<Categoria> categorias = [];
+  DateTime fechaRecordatorio = currentDateTime;
+  Recurrencia recurrenciaSeleccionada = Recurrencia.ninguno;
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
@@ -55,6 +62,23 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     super.dispose();
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final currentDay = currentDateTime;
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: fechaRecordatorio,
+      firstDate: DateTime(currentDay.year - 3),
+      lastDate: DateTime(currentDay.year, currentDay.month, currentDay.day),
+    );
+
+    if (picked != null && picked != fechaRecordatorio) {
+      setState(() {
+        fechaRecordatorio = picked;
+      });
+      // _checkEnableSaveButton();
+    }
+  }
+
   Future<void> _onChangeCategoria(int categoriaId) async {
     if (categoriaSeleccionada == categoriaId) return;
 
@@ -85,7 +109,6 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(title: Text('Crear recordatorio')),
       body: Padding(
@@ -149,6 +172,39 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                         iconData: Icons.description,
                         iconColor: Colors.grey,
                         maxLength: 200,
+                      ),
+                      InkWell(
+                        onTap: () => isViewOnly ? null : _selectDate(context),
+                        borderRadius: BorderRadius.circular(12),
+                        child: DetailCategoryCard(
+                          categoryName: 'Fecha',
+                          categoryIcon: Icons.calendar_today,
+                          iconColor: Colors.purple,
+                          currentValue: formatDate(fechaRecordatorio),
+                          showArrow: !isViewOnly,
+                        ),
+                      ),
+                      LabeledFormField(
+                        label: "Recurrencia",
+                        icon: Icon(Icons.repeat, color: Colors.teal),
+                        child: DropdownButton<Recurrencia>(
+                          value: recurrenciaSeleccionada,
+                          onChanged: isViewOnly
+                              ? null
+                              : (Recurrencia? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      recurrenciaSeleccionada = newValue;
+                                    });
+                                  }
+                                },
+                          items: Recurrencia.values.map((Recurrencia value) {
+                            return DropdownMenuItem<Recurrencia>(
+                              value: value,
+                              child: Text(value.name),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ],
                   ),

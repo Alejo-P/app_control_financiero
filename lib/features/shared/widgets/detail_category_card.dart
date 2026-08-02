@@ -23,6 +23,7 @@ class DetailCategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final [r, g, b] = getRGBFromColor(iconColor);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -47,7 +48,12 @@ class DetailCategoryCard extends StatelessWidget {
             categoryName,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.primary,
+              //fontSize: 16,
+              fontWeight: FontWeight.w500,
+
+            ),
           ),
         ),
         const SizedBox(width: 6),

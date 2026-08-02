@@ -95,6 +95,21 @@ class CategoriasLocalDataSource {
   // Agregar una nueva categoría
   Future<OperationResult<int>> addCategoria(Categoria categoria) async {
     final db = await _dbHelper.database;
+
+    // Comprobar si ya existe una categoría con el mismo nombre
+    final List<Map<String, dynamic>> existing = await db.query(
+      CategoriasTable.table,
+      where: '${CategoriasTable.name} = ?',
+      whereArgs: [categoria.name],
+    );
+
+    if (existing.isNotEmpty) {
+      return OperationResult<int>(
+        success: false,
+        message: 'Ya existe una categoría con el mismo nombre.',
+      );
+    }
+
     final id = await db.insert(CategoriasTable.table, categoria.toMap());
 
     return OperationResult<int>(
