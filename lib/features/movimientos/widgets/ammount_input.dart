@@ -1,10 +1,13 @@
-import 'package:control_financiero/core/formatters/number_input_formatter.dart';
+import 'package:control_financiero/features/shared/widgets/number_input.dart';
 import 'package:flutter/material.dart';
 
 class AmountInput extends StatelessWidget {
   final TextEditingController controller;
   final bool isEditable;
   final bool showLabel;
+  final double fontSize;
+  final FontWeight fontWeight;
+  final TextAlign textAlign;
   final String? Function(String?)? validator;
 
   const AmountInput({
@@ -12,18 +15,17 @@ class AmountInput extends StatelessWidget {
     required this.controller,
     this.isEditable = true,
     this.showLabel = true,
+    this.fontSize = 20,
+    this.fontWeight = FontWeight.bold,
+    this.textAlign = TextAlign.center,
     this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(height: 15),
         if (showLabel) 
           ...[
             // Label
@@ -33,39 +35,23 @@ class AmountInput extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
           children: [
             // Símbolo $
             Text(
               '\$',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
             ),
-            const SizedBox(width: 18),
 
             // Input
             IntrinsicWidth(
-              child: TextFormField(
+              child: NumberInput(
                 controller: controller,
-                enabled: isEditable,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: InputDecoration(
-                  hintText: '0.00',
-                  hintStyle: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                ),
-                inputFormatters: [NumberInputFormatter()],
-                cursorColor: colorScheme.primary,
-                textAlign: TextAlign.center,
+                isEditable: isEditable,
                 validator: validator,
+                fontSize: fontSize,
+                fontWeight: fontWeight,
+                textAlign: textAlign,
               ),
             ),
           ],

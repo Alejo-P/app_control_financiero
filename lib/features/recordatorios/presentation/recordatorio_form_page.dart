@@ -5,6 +5,7 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/label_card.dart';
+import 'package:control_financiero/features/shared/widgets/number_input.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
@@ -138,21 +139,25 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                           ),
                         ],
                       ),
-                      AmountInput(
-                        controller: _amountController,
-                        //isEditable: !isViewOnly,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'El monto es obligatorio';
-                          }
-                          final amount = double.tryParse(
-                            value.trim().replaceAll(',', '.'),
-                          );
-                          if (amount == null || amount <= 0) {
-                            return 'Ingrese un monto válido';
-                          }
-                          return null;
-                        },
+                      LabeledFormField(
+                        label: "Monto",
+                        icon: Icon(Icons.attach_money, color: Colors.green),
+                        colors: colors,
+                        child: AmountInput(
+                          controller: _amountController,
+                          showLabel: false,
+                          textAlign: TextAlign.left,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor ingrese un monto';
+                            }
+                            final amount = double.tryParse(value);
+                            if (amount == null || amount <= 0) {
+                              return 'Por favor ingrese un monto válido';
+                            }
+                            return null;
+                          },
+                        ),
                       ),
                       TextInputCard(
                         textController: _descriptionController,
@@ -169,6 +174,44 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class LabeledFormField extends StatelessWidget {
+  final String label;
+  final Icon icon;
+  final ColorScheme colors;
+  final Widget child;
+
+  const LabeledFormField({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.colors,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        LabelCard(
+          label: label,
+          iconData: icon.icon,
+          iconColor: icon.color,
+          textStyle: textTheme.bodyMedium?.copyWith(
+            color: colors.primary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(width: 12),
+        child,
+      ],
     );
   }
 }

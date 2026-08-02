@@ -600,6 +600,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                             ),
                             AmountInput(
                               controller: _presupuestoAmountController,
+                              fontSize: 40,
                               isEditable:
                                   (ingresoDisponible.monto > 0 ||
                                       modo == PresupuestoFormMode.edit) &&

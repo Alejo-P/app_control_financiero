@@ -568,21 +568,25 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              AmountInput(
-                                controller: _amountController,
-                                isEditable: !isViewOnly,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'El monto es obligatorio';
-                                  }
-                                  final amount = double.tryParse(
-                                    value.trim().replaceAll(',', '.'),
-                                  );
-                                  if (amount == null || amount <= 0) {
-                                    return 'Ingrese un monto válido';
-                                  }
-                                  return null;
-                                },
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: AmountInput(
+                                  controller: _amountController,
+                                  isEditable: !isViewOnly,
+                                  fontSize: 40,
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'El monto es obligatorio';
+                                    }
+                                    final amount = double.tryParse(
+                                      value.trim().replaceAll(',', '.'),
+                                    );
+                                    if (amount == null || amount <= 0) {
+                                      return 'Ingrese un monto válido';
+                                    }
+                                    return null;
+                                  },
+                                ),
                               ),
                               WidgetsContainer(
                                 title: 'Detalles del movimiento',
