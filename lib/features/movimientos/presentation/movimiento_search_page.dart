@@ -11,7 +11,7 @@ import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_search_filters.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
-import 'package:control_financiero/features/shared/widgets/label_card.dart';
+import 'package:control_financiero/features/shared/widgets/labeled_form_field.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -291,94 +291,29 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
 
                     const SizedBox(height: 12),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        LabelCard(
-                          label: "Categoría",
-                          iconData: iconoCategoriaSeleccionada,
-                          iconColor: colorCategoriaSeleccionada,
-                          textStyle: textTheme.bodyMedium?.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        CategoryDropdown(
-                          categorias: categorias,
-                          selectedValue: categoriaSeleccionada,
-                          onChangeCategory: _onChangeCategoria,
-                        ),
-                      ],
+                    LabeledFormField(
+                      label: "Categoría",
+                      icon: Icon(Icons.category, color: Colors.orange),
+                      child: CategoryDropdown(
+                        categorias: categorias,
+                        selectedValue: categoriaSeleccionada,
+                        onChangeCategory: _onChangeCategoria,
+                      ),
                     ),
 
                     const SizedBox(height: 12),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        LabelCard(
-                          label: "Por fecha",
-                          iconData: Icons.date_range,
-                          iconColor: Colors.grey.shade600,
-                          textStyle: textTheme.bodyMedium?.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          spacing: 8.0,
-                          children: [
-                            if (isSelectedRange)
-                              TextButton(
-                                onPressed: _showDateRangePicker,
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  backgroundColor: colors.primary.withOpacity(
-                                    0.2,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: context.isPhone
-                                    ? Icon(
-                                        Icons.edit_calendar,
-                                        color: colors.primary,
-                                      )
-                                    : Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.edit_calendar,
-                                            color: colors.primary,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            "Editar rango",
-                                            style: textTheme.bodyMedium
-                                                ?.copyWith(
-                                                  color: colors.primary,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ],
-                                      ),
-                              ),
-
+                    LabeledFormField(
+                      label: "Por fecha",
+                      icon: Icon(Icons.date_range, color: Colors.grey.shade600),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 8.0,
+                        children: [
+                          if (isSelectedRange)
                             TextButton(
-                              onPressed: isSelectedRange
-                                  ? _onClearDateRange
-                                  : _showDateRangePicker,
+                              onPressed: _showDateRangePicker,
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -393,36 +328,76 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                               ),
                               child: context.isPhone
                                   ? Icon(
-                                      isSelectedRange
-                                          ? Icons.delete_outline
-                                          : Icons.date_range,
+                                      Icons.edit_calendar,
                                       color: colors.primary,
                                     )
                                   : Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          isSelectedRange
-                                              ? Icons.delete_outline
-                                              : Icons.date_range,
+                                          Icons.edit_calendar,
                                           color: colors.primary,
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          isSelectedRange
-                                              ? 'Eliminar rango'
-                                              : 'Seleccionar rango',
+                                          "Editar rango",
                                           style: textTheme.bodyMedium?.copyWith(
                                             color: colors.primary,
                                             fontWeight: FontWeight.w500,
                                           ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                          textAlign: TextAlign.left,
                                         ),
                                       ],
                                     ),
                             ),
-                          ],
-                        ),
-                      ],
+
+                          TextButton(
+                            onPressed: isSelectedRange
+                                ? _onClearDateRange
+                                : _showDateRangePicker,
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              backgroundColor: colors.primary.withOpacity(0.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: context.isPhone
+                                ? Icon(
+                                    isSelectedRange
+                                        ? Icons.delete_outline
+                                        : Icons.date_range,
+                                    color: colors.primary,
+                                  )
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isSelectedRange
+                                            ? Icons.delete_outline
+                                            : Icons.date_range,
+                                        color: colors.primary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        isSelectedRange
+                                            ? 'Eliminar rango'
+                                            : 'Seleccionar rango',
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: colors.primary,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
