@@ -5,6 +5,7 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/label_card.dart';
+import 'package:control_financiero/features/shared/widgets/labeled_form_field.dart';
 import 'package:control_financiero/features/shared/widgets/number_input.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
@@ -119,30 +120,18 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                           return null;
                         },
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          LabelCard(
-                            label: "Categoría",
-                            iconData: iconoCategoriaSeleccionada,
-                            iconColor: colorCategoriaSeleccionada,
-                            textStyle: textTheme.bodyMedium?.copyWith(
-                              color: colors.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          CategoryDropdown(
-                            categorias: categorias,
-                            selectedValue: categoriaSeleccionada,
-                            onChangeCategory: _onChangeCategoria,
-                          ),
-                        ],
+                      LabeledFormField(
+                        label: "Categoría",
+                        icon: Icon(Icons.category, color: Colors.orange),
+                        child: CategoryDropdown(
+                          categorias: categorias,
+                          selectedValue: categoriaSeleccionada,
+                          onChangeCategory: _onChangeCategoria,
+                        ),
                       ),
                       LabeledFormField(
                         label: "Monto",
                         icon: Icon(Icons.attach_money, color: Colors.green),
-                        colors: colors,
                         child: AmountInput(
                           controller: _amountController,
                           showLabel: false,
@@ -174,44 +163,6 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class LabeledFormField extends StatelessWidget {
-  final String label;
-  final Icon icon;
-  final ColorScheme colors;
-  final Widget child;
-
-  const LabeledFormField({
-    super.key,
-    required this.label,
-    required this.icon,
-    required this.colors,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        LabelCard(
-          label: label,
-          iconData: icon.icon,
-          iconColor: icon.color,
-          textStyle: textTheme.bodyMedium?.copyWith(
-            color: colors.primary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: 12),
-        child,
-      ],
     );
   }
 }
