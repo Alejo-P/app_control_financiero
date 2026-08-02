@@ -561,29 +561,34 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                                         color: colorScheme.primary,
                                       ),
                                       const SizedBox(width: 8),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            'Monto disponible para este presupuesto',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: colorScheme.primary,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'Monto disponible para este presupuesto',
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: colorScheme.primary,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: colorScheme.primary,
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: colorScheme.primary,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),

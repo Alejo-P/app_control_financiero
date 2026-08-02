@@ -151,20 +151,23 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                       LabeledFormField(
                         label: "Monto",
                         icon: Icon(Icons.attach_money, color: Colors.green),
-                        child: AmountInput(
-                          controller: _amountController,
-                          showLabel: false,
-                          textAlign: TextAlign.left,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor ingrese un monto';
-                            }
-                            final amount = double.tryParse(value);
-                            if (amount == null || amount <= 0) {
-                              return 'Por favor ingrese un monto válido';
-                            }
-                            return null;
-                          },
+                        child: Expanded(
+                          child: AmountInput(
+                            controller: _amountController,
+                            showLabel: false,
+                            textAlign: TextAlign.center,
+                            position: MainAxisAlignment.end,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor ingrese un monto';
+                              }
+                              final amount = double.tryParse(value);
+                              if (amount == null || amount <= 0) {
+                                return 'Por favor ingrese un monto válido';
+                              }
+                              return null;
+                            },
+                          ),
                         ),
                       ),
                       TextInputCard(

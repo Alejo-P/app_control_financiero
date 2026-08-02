@@ -8,6 +8,7 @@ class AmountInput extends StatelessWidget {
   final double fontSize;
   final FontWeight fontWeight;
   final TextAlign textAlign;
+  final MainAxisAlignment position;
   final String? Function(String?)? validator;
 
   const AmountInput({
@@ -18,6 +19,7 @@ class AmountInput extends StatelessWidget {
     this.fontSize = 20,
     this.fontWeight = FontWeight.bold,
     this.textAlign = TextAlign.center,
+    this.position = MainAxisAlignment.center,
     this.validator,
   });
 
@@ -34,7 +36,7 @@ class AmountInput extends StatelessWidget {
           ],
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: position,
           spacing: 8,
           children: [
             // Símbolo $
