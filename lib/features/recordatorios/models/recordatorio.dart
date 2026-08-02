@@ -2,6 +2,23 @@ import 'package:control_financiero/core/database/db_tables.dart';
 
 enum Recurrencia { diario, semanal, mensual, anual, ninguno }
 
+extension RecurrenciaExtension on Recurrencia {
+  String get name {
+    switch (this) {
+      case Recurrencia.diario:
+        return 'Diario';
+      case Recurrencia.semanal:
+        return 'Semanal';
+      case Recurrencia.mensual:
+        return 'Mensual';
+      case Recurrencia.anual:
+        return 'Anual';
+      case Recurrencia.ninguno:
+        return 'Ninguno';
+    }
+  }
+}
+
 class Recordatorio {
   final int? id;
   final String title;

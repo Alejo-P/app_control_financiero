@@ -18,6 +18,10 @@ class CustomDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+    
     return Expanded(
       child: DropdownButtonFormField<T>(
         isExpanded: true,
@@ -30,6 +34,12 @@ class CustomDropdown<T> extends StatelessWidget {
                   itemLabelBuilder != null
                       ? itemLabelBuilder!(item)
                       : item.toString(),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             )

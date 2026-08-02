@@ -28,6 +28,7 @@ class DetailCategoryCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      spacing: 8,
       children: [
         //Categoria
         Container(
@@ -40,10 +41,8 @@ class DetailCategoryCard extends StatelessWidget {
           child: Icon(categoryIcon, size: 22, color: iconColor),
         ),
 
-        const SizedBox(width: 3),
         //Nombre categoria
         Expanded(
-          flex: 2,
           child: Text(
             categoryName,
             maxLines: 3,
@@ -56,12 +55,10 @@ class DetailCategoryCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 6),
 
         //Valor actual
         if (currentValue != null && trailing == null)
           Expanded(
-            flex: 3,
             child: Tooltip(
               message: currentValue!,
               child: Text(
