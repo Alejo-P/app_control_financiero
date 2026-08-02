@@ -31,7 +31,6 @@ class LabelCard extends StatelessWidget {
             ),
             child: Icon(iconData, size: 22, color: iconColor ?? Colors.grey),
           ),
-          const SizedBox(width: 8),
         ],
         Text(
           label,

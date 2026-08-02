@@ -35,19 +35,28 @@ class CustomDropdown<T> extends StatelessWidget {
             )
             .toList(),
         onChanged: onChanged,
-        decoration: _inputDecoration(hintText),
+        decoration: _inputDecoration(hintText, context),
       ),
     );
   }
 
-  InputDecoration _inputDecoration(String? hintText) {
+  InputDecoration _inputDecoration(String? hintText, BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final dropDownBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide.none,
+    );
+
     return InputDecoration(
       hintText: hintText,
       isDense: true,
+      filled: true,
+      fillColor: colorScheme.primary.withOpacity(0.2),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+      border: dropDownBorder,
+      enabledBorder: dropDownBorder,
+      focusedBorder: dropDownBorder,
     );
   }
 }

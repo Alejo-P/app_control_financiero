@@ -4,6 +4,7 @@ import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
+import 'package:control_financiero/features/shared/widgets/custom_dropdown.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
@@ -187,23 +188,15 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                       LabeledFormField(
                         label: "Recurrencia",
                         icon: Icon(Icons.repeat, color: Colors.teal),
-                        child: DropdownButton<Recurrencia>(
-                          value: recurrenciaSeleccionada,
-                          onChanged: isViewOnly
-                              ? null
-                              : (Recurrencia? newValue) {
-                                  if (newValue != null) {
-                                    setState(() {
-                                      recurrenciaSeleccionada = newValue;
-                                    });
-                                  }
-                                },
-                          items: Recurrencia.values.map((Recurrencia value) {
-                            return DropdownMenuItem<Recurrencia>(
-                              value: value,
-                              child: Text(value.name),
-                            );
-                          }).toList(),
+                        child: CustomDropdown<Recurrencia>(
+                          selectedItem: recurrenciaSeleccionada,
+                          items: Recurrencia.values,
+                          itemLabelBuilder: (Recurrencia value) => value.name,
+                          onChanged: (newValue) {
+                            setState(() {
+                              recurrenciaSeleccionada = newValue!;
+                            });
+                          },
                         ),
                       ),
                     ],
