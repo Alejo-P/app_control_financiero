@@ -14,6 +14,9 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final currentTab = appState.currentTab;
+    final currentFAB = appState.floatingActionButton;
+    final showFAB = appState.showFAB;
 
     final pages = [
       MovimientosPage(),
@@ -24,8 +27,17 @@ class AppScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      floatingActionButton: AnimatedOpacity(
+        opacity: showFAB ? 1 : 0,
+        duration: const Duration(milliseconds: 250),
+        child: AnimatedSlide(
+          offset: showFAB ? Offset.zero : const Offset(0, 2),
+          duration: const Duration(milliseconds: 200),
+          child: currentFAB,
+        ),
+      ),
       appBar: const AppAppbar(),
-      body: pages[appState.currentTab],
+      body: pages[currentTab],
       bottomNavigationBar: const AppBottomNav(),
     );
   }

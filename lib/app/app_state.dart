@@ -73,7 +73,11 @@ class AppState extends ChangeNotifier {
   bool get isDarkMode => _isDarkMode;
 
   List<AppBarAction> _appBarActions = [];
+  FloatingActionButton? _floatingActionButton;
+  bool _showFAB = true;
   List<AppBarAction> get appBarActions => _appBarActions;
+  FloatingActionButton? get floatingActionButton => _floatingActionButton;
+  bool get showFAB => _showFAB;
 
   final MovimientosRepository _movimientosRepository;
   final CategoriasRepository _categoriasRepository;
@@ -741,6 +745,21 @@ class AppState extends ChangeNotifier {
 
   void clearAppBarActions() {
     _appBarActions = [];
+    notifyListeners();
+  }
+
+  void setFloatingActionButton(FloatingActionButton? button) {
+    _floatingActionButton = button;
+    notifyListeners();
+  }
+
+  void setShowFloatingActionButton(bool show) {
+    _showFAB = show;
+    notifyListeners();
+  }
+
+  void clearFloatingActionButton() {
+    _floatingActionButton = null;
     notifyListeners();
   }
 

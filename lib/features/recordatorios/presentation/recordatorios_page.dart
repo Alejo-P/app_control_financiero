@@ -25,6 +25,8 @@ class RecordatoriosPage extends StatelessWidget {
             arguments: RecordatorioFormArgs(id: -1),
           );
         },
+        tooltip: 'Agregar recordatorio',
+        elevation: 2,
         child: const Icon(Icons.add),
       ),
       body: Padding(

@@ -12,6 +12,7 @@ import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/month_selection.dart';
 import 'package:control_financiero/features/shared/widgets/summary_card.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
@@ -24,7 +25,21 @@ class MovimientosPage extends StatefulWidget {
 }
 
 class _MovimientosPageState extends State<MovimientosPage> {
+  final ScrollController _controller = ScrollController();
   late AppState _appState;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -61,9 +76,10 @@ class _MovimientosPageState extends State<MovimientosPage> {
             );
           },
         ),
-        AppBarAction(
-          icon: Icons.add,
-          tooltip: 'Nuevo movimiento',
+      ]);
+
+      _appState.setFloatingActionButton(
+        FloatingActionButton(
           onPressed: () {
             Navigator.pushNamed(
               context,
@@ -74,8 +90,43 @@ class _MovimientosPageState extends State<MovimientosPage> {
               ),
             );
           },
+          tooltip: 'Agregar movimiento',
+          elevation: 2,
+          child: const Icon(Icons.add),
         ),
-      ]);
+      );
+    });
+  }
+
+  void _onScroll() {
+    if (_appState.isLoadingMonth) return;
+
+    if (_controller.position.userScrollDirection == ScrollDirection.reverse) {
+      _appState.setShowFloatingActionButton(false);
+    } else if (_controller.position.userScrollDirection ==
+        ScrollDirection.forward) {
+      _appState.setShowFloatingActionButton(true);
+    }
+  }
+
+  Future<void> _changeMonth(DateTime newMonth) async {
+    _appState.setShowFloatingActionButton(false);
+
+    if (_controller.hasClients) {
+      _controller.jumpTo(0);
+    }
+
+    await _appState.changeMovementsMonth(newMonth);
+
+    if (!mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      if (_controller.hasClients) {
+        _controller.jumpTo(0);
+      }
+      _appState.setShowFloatingActionButton(true);
     });
   }
 
@@ -131,7 +182,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
             initialDate: selectedMonth,
             isLoading: isLoading,
             onMonthChanged: (newMonth) async {
-              await appState.changeMovementsMonth(newMonth);
+              await _changeMonth(newMonth);
             },
           ),
           const SizedBox(height: 6),
@@ -144,6 +195,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
                 : fechasMovimientos.isEmpty
                 ? _EmptyMovimientos()
                 : SingleChildScrollView(
+                    controller: _controller,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
