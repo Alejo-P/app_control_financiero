@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/shared/widgets/month_selection.dart';
 import 'package:control_financiero/features/presupuestos/widgets/category_card.dart';
+import 'package:flutter/rendering.dart';
 
 class PresupuestosPage extends StatefulWidget {
   const PresupuestosPage({super.key});
@@ -26,6 +27,7 @@ class PresupuestosPage extends StatefulWidget {
 
 class _PresupuestosPageState extends State<PresupuestosPage> {
   late AppState _appState;
+  final ScrollController _controller = ScrollController();
   final _ingresoPresupuestadoController = TextEditingController();
   bool _isSaveButtonEnabled = false;
 
@@ -33,12 +35,14 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
   void initState() {
     super.initState();
     _ingresoPresupuestadoController.addListener(_checkEnableSaveButton);
+    _controller.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _ingresoPresupuestadoController.removeListener(_checkEnableSaveButton);
     _ingresoPresupuestadoController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -58,11 +62,12 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
           },
         ),
 
-        if (_appState.ingresoPresupuestado != null &&
-            _appState.ingresoPresupuestado!.monto > 0)
-          AppBarAction(
-            icon: Icons.add,
-            tooltip: 'Nuevo presupuesto',
+      ]);
+
+      if (_appState.ingresoPresupuestado != null &&
+          _appState.ingresoPresupuestado!.monto > 0) {
+        _appState.setFloatingActionButton(
+          FloatingActionButton(
             onPressed: () {
               Navigator.pushNamed(
                 context,
@@ -75,8 +80,53 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                 ),
               );
             },
+            tooltip: 'Nuevo presupuesto',
+            elevation: 2,
+            child: const Icon(Icons.add),
           ),
-      ]);
+        );
+      } else {
+        _appState.clearFloatingActionButton();
+      }
+    });
+  }
+
+  void _onScroll() {
+    if (_appState.isLoadingBudget) return;
+
+    if (_controller.offset <= 0) {
+      if (!_appState.showFAB) {
+        _appState.setShowFloatingActionButton(true);
+      }
+      return;
+    }
+
+    if (_controller.position.userScrollDirection == ScrollDirection.reverse) {
+      _appState.setShowFloatingActionButton(false);
+    } else if (_controller.position.userScrollDirection ==
+        ScrollDirection.forward) {
+      _appState.setShowFloatingActionButton(true);
+    }
+  }
+
+  Future<void> _changeMonth(DateTime newMonth) async {
+    _appState.setShowFloatingActionButton(false);
+
+    if (_controller.hasClients) {
+      _controller.jumpTo(0);
+    }
+
+    await _appState.changeBudgetMonth(newMonth);
+
+    if (!mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      if (_controller.hasClients) {
+        _controller.jumpTo(0);
+      }
+      _appState.setShowFloatingActionButton(true);
     });
   }
 
@@ -192,7 +242,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
             initialDate: selectedMonth,
             isLoading: isLoading,
             onMonthChanged: (newMonth) async {
-              await appState.changeBudgetMonth(newMonth);
+              await _changeMonth(newMonth);
             },
           ),
           const SizedBox(height: 6),
@@ -205,6 +255,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                 : presupuestos.isEmpty
                 ? _EmptyPresupuestos()
                 : SingleChildScrollView(
+                    controller: _controller,
                     child: Column(
                       children: [
                         SizedBox(

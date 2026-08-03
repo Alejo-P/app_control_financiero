@@ -5,10 +5,40 @@ import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/recordatorios/widgets/recordatorio_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
-class RecordatoriosPage extends StatelessWidget {
+class RecordatoriosPage extends StatefulWidget {
   const RecordatoriosPage({super.key});
+
+  @override
+  State<RecordatoriosPage> createState() => _RecordatoriosPageState();
+}
+
+class _RecordatoriosPageState extends State<RecordatoriosPage> {
+  final ScrollController _controller = ScrollController();
+  bool _showFAB = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final shouldShow = _controller.offset <= 0 ||
+        _controller.position.userScrollDirection == ScrollDirection.forward;
+
+    if (_showFAB != shouldShow) {
+      setState(() => _showFAB = shouldShow);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,17 +47,25 @@ class RecordatoriosPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Recordatorios')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            AppRoutes.recordatorioFormRoute,
-            arguments: RecordatorioFormArgs(id: -1),
-          );
-        },
-        tooltip: 'Agregar recordatorio',
-        elevation: 2,
-        child: const Icon(Icons.add),
+      floatingActionButton: AnimatedOpacity(
+        opacity: _showFAB ? 1 : 0,
+        duration: const Duration(milliseconds: 250),
+        child: AnimatedSlide(
+          offset: _showFAB ? Offset.zero : const Offset(0, 2),
+          duration: const Duration(milliseconds: 200),
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.recordatorioFormRoute,
+                arguments: RecordatorioFormArgs(id: -1),
+              );
+            },
+            tooltip: 'Agregar recordatorio',
+            elevation: 2,
+            child: const Icon(Icons.add),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
@@ -36,6 +74,7 @@ class RecordatoriosPage extends StatelessWidget {
             : recordatorios.isEmpty
             ? _EmptyRecordatorios()
             : ListView.separated(
+                controller: _controller,
                 itemCount: recordatorios.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {

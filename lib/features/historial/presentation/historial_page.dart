@@ -36,6 +36,7 @@ class _HistorialPageState extends State<HistorialPage> {
           icon: Icons.filter_list,
         ),
       ]);
+      _appState.clearFloatingActionButton();
     });
   }
 

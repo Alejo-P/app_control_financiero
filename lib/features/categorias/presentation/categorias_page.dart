@@ -4,6 +4,7 @@ import 'package:control_financiero/features/categorias/models/categoria_form_arg
 import 'package:control_financiero/features/categorias/widgets/category_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 class CategoriasPage extends StatefulWidget {
@@ -14,6 +15,30 @@ class CategoriasPage extends StatefulWidget {
 }
 
 class _CategoriasPageState extends State<CategoriasPage> {
+  final ScrollController _controller = ScrollController();
+  bool _showFAB = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final shouldShow = _controller.offset <= 0 ||
+        _controller.position.userScrollDirection == ScrollDirection.forward;
+
+    if (_showFAB != shouldShow) {
+      setState(() => _showFAB = shouldShow);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
@@ -27,10 +52,14 @@ class _CategoriasPageState extends State<CategoriasPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Categorías'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Nueva categoría',
+      ),
+      floatingActionButton: AnimatedOpacity(
+        opacity: _showFAB ? 1 : 0,
+        duration: const Duration(milliseconds: 250),
+        child: AnimatedSlide(
+          offset: _showFAB ? Offset.zero : const Offset(0, 2),
+          duration: const Duration(milliseconds: 200),
+          child: FloatingActionButton(
             onPressed: () {
               Navigator.pushNamed(
                 context,
@@ -38,8 +67,11 @@ class _CategoriasPageState extends State<CategoriasPage> {
                 arguments: CategoriaFormArgs(id: -1),
               );
             },
+            tooltip: 'Nueva categoría',
+            elevation: 2,
+            child: const Icon(Icons.add),
           ),
-        ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
@@ -73,6 +105,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
                   : nombresTiposCategoria.isEmpty
                   ? _EmptyCategorias()
                   : SingleChildScrollView(
+                      controller: _controller,
                       child: Column(
                         children: [
                           ...nombresTiposCategoria.map((tipoCategoria) {

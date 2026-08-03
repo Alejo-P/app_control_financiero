@@ -29,6 +29,7 @@ class _AjustesPageState extends State<AjustesPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _appState.clearAppBarActions();
+      _appState.clearFloatingActionButton();
     });
   }
 
