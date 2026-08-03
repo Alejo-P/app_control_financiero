@@ -4,6 +4,7 @@ import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/custom_dropdown.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
@@ -67,6 +68,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     final currentDay = currentDateTime;
     final DateTime? picked = await showDatePicker(
       context: context,
+      helpText: 'Selecciona la fecha del recordatorio',
       initialDate: fechaRecordatorio,
       firstDate: DateTime(currentDay.year - 3),
       lastDate: DateTime(currentDay.year, currentDay.month, currentDay.day),
@@ -121,86 +123,115 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
               child: SingleChildScrollView(
                 child: Form(
                   key: _formKey,
-                  child: WidgetsContainer(
-                    title: 'Detalles del recordatorio',
-                    padding: EdgeInsets.all(12),
-                    showDivider: false,
+                  child: Column(
                     children: [
-                      TextInputCard(
-                        textController: _titleController,
-                        placeholder: 'Nombre del recordatorio',
-                        iconData: Icons.title,
-                        iconColor: Colors.blue,
-                        maxLength: 50,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Por favor ingrese un nombre';
-                          }
-                          return null;
-                        },
-                      ),
-                      LabeledFormField(
-                        label: "Categoría",
-                        icon: Icon(Icons.category, color: Colors.orange),
-                        child: CategoryDropdown(
-                          categorias: categorias,
-                          selectedValue: categoriaSeleccionada,
-                          onChangeCategory: _onChangeCategoria,
-                        ),
-                      ),
-                      LabeledFormField(
-                        label: "Monto",
-                        icon: Icon(Icons.attach_money, color: Colors.green),
-                        child: Expanded(
-                          child: AmountInput(
-                            controller: _amountController,
-                            showLabel: false,
-                            textAlign: TextAlign.center,
-                            position: MainAxisAlignment.end,
+                      WidgetsContainer(
+                        title: 'Detalles del recordatorio',
+                        padding: EdgeInsets.all(12),
+                        showDivider: false,
+                        children: [
+                          TextInputCard(
+                            textController: _titleController,
+                            placeholder: 'Nombre del recordatorio',
+                            iconData: Icons.title,
+                            iconColor: Colors.blue,
+                            maxLength: 50,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Por favor ingrese un monto';
-                              }
-                              final amount = double.tryParse(value);
-                              if (amount == null || amount <= 0) {
-                                return 'Por favor ingrese un monto válido';
+                                return 'Por favor ingrese un nombre';
                               }
                               return null;
                             },
                           ),
-                        ),
+                          LabeledFormField(
+                            label: "Categoría",
+                            icon: Icon(Icons.category, color: Colors.orange),
+                            child: CategoryDropdown(
+                              categorias: categorias,
+                              selectedValue: categoriaSeleccionada,
+                              onChangeCategory: _onChangeCategoria,
+                            ),
+                          ),
+                          LabeledFormField(
+                            label: "Monto",
+                            icon: Icon(Icons.attach_money, color: Colors.green),
+                            child: Expanded(
+                              child: AmountInput(
+                                controller: _amountController,
+                                showLabel: false,
+                                textAlign: TextAlign.center,
+                                position: MainAxisAlignment.end,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Por favor ingrese un monto';
+                                  }
+                                  final amount = double.tryParse(value);
+                                  if (amount == null || amount <= 0) {
+                                    return 'Por favor ingrese un monto válido';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ),
+                          TextInputCard(
+                            textController: _descriptionController,
+                            placeholder: 'Descripción (opcional)',
+                            iconData: Icons.description,
+                            iconColor: Colors.grey,
+                            maxLength: 200,
+                          ),
+                          InkWell(
+                            onTap: () => isViewOnly ? null : _selectDate(context),
+                            borderRadius: BorderRadius.circular(12),
+                            child: DetailCategoryCard(
+                              categoryName: 'Fecha',
+                              categoryIcon: Icons.calendar_today,
+                              iconColor: Colors.purple,
+                              currentValue: formatDate(fechaRecordatorio),
+                              showArrow: !isViewOnly,
+                            ),
+                          ),
+                          LabeledFormField(
+                            label: "Recurrencia",
+                            icon: Icon(Icons.repeat, color: Colors.teal),
+                            child: CustomDropdown<Recurrencia>(
+                              selectedItem: recurrenciaSeleccionada,
+                              items: Recurrencia.values,
+                              itemLabelBuilder: (Recurrencia value) => value.name,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  recurrenciaSeleccionada = newValue!;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      TextInputCard(
-                        textController: _descriptionController,
-                        placeholder: 'Descripción (opcional)',
-                        iconData: Icons.description,
-                        iconColor: Colors.grey,
-                        maxLength: 200,
-                      ),
-                      InkWell(
-                        onTap: () => isViewOnly ? null : _selectDate(context),
-                        borderRadius: BorderRadius.circular(12),
-                        child: DetailCategoryCard(
-                          categoryName: 'Fecha',
-                          categoryIcon: Icons.calendar_today,
-                          iconColor: Colors.purple,
-                          currentValue: formatDate(fechaRecordatorio),
-                          showArrow: !isViewOnly,
-                        ),
-                      ),
-                      LabeledFormField(
-                        label: "Recurrencia",
-                        icon: Icon(Icons.repeat, color: Colors.teal),
-                        child: CustomDropdown<Recurrencia>(
-                          selectedItem: recurrenciaSeleccionada,
-                          items: Recurrencia.values,
-                          itemLabelBuilder: (Recurrencia value) => value.name,
-                          onChanged: (newValue) {
-                            setState(() {
-                              recurrenciaSeleccionada = newValue!;
-                            });
-                          },
-                        ),
+                      CustomButton(
+                        text: 'Guardar',
+                        icon: Icons.save,
+                        width: WidgetWidth.fullWidth,
+                        onTap: _isLoading
+                            ? null
+                            : () {
+                                if (_formKey.currentState!.validate()) {
+                                  // Aquí puedes manejar la lógica para guardar el recordatorio
+                                  // Por ejemplo, crear un objeto Recordatorio y enviarlo a tu backend o base de datos
+                                  final nuevoRecordatorio = Recordatorio(
+                                    title: _titleController.text,
+                                    description: _descriptionController.text.isNotEmpty
+                                        ? _descriptionController.text
+                                        : null,
+                                    categoryId: categoriaSeleccionada,
+                                    amount: double.tryParse(_amountController.text),
+                                    scheduledAt: fechaRecordatorio,
+                                    recurrencia: recurrenciaSeleccionada,
+                                  );
+
+                                  // Lógica para guardar el recordatorio...
+                                }
+                              },
                       ),
                     ],
                   ),

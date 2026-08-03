@@ -27,6 +27,20 @@ class PresupuestosPage extends StatefulWidget {
 class _PresupuestosPageState extends State<PresupuestosPage> {
   late AppState _appState;
   final _ingresoPresupuestadoController = TextEditingController();
+  bool _isSaveButtonEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ingresoPresupuestadoController.addListener(_checkEnableSaveButton);
+  }
+
+  @override
+  void dispose() {
+    _ingresoPresupuestadoController.removeListener(_checkEnableSaveButton);
+    _ingresoPresupuestadoController.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -63,6 +77,16 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
             },
           ),
       ]);
+    });
+  }
+
+  void _checkEnableSaveButton() {
+    final amountText = _ingresoPresupuestadoController.text.trim();
+    final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+    final totalGastos = _appState.totalGastos ?? 0.0;
+
+    setState(() {
+      _isSaveButtonEnabled = value > 0 && value >= totalGastos;
     });
   }
 
@@ -229,31 +253,36 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              Expanded(child: Divider(color: colorScheme.tertiary)),
+                              Expanded(
+                                child: Divider(color: colorScheme.tertiary),
+                              ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                 ),
                                 child: Text(
                                   'Gastos sin presupuesto',
-                                  style: textTheme.labelMedium
-                                      ?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                  style: textTheme.labelMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                              Expanded(child: Divider(color: colorScheme.tertiary)),
+                              Expanded(
+                                child: Divider(color: colorScheme.tertiary),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 8),
                           ...categoriasSinPresupuestoConGasto.map((categoria) {
                             return ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
                               leading: IconContainer(
                                 icon: categoria['icon'],
                                 color: categoria['iconColor'],
-                                size:26,
+                                size: 26,
                               ),
                               title: Text(
                                 categoria['name'],
@@ -348,14 +377,20 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
           ),
           content: SizedBox(
             height: 120,
-            child: AmountInput(controller: _ingresoPresupuestadoController),
+            child: AmountInput(
+              controller: _ingresoPresupuestadoController,
+              fontSize: 40,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar'),
             ),
-            CustomButton(onTap: _guardarIngresoPresupuesto, text: 'Guardar'),
+            CustomButton(
+              onTap: _isSaveButtonEnabled ? _guardarIngresoPresupuesto : null,
+              text: 'Guardar',
+            ),
           ],
         );
       },

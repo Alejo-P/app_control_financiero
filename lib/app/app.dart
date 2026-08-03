@@ -25,6 +25,7 @@ import 'package:control_financiero/features/recordatorios/presentation/recordato
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/core/constants/app_strings.dart';
@@ -111,6 +112,16 @@ class _AppState extends State<App> {
             debugShowCheckedModeBanner: false,
             title: appName,
             theme: appState.isDarkMode ? AppTheme.dark : AppTheme.light,
+            locale: const Locale('es', 'EC'),
+            supportedLocales: const [
+              Locale('es', 'EC'),
+              Locale('es'),
+            ],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
 
             // Rutas (pendiente por usar en todas las vistas)
             routes: {
