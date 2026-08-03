@@ -74,17 +74,22 @@ class DetalleRecordatorio extends Equatable {
   }
 
   @override
+  String toString() {
+    return 'DetalleRecordatorio(id: $id, title: $title, description: $description, isEnabled: $isEnabled, scheduledAt: $scheduledAt, amount: $amount, recurrency: $recurrency, categoryId: $categoryId, categoryName: $categoryName, categoryIcon: $categoryIcon, categoryColor: $categoryColor)';
+  }
+
+  @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        isEnabled,
-        scheduledAt,
-        amount,
-        recurrency,
-        categoryId,
-        categoryName,
-        categoryIcon,
-        categoryColor,
-      ];
+    id,
+    title,
+    description,
+    isEnabled,
+    scheduledAt,
+    amount,
+    recurrency,
+    categoryId,
+    categoryName,
+    categoryIcon,
+    categoryColor,
+  ];
 }

@@ -28,7 +28,6 @@ class DetailCategoryCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      spacing: 8,
       children: [
         //Categoria
         Container(
