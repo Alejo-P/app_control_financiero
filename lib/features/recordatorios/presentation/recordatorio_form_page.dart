@@ -1,5 +1,6 @@
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/constants/recordatorio_constants.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -26,6 +27,8 @@ class RecordatorioFormPage extends StatefulWidget {
 }
 
 class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
+  DetalleRecordatorio? detalleRecordatorio;
+  RecordatorioFormMode formMode = RecordatorioFormMode.create;
   bool _isLoading = false; // Variable para controlar el estado de carga
   bool _loaded = false;
   bool isViewOnly =
@@ -38,7 +41,6 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
   List<Categoria> categorias = [];
   DateTime fechaRecordatorio = currentDateTime;
   Recurrencia recurrenciaSeleccionada = Recurrencia.ninguno;
-  DetalleRecordatorio? _detalleRecordatorio;
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
@@ -113,8 +115,12 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     if (!mounted) return;
 
     setState(() {
-      _detalleRecordatorio = result;
+      detalleRecordatorio = result;
       _isLoading = false;
+
+      formMode = id == -1
+          ? RecordatorioFormMode.create
+          : RecordatorioFormMode.edit;
     });
     //_checkEnableSaveButton();
   }
@@ -150,7 +156,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     });
 
     final recordatorio = Recordatorio(
-      id: _detalleRecordatorio?.id,
+      id: detalleRecordatorio?.id,
       title: _titleController.text,
       description: _descriptionController.text,
       categoryId: categoriaSeleccionada,
@@ -218,7 +224,13 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Crear recordatorio')),
+      appBar: AppBar(
+        title: Text(
+          formMode == RecordatorioFormMode.create
+              ? 'Crear recordatorio'
+              : 'Editar recordatorio'
+        )
+      ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
         child: _isLoading
@@ -327,7 +339,9 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                               ],
                             ),
                             CustomButton(
-                              text: 'Guardar',
+                              text: formMode == RecordatorioFormMode.create
+                                  ? 'Guardar'
+                                  : 'Actualizar',
                               icon: Icons.save,
                               width: WidgetWidth.fullWidth,
                               onTap: _isLoading

@@ -34,6 +34,10 @@ class AppTheme {
       buttonColor: Colors.blue,
       textTheme: ButtonTextTheme.primary,
     ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+    ),
     dividerTheme: DividerThemeData(
       thickness: 1,
       space: 1,
@@ -132,6 +136,10 @@ class AppTheme {
     buttonTheme: const ButtonThemeData(
       buttonColor: Colors.blue,
       textTheme: ButtonTextTheme.primary,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
     ),
     dividerTheme: DividerThemeData(
       thickness: 1,
