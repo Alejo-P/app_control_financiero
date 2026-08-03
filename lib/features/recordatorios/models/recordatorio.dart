@@ -86,7 +86,7 @@ class Recordatorio {
   Map<String, dynamic> toMap() {
     return {
       RecordatorioTable.title: title,
-      RecordatorioTable.description: description,
+      RecordatorioTable.description: description ?? '',
       RecordatorioTable.categoryId: categoryId,
       RecordatorioTable.amount: amount,
       RecordatorioTable.scheduledAt: scheduledAt.toIso8601String(),

@@ -23,7 +23,9 @@ import 'package:control_financiero/features/presupuestos/models/detalle_presupue
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/recordatorios/data/recordatorios_repository.dart';
+import 'package:control_financiero/features/recordatorios/models/detalle_recordatorio.dart';
 import 'package:control_financiero/features/recordatorios/models/info_card_recordatorio.dart';
+import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_repository.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:flutter/material.dart';
@@ -994,5 +996,31 @@ class AppState extends ChangeNotifier {
         .map((n) => n.copyWith(isRead: true))
         .toList();
     await updateCountersNotif();
+  }
+
+  // ================================ RECORDATORIOS CRUD =================================
+  Future<DetalleRecordatorio?> getRecordatorioById(int id) async {
+    final result = await _recordatoriosRepository.fetchDetalleRecordatorioById(id);
+
+    return result;
+  }
+
+  Future<int> agregarRecordatorio(Recordatorio recordatorio) async {
+    final result = await _recordatoriosRepository.insertRecordatorio(recordatorio);
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success == true) {
+      await loadRecordatiosData();
+    }
+    return result.data ?? -1;
+  }
+
+  Future<void> actualizarRecordatorio(Recordatorio recordatorio) async {
+    final result = await _recordatoriosRepository.updateRecordatorio(recordatorio);
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success == true) {
+      await loadRecordatiosData();
+    }
   }
 }
