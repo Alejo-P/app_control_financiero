@@ -106,7 +106,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     if (result != null) {
       _amountController.text = result.amount != 0.0
           ? result.amount.toString()
-          : '';
+          : '0.0';
       _titleController.text = result.title;
       _descriptionController.text = result.description;
       categoriaSeleccionada = result.categoryId;
@@ -369,7 +369,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                                             return 'Por favor ingrese un monto';
                                           }
                                           final amount = double.tryParse(value);
-                                          if (amount == null || amount <= 0) {
+                                          if (amount == null || amount < 0) {
                                             return 'Por favor ingrese un monto válido';
                                           }
                                           return null;
