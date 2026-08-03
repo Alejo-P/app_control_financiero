@@ -17,6 +17,16 @@ class RecordatoriosPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Recordatorios')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.recordatorioFormRoute,
+            arguments: RecordatorioFormArgs(id: -1),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
         child: appState.loadingInitialData
