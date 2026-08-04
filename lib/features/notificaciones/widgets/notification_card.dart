@@ -1,4 +1,4 @@
-import 'package:control_financiero/core/utils/relative_time.dart';
+import 'package:control_financiero/core/utils/time_utils.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 

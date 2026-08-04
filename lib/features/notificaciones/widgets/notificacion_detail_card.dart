@@ -2,7 +2,7 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/constants/notificacion_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
-import 'package:control_financiero/core/utils/relative_time.dart';
+import 'package:control_financiero/core/utils/time_utils.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/extra_data_table.dart';

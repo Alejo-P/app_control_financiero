@@ -3,6 +3,7 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/recordatorio_constants.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/time_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/recordatorios/models/detalle_recordatorio.dart';
@@ -151,6 +152,27 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     }
   }
 
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? timePicked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(fechaRecordatorio),
+      helpText: 'Selecciona la hora del recordatorio',
+    );
+
+    if (timePicked != null) {
+      setState(() {
+        fechaRecordatorio = DateTime(
+          fechaRecordatorio.year,
+          fechaRecordatorio.month,
+          fechaRecordatorio.day,
+          timePicked.hour,
+          timePicked.minute,
+        );
+      });
+      _checkEnableSaveButton();
+    }
+  }
+
   Future<void> _saveRecordatorio() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -290,7 +312,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       content:
           'Hay cambios sin guardar. ¿Estás seguro de que deseas salir sin guardar?',
     );
-    
+
     return confirm ?? false;
   }
 
@@ -394,6 +416,22 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                                       categoryIcon: Icons.calendar_today,
                                       iconColor: Colors.purple,
                                       currentValue: formatDate(
+                                        fechaRecordatorio,
+                                      ),
+                                      showArrow: !isViewOnly,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () => isViewOnly
+                                        ? null
+                                        : _selectTime(context),
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: DetailCategoryCard(
+                                      categoryName: 'Hora',
+                                      categoryIcon: Icons.access_time,
+                                      iconColor: Colors.orange,
+                                      currentValue: formatTimeFromDateTime(
+                                        context,
                                         fechaRecordatorio,
                                       ),
                                       showArrow: !isViewOnly,

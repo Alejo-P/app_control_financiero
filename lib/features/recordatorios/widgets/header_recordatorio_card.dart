@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/time_utils.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
@@ -67,6 +68,28 @@ class HeaderRecordatorioCard extends StatelessWidget {
                     ),
                     Text(
                       formatDate(createdAt),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.primary,
+                      ),
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  children: [
+                    Icon(
+                      Icons.access_time_outlined,
+                      size: 16,
+                      color: colorScheme.secondary,
+                    ),
+                    Text(
+                      formatTimeFromDateTime(context, createdAt),
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.primary,
                       ),
