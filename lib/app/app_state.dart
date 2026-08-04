@@ -1049,6 +1049,18 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<void> actualizarEstadoRecordatorio(int id, bool enabled) async {
+    final result = await _recordatoriosRepository.updateRecordatorioEnabled(
+      id,
+      enabled,
+    );
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success == true) {
+      await loadRecordatiosData();
+    }
+  }
+
   Future<void> eliminarRecordatorio(int id) async {
     final result = await _recordatoriosRepository.deleteRecordatorio(id);
     transactionResultMessage = result.message;

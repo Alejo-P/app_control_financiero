@@ -40,6 +40,17 @@ class RecordatoriosRepository {
     return await localDataSource.updateRecordatorio(recordatorio);
   }
 
+  ///Actualiza el estado habilitado de un recordatorio en la base de datos.
+  ///@param id El ID del recordatorio a actualizar.
+  ///@param enabled El nuevo estado habilitado.
+  ///@return Un objeto OperationResult que contiene el número de filas actualizadas si la operación fue exitosa, de lo contrario null.
+  Future<OperationResult<int?>> updateRecordatorioEnabled(
+    int id,
+    bool enabled,
+  ) async {
+    return await localDataSource.updateRecordatorioEnabled(id, enabled);
+  }
+
   ///Elimina un recordatorio de la base de datos.
   ///@param id El ID del recordatorio a eliminar.
   ///@return Un objeto OperationResult que contiene el número de filas eliminadas si la operación fue exitosa, de lo contrario null.

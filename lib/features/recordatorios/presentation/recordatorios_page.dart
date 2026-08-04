@@ -69,6 +69,14 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
     }
   }
 
+  Future<void> _onEnabledChanged(int id, bool enabled) async {
+    final appState = context.read<AppState>();
+    await appState.actualizarEstadoRecordatorio(id, enabled);
+
+    if (!mounted || appState.transactionSuccess == true) return;
+    AppSnackbar.error(context, appState.transactionResultMessage);
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
@@ -123,6 +131,8 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                         arguments: RecordatorioFormArgs(id: recordatorio.id!),
                       );
                     },
+                    onChange: (enabled) =>
+                        _onEnabledChanged(recordatorio.id!, enabled),
                     onDelete: () => _onDeleteRecordatorio(recordatorio.title, recordatorio.id!),
                   );
                 },

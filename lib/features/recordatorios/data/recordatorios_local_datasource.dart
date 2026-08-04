@@ -100,6 +100,31 @@ class RecordatoriosLocalDataSource {
     }
   }
 
+  Future<OperationResult<int?>> updateRecordatorioEnabled(
+    int id,
+    bool enabled,
+  ) async {
+    final db = await _dbHelper.database;
+    try {
+      final count = await db.update(
+        RecordatorioTable.table,
+        {RecordatorioTable.enabled: enabled ? 1 : 0},
+        where: '${RecordatorioTable.id} = ?',
+        whereArgs: [id],
+      );
+      return OperationResult<int?>(
+        message: 'Estado del recordatorio actualizado con éxito',
+        data: count,
+        success: true,
+      );
+    } catch (e) {
+      return OperationResult<int?>(
+        message: 'Error al actualizar el estado del recordatorio: $e',
+        success: false,
+      );
+    }
+  }
+
   Future<OperationResult<int?>> deleteRecordatorio(int id) async {
     final db = await _dbHelper.database;
     try {
