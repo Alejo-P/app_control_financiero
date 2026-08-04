@@ -1019,13 +1019,17 @@ class AppState extends ChangeNotifier {
 
   // ================================ RECORDATORIOS CRUD =================================
   Future<DetalleRecordatorio?> getRecordatorioById(int id) async {
-    final result = await _recordatoriosRepository.fetchDetalleRecordatorioById(id);
+    final result = await _recordatoriosRepository.fetchDetalleRecordatorioById(
+      id,
+    );
 
     return result;
   }
 
   Future<int> agregarRecordatorio(Recordatorio recordatorio) async {
-    final result = await _recordatoriosRepository.insertRecordatorio(recordatorio);
+    final result = await _recordatoriosRepository.insertRecordatorio(
+      recordatorio,
+    );
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
@@ -1035,7 +1039,18 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> actualizarRecordatorio(Recordatorio recordatorio) async {
-    final result = await _recordatoriosRepository.updateRecordatorio(recordatorio);
+    final result = await _recordatoriosRepository.updateRecordatorio(
+      recordatorio,
+    );
+    transactionResultMessage = result.message;
+    transactionSuccess = result.success;
+    if (result.success == true) {
+      await loadRecordatiosData();
+    }
+  }
+
+  Future<void> eliminarRecordatorio(int id) async {
+    final result = await _recordatoriosRepository.deleteRecordatorio(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {

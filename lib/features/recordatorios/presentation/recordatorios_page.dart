@@ -1,4 +1,5 @@
 import 'package:control_financiero/app/app_routes.dart';
+import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
@@ -32,11 +33,39 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
   }
 
   void _onScroll() {
-    final shouldShow = _controller.offset <= 0 ||
+    final shouldShow =
+        _controller.offset <= 0 ||
         _controller.position.userScrollDirection == ScrollDirection.forward;
 
     if (_showFAB != shouldShow) {
       setState(() => _showFAB = shouldShow);
+    }
+  }
+
+  Future<void> _refreshRecordatorios() async {
+    final appState = context.read<AppState>();
+    await appState.loadRecordatiosData();
+  }
+
+  Future<void> _onDeleteRecordatorio(String title, int id) async {
+    final appState = context.read<AppState>();
+
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Eliminar recordatorio',
+      content: 'Va a eliminar el recordatorio \'$title\'',
+    );
+
+    if (confirm != true) return;
+
+    await appState.eliminarRecordatorio(id);
+
+    if (!mounted) return;
+
+    if (appState.transactionSuccess == true) {
+      AppSnackbar.success(context, appState.transactionResultMessage);
+    } else {
+      AppSnackbar.error(context, appState.transactionResultMessage);
     }
   }
 
@@ -91,21 +120,10 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                       Navigator.pushNamed(
                         context,
                         AppRoutes.recordatorioFormRoute,
-                        arguments: RecordatorioFormArgs(
-                          id: recordatorio.id!,
-                        ),
+                        arguments: RecordatorioFormArgs(id: recordatorio.id!),
                       );
                     },
-                    onDelete: () async {
-                      final confirm = await showConfirmDialog(
-                        context,
-                        title: 'Eliminar recordatorio',
-                        content:
-                            'Va a eliminar el recordatorio \'${recordatorio.title}\'',
-                      );
-
-                      if (confirm != true) return;
-                    },
+                    onDelete: () => _onDeleteRecordatorio(recordatorio.title, recordatorio.id!),
                   );
                 },
               ),

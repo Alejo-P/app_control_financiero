@@ -99,4 +99,25 @@ class RecordatoriosLocalDataSource {
       );
     }
   }
+
+  Future<OperationResult<int?>> deleteRecordatorio(int id) async {
+    final db = await _dbHelper.database;
+    try {
+      final rowsAffected = await db.delete(
+        RecordatorioTable.table,
+        where: '${RecordatorioTable.id} = ?',
+        whereArgs: [id],
+      );
+      return OperationResult<int?>(
+        message: 'Recordatorio eliminado con éxito',
+        data: rowsAffected,
+        success: true,
+      );
+    } catch (e) {
+      return OperationResult<int?>(
+        message: 'Error al eliminar el recordatorio: $e',
+        success: false,
+      );
+    }
+  }
 }

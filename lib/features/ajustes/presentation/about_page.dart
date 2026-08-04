@@ -1,4 +1,4 @@
-import 'package:control_financiero/core/constants/app_strings.dart' as AppStrings;
+import 'package:control_financiero/core/constants/app_strings.dart' as app_strings;
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -42,7 +42,7 @@ class AboutPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             Text(
-              AppStrings.appName,
+              app_strings.appName,
               style: textTheme.headlineSmall?.copyWith(
                 color: colors.secondary,
                 fontWeight: FontWeight.w500,
@@ -51,7 +51,7 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Versión ${AppStrings.appVersion}',
+              'Versión ${app_strings.appVersion}',
               style: textTheme.bodyMedium?.copyWith(
                 color: colors.primary,
                 fontWeight: FontWeight.w500,
