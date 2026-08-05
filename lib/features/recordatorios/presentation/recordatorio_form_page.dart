@@ -48,7 +48,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  final _amountController = TextEditingController();
+  final _amountController = TextEditingController(text: '0.0');
   final _descriptionController = TextEditingController();
 
   @override
@@ -140,16 +140,37 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       context: context,
       helpText: 'Selecciona la fecha del recordatorio',
       initialDate: fechaRecordatorio,
-      firstDate: DateTime(currentDay.year - 3),
-      lastDate: DateTime(currentDay.year, currentDay.month, currentDay.day),
+      firstDate: fechaRecordatorio.isBefore(currentDay)
+          ? fechaRecordatorio
+          : currentDay,
+      lastDate: currentDay.add(
+        const Duration(days: 365 * 5),
+      ), // 5 años en el futuro
     );
 
-    if (picked != null && picked != fechaRecordatorio) {
-      setState(() {
-        fechaRecordatorio = picked;
-      });
-      _checkEnableSaveButton();
+    if (!mounted) return;
+
+    if (picked == null || picked == fechaRecordatorio) return;
+    final isValidDate = _checkValidDateTime(picked);
+
+    if (!isValidDate) {
+      AppSnackbar.error(
+        // ignore: use_build_context_synchronously
+        context,
+        'La fecha seleccionada no puede ser anterior a la actual.',
+      );
+      return;
     }
+
+    setState(() {
+      fechaRecordatorio = picked;
+    });
+    _checkEnableSaveButton();
+  }
+
+  bool _checkValidDateTime(DateTime dateTime) {
+    final currentDay = currentDateTime;
+    return dateTime.isAfter(currentDay) || isSameDay(dateTime, currentDay);
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -159,22 +180,58 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       helpText: 'Selecciona la hora del recordatorio',
     );
 
-    if (timePicked != null) {
-      setState(() {
-        fechaRecordatorio = DateTime(
-          fechaRecordatorio.year,
-          fechaRecordatorio.month,
-          fechaRecordatorio.day,
-          timePicked.hour,
-          timePicked.minute,
-        );
-      });
-      _checkEnableSaveButton();
+    if (timePicked == null) return;
+    final isValidTime = _checkValidTime(timePicked);
+
+    if (!isValidTime) {
+      AppSnackbar.error(
+        // ignore: use_build_context_synchronously
+        context,
+        'La hora seleccionada no puede ser anterior a la actual.',
+      );
+      return;
     }
+
+    setState(() {
+      fechaRecordatorio = DateTime(
+        fechaRecordatorio.year,
+        fechaRecordatorio.month,
+        fechaRecordatorio.day,
+        timePicked.hour,
+        timePicked.minute,
+      );
+    });
+    _checkEnableSaveButton();
+  }
+
+  bool _checkValidTime(TimeOfDay time) {
+    final currentTime = TimeOfDay.fromDateTime(currentDateTime);
+    return !time.isBefore(currentTime);
   }
 
   Future<void> _saveRecordatorio() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final isValidDate = _checkValidDateTime(fechaRecordatorio);
+    if (!isValidDate) {
+      AppSnackbar.error(
+        // ignore: use_build_context_synchronously
+        context,
+        'La fecha seleccionada no puede ser anterior a la actual.',
+      );
+      return;
+    }
+
+    final timeOfDay = getTimeFromDateTime(fechaRecordatorio);
+    final isValidTime = _checkValidTime(timeOfDay);
+    if (!isValidTime) {
+      AppSnackbar.error(
+        // ignore: use_build_context_synchronously
+        context,
+        'La hora seleccionada no puede ser anterior a la actual.',
+      );
       return;
     }
 

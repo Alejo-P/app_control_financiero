@@ -9,3 +9,7 @@ String formatTimeFromDateTime(BuildContext context, DateTime dateTime) {
   final formated = TimeOfDay.fromDateTime(dateTime);
   return formated.format(context);
 }
+
+TimeOfDay getTimeFromDateTime(DateTime dateTime) {
+  return TimeOfDay.fromDateTime(dateTime);
+}
