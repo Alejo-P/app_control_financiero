@@ -163,7 +163,13 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     }
 
     setState(() {
-      fechaRecordatorio = picked;
+      fechaRecordatorio = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        fechaRecordatorio.hour,
+        fechaRecordatorio.minute,
+      );
     });
     _checkEnableSaveButton();
   }
@@ -174,6 +180,14 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
   }
 
   Future<void> _selectTime(BuildContext context) async {
+    if (_isPastDate(fechaRecordatorio)) {
+      AppSnackbar.error(
+        context,
+        'No se puede seleccionar una hora para un recordatorio vencido.',
+      );
+      return;
+    }
+
     final TimeOfDay? timePicked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(fechaRecordatorio),
@@ -205,8 +219,20 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
   }
 
   bool _checkValidTime(TimeOfDay time) {
-    final currentTime = TimeOfDay.fromDateTime(currentDateTime);
+    final now = currentDateTime;
+
+    if (_isPastDate(fechaRecordatorio, now)) return false;
+    if (!isSameDay(fechaRecordatorio, now)) return true;
+
+    final currentTime = TimeOfDay.fromDateTime(now);
     return !time.isBefore(currentTime);
+  }
+
+  bool _isPastDate(DateTime date, [DateTime? referenceDate]) {
+    final reference = referenceDate ?? currentDateTime;
+    final selectedDay = DateTime(date.year, date.month, date.day);
+    final currentDay = DateTime(reference.year, reference.month, reference.day);
+    return selectedDay.isBefore(currentDay);
   }
 
   Future<void> _saveRecordatorio() async {
