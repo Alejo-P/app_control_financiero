@@ -71,8 +71,6 @@ class MovimientosLocalDataSource {
           c.${CategoriasTable.iconName} AS categoriaIcono,
           c.${CategoriasTable.iconColorValue} AS categoriaColor,
           c.${CategoriasTable.movementType} AS tipoMovimiento,
-          c.${CategoriasTable.enabledRepeatMovement} as enabledRepeatMovement,
-          m.${MovimientosTable.repeatMovement} as repeatMovement,
           c.${CategoriasTable.id} AS categoriaId
         FROM ${MovimientosTable.table} m
         JOIN ${CategoriasTable.table} c ON m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}

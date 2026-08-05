@@ -73,7 +73,6 @@ class CategoriasLocalDataSource {
           c.icon_name AS icon,
           c.icon_color_value AS color,
           c.movement_type AS movementType,
-          c.enabled_repeat_movement AS enabledRepeatMovement,
           c.is_default AS isDefault,
           ct.name AS categoryTypeName,
           ct.id AS categoryTypeID,

@@ -29,7 +29,6 @@ Future<void> migrateMovimientosAmount(Database db) async {
           ${MovimientosTable.date} TEXT NOT NULL,
           ${MovimientosTable.time} TEXT NOT NULL,
           ${MovimientosTable.note} TEXT DEFAULT '',
-          ${MovimientosTable.repeatMovement} INTEGER DEFAULT 0,
           FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
         )
       ''');
@@ -42,8 +41,7 @@ Future<void> migrateMovimientosAmount(Database db) async {
           ${MovimientosTable.amount},
           ${MovimientosTable.date},
           ${MovimientosTable.time},
-          ${MovimientosTable.note},
-          ${MovimientosTable.repeatMovement}
+          ${MovimientosTable.note}
         )
         SELECT
           ${MovimientosTable.id},
@@ -52,8 +50,7 @@ Future<void> migrateMovimientosAmount(Database db) async {
           $oldAmountColumnName,
           ${MovimientosTable.date},
           ${MovimientosTable.time},
-          ${MovimientosTable.note},
-          0 -- Valor predeterminado para repeat_movement
+          ${MovimientosTable.note}
         FROM temp_${MovimientosTable.table};
       ''');
 
@@ -64,23 +61,57 @@ Future<void> migrateMovimientosAmount(Database db) async {
   }
 }
 
-Future<void> migrateMovimientosTable(Database db) async {
-  // Agregar la columna 'repeat_movement' si no existe
-  final columns = await db.rawQuery(
-    "PRAGMA table_info(${MovimientosTable.table});",
+Future<void> migrateRemoveObsoleteColumns(Database db) async {
+  final categoryColumns = await db.rawQuery(
+    'PRAGMA table_info(${CategoriasTable.table})',
   );
+  final movementColumns = await db.rawQuery(
+    'PRAGMA table_info(${MovimientosTable.table})',
+  );
+  final categoryColumnNames = categoryColumns
+      .map((column) => column['name'] as String)
+      .toSet();
+  final movementColumnNames = movementColumns
+      .map((column) => column['name'] as String)
+      .toSet();
 
-  final columnNames = columns.map((column) => column['name'] as String).toSet();
+  if (!categoryColumnNames.contains('enabled_repeat_movement') &&
+      !movementColumnNames.contains('repeat_movement')) {
+    return;
+  }
 
-  if (!columnNames.contains(MovimientosTable.repeatMovement)) {
+  await db.execute('PRAGMA foreign_keys = OFF');
+  try {
     await db.transaction((txn) async {
       await txn.execute('''
-        ALTER TABLE ${MovimientosTable.table}
-        RENAME TO temp_${MovimientosTable.table};
+        CREATE TABLE categorias_new (
+          ${CategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+          ${CategoriasTable.name} TEXT NOT NULL,
+          ${CategoriasTable.description} TEXT,
+          ${CategoriasTable.movementType} TEXT NOT NULL,
+          ${CategoriasTable.categoryTypeId} INTEGER NOT NULL,
+          ${CategoriasTable.iconName} TEXT NOT NULL,
+          ${CategoriasTable.iconColorValue} INTEGER NOT NULL,
+          ${CategoriasTable.isDefault} INTEGER DEFAULT 0,
+          FOREIGN KEY(${CategoriasTable.categoryTypeId}) REFERENCES ${TipoCategoriasTable.table}(${TipoCategoriasTable.id})
+        )
       ''');
+      await txn.execute('''
+        INSERT INTO categorias_new
+        SELECT
+          ${CategoriasTable.id}, ${CategoriasTable.name}, ${CategoriasTable.description},
+          ${CategoriasTable.movementType}, ${CategoriasTable.categoryTypeId},
+          ${CategoriasTable.iconName}, ${CategoriasTable.iconColorValue},
+          ${CategoriasTable.isDefault}
+        FROM ${CategoriasTable.table}
+      ''');
+      await txn.execute('DROP TABLE ${CategoriasTable.table}');
+      await txn.execute(
+        'ALTER TABLE categorias_new RENAME TO ${CategoriasTable.table}',
+      );
 
       await txn.execute('''
-        CREATE TABLE ${MovimientosTable.table} (
+        CREATE TABLE movimientos_new (
           ${MovimientosTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
           ${MovimientosTable.title} TEXT NOT NULL,
           ${MovimientosTable.categoryId} INTEGER NOT NULL,
@@ -88,66 +119,29 @@ Future<void> migrateMovimientosTable(Database db) async {
           ${MovimientosTable.date} TEXT NOT NULL,
           ${MovimientosTable.time} TEXT NOT NULL,
           ${MovimientosTable.note} TEXT DEFAULT '',
-          ${MovimientosTable.repeatMovement} INTEGER DEFAULT 0,
           FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
         )
       ''');
-
       await txn.execute('''
-        INSERT INTO ${MovimientosTable.table} (
-          ${MovimientosTable.id},
-          ${MovimientosTable.title},
-          ${MovimientosTable.categoryId},
-          ${MovimientosTable.amount},
-          ${MovimientosTable.date},
-          ${MovimientosTable.time},
-          ${MovimientosTable.note},
-          ${MovimientosTable.repeatMovement}
-        )
+        INSERT INTO movimientos_new
         SELECT
-          ${MovimientosTable.id},
-          ${MovimientosTable.title},
-          ${MovimientosTable.categoryId},
-          ${MovimientosTable.amount},
-          ${MovimientosTable.date},
-          ${MovimientosTable.time},
-          ${MovimientosTable.note},
-          0 -- Valor predeterminado para repeat_movement
-        FROM temp_${MovimientosTable.table};
+          ${MovimientosTable.id}, ${MovimientosTable.title},
+          ${MovimientosTable.categoryId}, ${MovimientosTable.amount},
+          ${MovimientosTable.date}, ${MovimientosTable.time}, ${MovimientosTable.note}
+        FROM ${MovimientosTable.table}
       ''');
-
-      await txn.execute('''
-        DROP TABLE temp_${MovimientosTable.table};
-      ''');
+      await txn.execute('DROP TABLE ${MovimientosTable.table}');
+      await txn.execute(
+        'ALTER TABLE movimientos_new RENAME TO ${MovimientosTable.table}',
+      );
     });
-  }
-}
 
-Future<void> migrateCategoriasEnabledRepeatMovement(Database db) async {
-  // Agregar la columna 'enabled_repeat_movement' si no existe
-  final columns = await db.rawQuery(
-    "PRAGMA table_info(${CategoriasTable.table});",
-  );
-
-  final columnNames = columns.map((column) => column['name'] as String).toSet();
-
-  if (!columnNames.contains(CategoriasTable.enabledRepeatMovement)) {
-    await db.execute('''
-      ALTER TABLE ${CategoriasTable.table}
-      ADD COLUMN ${CategoriasTable.enabledRepeatMovement}
-      INTEGER DEFAULT 0;
-    ''');
-
-    // Verificar integridad
     final result = await db.rawQuery('PRAGMA foreign_key_check');
     if (result.isNotEmpty) {
-      AppLogger.log(
-        'Foreign key check failed after migration: $result',
-        level: LogLevel.error,
-        tag: 'DBMigration',
-      );
       throw Exception('Foreign key check failed: $result');
     }
+  } finally {
+    await db.execute('PRAGMA foreign_keys = ON');
   }
 }
 

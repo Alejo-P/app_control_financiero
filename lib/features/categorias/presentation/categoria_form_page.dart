@@ -40,8 +40,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   String _action = "Guardando";
   bool isDefault = false;
   bool isEditing = false;
-  bool isEnabledRepeatMovement = false;
-  bool _initialValueIsEnabledRepeatMovement = false;
   int categoryTypeID = -1;
   String categoryTypeName = 'Sin seleccionar';
   String selectedTipeMovement = 'gasto';
@@ -97,8 +95,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           ? 'ingreso'
           : 'gasto';
       isDefault = result.isDefault;
-      isEnabledRepeatMovement = result.enabledRepeatMovement;
-      _initialValueIsEnabledRepeatMovement = result.enabledRepeatMovement;
     }
     if (!mounted) return;
 
@@ -140,21 +136,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
     _checkEnableSaveButton();
   }
 
-  void _toggleRepeatMovement(bool value) {
-    if (_initialValueIsEnabledRepeatMovement && movementsByCategory > 0) {
-      AppSnackbar.warning(
-        context,
-        'No puedes cambiar esta opción porque esta categoría tiene movimientos asociados.',
-      );
-      return;
-    }
-
-    setState(() {
-      isEnabledRepeatMovement = value;
-    });
-    _checkEnableSaveButton();
-  }
-
   Future<void> _guardarCategoria() async {
     final appState = context.read<AppState>();
     final nombre = _categoryNameController.text.trim();
@@ -186,9 +167,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
         Text(
           'Tipo de movimiento: ${selectedTipeMovement == 'gasto' ? 'Gasto' : 'Ingreso'}',
         ),
-        Text(
-          'Permitir repetir movimientos cada mes: ${isEnabledRepeatMovement ? 'Sí' : 'No'}',
-        ),
       ],
     );
     if (confirmed != true) return;
@@ -208,7 +186,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       iconName: IconMapper.toName(selectedIcon),
       iconColorValue: selectedColor.value,
       movementType: tipoMovimientoSeleccionado,
-      enabledRepeatMovement: isEnabledRepeatMovement,
       isDefault: isDefault,
     );
 
@@ -273,7 +250,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       categoryTypeName: categoryTypeName,
       categoryTypeID: categoryTypeID,
       totalMovements: detalleCategoria?.totalMovements ?? 0,
-      enabledRepeatMovement: isEnabledRepeatMovement,
       isDefault: isDefault,
     );
     final original =
@@ -288,7 +264,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
           categoryTypeName: 'Sin seleccionar',
           categoryTypeID: -1,
           totalMovements: 0,
-          enabledRepeatMovement: false,
           isDefault: false,
         );
 
@@ -472,20 +447,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                                         ? 'Gasto'
                                         : 'Ingreso',
                                     showArrow: (!isDefault && !isEditing),
-                                  ),
-                                ),
-                                DetailCategoryCard(
-                                  categoryName:
-                                      'Permitir repetir movimientos cada mes',
-                                  categoryIcon: Icons.repeat,
-                                  iconColor: Colors.green,
-                                  showArrow: false,
-                                  trailing: Switch(
-                                    value: isEnabledRepeatMovement,
-                                    onChanged: (value) {
-                                      if (isDefault) return;
-                                      _toggleRepeatMovement(value);
-                                    },
                                   ),
                                 ),
                               ],

@@ -13,8 +13,6 @@ class DetalleMovimiento extends Equatable {
   final String? categoryName;
   final IconData categoryIcon;
   final Color? categoryColor;
-  final bool isEnabledRepeatMovement;
-  final bool repeatMovement;
   final int? categoryId;
   final TimeOfDay? time;
   final String note;
@@ -28,8 +26,6 @@ class DetalleMovimiento extends Equatable {
     required this.categoryIcon,
     required this.categoryColor,
     this.categoryName,
-    this.isEnabledRepeatMovement = false,
-    this.repeatMovement = false,
     this.categoryId,
     this.time,
     this.note = '',
@@ -44,8 +40,6 @@ class DetalleMovimiento extends Equatable {
     String? categoryName,
     IconData? categoryIcon,
     Color? categoryColor,
-    bool? isEnabledRepeatMovement,
-    bool? repeatMovement,
     int? categoryId,
     TimeOfDay? time,
     String? note,
@@ -59,9 +53,6 @@ class DetalleMovimiento extends Equatable {
       categoryName: categoryName ?? this.categoryName,
       categoryIcon: categoryIcon ?? this.categoryIcon,
       categoryColor: categoryColor ?? this.categoryColor,
-      isEnabledRepeatMovement:
-          isEnabledRepeatMovement ?? this.isEnabledRepeatMovement,
-      repeatMovement: repeatMovement ?? this.repeatMovement,
       categoryId: categoryId ?? this.categoryId,
       time: time ?? this.time,
       note: note ?? this.note,
@@ -88,8 +79,6 @@ class DetalleMovimiento extends Equatable {
       categoryName: map['categoria'] != null
           ? map['categoria'] as String
           : null,
-      isEnabledRepeatMovement: map['enabledRepeatMovement'] == 1,
-      repeatMovement: map['repeatMovement'] == 1,
       time: map['hora'] != null
           ? TimeOfDay(
               hour: int.parse(map['hora'].split(':')[0]),
@@ -114,8 +103,6 @@ class DetalleMovimiento extends Equatable {
       'categoriaIcono': IconMapper.toName(categoryIcon),
       'categoriaColor': categoryColor?.value,
       'categoria': categoryName,
-      'enabledRepeatMovement': isEnabledRepeatMovement ? 1 : 0,
-      'repeatMovement': repeatMovement ? 1 : 0,
       'time': time != null ? '${time!.hour}:${time!.minute}' : null,
       'categoriaId': categoryId,
     };
@@ -123,7 +110,7 @@ class DetalleMovimiento extends Equatable {
 
   @override
   String toString() {
-    return 'DetalleMovimiento(id: $id, title: $title, amount: $amount, movementType: $movementType, date: $date, categoryName: $categoryName, categoryIcon: $categoryIcon, categoryColor: $categoryColor, isEnabledRepeatMovement: $isEnabledRepeatMovement, repeatMovement: $repeatMovement, categoryId: $categoryId, time: $time, note: $note)';
+    return 'DetalleMovimiento(id: $id, title: $title, amount: $amount, movementType: $movementType, date: $date, categoryName: $categoryName, categoryIcon: $categoryIcon, categoryColor: $categoryColor, categoryId: $categoryId, time: $time, note: $note)';
   }
 
   @override
@@ -137,8 +124,6 @@ class DetalleMovimiento extends Equatable {
       categoryName,
       categoryIcon,
       categoryColor,
-      isEnabledRepeatMovement,
-      repeatMovement,
       categoryId,
       time,
       note,

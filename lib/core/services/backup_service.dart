@@ -13,6 +13,8 @@ import 'package:control_financiero/features/presupuestos/data/presupuestos_local
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'dart:convert';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
+import 'package:control_financiero/features/recordatorios/data/recordatorios_local_datasource.dart';
+import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 
 class BackupService {
   final MovimientosLocalDataSource _movimientosLocalDataSource =
@@ -23,6 +25,8 @@ class BackupService {
       PresupuestosLocalDataSource();
   final NotificacionLocalDataSource _notificacionLocalDataSource =
       NotificacionLocalDataSource();
+  final RecordatoriosLocalDataSource _recordatoriosLocalDataSource =
+      RecordatoriosLocalDataSource();
   final int backupVersion = 1;
 
   Future<bool> checkBackupfile(String filePath) async {
@@ -53,6 +57,8 @@ class BackupService {
         .fetchAllIngresosPresupuestados();
     final configPorcentajeNotif = await _notificacionLocalDataSource
         .fetchAllBudgetNotifications();
+    final recordatorios = await _recordatoriosLocalDataSource
+        .fetchAllRecordatoriosBackup();
 
     return {
       'movimientos': movimientos.map((m) => m.toMap()).toList(),
@@ -64,10 +70,12 @@ class BackupService {
       'configPorcentajeNotif': configPorcentajeNotif
           .map((n) => n.toMap())
           .toList(),
+      'recordatorios': recordatorios.map((r) => r.toMap()).toList(),
     };
   }
 
   Future<void> _clearExistingData() async {
+    await _recordatoriosLocalDataSource.deleteAllRecordatorios();
     await _movimientosLocalDataSource.deleteAllMovimientos();
     await _presupuestosLocalDataSource.deleteAllPresupuestos();
     await _presupuestosLocalDataSource.deleteAllIngresosPresupuestados();
@@ -81,6 +89,7 @@ class BackupService {
       final movimientosData = (backupData['movimientos'] ?? []) as List;
       final categoriasData = (backupData['categorias'] ?? []) as List;
       final presupuestosData = (backupData['presupuestos'] ?? []) as List;
+      final recordatoriosData = (backupData['recordatorios'] ?? []) as List;
       final ingresosPresupuestadosData =
           (backupData['ingresosPresupuestados'] ?? []) as List;
       final configPorcentajeNotifData =
@@ -115,6 +124,12 @@ class BackupService {
       for (final presupuestoMap in presupuestosData) {
         await _presupuestosLocalDataSource.addPresupuesto(
           Presupuesto.fromMap(presupuestoMap as Map<String, dynamic>),
+        );
+      }
+
+      for (final recordatorioMap in recordatoriosData) {
+        await _recordatoriosLocalDataSource.insertRecordatorio(
+          Recordatorio.fromMap(recordatorioMap as Map<String, dynamic>),
         );
       }
 

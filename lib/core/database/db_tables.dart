@@ -18,7 +18,6 @@ class CategoriasTable {
   static const categoryTypeId = 'category_type_id';
   static const iconName = 'icon_name';
   static const iconColorValue = 'icon_color_value';
-  static const enabledRepeatMovement = 'enabled_repeat_movement';
   static const isDefault = 'is_default';
 }
 
@@ -42,7 +41,6 @@ class MovimientosTable {
   static const date = 'date';
   static const time = 'time';
   static const note = 'note';
-  static const repeatMovement = 'repeat_movement';
 }
 
 class IngresoPresupuestadoTable {
@@ -160,7 +158,6 @@ Future<void> createTables(Database db) async {
         ${CategoriasTable.categoryTypeId} INTEGER NOT NULL,
         ${CategoriasTable.iconName} TEXT NOT NULL,
         ${CategoriasTable.iconColorValue} INTEGER NOT NULL,
-        ${CategoriasTable.enabledRepeatMovement} INTEGER DEFAULT 0,
         ${CategoriasTable.isDefault} INTEGER DEFAULT 0,
         FOREIGN KEY(${CategoriasTable.categoryTypeId}) REFERENCES ${TipoCategoriasTable.table}(${TipoCategoriasTable.id})
       );
@@ -244,7 +241,6 @@ Future<void> createTables(Database db) async {
         ${MovimientosTable.date} TEXT NOT NULL,
         ${MovimientosTable.time} TEXT NOT NULL,
         ${MovimientosTable.note} TEXT DEFAULT '',
-        ${MovimientosTable.repeatMovement} INTEGER DEFAULT 0,
         FOREIGN KEY(${MovimientosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
       );
     ''');

@@ -8,6 +8,15 @@ import 'package:control_financiero/features/recordatorios/models/recordatorio.da
 class RecordatoriosLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
 
+  Future<List<Recordatorio>> fetchAllRecordatoriosBackup() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      RecordatorioTable.table,
+    );
+
+    return maps.map(Recordatorio.fromMap).toList();
+  }
+
   Future<List<InfoCardRecordatorio>> fetchAllRecordatorios() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -144,5 +153,18 @@ class RecordatoriosLocalDataSource {
         success: false,
       );
     }
+  }
+
+  Future<OperationResult<int>> deleteAllRecordatorios() async {
+    final db = await _dbHelper.database;
+    final result = await db.delete(RecordatorioTable.table);
+
+    return OperationResult<int>(
+      success: result > 0,
+      data: result,
+      message: result > 0
+          ? 'Todos los recordatorios eliminados exitosamente.'
+          : 'Error al eliminar los recordatorios.',
+    );
   }
 }

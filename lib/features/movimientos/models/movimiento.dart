@@ -10,7 +10,6 @@ class Movimiento {
   final DateTime date;
   final TimeOfDay time;
   final String note;
-  final bool repeatMovement;
 
   Movimiento({
     this.id,
@@ -20,7 +19,6 @@ class Movimiento {
     required this.date,
     required this.time,
     this.note = '',
-    this.repeatMovement = false,
   });
 
   Movimiento copyWith({
@@ -31,7 +29,6 @@ class Movimiento {
     DateTime? date,
     TimeOfDay? time,
     String? note,
-    bool? repeatMovement,
   }) {
     return Movimiento(
       id: id ?? this.id,
@@ -41,7 +38,6 @@ class Movimiento {
       date: date ?? this.date,
       time: time ?? this.time,
       note: note ?? this.note,
-      repeatMovement: repeatMovement ?? this.repeatMovement,
     );
   }
 
@@ -59,7 +55,6 @@ class Movimiento {
         minute: int.parse((map[MovimientosTable.time] as String).split(':')[1]),
       ),
       note: map[MovimientosTable.note] as String? ?? '',
-      repeatMovement: map[MovimientosTable.repeatMovement] == 1,
     );
   }
 
@@ -73,12 +68,11 @@ class Movimiento {
       MovimientosTable.time:
           '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
       MovimientosTable.note: note,
-      MovimientosTable.repeatMovement: repeatMovement ? 1 : 0,
     };
   }
 
   @override
   String toString() {
-    return 'Movimiento{id: $id, title: $title, categoryID: $categoryID, amount: $amount, date: $date, time: $time, note: $note}, repeatMovement: $repeatMovement}';
+    return 'Movimiento{id: $id, title: $title, categoryID: $categoryID, amount: $amount, date: $date, time: $time, note: $note}';
   }
 }

@@ -51,8 +51,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   String categoryName = 'Sin categoría';
   TimeOfDay movementTime = TimeOfDay.now();
   TipoMovimiento tipoMovimiento = TipoMovimiento.gasto;
-  bool isEnabledRepeatMovement = false;
-  bool repeatMovement = false;
   String _action = "Guardando";
   List<Categoria> categorias = [];
   List<Categoria> categoriasFiltradas = [];
@@ -116,8 +114,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       categoryName = result.categoryName ?? 'Sin categoría';
       categoryIcon = result.categoryIcon;
       categoryColor = result.categoryColor ?? Colors.blue;
-      isEnabledRepeatMovement = result.isEnabledRepeatMovement;
-      repeatMovement = result.repeatMovement;
       tipoMovimiento = result.movementType;
     }
 
@@ -159,8 +155,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       categoryId: categoryId,
       time: movementTime,
       note: _noteController.text.trim(),
-      isEnabledRepeatMovement: isEnabledRepeatMovement,
-      repeatMovement: repeatMovement,
     );
     final original =
         detalleMovimiento ??
@@ -175,8 +169,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           categoryId: -1,
           time: movementTime,
           note: '',
-          isEnabledRepeatMovement: false,
-          repeatMovement: false,
         );
 
     return (original != current);
@@ -207,7 +199,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       categoryName = categoria.name;
       categoryIcon = categoria.iconData;
       categoryColor = categoria.iconColor;
-      isEnabledRepeatMovement = categoria.enabledRepeatMovement;
     });
     _checkEnableSaveButton();
   }
@@ -301,24 +292,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       return;
     }
 
-    // Si el movimiento tiene activado los movimientos recurrentes y se usa una categoria que no los permite, indicar que se desactivaran los movimientos recurrentes
-    if (repeatMovement && !isEnabledRepeatMovement) {
-      final shouldContinue = await showConfirmDialog(
-        context,
-        title: 'Desactivar movimiento recurrente',
-        content:
-            'La categoría seleccionada no permite movimientos recurrentes. ¿Desea continuar y desactivar esta opción?',
-      );
-
-      if (shouldContinue != true) {
-        return;
-      }
-
-      setState(() {
-        repeatMovement = false;
-      });
-    }
-
     if (!mounted) return;
 
     final confirmed = await showConfirmAddDialog(
@@ -333,8 +306,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         Text('Categoría: $categoryName'),
         Text('Fecha: ${formatDate(selectedDate)}'),
         if (noteText.isNotEmpty) Text('Nota: $noteText'),
-
-        if (repeatMovement) Text('El movimiento se repetirá mensualmente'),
       ],
     );
     if (confirmed != true) return;
@@ -353,7 +324,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       date: selectedDate,
       time: modo == MovimientoFormMode.edit ? movementTime : TimeOfDay.now(),
       note: noteText,
-      repeatMovement: repeatMovement,
     );
 
     final isUpdateMovement = modo == MovimientoFormMode.edit;
@@ -389,7 +359,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         'Nota': movimiento.note.isNotEmpty ? movimiento.note : '(Sin nota)',
         'Fecha creacion': formatDate(movimiento.date),
         'Hora creacion': movimiento.time.format(context),
-        'Repetir mensualmente': movimiento.repeatMovement ? 'Sí' : 'No',
       },
     );
     await appState.insertarNotificacion(
@@ -496,9 +465,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         'Hora creacion': detalleMovimiento != null
             ? detalleMovimiento!.time!.format(context)
             : '',
-        'Repetir mensualmente': detalleMovimiento?.repeatMovement == true
-            ? 'Sí'
-            : 'No',
       },
     );
 

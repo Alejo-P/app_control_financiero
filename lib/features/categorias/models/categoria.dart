@@ -12,7 +12,6 @@ class Categoria {
   final String iconName;
   final int iconColorValue;
   final int? movementsCount;
-  final bool enabledRepeatMovement;
   final bool isDefault;
 
   Categoria({
@@ -24,7 +23,6 @@ class Categoria {
     required this.iconName,
     required this.iconColorValue,
     this.movementsCount = 0,
-    this.enabledRepeatMovement = false,
     this.isDefault = false,
   });
 
@@ -37,7 +35,6 @@ class Categoria {
     String? iconName,
     int? iconColorValue,
     int? movementsCount,
-    bool? enabledRepeatMovement,
     bool? isDefault,
   }) {
     return Categoria(
@@ -49,15 +46,13 @@ class Categoria {
       iconName: iconName ?? this.iconName,
       iconColorValue: iconColorValue ?? this.iconColorValue,
       movementsCount: movementsCount ?? this.movementsCount,
-      enabledRepeatMovement:
-          enabledRepeatMovement ?? this.enabledRepeatMovement,
       isDefault: isDefault ?? this.isDefault,
     );
   }
 
   @override
   String toString() {
-    return 'Categoria{id: $id, name: $name, description: $description, movementType: $movementType, categoryTypeID: $categoryTypeID, iconName: $iconName, iconColorValue: $iconColorValue, movementsCount: $movementsCount, enabledRepeatMovement: $enabledRepeatMovement, isDefault: $isDefault}';
+    return 'Categoria{id: $id, name: $name, description: $description, movementType: $movementType, categoryTypeID: $categoryTypeID, iconName: $iconName, iconColorValue: $iconColorValue, movementsCount: $movementsCount, isDefault: $isDefault}';
   }
 
   factory Categoria.fromMap(Map<String, dynamic> map) {
@@ -74,7 +69,6 @@ class Categoria {
       iconName: map[CategoriasTable.iconName] as String,
       iconColorValue: map[CategoriasTable.iconColorValue] as int,
       movementsCount: map['movements_count'] ?? 0,
-      enabledRepeatMovement: map[CategoriasTable.enabledRepeatMovement] == 1,
       isDefault: map[CategoriasTable.isDefault] == 1,
     );
   }
@@ -88,7 +82,6 @@ class Categoria {
       CategoriasTable.categoryTypeId: categoryTypeID,
       CategoriasTable.iconName: iconName,
       CategoriasTable.iconColorValue: iconColorValue,
-      CategoriasTable.enabledRepeatMovement: enabledRepeatMovement ? 1 : 0,
       CategoriasTable.isDefault: isDefault ? 1 : 0,
     };
   }
