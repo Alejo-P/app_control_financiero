@@ -88,15 +88,14 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
     final args =
         ModalRoute.of(context)!.settings.arguments as RecordatorioFormArgs;
-    final id = args.id;
-
-    _load(id);
+    _load(args);
 
     _loaded = true;
   }
 
-  Future<void> _load(int id) async {
+  Future<void> _load(RecordatorioFormArgs args) async {
     final appState = context.read<AppState>();
+    final id = args.id;
 
     setState(() {
       _isLoading = true;
@@ -119,6 +118,8 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
         (r) => r.name == result.recurrency,
         orElse: () => Recurrencia.ninguno,
       );
+    } else {
+      _setInitialValues(args);
     }
 
     if (!mounted) return;
@@ -132,6 +133,22 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
           : RecordatorioFormMode.edit;
     });
     //_checkEnableSaveButton();
+  }
+
+  void _setInitialValues(RecordatorioFormArgs args) {
+    _titleController.text = args.title ?? _titleController.text;
+    _descriptionController.text =
+        args.description ?? _descriptionController.text;
+    _amountController.text = args.amount?.toString() ?? _amountController.text;
+    fechaRecordatorio = args.scheduledAt ?? fechaRecordatorio;
+
+    final category = args.category;
+    if (category == null) return;
+
+    categoriaSeleccionada = category.id ?? categoriaSeleccionada;
+    nombreCategoria = category.name;
+    iconoCategoriaSeleccionada = category.iconData;
+    colorCategoriaSeleccionada = category.iconColor;
   }
 
   Future<void> _selectDate(BuildContext context) async {

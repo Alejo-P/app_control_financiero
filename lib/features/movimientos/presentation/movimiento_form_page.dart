@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/constants/notificacion_constants.dart';
@@ -13,6 +14,7 @@ import 'package:control_financiero/features/movimientos/models/movimiento_form_a
 import 'package:control_financiero/features/notificaciones/models/budget_notification_event.dart';
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
+import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/not_found_state.dart';
@@ -208,6 +210,55 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       isEnabledRepeatMovement = categoria.enabledRepeatMovement;
     });
     _checkEnableSaveButton();
+  }
+
+  Categoria? get _selectedCategory {
+    for (final category in categorias) {
+      if (category.id == categoryId) return category;
+    }
+    return null;
+  }
+
+  bool get _hasRequiredReminderFields {
+    final amount = double.tryParse(
+      _amountController.text.trim().replaceAll(',', '.'),
+    );
+    return _titleController.text.trim().isNotEmpty &&
+        amount != null &&
+        amount > 0 &&
+        _selectedCategory != null;
+  }
+
+  void _openReminderForm() {
+    final category = _selectedCategory;
+    if (!_hasRequiredReminderFields || category == null) {
+      AppSnackbar.warning(
+        context,
+        'Completa el título, monto y categoría antes de programar un recordatorio.',
+      );
+      return;
+    }
+
+    Navigator.pushNamed(
+      context,
+      AppRoutes.recordatorioFormRoute,
+      arguments: RecordatorioFormArgs(
+        id: -1,
+        title: _titleController.text.trim(),
+        description: _noteController.text.trim(),
+        amount: double.parse(
+          _amountController.text.trim().replaceAll(',', '.'),
+        ),
+        category: category,
+        scheduledAt: DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+          movementTime.hour,
+          movementTime.minute,
+        ),
+      ),
+    );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -498,6 +549,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     categoriasFiltradas = categorias
         .where((categoria) => categoria.movementType == tipoMovimiento)
         .toList();
+    final canScheduleReminder = _hasRequiredReminderFields;
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -652,23 +704,31 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                   ),
                                 ],
                               ),
-                              if (isEnabledRepeatMovement)
+                              if (!isViewOnly)
                                 WidgetsContainer(
-                                  title: 'Movimiento recurrente',
+                                  title: 'Programar recordatorio',
                                   description:
-                                      'Este movimiento se repetirá mensualmente en la fecha seleccionada.',
+                                      'Se enviara una notificacion en la fecha y hora seleccionada',
                                   padding: const EdgeInsets.all(12),
                                   children: [
-                                    DetailCategoryCard(
-                                      categoryName:
-                                          'Repetir movimiento mensualmente',
-                                      categoryIcon: Icons.repeat,
-                                      iconColor: Colors.orange,
-                                      trailing: Switch(
-                                        value: repeatMovement,
-                                        onChanged: isViewOnly
+                                    InkWell(
+                                      onTap: !canScheduleReminder
+                                          ? null
+                                          : _openReminderForm,
+                                      child: DetailCategoryCard(
+                                        currentValue: !canScheduleReminder
                                             ? null
-                                            : _toggleRepeatMovement,
+                                            : 'Configurar recordatorio',
+                                        categoryName: !canScheduleReminder
+                                            ? 'No puede configurar un recordatorio hasta completar el formulario'
+                                            : 'Programar un recordatorio para este movimiento',
+                                        categoryIcon: !canScheduleReminder
+                                            ? Icons.notifications_off_outlined
+                                            : Icons.notifications_none_rounded,
+                                        showArrow: canScheduleReminder,
+                                        iconColor: !canScheduleReminder
+                                            ? Colors.red
+                                            : Colors.blue,
                                       ),
                                     ),
                                   ],
