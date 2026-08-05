@@ -522,13 +522,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
     Navigator.pop(context, true);
   }
 
-  void _toggleRepeatMovement(bool value) {
-    setState(() {
-      repeatMovement = value;
-    });
-    _checkEnableSaveButton();
-  }
-
   Future<bool> _onWillPop() async {
     final hasChanges = _checkForChanges();
     if (!hasChanges) return true;
