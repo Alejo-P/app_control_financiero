@@ -78,6 +78,13 @@ String formatRelativeDateWithMonth(DateTime date) {
   return resultado;
 }
 
+bool isPastDate(DateTime date, [DateTime? referenceDate]) {
+  final reference = referenceDate ?? currentDateTime;
+  final selectedDay = DateTime(date.year, date.month, date.day);
+  final currentDay = DateTime(reference.year, reference.month, reference.day);
+  return selectedDay.isBefore(currentDay);
+}
+
 bool isSameDay(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
 }
