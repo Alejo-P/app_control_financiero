@@ -1,6 +1,7 @@
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -116,6 +117,10 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final recordatorio = recordatorios[index];
+                  final isSystemReminder =
+                      recordatorio.id ==
+                      NotificationService.getDailyMovementReminderId();
+
                   return RecordatorioCard(
                     icon: recordatorio.categoryIcon,
                     iconColor: recordatorio.categoryColor,
@@ -124,16 +129,27 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                     recurrency: recordatorio.recurrency,
                     createdAt: recordatorio.scheduledAt,
                     title: recordatorio.title,
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.recordatorioFormRoute,
-                        arguments: RecordatorioFormArgs(id: recordatorio.id!),
-                      );
-                    },
-                    onChange: (enabled) =>
-                        _onEnabledChanged(recordatorio.id!, enabled),
-                    onDelete: () => _onDeleteRecordatorio(recordatorio.title, recordatorio.id!),
+                    onTap: isSystemReminder
+                        ? null
+                        : () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.recordatorioFormRoute,
+                              arguments: RecordatorioFormArgs(
+                                id: recordatorio.id!,
+                              ),
+                            );
+                          },
+                    onChange: isSystemReminder
+                        ? null
+                        : (enabled) =>
+                              _onEnabledChanged(recordatorio.id!, enabled),
+                    onDelete: isSystemReminder
+                        ? null
+                        : () => _onDeleteRecordatorio(
+                            recordatorio.title,
+                            recordatorio.id!,
+                          ),
                   );
                 },
               ),

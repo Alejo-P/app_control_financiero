@@ -8,7 +8,7 @@ import 'package:control_financiero/features/recordatorios/models/recordatorio.da
 class RecordatoriosLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
 
-  Future<List<Recordatorio>> fetchAllRecordatoriosBackup() async {
+  Future<List<Recordatorio>> fetchAllRecordatorios() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       RecordatorioTable.table,
@@ -17,7 +17,7 @@ class RecordatoriosLocalDataSource {
     return maps.map(Recordatorio.fromMap).toList();
   }
 
-  Future<List<InfoCardRecordatorio>> fetchAllRecordatorios() async {
+  Future<List<InfoCardRecordatorio>> fetchAllDetailedRecordatorios() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
         SELECT

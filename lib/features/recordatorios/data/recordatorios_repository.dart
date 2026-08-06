@@ -10,9 +10,14 @@ class RecordatoriosRepository {
   RecordatoriosRepository(this.localDataSource);
 
   ///Obtiene la lista de todos los recordatorios.
-  ///@return Una lista de objetos InfoCardRecordatorio.
-  Future<List<InfoCardRecordatorio>> fetchAllRecordatorios() async {
+  ///@return Una lista de objetos Recordatorio.
+  Future<List<Recordatorio>> fetchAllRecordatorios() async {
     return await localDataSource.fetchAllRecordatorios();
+  }
+  ///Obtiene la lista de todos los recordatorios.
+  ///@return Una lista de objetos InfoCardRecordatorio para mostrar en la vista.
+  Future<List<InfoCardRecordatorio>> fetchAllDetailedRecordatorios() async {
+    return await localDataSource.fetchAllDetailedRecordatorios();
   }
 
   ///Obtiene el detalle de un recordatorio por su ID.

@@ -174,9 +174,48 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> loadRecordatiosData({bool notify = true}) async {
-    recordatorios = await _recordatoriosRepository.fetchAllRecordatorios();
+    final detailedRecordatorios = await _recordatoriosRepository
+        .fetchAllDetailedRecordatorios();
+
+    final recordatoriosList = await _recordatoriosRepository
+        .fetchAllRecordatorios();
+    await syncRecordatorioNotifications(recordatoriosList);
+
+    recordatorios = mergeDailyMovementReminder(
+      detailedRecordatorios,
+      referenceDateTime: currentDateTime,
+    );
 
     if (notify) notifyListeners();
+  }
+
+  Future<void> syncRecordatorioNotifications([
+    List<Recordatorio>? items,
+  ]) async {
+    final list =
+        items ?? await _recordatoriosRepository.fetchAllRecordatorios();
+
+    for (final item in list) {
+      if (item.id == null) continue;
+
+      final notificationId = NotificationService.getRecordatorioNotificationId(
+        item.id!,
+      );
+
+      if (!item.enabled || item.scheduledAt.isBefore(currentDateTime)) {
+        await NotificationService.cancelNotification(notificationId);
+        continue;
+      }
+
+      await NotificationService.scheduleRecordatorioNotification(
+        id: item.id!,
+        title: item.title,
+        body: item.description?.trim().isNotEmpty == true
+            ? item.description!
+            : 'Te recordamos: ${item.title}',
+        scheduledDate: item.scheduledAt,
+      );
+    }
   }
 
   Future<void> loadMovementsByMonthAndYear(
@@ -196,8 +235,47 @@ class AppState extends ChangeNotifier {
     _movimientosPorFecha = _fetchMovimientosPorFecha();
 
     _uniqueMovementDates = _fetchUniqueMovementDates();
+    await syncDailyMovementReminder();
 
     if (notify) notifyListeners();
+  }
+
+  Future<void> syncDailyMovementReminder({DateTime? referenceDateTime}) async {
+    final now = referenceDateTime ?? currentDateTime;
+    final reminderDateTime =
+        NotificationService.getDailyMovementReminderDateTime(now);
+    final reminderId = NotificationService.getDailyMovementReminderId();
+    final reminderNotificationId =
+        NotificationService.getRecordatorioNotificationId(reminderId);
+
+    final movimientosHoy = await _movimientosRepository.fetchMovimientosByDate(
+      DateTime(now.year, now.month, now.day),
+    );
+
+    if (movimientosHoy.isNotEmpty) {
+      await NotificationService.cancelNotification(reminderNotificationId);
+      return;
+    }
+
+    if (now.isBefore(reminderDateTime)) {
+      await NotificationService.scheduleRecordatorioNotification(
+        id: reminderId,
+        title: 'Registra tus movimientos',
+        body:
+            'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
+        scheduledDate: reminderDateTime,
+      );
+      return;
+    }
+
+    await NotificationService.cancelNotification(reminderNotificationId);
+    await NotificationService.showNotification(
+      title: 'Registra tus movimientos',
+      body:
+          'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
+      id: reminderId,
+      type: 'recordatorio_movimientos',
+    );
   }
 
   Future<Box> _getSettingsBox() async {
@@ -830,6 +908,7 @@ class AppState extends ChangeNotifier {
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
       await updateHistory();
+      await syncDailyMovementReminder();
     }
     return result.data ?? -1;
   }
@@ -843,6 +922,7 @@ class AppState extends ChangeNotifier {
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
       await updateHistory();
+      await syncDailyMovementReminder();
     }
     return null;
   }
@@ -856,6 +936,7 @@ class AppState extends ChangeNotifier {
       await loadMovementsByMonthAndYear(selectedMovementsMonth);
       await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
       await updateHistory();
+      await syncDailyMovementReminder();
     }
   }
 
@@ -1034,6 +1115,16 @@ class AppState extends ChangeNotifier {
     transactionSuccess = result.success;
     if (result.success == true) {
       await loadRecordatiosData();
+      final savedId = result.data ?? recordatorio.id ?? -1;
+      if (savedId > 0 && recordatorio.enabled) {
+        await NotificationService.scheduleRecordatorioNotification(
+          id: savedId,
+          title: recordatorio.title,
+          body:
+              'Tu recordatorio "${recordatorio.title}" está programado para ${formatDate(recordatorio.scheduledAt)}',
+          scheduledDate: recordatorio.scheduledAt,
+        );
+      }
     }
     return result.data ?? -1;
   }
@@ -1058,10 +1149,26 @@ class AppState extends ChangeNotifier {
     transactionSuccess = result.success;
     if (result.success == true) {
       await loadRecordatiosData();
+      if (enabled) {
+        final detalle = await getRecordatorioById(id);
+        if (detalle != null) {
+          await NotificationService.scheduleRecordatorioNotification(
+            id: detalle.id,
+            title: detalle.title,
+            body:
+                'Tu recordatorio "${detalle.title}" está programado para ${formatDate(detalle.scheduledAt)}',
+            scheduledDate: detalle.scheduledAt,
+          );
+        }
+      }
     }
   }
 
   Future<void> eliminarRecordatorio(int id) async {
+    await NotificationService.cancelNotification(
+      NotificationService.getRecordatorioNotificationId(id),
+    );
+
     final result = await _recordatoriosRepository.deleteRecordatorio(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;

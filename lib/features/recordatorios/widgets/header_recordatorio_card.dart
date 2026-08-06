@@ -109,11 +109,12 @@ class HeaderRecordatorioCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 4,
             children: [
-              IconButton(
-                onPressed: onDelete,
-                tooltip: 'Eliminar',
-                icon: Icon(Icons.delete_forever_outlined),
-              ),
+              if (onDelete != null)
+                IconButton(
+                  onPressed: onDelete,
+                  tooltip: 'Eliminar',
+                  icon: Icon(Icons.delete_forever_outlined),
+                ),
               Switch(value: isEnabled, onChanged: onTap),
             ],
           ),

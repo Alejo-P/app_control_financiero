@@ -307,6 +307,11 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     } catch (e, stackTrace) {
       if (!mounted) return;
 
+      setState(() {
+        _isLoading = false;
+        _action = '';
+      });
+      
       AppLogger.log(
         'Error al guardar recordatorio: ${e.toString()}',
         level: LogLevel.error,

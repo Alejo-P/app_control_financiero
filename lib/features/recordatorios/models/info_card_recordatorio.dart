@@ -1,6 +1,38 @@
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:flutter/material.dart';
 
+List<InfoCardRecordatorio> mergeDailyMovementReminder(
+  List<InfoCardRecordatorio> currentItems, {
+  required DateTime referenceDateTime,
+}) {
+  final reminderId = 200000;
+  final alreadyExists = currentItems.any((item) => item.id == reminderId);
+
+  if (alreadyExists) {
+    return currentItems;
+  }
+
+  return [
+    ...currentItems,
+    InfoCardRecordatorio(
+      id: reminderId,
+      title: 'Registra tus movimientos',
+      categoryName: 'Recordatorio diario',
+      categoryIcon: Icons.notifications_active_outlined,
+      categoryColor: Colors.orange,
+      isEnabled: true,
+      scheduledAt: DateTime(
+        referenceDateTime.year,
+        referenceDateTime.month,
+        referenceDateTime.day,
+        20,
+        30,
+      ),
+      recurrency: 'Diario',
+    ),
+  ];
+}
+
 class InfoCardRecordatorio {
   final int? id;
   final String title;

@@ -58,7 +58,7 @@ class BackupService {
     final configPorcentajeNotif = await _notificacionLocalDataSource
         .fetchAllBudgetNotifications();
     final recordatorios = await _recordatoriosLocalDataSource
-        .fetchAllRecordatoriosBackup();
+        .fetchAllRecordatorios();
 
     return {
       'movimientos': movimientos.map((m) => m.toMap()).toList(),

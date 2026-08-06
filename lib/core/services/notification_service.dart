@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/services/navigation_service.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_repository.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -20,6 +22,19 @@ class NotificationService {
   static final _notificationRepository = NotificacionRepository(
     NotificacionLocalDataSource(),
   );
+
+  static int getRecordatorioNotificationId(int id) {
+    return 100000 + id;
+  }
+
+  static int getDailyMovementReminderId() {
+    return 200000;
+  }
+
+  static DateTime getDailyMovementReminderDateTime(DateTime now) {
+    final today = DateTime(now.year, now.month, now.day);
+    return DateTime(today.year, today.month, today.day, 20, 30);
+  }
 
   static Future<void> init() async {
     const android = AndroidInitializationSettings('ic_notification');
@@ -139,19 +154,80 @@ class NotificationService {
     );
   }
 
+  static AndroidScheduleMode resolveScheduleMode(Object? exception) {
+    if (exception is PlatformException &&
+        exception.code == 'exact_alarms_not_permitted') {
+      return AndroidScheduleMode.inexactAllowWhileIdle;
+    }
+
+    return AndroidScheduleMode.exactAllowWhileIdle;
+  }
+
+  static Future<void> scheduleRecordatorioNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+  }) async {
+    if (!_isMobile()) {
+      return;
+    }
+
+    final notificationId = getRecordatorioNotificationId(id);
+    await cancelNotification(notificationId);
+
+    if (scheduledDate.isBefore(currentDateTime)) {
+      return;
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      'recordatorio_channel',
+      'Recordatorios',
+      icon: 'ic_notification',
+      importance: Importance.max,
+      priority: Priority.high,
+      channelDescription: 'Alertas de recordatorios programados',
+    );
+
+    final details = NotificationDetails(android: androidDetails);
+    final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
+
+    try {
+      await _notifications.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        tzDate,
+        details,
+        payload: 'recordatorio:$id',
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } on PlatformException catch (exception) {
+      await _notifications.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        tzDate,
+        details,
+        payload: 'recordatorio:$id',
+        androidScheduleMode: resolveScheduleMode(exception),
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
+  }
+
   static Future<void> cancelNotification(int id) async {
     if (!_isMobile()) {
       return;
     }
 
     final pending = await _notifications.pendingNotificationRequests();
-
-    debugPrint('Pendientes: ${pending.length}');
-
     for (final p in pending) {
       debugPrint('${p.id} - ${p.title}');
     }
-    debugPrint('Cancelando notificación $id');
 
     await _notifications.cancel(id);
   }
