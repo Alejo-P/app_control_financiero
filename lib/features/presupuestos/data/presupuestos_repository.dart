@@ -2,6 +2,7 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
@@ -57,7 +58,7 @@ class PresupuestosRepository implements _PresupuestosRepository {
   final List<Presupuesto> presupuestos = [];
 
   // Lista para almacenar los moovimientos segun el mes del presupuesto
-  final List<Movimiento> movimientos = [];
+  final List<DetalleMovimiento> movimientos = [];
 
   PresupuestosRepository(this.localDatasource);
 
@@ -109,7 +110,7 @@ class PresupuestosRepository implements _PresupuestosRepository {
     // Filtar solo los movimientos de tipo gasto
     for (var movimiento in listaMovimeintos) {
       final categoria = await categoriasLocalDataSource.fetchCategoriaById(
-        movimiento.categoryID,
+        movimiento.categoryId!,
       );
       if (categoria != null && categoria.movementType == TipoMovimiento.gasto) {
         movimientos.add(movimiento);

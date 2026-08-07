@@ -16,9 +16,15 @@ class MovimientosRepository {
     return await localDataSource.fetchAllMovimientos();
   }
 
+  ///Obtiene la lista de todos los movimientos.
+  ///@return Una lista de objetos Movimiento.
+  Future<List<DetalleMovimiento>> fetchAllDetalleMovimiento() async {
+    return await localDataSource.fetchAllDetalleMovimiento();
+  }
+
   ///Obtiene la lista de movimientos por mes.
   ///@return Una lista de objetos Movimiento.
-  Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
+  Future<List<DetalleMovimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
     return await localDataSource.fetchMovimientosByMonthAndYear(date);
   }
 
@@ -68,7 +74,7 @@ class MovimientosRepository {
   /// Obtener todos los movimientos asociados a una categoria
   /// @parram categoryID El ID de la categoria a obtener los movimientos
   /// @return Una lista de objetos Movimiento.
-  Future<List<Movimiento>> getMovementsByCategoryID(int categoryID) async {
+  Future<List<DetalleMovimiento>> getMovementsByCategoryID(int categoryID) async {
     return await localDataSource.getMovementsByCategoryID(categoryID);
   }
 

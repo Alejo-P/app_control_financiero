@@ -63,29 +63,31 @@ class DetalleMovimiento extends Equatable {
   factory DetalleMovimiento.fromMap(Map<String, dynamic> map) {
     return DetalleMovimiento(
       id: map['id'] != null ? map['id'] as int : null,
-      title: map['titulo'],
-      amount: map['monto'],
-      movementType: map['tipoMovimiento'] == 'ingreso'
+      title: map['title'],
+      amount: map['amount'],
+      movementType: map['movement_type'] == 'ingreso'
           ? TipoMovimiento.ingreso
           : TipoMovimiento.gasto,
-      date: DateTime.parse(map['fecha']),
-      note: map['nota'],
-      categoryIcon: map['categoriaIcono'] != null
-          ? IconMapper.fromName(map['categoriaIcono'])
+      date: DateTime.parse(map['date']),
+      note: map['note'] ?? '',
+      categoryIcon: map['category_icon'] != null
+          ? IconMapper.fromName(map['category_icon'])
           : Icons.category,
-      categoryColor: map['categoriaColor'] != null
-          ? Color(map['categoriaColor'])
+      categoryColor: map['category_color'] != null
+          ? Color(map['category_color'])
           : null,
-      categoryName: map['categoria'] != null
-          ? map['categoria'] as String
+      categoryName: map['category_name'] != null
+          ? map['category_name'] as String
           : null,
-      time: map['hora'] != null
+      time: map['time'] != null
           ? TimeOfDay(
-              hour: int.parse(map['hora'].split(':')[0]),
-              minute: int.parse(map['hora'].split(':')[1]),
+              hour: int.parse(map['time'].split(':')[0]),
+              minute: int.parse(map['time'].split(':')[1]),
             )
           : null,
-      categoryId: map['categoriaId'] != null ? map['categoriaId'] as int : null,
+      categoryId: map['category_id'] != null
+          ? map['category_id'] as int?
+          : null,
     );
   }
 

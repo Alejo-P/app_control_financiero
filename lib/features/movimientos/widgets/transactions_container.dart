@@ -1,17 +1,15 @@
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
-import 'package:control_financiero/features/movimientos/models/movimiento.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/movimientos/widgets/transaction_detail_card.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
-import 'package:control_financiero/app/app_state.dart';
-import 'package:provider/provider.dart';
 
 class TransactionsContainer extends StatelessWidget {
   final DateTime date;
-  final List<Movimiento> movimientos;
+  final List<DetalleMovimiento> movimientos;
 
   const TransactionsContainer({
     super.key,
@@ -28,12 +26,9 @@ class TransactionsContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-
-    final appState = context.watch<AppState>();
     final formattedDate = formatRelativeDateWithMonth(date);
     final totalAmount = movimientos.fold<double>(0.0, (total, mov) {
-      final categoria = appState.getCategoriaById(mov.categoryID);
-      return categoria!.movementType == TipoMovimiento.gasto
+      return mov.movementType == TipoMovimiento.gasto
           ? total - mov.amount
           : total + mov.amount;
     });
@@ -49,16 +44,15 @@ class TransactionsContainer extends StatelessWidget {
       ),
       showDivider: false,
       children: movimientos.map((movimiento) {
-        final categoria = appState.getCategoriaById(movimiento.categoryID);
 
         return TransactionDetailCard(
           title: movimiento.title,
-          category: categoria!.name,
-          type: _getTypeName(categoria.movementType),
+          category: movimiento.categoryName!,
+          type: _getTypeName(movimiento.movementType),
           spent: movimiento.amount,
-          icon: categoria.iconData,
-          iconColor: Color(categoria.iconColorValue),
-          time: movimiento.time,
+          icon: movimiento.categoryIcon,
+          iconColor: movimiento.categoryColor!,
+          time: movimiento.time!,
           onTap: () {
             Navigator.pushNamed(
               context,

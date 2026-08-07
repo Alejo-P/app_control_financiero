@@ -7,6 +7,7 @@ import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/responsive_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_search_filters.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
@@ -26,8 +27,8 @@ class MovimientoSearchPage extends StatefulWidget {
 }
 
 class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
-  List<Movimiento> listaMovimientos = [];
-  List<Movimiento> movimientosFiltrados = [];
+  List<DetalleMovimiento> listaMovimientos = [];
+  List<DetalleMovimiento> movimientosFiltrados = [];
   List<DateTime> fechasUnicas = [];
   DateTime? fechaInicio;
   DateTime? fechaFin;
@@ -95,7 +96,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     final requestId = ++_requestId;
     setState(() => _isLoading = true);
 
-    List<Movimiento> movimientos = [];
+    List<DetalleMovimiento> movimientos = [];
 
     movimientos = await appState.obtenerMovimientosPorCategoria(
       categoriaSeleccionada,

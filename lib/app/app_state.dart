@@ -106,7 +106,7 @@ class AppState extends ChangeNotifier {
   double? _variacionAhorro;
   double? _totalGastos;
   List<DateTime> _uniqueMovementDates = [];
-  Map<DateTime, List<Movimiento>> _movimientosPorFecha = {};
+  Map<DateTime, List<DetalleMovimiento>> _movimientosPorFecha = {};
   List<String> _uniqueTipeCategoryNames = [];
   TotalesMensuales? get totalesMensuales => _totalesMensuales;
   IngresoPresupuestado? get ingresoPresupuestado => _ingresoPresupuestado;
@@ -120,7 +120,7 @@ class AppState extends ChangeNotifier {
   List<TipoCategoria> get tiposCategorias =>
       _tipoCategoriaRepository.tipoCategorias;
 
-  List<Movimiento> movimientos = [];
+  List<DetalleMovimiento> movimientos = [];
   List<Categoria> categorias = [];
   List<InfoCardRecordatorio> recordatorios = [];
 
@@ -129,7 +129,7 @@ class AppState extends ChangeNotifier {
   List<MovementNotificationConfig> movementNotificationConfigs = [];
   List<double> get budgetThresholds =>
       budgetNotifications.map((n) => n.threshold).toList();
-  List<Movimiento> get movimientosPresupuestos =>
+  List<DetalleMovimiento> get movimientosPresupuestos =>
       _presupuestosRepository.movimientos;
   double? get totalGastos => _totalGastos;
 
@@ -512,7 +512,7 @@ class AppState extends ChangeNotifier {
     int total = 0;
 
     for (var movimiento in movimientos) {
-      if (movimiento.categoryID == categoryId) {
+      if (movimiento.categoryId == categoryId) {
         total += 1;
       }
     }
@@ -621,7 +621,7 @@ class AppState extends ChangeNotifier {
 
   // Obtener todas las fechas únicas de movimientos (pasando la lista de movimientos como parametro)
   List<DateTime> fetchUniqueMovementDatesInList(
-    List<Movimiento> listaMovimientos,
+    List<DetalleMovimiento> listaMovimientos,
   ) {
     final dates = listaMovimientos
         .map((m) => DateTime(m.date.year, m.date.month, m.date.day))
@@ -633,22 +633,22 @@ class AppState extends ChangeNotifier {
   }
 
   // Obtener movimientos por categoria (id)
-  List<Movimiento> getMovimientosByCategoriaId(int categoriaId) {
-    return movimientos.where((m) => m.categoryID == categoriaId).toList();
+  List<DetalleMovimiento> getMovimientosByCategoriaId(int categoriaId) {
+    return movimientos.where((m) => m.categoryId == categoriaId).toList();
   }
 
   // Obtener movimientos (para presupuesto) por categoria (id)
-  List<Movimiento> getMovimientosPresupuestoByCategoriaId(int categoriaId) {
+  List<DetalleMovimiento> getMovimientosPresupuestoByCategoriaId(int categoriaId) {
     return movimientosPresupuestos
-        .where((m) => m.categoryID == categoriaId)
+        .where((m) => m.categoryId == categoriaId)
         .toList();
   }
 
   // Obtener movimientos presupuestos filtrados por fecha (mes y año)
 
   // Obtener movimientos agrupados por fecha
-  Map<DateTime, List<Movimiento>> _fetchMovimientosPorFecha() {
-    final Map<DateTime, List<Movimiento>> groupedMovements = {};
+  Map<DateTime, List<DetalleMovimiento>> _fetchMovimientosPorFecha() {
+    final Map<DateTime, List<DetalleMovimiento>> groupedMovements = {};
 
     for (var movimiento in movimientos) {
       final dateKey = DateTime(
@@ -667,7 +667,7 @@ class AppState extends ChangeNotifier {
     final sortedKeys = groupedMovements.keys.toList()
       ..sort((a, b) => b.compareTo(a));
 
-    final sortedMap = <DateTime, List<Movimiento>>{};
+    final sortedMap = <DateTime, List<DetalleMovimiento>>{};
     for (var key in sortedKeys) {
       sortedMap[key] = groupedMovements[key]!;
     }
@@ -676,7 +676,7 @@ class AppState extends ChangeNotifier {
   }
 
   // Obtener movimientos filtrados por fecha (mes y año)
-  List<Movimiento> getMovimientosByDateAndFilter(
+  List<DetalleMovimiento> getMovimientosByDateAndFilter(
     DateTime fecha, {
     MovimientoFiltro filtro = MovimientoFiltro.todos,
   }) {
@@ -687,9 +687,9 @@ class AppState extends ChangeNotifier {
     return movimientos
         .where(
           (m) => filtro == MovimientoFiltro.ingresos
-              ? getTipoMovimientoByCategoriaId(m.categoryID) ==
+              ? m.movementType ==
                     TipoMovimiento.ingreso
-              : getTipoMovimientoByCategoriaId(m.categoryID) ==
+              : m.movementType ==
                     TipoMovimiento.gasto,
         )
         .toList();
@@ -730,11 +730,11 @@ class AppState extends ChangeNotifier {
   // Obtener el acumulado de gastos para una categoria en el mes seleccionado
   double getGastoAcumuladoPorCategoriaEnMes(int categoriaId) {
     final movimientosCategoria = movimientosPresupuestos
-        .where((m) => m.categoryID == categoriaId)
+        .where((m) => m.categoryId == categoriaId)
         .toList();
 
     final gastosEnMes = movimientosCategoria.where((m) {
-      return getTipoMovimientoByCategoriaId(m.categoryID) ==
+      return m.movementType ==
               TipoMovimiento.gasto &&
           isSameMonth(m.date, selectedBudgetMonth);
     }).toList();
@@ -878,7 +878,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<Movimiento>> obtenerMovimientosPorCategoria(
+  Future<List<DetalleMovimiento>> obtenerMovimientosPorCategoria(
     int categoryID,
   ) async {
     final movimientos = _movimientosRepository.getMovementsByCategoryID(

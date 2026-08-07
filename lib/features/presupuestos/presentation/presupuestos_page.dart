@@ -194,13 +194,13 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
         .toSet();
 
     final categoriasConGasto = _appState.movimientosPresupuestos
-        .map((movimiento) => movimiento.categoryID)
+        .map((movimiento) => movimiento.categoryId)
         .toSet();
 
     return categoriasConGasto
         .where((categoriaId) => !categoriasConPresupuesto.contains(categoriaId))
         .map((categoriaId) {
-          final categoria = _appState.getCategoriaById(categoriaId);
+          final categoria = _appState.getCategoriaById(categoriaId!);
 
           return {
             'id': categoriaId,

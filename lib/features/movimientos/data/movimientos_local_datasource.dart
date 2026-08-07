@@ -21,20 +21,58 @@ class MovimientosLocalDataSource {
     return maps.map(Movimiento.fromMap).toList();
   }
 
+  Future<List<DetalleMovimiento>> fetchAllDetalleMovimiento() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+        SELECT
+          m.${MovimientosTable.id} AS id,
+          m.${MovimientosTable.title} AS title,
+          m.${MovimientosTable.amount} AS amount,
+          m.${MovimientosTable.date} as date,
+          m.${MovimientosTable.time} as time,
+          m.${MovimientosTable.note} AS note,
+          c.${CategoriasTable.name} AS category_name,
+          c.${CategoriasTable.iconName} AS category_icon,
+          c.${CategoriasTable.iconColorValue} AS category_color,
+          c.${CategoriasTable.movementType} AS movement_type,
+          c.${CategoriasTable.id} AS category_id
+        FROM ${MovimientosTable.table} m
+        JOIN ${CategoriasTable.table} c ON m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}
+      ''',
+    );
+
+    return maps.map(DetalleMovimiento.fromMap).toList();
+  }
+
   // Obtener todos los movimientos
-  Future<List<Movimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
+  Future<List<DetalleMovimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
     final db = await _dbHelper.database;
     final String month = date.month.toString().padLeft(2, '0');
     final int year = date.year;
 
-    final List<Map<String, dynamic>> maps = await db.query(
-      MovimientosTable.table,
-      where: "strftime('%Y-%m', ${MovimientosTable.date}) = ?",
-      whereArgs: ['$year-$month'],
-      orderBy: '${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC',
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+        SELECT
+          m.${MovimientosTable.id} AS id,
+          m.${MovimientosTable.title} AS title,
+          m.${MovimientosTable.amount} AS amount,
+          m.${MovimientosTable.date} as date,
+          m.${MovimientosTable.time} as time,
+          m.${MovimientosTable.note} AS note,
+          c.${CategoriasTable.name} AS category_name,
+          c.${CategoriasTable.iconName} AS category_icon,
+          c.${CategoriasTable.iconColorValue} AS category_color,
+          c.${CategoriasTable.movementType} AS movement_type,
+          c.${CategoriasTable.id} AS category_id
+        FROM ${MovimientosTable.table} m
+        JOIN ${CategoriasTable.table} c ON m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}
+        WHERE strftime('%Y-%m', ${MovimientosTable.date}) = ?
+        ORDER BY ${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC
+      ''',
+      ['$year-$month']
     );
 
-    return maps.map(Movimiento.fromMap).toList();
+    return maps.map(DetalleMovimiento.fromMap).toList();
   }
 
   Future<Movimiento?> fetchMovimientoById(int id) async {
@@ -62,16 +100,16 @@ class MovimientosLocalDataSource {
       '''
         SELECT
           m.${MovimientosTable.id} AS id,
-          m.${MovimientosTable.title} AS titulo,
-          m.${MovimientosTable.amount} AS monto,
-          m.${MovimientosTable.date} as fecha,
-          m.${MovimientosTable.time} as hora,
-          m.${MovimientosTable.note} AS nota,
-          c.${CategoriasTable.name} AS categoria,
-          c.${CategoriasTable.iconName} AS categoriaIcono,
-          c.${CategoriasTable.iconColorValue} AS categoriaColor,
-          c.${CategoriasTable.movementType} AS tipoMovimiento,
-          c.${CategoriasTable.id} AS categoriaId
+          m.${MovimientosTable.title} AS title,
+          m.${MovimientosTable.amount} AS amount,
+          m.${MovimientosTable.date} as date,
+          m.${MovimientosTable.time} as time,
+          m.${MovimientosTable.note} AS note,
+          c.${CategoriasTable.name} AS category_name,
+          c.${CategoriasTable.iconName} AS category_icon,
+          c.${CategoriasTable.iconColorValue} AS category_color,
+          c.${CategoriasTable.movementType} AS movement_type,
+          c.${CategoriasTable.id} AS category_id
         FROM ${MovimientosTable.table} m
         JOIN ${CategoriasTable.table} c ON m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}
         WHERE m.${MovimientosTable.id} = ?
@@ -178,16 +216,31 @@ class MovimientosLocalDataSource {
     };
   }
 
-  Future<List<Movimiento>> getMovementsByCategoryID(int categoryID) async {
+  Future<List<DetalleMovimiento>> getMovementsByCategoryID(int categoryID) async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      MovimientosTable.table,
-      where: "${MovimientosTable.categoryId} = ?",
-      whereArgs: [categoryID],
-      orderBy: '${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC',
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+        SELECT
+          m.${MovimientosTable.id} AS id,
+          m.${MovimientosTable.title} AS title,
+          m.${MovimientosTable.amount} AS amount,
+          m.${MovimientosTable.date} as date,
+          m.${MovimientosTable.time} as time,
+          m.${MovimientosTable.note} AS note,
+          c.${CategoriasTable.name} AS category_name,
+          c.${CategoriasTable.iconName} AS category_icon,
+          c.${CategoriasTable.iconColorValue} AS category_color,
+          c.${CategoriasTable.movementType} AS movement_type,
+          c.${CategoriasTable.id} AS category_id
+        FROM ${MovimientosTable.table} m
+        JOIN ${CategoriasTable.table} c ON m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}
+        WHERE ${MovimientosTable.categoryId} = ?
+        ORDER BY ${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC
+      ''',
+      [categoryID],
     );
 
-    return maps.map(Movimiento.fromMap).toList();
+    return maps.map(DetalleMovimiento.fromMap).toList();
   }
 
   // Agregar un nuevo movimiento
