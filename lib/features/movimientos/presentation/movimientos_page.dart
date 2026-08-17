@@ -1,6 +1,8 @@
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/movimientos/models/category_chip_info.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento_form_args.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_search_page.dart';
@@ -26,6 +28,8 @@ class MovimientosPage extends StatefulWidget {
 
 class _MovimientosPageState extends State<MovimientosPage> {
   final ScrollController _controller = ScrollController();
+  MovimientoFiltro selectedFilter = MovimientoFiltro.todos;
+  int selectedCategoryFilter = -1;
   late AppState _appState;
 
   @override
@@ -109,6 +113,49 @@ class _MovimientosPageState extends State<MovimientosPage> {
     }
   }
 
+  void _onChangeMovimientoFiltro(MovimientoFiltro filtro) {
+    setState(() {
+      selectedFilter = filtro;
+      selectedCategoryFilter = -1;
+    });
+  }
+
+  void _onSelectCategoryFilter(int categoryID) {
+    setState(() {
+      selectedCategoryFilter = selectedCategoryFilter == categoryID
+          ? -1
+          : categoryID;
+    });
+  }
+
+  List<DetalleMovimiento> _getMovimientosByDateAndFilter(
+    DateTime fecha, {
+    MovimientoFiltro filtro = MovimientoFiltro.todos,
+  }) {
+    final appState = context.read<AppState>();
+    final movimientos = appState.movimientosPorFecha[fecha] ?? [];
+
+    if (filtro == MovimientoFiltro.todos) return movimientos;
+
+    return movimientos
+        .where(
+          (m) => filtro == MovimientoFiltro.ingresos
+              ? m.movementType == TipoMovimiento.ingreso
+              : m.movementType == TipoMovimiento.gasto,
+        )
+        .toList();
+  }
+
+  List<DetalleMovimiento> _getMovimientosByCategoryFilter(
+    DateTime fecha,
+    int idCategoria,
+  ) {
+    final appState = context.read<AppState>();
+    final movimientos = appState.movimientosPorFecha[fecha] ?? [];
+
+    return movimientos.where((m) => m.categoryId == idCategoria).toList();
+  }
+
   Future<void> _changeMonth(DateTime newMonth) async {
     _appState.setShowFloatingActionButton(false);
 
@@ -127,6 +174,11 @@ class _MovimientosPageState extends State<MovimientosPage> {
         _controller.jumpTo(0);
       }
       _appState.setShowFloatingActionButton(true);
+    });
+
+    setState(() {
+      //selectedFilter = MovimientoFiltro.todos;
+      selectedCategoryFilter = -1;
     });
   }
 
@@ -148,9 +200,6 @@ class _MovimientosPageState extends State<MovimientosPage> {
     // Obtener el porcentaje de variación respecto al mes anterior
     final variationPercent = appState.variacionAhorro;
 
-    // Filtro de movimientos seleccionado
-    MovimientoFiltro selectedFilter = appState.movimientoFiltro;
-
     // Movimientos agrupados por fecha
     final fechasMovimientos = appState.uniqueMovementDates;
 
@@ -163,11 +212,39 @@ class _MovimientosPageState extends State<MovimientosPage> {
         )
         .toList();
 
-    final categories = [
-      MovimientoFiltro.todos,
-      MovimientoFiltro.ingresos,
-      MovimientoFiltro.gastos,
-    ];
+    final filterValues = MovimientoFiltro.values;
+
+    final seenCategoryKeys = <String>{};
+    final categoryValues = <CategoryChipInfo>[];
+
+    for (final movimiento in appState.movimientos) {
+      if (selectedFilter == MovimientoFiltro.ingresos &&
+          movimiento.movementType != TipoMovimiento.ingreso) {
+        continue;
+      }
+
+      if (selectedFilter == MovimientoFiltro.gastos &&
+          movimiento.movementType != TipoMovimiento.gasto) {
+        continue;
+      }
+
+      final categoryColor = movimiento.categoryColor ?? Colors.blue;
+      final categoryName = movimiento.categoryName ?? 'Sin categoría';
+      final categoryId = movimiento.categoryId ?? -1;
+      final categoryKey =
+          '${categoryName}_${movimiento.categoryIcon.codePoint}_${categoryColor.value}#$categoryId';
+
+      if (seenCategoryKeys.add(categoryKey)) {
+        categoryValues.add(
+          CategoryChipInfo(
+            categoryIcon: movimiento.categoryIcon,
+            categoryColor: categoryColor,
+            categoryName: categoryName,
+            categoryID: categoryId,
+          ),
+        );
+      }
+    }
 
     if (appState.loadingInitialData) {
       return LoadingScreen(message: 'Cargando datos de movimientos...');
@@ -222,26 +299,49 @@ class _MovimientosPageState extends State<MovimientosPage> {
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 8,
                                 children: [
                                   for (
                                     var i = 0;
-                                    i < categories.length;
+                                    i < filterValues.length;
                                     i++
                                   ) ...[
                                     CategoryChip(
-                                      label: categories[i].label,
-                                      selected: categories[i] == selectedFilter,
-                                      icon: categories[i].icon,
-                                      iconColor: categories[i].color,
+                                      label: filterValues[i].label,
+                                      selected:
+                                          filterValues[i] == selectedFilter,
+                                      icon: filterValues[i].icon,
+                                      iconColor: filterValues[i].color,
                                       onTap: () {
-                                        appState.changeMovimientoFiltro(
-                                          categories[i],
+                                        _onChangeMovimientoFiltro(
+                                          filterValues[i],
                                         );
                                       },
                                     ),
-                                    if (i != categories.length - 1)
-                                      const SizedBox(width: 8),
                                   ],
+                                  const VerticalDivider(
+                                    width: 3,
+                                    thickness: 2,
+                                    radius: BorderRadius.all(
+                                      Radius.circular(50),
+                                    ),
+                                  ),
+
+                                  ...categoryValues.map(
+                                    (category) => CategoryChip(
+                                      label: category.categoryName,
+                                      icon: category.categoryIcon,
+                                      iconColor: category.categoryColor,
+                                      selected:
+                                          category.categoryID ==
+                                          selectedCategoryFilter,
+                                      onTap: () {
+                                        _onSelectCategoryFilter(
+                                          category.categoryID,
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -255,11 +355,16 @@ class _MovimientosPageState extends State<MovimientosPage> {
                           // Lista de movimientos agrupados por fecha
                           ...fechasMovimientos.map((fecha) {
                             // Filtrar movimientos por fecha y filtro seleccionado
-                            final movimientosFiltrados = appState
-                                .getMovimientosByDateAndFilter(
-                                  fecha,
-                                  filtro: selectedFilter,
-                                );
+                            final movimientosFiltrados =
+                                (selectedCategoryFilter == -1)
+                                ? _getMovimientosByDateAndFilter(
+                                    fecha,
+                                    filtro: selectedFilter,
+                                  )
+                                : _getMovimientosByCategoryFilter(
+                                    fecha,
+                                    selectedCategoryFilter,
+                                  );
 
                             if (movimientosFiltrados.isEmpty) {
                               return const SizedBox.shrink();

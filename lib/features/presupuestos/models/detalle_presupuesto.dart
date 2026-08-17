@@ -1,5 +1,4 @@
 import 'package:control_financiero/core/utils/icon_mapper.dart';
-import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -35,7 +34,6 @@ class DetallePresupuesto extends Equatable {
     double? montoPresupuestado,
     double? totalPresupuestado,
     bool? esRecurrente,
-    List<Movimiento>? movimientos,
   }) {
     return DetallePresupuesto(
       id: id ?? this.id,

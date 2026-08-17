@@ -97,9 +97,6 @@ class AppState extends ChangeNotifier {
     this._recordatoriosRepository,
   );
 
-  MovimientoFiltro _movimientoFiltro = MovimientoFiltro.todos;
-  MovimientoFiltro get movimientoFiltro => _movimientoFiltro;
-
   TotalesMensuales? _totalesMensuales;
   IngresoPresupuestado? _ingresoPresupuestado;
   double? _totalIngresoPresupuestado;
@@ -107,6 +104,8 @@ class AppState extends ChangeNotifier {
   double? _totalGastos;
   List<DateTime> _uniqueMovementDates = [];
   Map<DateTime, List<DetalleMovimiento>> _movimientosPorFecha = {};
+  Map<DateTime, List<DetalleMovimiento>> get movimientosPorFecha =>
+      _movimientosPorFecha;
   List<String> _uniqueTipeCategoryNames = [];
   TotalesMensuales? get totalesMensuales => _totalesMensuales;
   IngresoPresupuestado? get ingresoPresupuestado => _ingresoPresupuestado;
@@ -556,12 +555,6 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  void changeMovimientoFiltro(MovimientoFiltro filtro) {
-    if (_movimientoFiltro == filtro) return;
-    _movimientoFiltro = filtro;
-    notifyListeners();
-  }
-
   int getTotalCategoriasCount() {
     return categorias.length;
   }
@@ -638,7 +631,9 @@ class AppState extends ChangeNotifier {
   }
 
   // Obtener movimientos (para presupuesto) por categoria (id)
-  List<DetalleMovimiento> getMovimientosPresupuestoByCategoriaId(int categoriaId) {
+  List<DetalleMovimiento> getMovimientosPresupuestoByCategoriaId(
+    int categoriaId,
+  ) {
     return movimientosPresupuestos
         .where((m) => m.categoryId == categoriaId)
         .toList();
@@ -687,10 +682,8 @@ class AppState extends ChangeNotifier {
     return movimientos
         .where(
           (m) => filtro == MovimientoFiltro.ingresos
-              ? m.movementType ==
-                    TipoMovimiento.ingreso
-              : m.movementType ==
-                    TipoMovimiento.gasto,
+              ? m.movementType == TipoMovimiento.ingreso
+              : m.movementType == TipoMovimiento.gasto,
         )
         .toList();
   }
@@ -734,8 +727,7 @@ class AppState extends ChangeNotifier {
         .toList();
 
     final gastosEnMes = movimientosCategoria.where((m) {
-      return m.movementType ==
-              TipoMovimiento.gasto &&
+      return m.movementType == TipoMovimiento.gasto &&
           isSameMonth(m.date, selectedBudgetMonth);
     }).toList();
 
@@ -886,10 +878,6 @@ class AppState extends ChangeNotifier {
     );
 
     return movimientos;
-  }
-
-  Future<Movimiento?> obtenerMovimientoPorId(int id) async {
-    return await _movimientosRepository.fetchMovimientoById(id);
   }
 
   Future<DetalleMovimiento?> obtenerDetalleMovimientoPorId(int id) async {

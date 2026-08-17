@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
@@ -65,13 +66,13 @@ class TransactionDetailCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  type == 'Ingreso'
+                  type == TipoMovimiento.ingreso.name
                       ? '+\$${spent.toStringAsFixed(2)}'
                       : '-\$${spent.toStringAsFixed(2)}',
                   textAlign: TextAlign.right,
                   style: textTheme.labelMedium!.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: type == 'Ingreso' ? Colors.green : Colors.red,
+                    color: type == TipoMovimiento.ingreso.name ? Colors.green : Colors.red,
                   ),
                 ),
                 const SizedBox(height: 3),

@@ -3,7 +3,6 @@ import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
-import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';

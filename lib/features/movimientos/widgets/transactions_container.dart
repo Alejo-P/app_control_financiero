@@ -48,7 +48,7 @@ class TransactionsContainer extends StatelessWidget {
         return TransactionDetailCard(
           title: movimiento.title,
           category: movimiento.categoryName!,
-          type: _getTypeName(movimiento.movementType),
+          type: movimiento.movementType.name,
           spent: movimiento.amount,
           icon: movimiento.categoryIcon,
           iconColor: movimiento.categoryColor!,
@@ -65,14 +65,5 @@ class TransactionsContainer extends StatelessWidget {
         );
       }).toList(),
     );
-  }
-
-  String _getTypeName(TipoMovimiento type) {
-    switch (type) {
-      case TipoMovimiento.ingreso:
-        return 'Ingreso';
-      case TipoMovimiento.gasto:
-        return 'Gasto';
-    }
   }
 }

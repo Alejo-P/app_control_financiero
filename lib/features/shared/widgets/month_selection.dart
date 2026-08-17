@@ -109,14 +109,14 @@ class _MonthSelectionState extends State<MonthSelection> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final isFuture = isLimitFutureMonth(selectedDate);
     final isCurrent = isCurrentMonth(selectedDate);
     final isLimitPast = isLimitPastMonth(selectedDate);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final backgroundThemeColor = Theme.of(context).colorScheme.surface;
-    final [rBorder, gBorder, bBorder] = getRGBFromColor(
-      Colors.grey.shade600,
-    );
+    final backgroundThemeColor = colorScheme.surface;
+    final [rBorder, gBorder, bBorder] = getRGBFromColor(Colors.grey.shade600);
 
     return Card(
       color: backgroundThemeColor,
@@ -125,8 +125,8 @@ class _MonthSelectionState extends State<MonthSelection> {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
-          width: 1.5
-        )
+          width: 1.5,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -148,34 +148,63 @@ class _MonthSelectionState extends State<MonthSelection> {
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   monthYearLabel,
-                  style: TextStyle(
+                  style: textTheme.bodyMedium?.copyWith(
                     fontSize: 16,
-                    color: isDarkMode ? Colors.white : Colors.black,
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                InkWell(
-                  onTap: (isCurrent || widget.isLoading) ? null : returnToday,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: [
+                    InkWell(
+                      onTap: (isCurrent || widget.isLoading) ? null : returnToday,
                       borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'Ir a mes actual',
-                      style: TextStyle(
-                        color: (isCurrent || widget.isLoading)
-                            ? Colors.grey[600]
-                            : Colors.blueAccent,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Ir a mes actual',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: (isCurrent || widget.isLoading)
+                                ? colorScheme.onSurface
+                                : Colors.blueAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    InkWell(
+                      onTap: (isCurrent || widget.isLoading) ? null : returnToday,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Ir a fecha',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: (isCurrent || widget.isLoading)
+                                ? colorScheme.onSurface
+                                : Colors.blueAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
