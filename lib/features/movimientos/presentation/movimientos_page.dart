@@ -118,6 +118,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
       selectedFilter = filtro;
       selectedCategoryFilter = -1;
     });
+    _appState.setShowFloatingActionButton(true); 
   }
 
   void _onSelectCategoryFilter(int categoryID) {
@@ -126,6 +127,8 @@ class _MovimientosPageState extends State<MovimientosPage> {
           ? -1
           : categoryID;
     });
+    _appState.setShowFloatingActionButton(true);
+    
   }
 
   List<DetalleMovimiento> _getMovimientosByDateAndFilter(
@@ -251,7 +254,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
       child: Column(
         // permite desplazamiento si el contenido es mayor que el espacio.
         children: [
@@ -297,6 +300,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
                           child: Center(
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
+                              padding:EdgeInsets.symmetric(horizontal: 4),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 spacing: 8,

@@ -5,7 +5,6 @@ import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/time_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
-import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/recordatorios/models/detalle_recordatorio.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
@@ -37,6 +36,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
   bool _loaded = false;
   bool isViewOnly =
       false; // Variable para controlar si el formulario es solo lectura
+  bool isDefaultReminder = false;
   String _action = '';
   String nombreCategoria = '';
   IconData? iconoCategoriaSeleccionada;
@@ -48,7 +48,6 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  final _amountController = TextEditingController(text: '0.0');
   final _descriptionController = TextEditingController();
 
   @override
@@ -68,14 +67,12 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     }
 
     _titleController.addListener(_checkEnableSaveButton);
-    _amountController.addListener(_checkEnableSaveButton);
     _descriptionController.addListener(_checkEnableSaveButton);
   }
 
   @override
   void dispose() {
     // Limpiar los controladores al desechar el widget
-    _amountController.dispose();
     _descriptionController.dispose();
     _titleController.dispose();
     super.dispose();
@@ -104,14 +101,12 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
     final result = await appState.getRecordatorioById(id);
     if (result != null) {
-      _amountController.text = result.amount != 0.0
-          ? result.amount.toString()
-          : '0.0';
       _titleController.text = result.title;
       _descriptionController.text = result.description;
       categoriaSeleccionada = result.categoryId;
       fechaRecordatorio = result.scheduledAt;
       nombreCategoria = result.categoryName;
+      isDefaultReminder = result.isDefault;
       iconoCategoriaSeleccionada = result.categoryIcon;
       colorCategoriaSeleccionada = result.categoryColor;
       recurrenciaSeleccionada = Recurrencia.values.firstWhere(
@@ -139,7 +134,6 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     _titleController.text = args.title ?? _titleController.text;
     _descriptionController.text =
         args.description ?? _descriptionController.text;
-    _amountController.text = args.amount?.toString() ?? _amountController.text;
     fechaRecordatorio = args.scheduledAt ?? fechaRecordatorio;
 
     final category = args.category;
@@ -207,8 +201,16 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
     final TimeOfDay? timePicked = await showTimePicker(
       context: context,
+      orientation: Orientation.portrait,
+      initialEntryMode: TimePickerEntryMode.dialOnly,
       initialTime: TimeOfDay.fromDateTime(fechaRecordatorio),
       helpText: 'Selecciona la hora del recordatorio',
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: child!,
+        );
+      },
     );
 
     if (timePicked == null) return;
@@ -283,7 +285,6 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       title: _titleController.text,
       description: _descriptionController.text,
       categoryId: categoriaSeleccionada,
-      amount: double.tryParse(_amountController.text) ?? 0.0,
       scheduledAt: fechaRecordatorio,
       recurrencia: recurrenciaSeleccionada,
     );
@@ -311,7 +312,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
         _isLoading = false;
         _action = '';
       });
-      
+
       AppLogger.log(
         'Error al guardar recordatorio: ${e.toString()}',
         level: LogLevel.error,
@@ -363,8 +364,8 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       title: _titleController.text,
       description: _descriptionController.text,
       isEnabled: detalleRecordatorio?.isEnabled ?? true,
+      isDefault: isDefaultReminder,
       scheduledAt: fechaRecordatorio,
-      amount: double.tryParse(_amountController.text) ?? 0.0,
       recurrency: recurrenciaSeleccionada.name,
       categoryId: categoriaSeleccionada,
       categoryName: nombreCategoria,
@@ -379,8 +380,8 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
           title: '',
           description: '',
           isEnabled: true,
+          isDefault: false,
           scheduledAt: fechaRecordatorio,
-          amount: 0.0,
           recurrency: Recurrencia.ninguno.name,
           categoryId: categoriaSeleccionada,
           categoryName: nombreCategoria,
@@ -470,31 +471,6 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                                       categorias: categorias,
                                       selectedValue: categoriaSeleccionada,
                                       onChangeCategory: _onChangeCategoria,
-                                    ),
-                                  ),
-                                  LabeledFormField(
-                                    label: "Monto",
-                                    icon: Icon(
-                                      Icons.attach_money,
-                                      color: Colors.green,
-                                    ),
-                                    child: Expanded(
-                                      child: AmountInput(
-                                        controller: _amountController,
-                                        showLabel: false,
-                                        textAlign: TextAlign.center,
-                                        position: MainAxisAlignment.end,
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return 'Por favor ingrese un monto';
-                                          }
-                                          final amount = double.tryParse(value);
-                                          if (amount == null || amount < 0) {
-                                            return 'Por favor ingrese un monto válido';
-                                          }
-                                          return null;
-                                        },
-                                      ),
                                     ),
                                   ),
                                   TextInputCard(

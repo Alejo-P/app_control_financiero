@@ -100,6 +100,11 @@ class AppTheme {
         }),
       ),
     ),
+    navigationBarTheme: NavigationBarThemeData(
+      height: 70,
+      elevation: 4,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+    ),
     useMaterial3: true,
   );
 
@@ -201,6 +206,11 @@ class AppTheme {
           return Colors.white;
         }),
       ),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      height: 70,
+      elevation: 4,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     ),
     useMaterial3: true,
   );

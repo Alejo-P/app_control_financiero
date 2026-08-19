@@ -26,6 +26,7 @@ void main() {
           categoryIcon: Icons.notifications_active_outlined,
           categoryColor: Colors.orange,
           isEnabled: true,
+          isDefault: true,
           scheduledAt: DateTime(2024, 1, 10, 20, 30),
           recurrency: 'Diario',
         ),

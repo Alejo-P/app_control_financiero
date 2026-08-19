@@ -184,26 +184,6 @@ class _MonthSelectionState extends State<MonthSelection> {
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: (isCurrent || widget.isLoading) ? null : returnToday,
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Ir a fecha',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: (isCurrent || widget.isLoading)
-                                ? colorScheme.onSurface
-                                : Colors.blueAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ],

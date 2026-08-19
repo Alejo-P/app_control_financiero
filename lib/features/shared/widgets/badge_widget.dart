@@ -17,7 +17,7 @@ class BadgeWidget extends StatelessWidget {
             right: 0,
             top: 0,
             child: Transform.translate(
-              offset: const Offset(6, -6),
+              offset: const Offset(4, -4),
               child: _BadgeCounter(count: counter),
             ),
           ),
@@ -45,7 +45,7 @@ class _BadgeCounter extends StatelessWidget {
         count > 99 ? '99+' : '$count',
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
       ),

@@ -21,6 +21,7 @@ List<InfoCardRecordatorio> mergeDailyMovementReminder(
       categoryIcon: Icons.notifications_active_outlined,
       categoryColor: Colors.orange,
       isEnabled: true,
+      isDefault: true,
       scheduledAt: DateTime(
         referenceDateTime.year,
         referenceDateTime.month,
@@ -36,20 +37,22 @@ List<InfoCardRecordatorio> mergeDailyMovementReminder(
 class InfoCardRecordatorio {
   final int? id;
   final String title;
-  final String categoryName;
-  final IconData categoryIcon;
-  final Color categoryColor;
+  final String? categoryName;
+  final IconData? categoryIcon;
+  final Color? categoryColor;
   final bool isEnabled;
+  final bool isDefault;
   final DateTime scheduledAt;
   final String recurrency;
 
   InfoCardRecordatorio({
     this.id,
     required this.title,
-    required this.categoryName,
-    required this.categoryIcon,
-    required this.categoryColor,
+    this.categoryName,
+    this.categoryIcon,
+    this.categoryColor,
     required this.isEnabled,
+    required this.isDefault,
     required this.scheduledAt,
     required String recurrency,
   }) : recurrency = _capitalize(recurrency);
@@ -67,6 +70,7 @@ class InfoCardRecordatorio {
     IconData? categoryIcon,
     Color? categoryColor,
     bool? isEnabled,
+    bool? isDefault,
     DateTime? scheduledAt,
     String? recurrency,
   }) {
@@ -77,6 +81,7 @@ class InfoCardRecordatorio {
       categoryIcon: categoryIcon ?? this.categoryIcon,
       categoryColor: categoryColor ?? this.categoryColor,
       isEnabled: isEnabled ?? this.isEnabled,
+      isDefault: isDefault ?? this.isDefault,
       scheduledAt: scheduledAt ?? this.scheduledAt,
       recurrency: recurrency ?? this.recurrency,
     );
@@ -86,10 +91,17 @@ class InfoCardRecordatorio {
     return InfoCardRecordatorio(
       id: map['id'] as int?,
       title: map['title'] as String,
-      categoryName: map['category_name'] as String,
-      categoryIcon: IconMapper.fromName(map['category_icon'] as String),
-      categoryColor: Color((map['category_color'] as num).toInt()),
+      categoryName: map['category_name'] != null
+          ? (map['category_name'] as String)
+          : null,
+      categoryIcon: map['category_icon'] != null
+          ? IconMapper.fromName(map['category_icon'] as String)
+          : null,
+      categoryColor: map['category_color'] != null
+          ? Color((map['category_color'] as num).toInt())
+          : null,
       isEnabled: map['is_enabled'] == 1,
+      isDefault: map['is_default'] == 1,
       scheduledAt: DateTime.parse(map['scheduled_at'] as String),
       recurrency: map['recurrency'] as String,
     );

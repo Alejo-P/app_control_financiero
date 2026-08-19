@@ -24,13 +24,14 @@ class RecordatoriosLocalDataSource {
           r.${RecordatorioTable.id} AS id,
           r.${RecordatorioTable.title} AS title,
           r.${RecordatorioTable.enabled} AS is_enabled,
+          r.${RecordatorioTable.isDefault} AS is_default,
           r.${RecordatorioTable.scheduledAt} AS scheduled_at,
           r.${RecordatorioTable.recurrencia} AS recurrency,
           c.${CategoriasTable.name} AS category_name,
           c.${CategoriasTable.iconName} AS category_icon,
           c.${CategoriasTable.iconColorValue} AS category_color
         FROM ${RecordatorioTable.table} r
-        JOIN ${CategoriasTable.table} c ON r.${RecordatorioTable.categoryId} = c.${CategoriasTable.id}
+        LEFT JOIN ${CategoriasTable.table} c ON r.${RecordatorioTable.categoryId} = c.${CategoriasTable.id}
       ''');
 
     return maps.map(InfoCardRecordatorio.fromMap).toList();
@@ -46,8 +47,8 @@ class RecordatoriosLocalDataSource {
           r.${RecordatorioTable.description} AS description,
           r.${RecordatorioTable.enabled} AS is_enabled,
           r.${RecordatorioTable.scheduledAt} AS scheduled_at,
-          r.${RecordatorioTable.amount} AS amount,
           r.${RecordatorioTable.recurrencia} AS recurrency,
+          r.${RecordatorioTable.isDefault} AS is_default,
           c.${CategoriasTable.id} AS category_id,
           c.${CategoriasTable.name} AS category_name,
           c.${CategoriasTable.iconName} AS category_icon,

@@ -7,44 +7,54 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
+    final appState = context.read<AppState>();
+    final currentTab = context.select<AppState, int>(
+      (state) => state.currentTab,
+    );
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
 
-    return BottomNavigationBar(
-      currentIndex: appState.currentTab,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey,
-      showUnselectedLabels: true,
-      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
-      landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
-      items: const [
-        BottomNavigationBarItem(
+    return NavigationBar(
+      indicatorColor: colorScheme.primary,
+      selectedIndex: currentTab,
+      onDestinationSelected: (index) => appState.changeTab(index),
+      labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+        final isSelected = states.contains(WidgetState.selected);
+
+        return textTheme.labelSmall!.copyWith(
+          color: colorScheme.primary,
+          fontSize: 13,
+          fontWeight: isSelected ? FontWeight.bold : null,
+        );
+      }),
+      animationDuration: const Duration(milliseconds: 250),
+      destinations: const [
+        NavigationDestination(
           icon: Icon(Icons.compare_arrows_outlined),
-          activeIcon: Icon(Icons.compare_arrows, size: 30),
+          selectedIcon: Icon(Icons.compare_arrows),
           label: 'Movimientos',
-          tooltip: 'Pestaña de Movimientos',
+          tooltip: 'Movimientos',
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.donut_large_outlined),
-          activeIcon: Icon(Icons.donut_large, size: 30),
+          selectedIcon: Icon(Icons.donut_large),
           label: 'Presupuestos',
-          tooltip: 'Pestaña de Presupuesto',
+          tooltip: 'Presupuesto',
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.history_outlined),
-          activeIcon: Icon(Icons.history, size: 30),
+          selectedIcon: Icon(Icons.history),
           label: 'Historial',
-          tooltip: 'Pestaña de Historial',
+          tooltip: 'Historial',
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.more_horiz_outlined),
-          activeIcon: Icon(Icons.more_horiz, size: 30),
+          selectedIcon: Icon(Icons.more_horiz),
           label: 'Más acciones',
-          tooltip: 'Pestaña de Más acciones',
+          tooltip: 'Más acciones',
         ),
       ],
-      onTap: (index) => appState.changeTab(index),
     );
   }
 }

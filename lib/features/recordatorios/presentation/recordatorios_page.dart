@@ -117,19 +117,19 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final recordatorio = recordatorios[index];
-                  final isSystemReminder =
-                      recordatorio.id ==
-                      NotificationService.getDailyMovementReminderId();
+                  final isDefaultReminder = recordatorio.isDefault;
 
                   return RecordatorioCard(
-                    icon: recordatorio.categoryIcon,
-                    iconColor: recordatorio.categoryColor,
+                    icon: recordatorio.categoryIcon ?? Icons.alarm,
+                    iconColor: recordatorio.categoryColor ?? Colors.blueAccent,
                     isEnabled: recordatorio.isEnabled,
-                    categoryName: recordatorio.categoryName,
+                    categoryName: isDefaultReminder
+                        ? 'Predeterminada'
+                        : recordatorio.categoryName ?? 'Sin definir',
                     recurrency: recordatorio.recurrency,
                     createdAt: recordatorio.scheduledAt,
                     title: recordatorio.title,
-                    onTap: isSystemReminder
+                    onTap: isDefaultReminder
                         ? null
                         : () {
                             Navigator.pushNamed(
@@ -140,11 +140,11 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                               ),
                             );
                           },
-                    onChange: isSystemReminder
+                    onChange: isDefaultReminder
                         ? null
                         : (enabled) =>
                               _onEnabledChanged(recordatorio.id!, enabled),
-                    onDelete: isSystemReminder
+                    onDelete: isDefaultReminder
                         ? null
                         : () => _onDeleteRecordatorio(
                             recordatorio.title,

@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TipoCategoriasTable {
@@ -105,11 +106,11 @@ class RecordatorioTable {
   static const title = 'title';
   static const description = 'description';
   static const categoryId = 'category_id';
-  static const amount = 'amount';
   static const scheduledAt = 'scheduled_at';
   static const completed = 'completed';
   static const enabled = 'enabled';
   static const recurrencia = 'recurrencia';
+  static const isDefault = 'is_default';
 }
 
 class MetaTable {
@@ -266,11 +267,11 @@ Future<void> createTables(Database db) async {
         ${RecordatorioTable.title} TEXT NOT NULL,
         ${RecordatorioTable.description} TEXT,
         ${RecordatorioTable.categoryId} INTEGER,
-        ${RecordatorioTable.amount} REAL,
         ${RecordatorioTable.scheduledAt} TEXT NOT NULL,
         ${RecordatorioTable.completed} INTEGER DEFAULT 0,
         ${RecordatorioTable.enabled} INTEGER DEFAULT 1,
-        ${RecordatorioTable.recurrencia} TEXT DEFAULT 'ninguno',
+        ${RecordatorioTable.recurrencia} TEXT DEFAULT '${Recurrencia.ninguno}',
+        ${RecordatorioTable.isDefault} INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY(${RecordatorioTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
       );
     ''');

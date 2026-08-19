@@ -2,9 +2,11 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/database/db_migrations.dart';
 import 'package:control_financiero/core/database/db_seeds.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
+import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -89,7 +91,7 @@ final categoriasList = <Categoria>[
   ),
 ];
 
-final presupuestosNotif = [
+final presupuestosNotif = <BudgetNotification>[
   BudgetNotification(
     id: 1,
     threshold: 0.5, // 50% del presupuesto
@@ -113,7 +115,7 @@ final presupuestosNotif = [
   ),
 ];
 
-final movementNotificationConfigs = [
+final movementNotificationConfigs = <MovementNotificationConfig>[
   MovementNotificationConfig(
     id: 1,
     typeKey: MovementNotificationConfig.createMovementKey,
@@ -137,6 +139,24 @@ final movementNotificationConfigs = [
   ),
 ];
 
+final defaultReminders = <Recordatorio>[
+  Recordatorio(
+    id: 200000,
+    title: 'Registra tus movimientos',
+    description:
+        'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
+    scheduledAt: DateTime(
+      // 8:30 PM
+      currentDateTime.year,
+      currentDateTime.month,
+      currentDateTime.day,
+      20,
+      30,
+    ),
+    recurrencia: Recurrencia.diario,
+  ),
+];
+
 Future<void> runSeeds(Database db) async {
   await createTables(db);
   final result = await db.query(
@@ -157,6 +177,19 @@ Future<void> runSeeds(Database db) async {
     for (var categoria in categoriasList) {
       await upsertCategoria(db, categoria);
     }
+
+    for (var notif in presupuestosNotif) {
+      await upsertBudgetNotification(db, notif);
+    }
+
+    for (var config in movementNotificationConfigs) {
+      await upsertMovementNotificationConfig(db, config);
+    }
+
+    for (var recordatorio in defaultReminders) {
+      await upsertRecordatorios(db, recordatorio);
+    }
+
     await setSeedVersion(db, currentVersion + 1);
   }
   if (currentVersion < 2) {
@@ -208,6 +241,12 @@ Future<void> runSeeds(Database db) async {
   }
   if (currentVersion < 13) {
     await migrateRemoveObsoleteColumns(db);
+    await setSeedVersion(db, currentVersion + 1);
+  }
+  if (currentVersion < 14) {
+    for (var recordatorio in defaultReminders) {
+      await upsertRecordatorios(db, recordatorio);
+    }
     await setSeedVersion(db, currentVersion + 1);
   }
 }

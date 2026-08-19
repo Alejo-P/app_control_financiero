@@ -7,8 +7,8 @@ class DetalleRecordatorio extends Equatable {
   final String title;
   final String description;
   final bool isEnabled;
+  final bool isDefault;
   final DateTime scheduledAt;
-  final double amount;
   final String recurrency;
   final int categoryId;
   final String categoryName;
@@ -20,8 +20,8 @@ class DetalleRecordatorio extends Equatable {
     required this.title,
     required this.description,
     required this.isEnabled,
+    required this.isDefault,
     required this.scheduledAt,
-    required this.amount,
     required this.recurrency,
     required this.categoryId,
     required this.categoryName,
@@ -34,8 +34,8 @@ class DetalleRecordatorio extends Equatable {
     String? title,
     String? description,
     bool? isEnabled,
+    bool? isDefault,
     DateTime? scheduledAt,
-    double? amount,
     String? recurrency,
     int? categoryId,
     String? categoryName,
@@ -47,8 +47,8 @@ class DetalleRecordatorio extends Equatable {
       title: title ?? this.title,
       description: description ?? this.description,
       isEnabled: isEnabled ?? this.isEnabled,
+      isDefault: isDefault ?? this.isDefault,
       scheduledAt: scheduledAt ?? this.scheduledAt,
-      amount: amount ?? this.amount,
       recurrency: recurrency ?? this.recurrency,
       categoryId: categoryId ?? this.categoryId,
       categoryName: categoryName ?? this.categoryName,
@@ -63,8 +63,8 @@ class DetalleRecordatorio extends Equatable {
       title: map['title'] as String,
       description: map['description'] as String,
       isEnabled: (map['is_enabled'] as int) == 1,
+      isDefault: (map['is_default'] as int) == 1,
       scheduledAt: DateTime.parse(map['scheduled_at'] as String),
-      amount: map['amount'] != null ? (map['amount'] as num).toDouble() : 0.0,
       recurrency: map['recurrency'] as String,
       categoryId: map['category_id'] as int,
       categoryName: map['category_name'] as String,
@@ -75,7 +75,7 @@ class DetalleRecordatorio extends Equatable {
 
   @override
   String toString() {
-    return 'DetalleRecordatorio(id: $id, title: $title, description: $description, isEnabled: $isEnabled, scheduledAt: $scheduledAt, amount: $amount, recurrency: $recurrency, categoryId: $categoryId, categoryName: $categoryName, categoryIcon: $categoryIcon, categoryColor: $categoryColor)';
+    return 'DetalleRecordatorio(id: $id, title: $title, description: $description, isEnabled: $isEnabled, isDefault: $isDefault, scheduledAt: $scheduledAt, recurrency: $recurrency, categoryId: $categoryId, categoryName: $categoryName, categoryIcon: $categoryIcon, categoryColor: $categoryColor)';
   }
 
   @override
@@ -84,8 +84,8 @@ class DetalleRecordatorio extends Equatable {
     title,
     description,
     isEnabled,
+    isDefault,
     scheduledAt,
-    amount,
     recurrency,
     categoryId,
     categoryName,

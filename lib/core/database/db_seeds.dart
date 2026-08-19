@@ -2,6 +2,7 @@ import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
+import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -60,6 +61,19 @@ Future<void> upsertMovementNotificationConfig(
 
   if (updated == 0) {
     await db.insert(MovementNotificationConfigTable.table, config.toMap());
+  }
+}
+
+Future<void> upsertRecordatorios(Database db, Recordatorio recordatorio) async {
+  final updated = await db.update(
+    RecordatorioTable.table,
+    recordatorio.toMap(),
+    where: '${RecordatorioTable.id} = ?',
+    whereArgs: [recordatorio.id],
+  );
+
+  if (updated == 0) {
+    await db.insert(RecordatorioTable.table, recordatorio.toMap());
   }
 }
 
