@@ -27,15 +27,6 @@ class NotificationService {
     return 100000 + id;
   }
 
-  static int getDailyMovementReminderId() {
-    return 200000;
-  }
-
-  static DateTime getDailyMovementReminderDateTime(DateTime now) {
-    final today = DateTime(now.year, now.month, now.day);
-    return DateTime(today.year, today.month, today.day, 20, 30);
-  }
-
   static Future<void> init() async {
     const android = AndroidInitializationSettings('ic_notification');
 
@@ -66,6 +57,7 @@ class NotificationService {
       importance: Importance.max,
       priority: Priority.high,
       groupKey: 'notif_group_$type',
+      channelDescription: 'Notificaciones de la app',
     );
 
     final details = NotificationDetails(android: androidDetails);
@@ -104,6 +96,7 @@ class NotificationService {
       importance: Importance.max,
       priority: Priority.high,
       groupKey: 'notif_group_$type',
+      channelDescription: 'Notificaciones de la app',
       setAsGroupSummary: true,
       styleInformation: InboxStyleInformation(
         [latest?.title ?? 'Notificaciones'],
@@ -136,6 +129,7 @@ class NotificationService {
       icon: 'ic_notification',
       importance: Importance.max,
       priority: Priority.high,
+      channelDescription: 'Notificaciones de la app',
       groupKey: 'notif_group_$type',
     );
     final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);

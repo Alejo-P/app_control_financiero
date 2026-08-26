@@ -19,6 +19,33 @@ extension RecurrenciaExtension on Recurrencia {
   }
 }
 
+DateTime calculateNextOccurrence(DateTime current, Recurrencia recurrencia) {
+  switch (recurrencia) {
+    case Recurrencia.diario:
+      return current.add(const Duration(days: 1));
+    case Recurrencia.semanal:
+      return current.add(const Duration(days: 7));
+    case Recurrencia.mensual:
+      return DateTime(
+        current.year,
+        current.month + 1,
+        current.day,
+        current.hour,
+        current.minute,
+      );
+    case Recurrencia.anual:
+      return DateTime(
+        current.year + 1,
+        current.month,
+        current.day,
+        current.hour,
+        current.minute,
+      );
+    default:
+      return current;
+  }
+}
+
 class Recordatorio {
   final int? id;
   final String title;
@@ -88,6 +115,7 @@ class Recordatorio {
 
   Map<String, dynamic> toMap() {
     return {
+      RecordatorioTable.id: id,
       RecordatorioTable.title: title,
       RecordatorioTable.description: description ?? '',
       RecordatorioTable.categoryId: categoryId,

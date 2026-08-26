@@ -1,7 +1,6 @@
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
-import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -45,7 +44,7 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
 
   Future<void> _refreshRecordatorios() async {
     final appState = context.read<AppState>();
-    await appState.loadRecordatiosData();
+    await appState.loadRecordatoriosData();
   }
 
   Future<void> _onDeleteRecordatorio(String title, int id) async {
@@ -109,49 +108,60 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
         padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
         child: appState.loadingInitialData
             ? const LoadingScreen(message: 'Cargando recordatorios...')
-            : recordatorios.isEmpty
-            ? _EmptyRecordatorios()
-            : ListView.separated(
-                controller: _controller,
-                itemCount: recordatorios.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final recordatorio = recordatorios[index];
-                  final isDefaultReminder = recordatorio.isDefault;
+            : RefreshIndicator(
+                onRefresh: _refreshRecordatorios,
+                child: recordatorios.isEmpty
+                    ? ListView(
+                        controller: _controller,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [_EmptyRecordatorios()],
+                      )
+                    : ListView.separated(
+                        controller: _controller,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: recordatorios.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final recordatorio = recordatorios[index];
+                          final isDefaultReminder = recordatorio.isDefault;
 
-                  return RecordatorioCard(
-                    icon: recordatorio.categoryIcon ?? Icons.alarm,
-                    iconColor: recordatorio.categoryColor ?? Colors.blueAccent,
-                    isEnabled: recordatorio.isEnabled,
-                    categoryName: isDefaultReminder
-                        ? 'Predeterminada'
-                        : recordatorio.categoryName ?? 'Sin definir',
-                    recurrency: recordatorio.recurrency,
-                    createdAt: recordatorio.scheduledAt,
-                    title: recordatorio.title,
-                    onTap: isDefaultReminder
-                        ? null
-                        : () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRoutes.recordatorioFormRoute,
-                              arguments: RecordatorioFormArgs(
-                                id: recordatorio.id!,
-                              ),
-                            );
-                          },
-                    onChange: isDefaultReminder
-                        ? null
-                        : (enabled) =>
-                              _onEnabledChanged(recordatorio.id!, enabled),
-                    onDelete: isDefaultReminder
-                        ? null
-                        : () => _onDeleteRecordatorio(
-                            recordatorio.title,
-                            recordatorio.id!,
-                          ),
-                  );
-                },
+                          return RecordatorioCard(
+                            icon: recordatorio.categoryIcon ?? Icons.alarm,
+                            iconColor:
+                                recordatorio.categoryColor ?? Colors.blueAccent,
+                            isEnabled: recordatorio.isEnabled,
+                            categoryName: isDefaultReminder
+                                ? 'Predeterminada'
+                                : recordatorio.categoryName ?? 'Sin definir',
+                            recurrency: recordatorio.recurrency,
+                            createdAt: recordatorio.scheduledAt,
+                            title: recordatorio.title,
+                            onTap: isDefaultReminder
+                                ? null
+                                : () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.recordatorioFormRoute,
+                                      arguments: RecordatorioFormArgs(
+                                        id: recordatorio.id!,
+                                      ),
+                                    );
+                                  },
+                            onChange: isDefaultReminder
+                                ? null
+                                : (enabled) => _onEnabledChanged(
+                                    recordatorio.id!,
+                                    enabled,
+                                  ),
+                            onDelete: isDefaultReminder
+                                ? null
+                                : () => _onDeleteRecordatorio(
+                                    recordatorio.title,
+                                    recordatorio.id!,
+                                  ),
+                          );
+                        },
+                      ),
               ),
       ),
     );
@@ -159,17 +169,15 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
 }
 
 class _EmptyRecordatorios extends StatelessWidget {
+  const _EmptyRecordatorios();
+
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.only(top: 150),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.hourglass_disabled_rounded,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.hourglass_disabled_rounded, size: 80, color: Colors.grey),
           const SizedBox(height: 24),
           Text(
             'No hay recordatorios establecidos.',
@@ -180,7 +188,7 @@ class _EmptyRecordatorios extends StatelessWidget {
             'Establece un recordatorio nuevo para algun movimiento futuro.',
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
         ],

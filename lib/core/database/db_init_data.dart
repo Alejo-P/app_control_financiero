@@ -141,7 +141,7 @@ final movementNotificationConfigs = <MovementNotificationConfig>[
 
 final defaultReminders = <Recordatorio>[
   Recordatorio(
-    id: 200000,
+    id: 1,
     title: 'Registra tus movimientos',
     description:
         'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
@@ -153,6 +153,7 @@ final defaultReminders = <Recordatorio>[
       20,
       30,
     ),
+    isDefault: true,
     recurrencia: Recurrencia.diario,
   ),
 ];

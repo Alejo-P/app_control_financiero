@@ -14,10 +14,18 @@ class RecordatoriosRepository {
   Future<List<Recordatorio>> fetchAllRecordatorios() async {
     return await localDataSource.fetchAllRecordatorios();
   }
+
   ///Obtiene la lista de todos los recordatorios.
   ///@return Una lista de objetos InfoCardRecordatorio para mostrar en la vista.
   Future<List<InfoCardRecordatorio>> fetchAllDetailedRecordatorios() async {
     return await localDataSource.fetchAllDetailedRecordatorios();
+  }
+
+  ///Obtiene un recordatorios por su ID.
+  ///@param id El ID del recordatorio.
+  ///@return Un objeto InfoCardRecordatorio para mostrar en la vista.
+  Future<InfoCardRecordatorio?> fetchDetailedRecordatorioById(int id) async {
+    return await localDataSource.fetchDetailedRecordatorioById(id);
   }
 
   ///Obtiene el detalle de un recordatorio por su ID.
@@ -38,11 +46,21 @@ class RecordatoriosRepository {
 
   ///Actualiza un recordatorio existente en la base de datos.
   ///@param recordatorio El objeto Recordatorio a actualizar.
-  ///@return Un objeto OperationResult que contiene el número de filas actualizadas si la operación fue exitosa, de lo contrario null.
-  Future<OperationResult<int?>> updateRecordatorio(
+  ///@return Un objeto OperationResult que contiene informacion del recordatorio actualizado si la operación fue exitosa, de lo contrario null.
+  Future<OperationResult<InfoCardRecordatorio?>> updateRecordatorio(
     Recordatorio recordatorio,
   ) async {
-    return await localDataSource.updateRecordatorio(recordatorio);
+    final result = await localDataSource.updateRecordatorio(recordatorio);
+
+    return OperationResult<InfoCardRecordatorio?>(
+      success: result.success,
+      message: result.message,
+      data: result.success
+          ? await localDataSource.fetchDetailedRecordatorioById(
+              recordatorio.id!,
+            )
+          : null,
+    );
   }
 
   ///Actualiza el estado habilitado de un recordatorio en la base de datos.

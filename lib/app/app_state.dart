@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/constants/notificacion_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/services/backup_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
@@ -159,7 +160,7 @@ class AppState extends ChangeNotifier {
       loadNotifications(),
     ]);
     await loadCategoryData(notify: false);
-    await loadRecordatiosData(notify: false);
+    await loadRecordatoriosData(notify: false);
     loadingInitialData = false;
 
     notifyListeners();
@@ -172,18 +173,13 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  Future<void> loadRecordatiosData({bool notify = true}) async {
-    final detailedRecordatorios = await _recordatoriosRepository
+  Future<void> loadRecordatoriosData({bool notify = true}) async {
+    recordatorios = await _recordatoriosRepository
         .fetchAllDetailedRecordatorios();
 
     final recordatoriosList = await _recordatoriosRepository
         .fetchAllRecordatorios();
     await syncRecordatorioNotifications(recordatoriosList);
-
-    recordatorios = mergeDailyMovementReminder(
-      detailedRecordatorios,
-      referenceDateTime: currentDateTime,
-    );
 
     if (notify) notifyListeners();
   }
@@ -201,8 +197,13 @@ class AppState extends ChangeNotifier {
         item.id!,
       );
 
-      if (!item.enabled || item.scheduledAt.isBefore(currentDateTime)) {
+      if (!item.enabled) {
         await NotificationService.cancelNotification(notificationId);
+        continue;
+      }
+
+      if (item.scheduledAt.isAfter(currentDateTime)) {
+        await reprogramarRecordatorioPorRecurrencia(item);
         continue;
       }
 
@@ -241,40 +242,54 @@ class AppState extends ChangeNotifier {
 
   Future<void> syncDailyMovementReminder({DateTime? referenceDateTime}) async {
     final now = referenceDateTime ?? currentDateTime;
-    final reminderDateTime =
-        NotificationService.getDailyMovementReminderDateTime(now);
-    final reminderId = NotificationService.getDailyMovementReminderId();
-    final reminderNotificationId =
-        NotificationService.getRecordatorioNotificationId(reminderId);
+    final remindersList = await _recordatoriosRepository
+        .fetchAllRecordatorios();
+    if (remindersList.isEmpty) return;
 
-    final movimientosHoy = await _movimientosRepository.fetchMovimientosByDate(
-      DateTime(now.year, now.month, now.day),
-    );
+    try {
+      final reminder = remindersList.firstWhere(
+        (r) => r.isDefault == true,
+      ); // El unico recordatorio por defecto es el recordatorio diario
+      final reminderNotificationId =
+          NotificationService.getRecordatorioNotificationId(reminder.id!);
 
-    if (movimientosHoy.isNotEmpty) {
+      final movimientosHoy = await _movimientosRepository
+          .fetchMovimientosByDate(currentDateTime);
+
+      if (movimientosHoy.isNotEmpty) {
+        await NotificationService.cancelNotification(reminderNotificationId);
+        return;
+      }
+
+      if (now.isBefore(reminder.scheduledAt)) {
+        await NotificationService.scheduleRecordatorioNotification(
+          id: reminder.id!,
+          title: reminder.title,
+          body:
+              reminder.description ??
+              'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
+          scheduledDate: reminder.scheduledAt,
+        );
+        return;
+      }
+
       await NotificationService.cancelNotification(reminderNotificationId);
-      return;
-    }
-
-    if (now.isBefore(reminderDateTime)) {
-      await NotificationService.scheduleRecordatorioNotification(
-        id: reminderId,
-        title: 'Registra tus movimientos',
+      await NotificationService.showNotification(
+        title: reminder.title,
         body:
+            reminder.description ??
             'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
-        scheduledDate: reminderDateTime,
+        id: reminderNotificationId,
+        type: TipoNotificacion.notifDiaria,
       );
-      return;
+    } on Exception catch (e, st) {
+      AppLogger.log(
+        'Ocurrio un error al mostrar el recordatorio diario: $e',
+        level: LogLevel.error,
+        tag: 'Recordatorio diario',
+        stackTrace: st,
+      );
     }
-
-    await NotificationService.cancelNotification(reminderNotificationId);
-    await NotificationService.showNotification(
-      title: 'Registra tus movimientos',
-      body:
-          'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
-      id: reminderId,
-      type: 'recordatorio_movimientos',
-    );
   }
 
   Future<Box> _getSettingsBox() async {
@@ -1102,7 +1117,7 @@ class AppState extends ChangeNotifier {
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
-      await loadRecordatiosData();
+      await loadRecordatoriosData();
       final savedId = result.data ?? recordatorio.id ?? -1;
       if (savedId > 0 && recordatorio.enabled) {
         await NotificationService.scheduleRecordatorioNotification(
@@ -1121,11 +1136,51 @@ class AppState extends ChangeNotifier {
     final result = await _recordatoriosRepository.updateRecordatorio(
       recordatorio,
     );
+
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadRecordatiosData();
+    if (!result.success && result.data != null) {
+      return;
     }
+
+    final updatedRecordatorio = result.data!;
+    final index = recordatorios.indexWhere(
+      (r) => r.id == updatedRecordatorio.id,
+    );
+
+    if (index == -1) {
+      return;
+    }
+
+    recordatorios[index] = updatedRecordatorio;
+    // TODO: Revisar como actualizar la programacion del recordatorio
+    //reprogramarRecordatorioPorRecurrencia(recordatorio);
+    notifyListeners();
+  }
+
+  Future<void> reprogramarRecordatorioPorRecurrencia(
+    Recordatorio recordatorio,
+  ) async {
+    if (recordatorio.id == null ||
+        recordatorio.recurrencia == Recurrencia.ninguno) {
+      return;
+    }
+
+    final recurrencia = recordatorio.recurrencia;
+    var siguienteFecha = recordatorio.scheduledAt;
+
+    // Salta las ocurrencias vencidas si la aplicación estuvo cerrada.
+    while (!siguienteFecha.isAfter(currentDateTime)) {
+      siguienteFecha = calculateNextOccurrence(siguienteFecha, recurrencia);
+    }
+
+    print('Reprogramando ${recordatorio.title} a $siguienteFecha');
+
+    final nuevoRecordatorio = recordatorio.copyWith(
+      scheduledAt: siguienteFecha,
+    );
+
+    await actualizarRecordatorio(nuevoRecordatorio);
   }
 
   Future<void> actualizarEstadoRecordatorio(int id, bool enabled) async {
@@ -1136,7 +1191,7 @@ class AppState extends ChangeNotifier {
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
-      await loadRecordatiosData();
+      await loadRecordatoriosData();
       if (enabled) {
         final detalle = await getRecordatorioById(id);
         if (detalle != null) {
@@ -1161,7 +1216,7 @@ class AppState extends ChangeNotifier {
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
     if (result.success == true) {
-      await loadRecordatiosData();
+      await loadRecordatoriosData();
     }
   }
 }
