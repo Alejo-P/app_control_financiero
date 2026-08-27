@@ -1153,7 +1153,6 @@ class AppState extends ChangeNotifier {
     }
 
     recordatorios[index] = updatedRecordatorio;
-    // TODO: Revisar como actualizar la programacion del recordatorio
     await syncRecordatorioNotifications();
     notifyListeners();
   }
