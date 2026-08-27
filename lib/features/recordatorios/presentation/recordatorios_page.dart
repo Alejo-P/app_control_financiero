@@ -1,6 +1,7 @@
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/features/recordatorios/models/info_card_recordatorio.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -25,6 +26,9 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
   void initState() {
     super.initState();
     _controller.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshRecordatorios();
+    });
   }
 
   @override
@@ -49,6 +53,7 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
     });
     final appState = context.read<AppState>();
     await appState.loadRecordatoriosData();
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
@@ -118,7 +123,7 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
             : RefreshIndicator(
                 onRefresh: _refreshRecordatorios,
                 child: _isLoading
-                    ? LoadingScreen(message: 'Cargando recordatorios...',)
+                    ? LoadingScreen(message: 'Cargando recordatorios...')
                     : recordatorios.isEmpty
                     ? ListView(
                         controller: _controller,
