@@ -139,9 +139,9 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                           final isDefaultReminder = recordatorio.isDefault;
 
                           return RecordatorioCard(
-                            icon: recordatorio.categoryIcon ?? Icons.alarm,
+                            icon: recordatorio.categoryIcon ?? Icons.notifications_active_outlined,
                             iconColor:
-                                recordatorio.categoryColor ?? Colors.blueAccent,
+                                recordatorio.categoryColor ?? Colors.orange,
                             isEnabled: recordatorio.isEnabled,
                             categoryName: isDefaultReminder
                                 ? 'Predeterminada'
@@ -149,6 +149,7 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                             recurrency: recordatorio.recurrency,
                             createdAt: recordatorio.scheduledAt,
                             title: recordatorio.title,
+                            isDefault: recordatorio.isDefault,
                             onTap: isDefaultReminder
                                 ? null
                                 : () {

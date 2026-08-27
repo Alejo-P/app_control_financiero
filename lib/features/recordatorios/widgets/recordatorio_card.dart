@@ -10,6 +10,7 @@ class RecordatorioCard extends StatelessWidget {
   final String recurrency;
   final DateTime createdAt;
   final bool isEnabled;
+  final bool isDefault;
   final VoidCallback? onTap;
   final ValueChanged<bool>? onChange;
   final VoidCallback? onDelete;
@@ -23,6 +24,7 @@ class RecordatorioCard extends StatelessWidget {
     required this.recurrency,
     required this.createdAt,
     required this.isEnabled,
+    this.isDefault = false,
     this.onTap,
     this.onChange,
     this.onDelete,
@@ -35,6 +37,10 @@ class RecordatorioCard extends StatelessWidget {
       borderRadius: BorderRadius.all(Radius.circular(15)),
       child: Card(
         elevation: 4,
+        shape: isDefault ? RoundedRectangleBorder(
+          side: BorderSide(color: Colors.orangeAccent),
+          borderRadius: BorderRadius.all(Radius.circular(15))
+        ) : null,
         child: Padding(
           padding: EdgeInsetsGeometry.all(16),
           child: Column(

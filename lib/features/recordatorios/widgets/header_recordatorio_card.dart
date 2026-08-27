@@ -4,6 +4,14 @@ import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
 class HeaderRecordatorioCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final DateTime createdAt;
+  final VoidCallback? onDelete;
+  final bool isEnabled;
+  final ValueChanged<bool>? onTap;
+
   const HeaderRecordatorioCard({
     super.key,
     required this.icon,
@@ -15,13 +23,6 @@ class HeaderRecordatorioCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final DateTime createdAt;
-  final VoidCallback? onDelete;
-  final bool isEnabled;
-  final ValueChanged<bool>? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +103,7 @@ class HeaderRecordatorioCard extends StatelessWidget {
               ],
             ),
           ),
-      
+
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -115,6 +116,7 @@ class HeaderRecordatorioCard extends StatelessWidget {
                   tooltip: 'Eliminar',
                   icon: Icon(Icons.delete_forever_outlined),
                 ),
+              
               Switch(value: isEnabled, onChanged: onTap),
             ],
           ),
