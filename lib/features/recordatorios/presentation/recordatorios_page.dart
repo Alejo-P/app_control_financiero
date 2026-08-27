@@ -1,7 +1,6 @@
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
-import 'package:control_financiero/features/recordatorios/models/info_card_recordatorio.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
