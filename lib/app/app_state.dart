@@ -202,7 +202,7 @@ class AppState extends ChangeNotifier {
         continue;
       }
 
-      if (item.scheduledAt.isAfter(currentDateTime)) {
+      if (currentDateTime.isAfter(item.scheduledAt)) {
         await reprogramarRecordatorioPorRecurrencia(item);
         continue;
       }
@@ -1154,15 +1154,20 @@ class AppState extends ChangeNotifier {
 
     recordatorios[index] = updatedRecordatorio;
     // TODO: Revisar como actualizar la programacion del recordatorio
-    //reprogramarRecordatorioPorRecurrencia(recordatorio);
+    await syncRecordatorioNotifications();
     notifyListeners();
   }
 
   Future<void> reprogramarRecordatorioPorRecurrencia(
     Recordatorio recordatorio,
   ) async {
-    if (recordatorio.id == null ||
-        recordatorio.recurrencia == Recurrencia.ninguno) {
+    if (recordatorio.id == null) {
+      return;
+    }
+
+    if (recordatorio.recurrencia == Recurrencia.ninguno) {
+      final nuevoRecordatorio = recordatorio.copyWith(enabled: false);
+      await actualizarRecordatorio(nuevoRecordatorio);
       return;
     }
 
@@ -1173,8 +1178,6 @@ class AppState extends ChangeNotifier {
     while (!siguienteFecha.isAfter(currentDateTime)) {
       siguienteFecha = calculateNextOccurrence(siguienteFecha, recurrencia);
     }
-
-    print('Reprogramando ${recordatorio.title} a $siguienteFecha');
 
     final nuevoRecordatorio = recordatorio.copyWith(
       scheduledAt: siguienteFecha,

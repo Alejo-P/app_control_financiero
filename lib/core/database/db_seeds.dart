@@ -72,8 +72,6 @@ Future<void> upsertRecordatorios(Database db, Recordatorio recordatorio) async {
     whereArgs: [recordatorio.id],
   );
 
-  print('Update or insert: $updated');
-
   if (updated == 0) {
     await db.insert(RecordatorioTable.table, recordatorio.toMap());
   }

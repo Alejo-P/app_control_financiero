@@ -19,6 +19,7 @@ class RecordatoriosPage extends StatefulWidget {
 class _RecordatoriosPageState extends State<RecordatoriosPage> {
   final ScrollController _controller = ScrollController();
   bool _showFAB = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -43,8 +44,14 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
   }
 
   Future<void> _refreshRecordatorios() async {
+    setState(() {
+      _isLoading = true;
+    });
     final appState = context.read<AppState>();
     await appState.loadRecordatoriosData();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _onDeleteRecordatorio(String title, int id) async {
@@ -110,7 +117,9 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
             ? const LoadingScreen(message: 'Cargando recordatorios...')
             : RefreshIndicator(
                 onRefresh: _refreshRecordatorios,
-                child: recordatorios.isEmpty
+                child: _isLoading
+                    ? LoadingScreen(message: 'Cargando recordatorios...',)
+                    : recordatorios.isEmpty
                     ? ListView(
                         controller: _controller,
                         physics: const AlwaysScrollableScrollPhysics(),
