@@ -270,7 +270,7 @@ Future<void> createTables(Database db) async {
         ${RecordatorioTable.scheduledAt} TEXT NOT NULL,
         ${RecordatorioTable.completed} INTEGER DEFAULT 0,
         ${RecordatorioTable.enabled} INTEGER DEFAULT 1,
-        ${RecordatorioTable.recurrencia} TEXT DEFAULT '${Recurrencia.ninguno}',
+        ${RecordatorioTable.recurrencia} TEXT DEFAULT '${Recurrencia.ninguno.name}',
         ${RecordatorioTable.isDefault} INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY(${RecordatorioTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
       );
