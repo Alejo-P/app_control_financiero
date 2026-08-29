@@ -24,7 +24,9 @@ class MovimientosRepository {
 
   ///Obtiene la lista de movimientos por mes.
   ///@return Una lista de objetos Movimiento.
-  Future<List<DetalleMovimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
+  Future<List<DetalleMovimiento>> fetchMovimientosByMonthAndYear(
+    DateTime date,
+  ) async {
     return await localDataSource.fetchMovimientosByMonthAndYear(date);
   }
 
@@ -74,7 +76,9 @@ class MovimientosRepository {
   /// Obtener todos los movimientos asociados a una categoria
   /// @parram categoryID El ID de la categoria a obtener los movimientos
   /// @return Una lista de objetos Movimiento.
-  Future<List<DetalleMovimiento>> getMovementsByCategoryID(int categoryID) async {
+  Future<List<DetalleMovimiento>> getMovementsByCategoryID(
+    int categoryID,
+  ) async {
     return await localDataSource.getMovementsByCategoryID(categoryID);
   }
 
@@ -89,17 +93,30 @@ class MovimientosRepository {
   /// Actualiza un movimiento financiero existente.
   /// @param movimiento El objeto Movimiento con los datos actualizados.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<OperationResult<void>> updateMovimiento(Movimiento movimiento) async {
+  Future<OperationResult<DetalleMovimiento?>> updateMovimiento(
+    Movimiento movimiento,
+  ) async {
     final result = await localDataSource.updateMovimiento(movimiento);
-    return result;
+
+    return OperationResult<DetalleMovimiento?>(
+      message: result.message,
+      success: result.success,
+      data: result.success
+          ? await localDataSource.fetchDetalleMovimientoById(movimiento.id!)
+          : null,
+    );
   }
 
   /// Elimina un movimiento financiero por su ID.
   /// @param id El ID del movimiento a eliminar.
-  /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<OperationResult<void>> deleteMovimiento(int id) async {
+  /// @return Un objeto OperationResult que contiene el id del movimiento eliminado si la operación fue exitosa, de lo contrario null.
+  Future<OperationResult<int?>> deleteMovimiento(int id) async {
     final result = await localDataSource.deleteMovimiento(id);
-    return result;
+    return OperationResult<int?>(
+      message: result.message,
+      success: result.success,
+      data: result.success ? id : null,
+    );
   }
 
   /// Obtiene la informacion necesaria sobre los movimeintos

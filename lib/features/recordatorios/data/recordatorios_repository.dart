@@ -76,8 +76,14 @@ class RecordatoriosRepository {
 
   ///Elimina un recordatorio de la base de datos.
   ///@param id El ID del recordatorio a eliminar.
-  ///@return Un objeto OperationResult que contiene el número de filas eliminadas si la operación fue exitosa, de lo contrario null.
+  ///@return Un objeto OperationResult que contiene el id del recordatorio eliminado si la operación fue exitosa, de lo contrario null.
   Future<OperationResult<int?>> deleteRecordatorio(int id) async {
-    return await localDataSource.deleteRecordatorio(id);
+    final result = await localDataSource.deleteRecordatorio(id);
+
+    return OperationResult<int?>(
+      message: result.message,
+      success: result.success,
+      data: result.success ? id : null,
+    );
   }
 }
