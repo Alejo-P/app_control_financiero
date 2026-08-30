@@ -960,19 +960,34 @@ class AppState extends ChangeNotifier {
     // await loadMovementsByMonthAndYear(selectedMovementsMonth);
   }
 
-  // TODO: Continuar con la implementacion de actualizaciones al eliminar, editar y agregar movimientos, categorias, presupuestos
+  // TODO: Continuar con la implementacion de actualizaciones al eliminar, editar y agregar movimientos, categorias, presupuestos y recordatorios
 
   Future<void> eliminarMovimiento(int id, int categoryId) async {
     final result = await _movimientosRepository.deleteMovimiento(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await sincronizarContadoresCategorias();
-      await loadMovementsByMonthAndYear(selectedMovementsMonth);
-      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
-      await updateHistory();
-      await syncDailyMovementReminder();
+    if (!result.success && result.data != null) {
+      return;
     }
+
+    movimientos.removeWhere((m) => m.id == result.data);
+
+    _totalesMensuales = await _movimientosRepository.fetchTotalesMensuales(
+      selectedMovementsMonth,
+    );
+
+    _variacionAhorro = await calcularVariacionAhorro(selectedMovementsMonth);
+
+    _movimientosPorFecha = _fetchMovimientosPorFecha();
+
+    _uniqueMovementDates = _fetchUniqueMovementDates();
+
+    await sincronizarContadoresCategorias();
+    await updateHistory();
+    await syncDailyMovementReminder();
+
+    //await loadMovementsByMonthAndYear(selectedMovementsMonth);
+    await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
   }
 
   // ================================ CATEGORIAS CRUD =================================
