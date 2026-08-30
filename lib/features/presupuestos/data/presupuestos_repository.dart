@@ -40,12 +40,14 @@ abstract class _PresupuestosRepository {
   /// Actualiza un presupuesto existente.
   /// @param presupuesto El objeto Presupuesto con los datos actualizados.
   /// @return Un OperationResult que indica el resultado de la operación.
-  Future<OperationResult<void>> updatePresupuesto(Presupuesto presupuesto);
+  Future<OperationResult<Presupuesto?>> updatePresupuesto(
+    Presupuesto presupuesto,
+  );
 
   /// Elimina un presupuesto por su ID.
   /// @param id El ID del presupuesto a eliminar.
   /// @return Un OperationResult que indica el resultado de la operación.
-  Future<OperationResult<void>> deletePresupuesto(int id);
+  Future<OperationResult<int?>> deletePresupuesto(int id);
 }
 
 class PresupuestosRepository implements _PresupuestosRepository {
@@ -133,42 +135,43 @@ class PresupuestosRepository implements _PresupuestosRepository {
     return resultado;
   }
 
-  Future<double> fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(int categoryId, DateTime date) async {
-    return await localDatasource.fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(
-      categoryId,
-      date,
-    );
+  Future<double> fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(
+    int categoryId,
+    DateTime date,
+  ) async {
+    return await localDatasource
+        .fetchPresupuestoUtilizadoPercentageByCategoryAndMonth(
+          categoryId,
+          date,
+        );
   }
 
   @override
   Future<OperationResult<int>> addPresupuesto(Presupuesto presupuesto) async {
-    final result = await localDatasource.addPresupuesto(presupuesto);
-    if (result.success && result.data != null) {
-      presupuestos.add(presupuesto.copyWith(id: result.data!));
-    }
-    return result;
+    return await localDatasource.addPresupuesto(presupuesto);
   }
 
   @override
-  Future<OperationResult<void>> updatePresupuesto(
+  Future<OperationResult<Presupuesto?>> updatePresupuesto(
     Presupuesto presupuesto,
   ) async {
     final result = await localDatasource.updatePresupuesto(presupuesto);
-    if (result.success) {
-      final index = presupuestos.indexWhere((p) => p.id == presupuesto.id);
-      if (index != -1) {
-        presupuestos[index] = presupuesto;
-      }
-    }
-    return result;
+    return OperationResult<Presupuesto?>(
+      message: result.message,
+      success: result.success,
+      data: result.success && presupuesto.id != null
+          ? await localDatasource.fetchPresupuestoById(presupuesto.id!)
+          : null,
+    );
   }
 
   @override
-  Future<OperationResult<void>> deletePresupuesto(int id) async {
+  Future<OperationResult<int?>> deletePresupuesto(int id) async {
     final result = await localDatasource.deletePresupuesto(id);
-    if (result.success) {
-      presupuestos.removeWhere((p) => p.id == id);
-    }
-    return result;
+    return OperationResult<int?>(
+      message: result.message,
+      success: result.success,
+      data: result.success ? id : null,
+    );
   }
 }

@@ -38,16 +38,28 @@ class CategoriasRepository {
   /// Actualiza una categoría existente.
   /// @param categoria El objeto Categoria con los datos actualizados.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<OperationResult<void>> updateCategoria(Categoria categoria) async {
+  Future<OperationResult<Categoria?>> updateCategoria(
+    Categoria categoria,
+  ) async {
     final result = await localDataSource.updateCategoria(categoria);
-    return result;
+    return OperationResult<Categoria?>(
+      message: result.message,
+      success: result.success,
+      data: result.success && categoria.id != null
+          ? await localDataSource.fetchCategoriaById(categoria.id!)
+          : null,
+    );
   }
 
   /// Elimina una categoría por su ID.
   /// @param id El ID de la categoría a eliminar.
   /// @return Un valor booleano que indica si la operación fue exitosa.
-  Future<OperationResult<void>> deleteCategoria(int id) async {
+  Future<OperationResult<int?>> deleteCategoria(int id) async {
     final result = await localDataSource.deleteCategoria(id);
-    return result;
+    return OperationResult<int?>(
+      message: result.message,
+      success: result.success,
+      data: result.success ? id : null,
+    );
   }
 }

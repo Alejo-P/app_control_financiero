@@ -469,10 +469,10 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> updateHistory() async {
+  Future<void> updateHistory({bool notify = true}) async {
     await _historialRepository.fetchAvailableYears();
     await _historialRepository.fetchYearHistory(selectedHistoryMonth);
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   Future<void> loadNotifications() async {
@@ -542,7 +542,7 @@ class AppState extends ChangeNotifier {
   }
 
   // Descontar del ingreso total presupuestado el monto de los presupuestos asignados
-  Future<void> calculateTotalIngresoPresupuestado() async {
+  Future<void> calculateTotalIngresoPresupuestado({bool notify = true}) async {
     if (_ingresoPresupuestado == null) return;
 
     _totalIngresoPresupuestado = _ingresoPresupuestado!.monto;
@@ -554,7 +554,7 @@ class AppState extends ChangeNotifier {
       _totalIngresoPresupuestado =
           _totalIngresoPresupuestado! - presupuesto.amount;
     }
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   Future<void> setIngresoPresupuestado(IngresoPresupuestado ingreso) async {
@@ -866,23 +866,42 @@ class AppState extends ChangeNotifier {
   }
 
   // ================================= MOVIMIENTOS CRUD =================================
-  Future<void> sincronizarContadoresCategorias() async {
+  Future<void> sincronizarContadoresCategorias({bool notify = true}) async {
     final counts = await _movimientosRepository.getMovementsCountByCategory();
 
-    for (var entry in counts.entries) {
-      final categoryId = entry.key;
-      final newCount = entry.value;
-      final index = categorias.indexWhere((c) => c.id == categoryId);
-      if (index == -1) {
-        AppLogger.log('Categoría con id $index no encontrada.');
-      }
-
-      final updatedCategoria = categorias[index].copyWith(
-        movementsCount: newCount,
+    for (var index = 0; index < categorias.length; index++) {
+      final categoria = categorias[index];
+      categorias[index] = categoria.copyWith(
+        movementsCount: counts[categoria.id] ?? 0,
       );
-      categorias[index] = updatedCategoria;
     }
-    notifyListeners();
+    if (notify) notifyListeners();
+  }
+
+  void _ordenarMovimientos() {
+    movimientos.sort((a, b) {
+      final dateComparison = b.date.compareTo(a.date);
+      if (dateComparison != 0) return dateComparison;
+
+      final aMinutes = (a.time?.hour ?? 0) * 60 + (a.time?.minute ?? 0);
+      final bMinutes = (b.time?.hour ?? 0) * 60 + (b.time?.minute ?? 0);
+      return bMinutes.compareTo(aMinutes);
+    });
+  }
+
+  Future<void> _sincronizarDatosDerivadosMovimientos() async {
+    _ordenarMovimientos();
+    _totalesMensuales = await _movimientosRepository.fetchTotalesMensuales(
+      selectedMovementsMonth,
+    );
+    _variacionAhorro = await calcularVariacionAhorro(selectedMovementsMonth);
+    _movimientosPorFecha = _fetchMovimientosPorFecha();
+    _uniqueMovementDates = _fetchUniqueMovementDates();
+
+    await sincronizarContadoresCategorias(notify: false);
+    await updateHistory(notify: false);
+    await syncDailyMovementReminder();
+    await loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false);
   }
 
   Future<List<DetalleMovimiento>> obtenerMovimientosPorCategoria(
@@ -906,14 +925,18 @@ class AppState extends ChangeNotifier {
     final result = await _movimientosRepository.addMovimiento(movimiento);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await sincronizarContadoresCategorias();
-      await loadMovementsByMonthAndYear(selectedMovementsMonth);
-      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
-      await updateHistory();
-      await syncDailyMovementReminder();
+    if (!result.success || result.data == null) return -1;
+
+    final detalle = await _movimientosRepository.fetchDetalleMovimientoById(
+      result.data!,
+    );
+    if (detalle != null && isSameMonth(selectedMovementsMonth, detalle.date)) {
+      movimientos.add(detalle);
     }
-    return result.data ?? -1;
+
+    await _sincronizarDatosDerivadosMovimientos();
+    notifyListeners();
+    return result.data!;
   }
 
   Future<int?> actualizarMovimiento(Movimiento movimiento) async {
@@ -922,9 +945,7 @@ class AppState extends ChangeNotifier {
     // Actualizacion de un movimiento
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (!result.success && result.data != null) {
-      return null;
-    }
+    if (!result.success || result.data == null) return null;
 
     final updatedMovimiento = result.data!;
     final index = movimientos.indexWhere((m) => m.id == updatedMovimiento.id);
@@ -933,64 +954,38 @@ class AppState extends ChangeNotifier {
       updatedMovimiento.date,
     );
 
-    if (index == -1 || !sameMonth) {
-      return null;
+    if (!sameMonth) {
+      movimientos.removeWhere((m) => m.id == updatedMovimiento.id);
+    } else if (index == -1) {
+      movimientos.add(updatedMovimiento);
+    } else {
+      movimientos[index] = updatedMovimiento;
     }
 
-    movimientos[index] = updatedMovimiento;
-
-    _totalesMensuales = await _movimientosRepository.fetchTotalesMensuales(
-      selectedMovementsMonth,
-    );
-
-    _variacionAhorro = await calcularVariacionAhorro(selectedMovementsMonth);
-
-    _movimientosPorFecha = _fetchMovimientosPorFecha();
-
-    _uniqueMovementDates = _fetchUniqueMovementDates();
-
-    await sincronizarContadoresCategorias();
-    await updateHistory();
-    await syncDailyMovementReminder();
-    // notifyListeners();
-    // Actualizacion de un presupuesto establecido
-    await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
-    return null;
-
-    // await loadMovementsByMonthAndYear(selectedMovementsMonth);
+    await _sincronizarDatosDerivadosMovimientos();
+    notifyListeners();
+    return updatedMovimiento.id;
   }
-
-  // TODO: Continuar con la implementacion de actualizaciones al eliminar, editar y agregar movimientos, categorias, presupuestos y recordatorios
 
   Future<void> eliminarMovimiento(int id, int categoryId) async {
     final result = await _movimientosRepository.deleteMovimiento(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (!result.success && result.data != null) {
-      return;
-    }
+    if (!result.success || result.data == null) return;
 
     movimientos.removeWhere((m) => m.id == result.data);
 
-    _totalesMensuales = await _movimientosRepository.fetchTotalesMensuales(
-      selectedMovementsMonth,
-    );
-
-    _variacionAhorro = await calcularVariacionAhorro(selectedMovementsMonth);
-
-    _movimientosPorFecha = _fetchMovimientosPorFecha();
-
-    _uniqueMovementDates = _fetchUniqueMovementDates();
-
-    await sincronizarContadoresCategorias();
-    await updateHistory();
-    await syncDailyMovementReminder();
-
-    //await loadMovementsByMonthAndYear(selectedMovementsMonth);
-    await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+    await _sincronizarDatosDerivadosMovimientos();
+    notifyListeners();
   }
 
   // ================================ CATEGORIAS CRUD =================================
+  void _ordenarCategorias() {
+    categorias.sort(
+      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+    );
+  }
+
   Future<DetalleCategoria?> obtenerDetalleCategoriaPorId(int id) async {
     return await _categoriasRepository.fetchDetalleCategoriaById(id);
   }
@@ -999,28 +994,61 @@ class AppState extends ChangeNotifier {
     final result = await _categoriasRepository.addCategoria(categoria);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      categorias.add(categoria.copyWith(id: result.data!));
-      await loadCategoryData();
-    }
+    if (!result.success || result.data == null) return;
+
+    categorias.add(categoria.copyWith(id: result.data!));
+    _ordenarCategorias();
+    _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
+    notifyListeners();
   }
 
   Future<void> actualizarCategoria(Categoria categoria) async {
     final result = await _categoriasRepository.updateCategoria(categoria);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadCategoryData();
-    }
+    if (!result.success || result.data == null) return;
+
+    final updatedCategoria = result.data!;
+    final index = categorias.indexWhere((c) => c.id == updatedCategoria.id);
+    if (index == -1) return;
+
+    final previousCategoria = categorias[index];
+    categorias[index] = updatedCategoria;
+    _ordenarCategorias();
+    _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
+    movimientos = movimientos.map((movimiento) {
+      if (movimiento.categoryId != updatedCategoria.id) return movimiento;
+      return movimiento.copyWith(
+        categoryName: updatedCategoria.name,
+        categoryIcon: updatedCategoria.iconData,
+        categoryColor: updatedCategoria.iconColor,
+        movementType: updatedCategoria.movementType,
+      );
+    }).toList();
+    recordatorios = recordatorios.map((recordatorio) {
+      if (recordatorio.categoryName != previousCategoria.name) {
+        return recordatorio;
+      }
+      return recordatorio.copyWith(
+        categoryName: updatedCategoria.name,
+        categoryIcon: updatedCategoria.iconData,
+        categoryColor: updatedCategoria.iconColor,
+      );
+    }).toList();
+    _movimientosPorFecha = _fetchMovimientosPorFecha();
+    await loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false);
+    notifyListeners();
   }
 
   Future<void> eliminarCategoria(int id) async {
     final result = await _categoriasRepository.deleteCategoria(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadCategoryData();
-    }
+    if (!result.success || result.data == null) return;
+
+    categorias.removeWhere((categoria) => categoria.id == result.data);
+    _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
+    notifyListeners();
   }
 
   // ================================ PRESUPUESTOS CRUD =================================
@@ -1028,29 +1056,49 @@ class AppState extends ChangeNotifier {
     final result = await _presupuestosRepository.addPresupuesto(presupuesto);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+    if (!result.success || result.data == null) return -1;
+
+    final saved = presupuesto.copyWith(id: result.data!);
+    if (isSameMonth(selectedBudgetMonth, saved.date)) {
+      presupuestos.add(saved);
+      await calculateTotalIngresoPresupuestado(notify: false);
     }
-    return result.data ?? -1;
+    notifyListeners();
+    return result.data!;
   }
 
   Future<int?> actualizarPresupuesto(Presupuesto presupuesto) async {
     final result = await _presupuestosRepository.updatePresupuesto(presupuesto);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+    if (!result.success || result.data == null) return null;
+
+    final updatedPresupuesto = result.data!;
+    final index = presupuestos.indexWhere(
+      (presupuesto) => presupuesto.id == updatedPresupuesto.id,
+    );
+    final sameMonth = isSameMonth(selectedBudgetMonth, updatedPresupuesto.date);
+    if (!sameMonth) {
+      presupuestos.removeWhere((p) => p.id == updatedPresupuesto.id);
+    } else if (index == -1) {
+      presupuestos.add(updatedPresupuesto);
+    } else {
+      presupuestos[index] = updatedPresupuesto;
     }
-    return null;
+    await calculateTotalIngresoPresupuestado(notify: false);
+    notifyListeners();
+    return updatedPresupuesto.id;
   }
 
   Future<void> eliminarPresupuesto(int id) async {
     final result = await _presupuestosRepository.deletePresupuesto(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
-    }
+    if (!result.success || result.data == null) return;
+
+    presupuestos.removeWhere((presupuesto) => presupuesto.id == result.data);
+    await calculateTotalIngresoPresupuestado(notify: false);
+    notifyListeners();
   }
 
   // ================================ NOTIFICACIONES CRUD =================================
@@ -1163,20 +1211,25 @@ class AppState extends ChangeNotifier {
     );
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadRecordatoriosData();
-      final savedId = result.data ?? recordatorio.id ?? -1;
-      if (savedId > 0 && recordatorio.enabled) {
-        await NotificationService.scheduleRecordatorioNotification(
-          id: savedId,
-          title: recordatorio.title,
-          body:
-              'Tu recordatorio "${recordatorio.title}" está programado para ${formatDate(recordatorio.scheduledAt)}',
-          scheduledDate: recordatorio.scheduledAt,
-        );
-      }
+    if (!result.success || result.data == null) return -1;
+
+    final savedId = result.data!;
+    final detalle = await _recordatoriosRepository
+        .fetchDetailedRecordatorioById(savedId);
+    if (detalle != null) {
+      recordatorios.add(detalle);
     }
-    return result.data ?? -1;
+    if (recordatorio.enabled) {
+      await NotificationService.scheduleRecordatorioNotification(
+        id: savedId,
+        title: recordatorio.title,
+        body:
+            'Tu recordatorio "${recordatorio.title}" está programado para ${formatDate(recordatorio.scheduledAt)}',
+        scheduledDate: recordatorio.scheduledAt,
+      );
+    }
+    notifyListeners();
+    return savedId;
   }
 
   Future<void> actualizarRecordatorio(Recordatorio recordatorio) async {
@@ -1186,9 +1239,7 @@ class AppState extends ChangeNotifier {
 
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (!result.success && result.data != null) {
-      return;
-    }
+    if (!result.success || result.data == null) return;
 
     final updatedRecordatorio = result.data!;
     final index = recordatorios.indexWhere(
@@ -1239,33 +1290,45 @@ class AppState extends ChangeNotifier {
     );
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadRecordatoriosData();
-      if (enabled) {
-        final detalle = await getRecordatorioById(id);
-        if (detalle != null) {
-          await NotificationService.scheduleRecordatorioNotification(
-            id: detalle.id,
-            title: detalle.title,
-            body:
-                'Tu recordatorio "${detalle.title}" está programado para ${formatDate(detalle.scheduledAt)}',
-            scheduledDate: detalle.scheduledAt,
-          );
-        }
+    if (!result.success) return;
+
+    final updated = await _recordatoriosRepository
+        .fetchDetailedRecordatorioById(id);
+    final index = recordatorios.indexWhere((r) => r.id == id);
+    if (updated != null && index != -1) {
+      recordatorios[index] = updated;
+    }
+
+    final notificationId = NotificationService.getRecordatorioNotificationId(
+      id,
+    );
+    if (!enabled) {
+      await NotificationService.cancelNotification(notificationId);
+    } else {
+      final detalle = await getRecordatorioById(id);
+      if (detalle != null) {
+        await NotificationService.scheduleRecordatorioNotification(
+          id: detalle.id,
+          title: detalle.title,
+          body:
+              'Tu recordatorio "${detalle.title}" está programado para ${formatDate(detalle.scheduledAt)}',
+          scheduledDate: detalle.scheduledAt,
+        );
       }
     }
+    notifyListeners();
   }
 
   Future<void> eliminarRecordatorio(int id) async {
-    await NotificationService.cancelNotification(
-      NotificationService.getRecordatorioNotificationId(id),
-    );
-
     final result = await _recordatoriosRepository.deleteRecordatorio(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (result.success == true) {
-      await loadRecordatoriosData();
-    }
+    if (!result.success || result.data == null) return;
+
+    await NotificationService.cancelNotification(
+      NotificationService.getRecordatorioNotificationId(id),
+    );
+    recordatorios.removeWhere((recordatorio) => recordatorio.id == result.data);
+    notifyListeners();
   }
 }
