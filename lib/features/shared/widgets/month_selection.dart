@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 class MonthSelection extends StatefulWidget {
   final DateTime initialDate;
   final bool isLoading;
+  final bool allowFutureMonths;
   final ValueChanged<DateTime>? onMonthChanged;
 
   const MonthSelection({
     super.key,
     required this.initialDate,
     this.isLoading = false,
+    this.allowFutureMonths = false,
     this.onMonthChanged,
   });
 
@@ -71,7 +73,9 @@ class _MonthSelectionState extends State<MonthSelection> {
       return; // No permitir retroceder más allá del límite
     }
 
-    if (offset > 0 && isLimitFutureMonth(selectedDate)) {
+    if (offset > 0 &&
+        !widget.allowFutureMonths &&
+        isLimitFutureMonth(selectedDate)) {
       return; // No permitir avanzar a meses futuros
     }
 
@@ -112,7 +116,8 @@ class _MonthSelectionState extends State<MonthSelection> {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
-    final isFuture = isLimitFutureMonth(selectedDate);
+    final isFuture =
+        !widget.allowFutureMonths && isLimitFutureMonth(selectedDate);
     final isCurrent = isCurrentMonth(selectedDate);
     final isLimitPast = isLimitPastMonth(selectedDate);
     final backgroundThemeColor = colorScheme.surface;

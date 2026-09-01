@@ -241,6 +241,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
           MonthSelection(
             initialDate: selectedMonth,
             isLoading: isLoading,
+            allowFutureMonths: true,
             onMonthChanged: (newMonth) async {
               await _changeMonth(newMonth);
             },
