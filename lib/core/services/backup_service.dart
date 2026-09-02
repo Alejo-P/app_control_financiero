@@ -135,7 +135,10 @@ class BackupService {
 
       return true;
     } on Exception catch (e) {
-      AppLogger.log('Error al restaurar datos: $e', level: LogLevel.error);
+      await AppLogger.log(
+        'Error al restaurar datos: $e',
+        level: LogLevel.error,
+      );
       return false;
     }
   }
@@ -173,7 +176,7 @@ class BackupService {
         message: 'Respaldo creado correctamente',
       );
     } catch (e) {
-      AppLogger.log('Error al crear respaldo: $e', level: LogLevel.error);
+      await AppLogger.log('Error al crear respaldo: $e', level: LogLevel.error);
       return OperationResult(
         success: false,
         data: null,
@@ -207,7 +210,10 @@ class BackupService {
         message: 'Restauración de datos completada exitosamente.',
       );
     } on Exception catch (e) {
-      AppLogger.log('Error al restaurar datos: $e', level: LogLevel.error);
+      await AppLogger.log(
+        'Error al restaurar datos: $e',
+        level: LogLevel.error,
+      );
       return OperationResult<void>(
         success: false,
         data: null,

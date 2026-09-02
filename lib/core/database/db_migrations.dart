@@ -163,7 +163,7 @@ Future<void> migratePresupuestosRepeatBudget(Database db) async {
     // Verificar integridad
     final result = await db.rawQuery('PRAGMA foreign_key_check');
     if (result.isNotEmpty) {
-      AppLogger.log(
+      await AppLogger.log(
         'Foreign key check failed after migration: $result',
         level: LogLevel.error,
         tag: 'DBMigration',

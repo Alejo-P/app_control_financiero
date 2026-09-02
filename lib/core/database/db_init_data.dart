@@ -1,14 +1,10 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
-import 'package:control_financiero/core/database/db_migrations.dart';
-import 'package:control_financiero/core/database/db_seeds.dart';
-import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:control_financiero/features/tipo_categorias/models/tipo_categoria.dart';
-import 'package:sqflite/sqflite.dart';
 
 final tipoCategoriasList = <TipoCategoria>[
   TipoCategoria(
@@ -157,97 +153,3 @@ final defaultReminders = <Recordatorio>[
     recurrencia: Recurrencia.diario,
   ),
 ];
-
-Future<void> runSeeds(Database db) async {
-  await createTables(db);
-  final result = await db.query(
-    MetaTable.table,
-    where: '${MetaTable.key} = ?',
-    whereArgs: ['seed_version'],
-  );
-
-  final currentVersion = result.isEmpty
-      ? 0
-      : int.parse(result.first['value'] as String);
-
-  if (currentVersion < 1) {
-    for (var tipo in tipoCategoriasList) {
-      await upsertTipoCategoria(db, tipo);
-    }
-
-    for (var categoria in categoriasList) {
-      await upsertCategoria(db, categoria);
-    }
-
-    for (var notif in presupuestosNotif) {
-      await upsertBudgetNotification(db, notif);
-    }
-
-    for (var config in movementNotificationConfigs) {
-      await upsertMovementNotificationConfig(db, config);
-    }
-
-    for (var recordatorio in defaultReminders) {
-      await upsertRecordatorios(db, recordatorio);
-    }
-
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 2) {
-    await migrateMovimientosAmount(db);
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 3) {
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 4) {
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 5) {
-    for (var categoria in categoriasList) {
-      await upsertCategoria(db, categoria);
-    }
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 6) {
-    await migratePresupuestosRepeatBudget(db);
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 7) {
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 8) {
-    await migrateNotificationsCreatedAt(db);
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 9) {
-    for (var notif in presupuestosNotif) {
-      await upsertBudgetNotification(db, notif);
-    }
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 10) {
-    await setSeedVersion(db, currentVersion + 1);
-    await migrateNotificationsType(db);
-  }
-  if (currentVersion < 11) {
-    await migrateNotificationsObjectId(db);
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 12) {
-    for (var config in movementNotificationConfigs) {
-      await upsertMovementNotificationConfig(db, config);
-    }
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 13) {
-    await migrateRemoveObsoleteColumns(db);
-    await setSeedVersion(db, currentVersion + 1);
-  }
-  if (currentVersion < 14) {
-    for (var recordatorio in defaultReminders) {
-      await upsertRecordatorios(db, recordatorio);
-    }
-    await setSeedVersion(db, currentVersion + 1);
-  }
-}

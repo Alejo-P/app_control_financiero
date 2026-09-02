@@ -84,7 +84,7 @@ class NotificacionLocalDataSource {
       return Notificacion.fromMap(result.first);
     }
 
-    AppLogger.log(
+    await AppLogger.log(
       'Notificación con id $id no encontrada en la base de datos',
       level: LogLevel.warning,
     );

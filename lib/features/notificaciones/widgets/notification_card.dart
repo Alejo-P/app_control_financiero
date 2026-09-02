@@ -9,8 +9,10 @@ class NotificationCard extends StatelessWidget {
   final Color iconColor;
   final DateTime createdAt;
   final bool isRead;
+  final bool isSelected;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
+  final VoidCallback? onLongPress;
 
   const NotificationCard({
     super.key,
@@ -20,15 +22,17 @@ class NotificationCard extends StatelessWidget {
     required this.iconColor,
     required this.createdAt,
     this.isRead = false,
+    this.isSelected = false,
     this.onTap,
     this.onDelete,
+    this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
-
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.all(4),
@@ -50,7 +54,12 @@ class NotificationCard extends StatelessWidget {
               const SizedBox(width: 8),
 
             // 🎨 Icono
-            IconContainer(icon: iconData, color: iconColor, size: 28),
+            IconContainer(
+              icon: isSelected ? Icons.check : iconData,
+              color: isSelected ? Colors.lightGreenAccent : iconColor,
+              size: 28,
+              onTap: onLongPress,
+            ),
 
             const SizedBox(width: 12),
 

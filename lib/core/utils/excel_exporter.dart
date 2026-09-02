@@ -85,7 +85,7 @@ class ExcelExporter {
         message: "Archivo creado correctamente",
       );
     } catch (e) {
-      AppLogger.log("Error al guardar Excel: $e", level: LogLevel.error);
+      await AppLogger.log("Error al guardar Excel: $e", level: LogLevel.error);
 
       return OperationResult<void>(
         success: false,

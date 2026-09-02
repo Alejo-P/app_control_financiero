@@ -23,8 +23,7 @@ class MovimientosLocalDataSource {
 
   Future<List<DetalleMovimiento>> fetchAllDetalleMovimiento() async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
-      '''
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
         SELECT
           m.${MovimientosTable.id} AS id,
           m.${MovimientosTable.title} AS title,
@@ -39,19 +38,21 @@ class MovimientosLocalDataSource {
           c.${CategoriasTable.id} AS category_id
         FROM ${MovimientosTable.table} m
         JOIN ${CategoriasTable.table} c ON m.${MovimientosTable.categoryId} = c.${CategoriasTable.id}
-      ''',
-    );
+      ''');
 
     return maps.map(DetalleMovimiento.fromMap).toList();
   }
 
   // Obtener todos los movimientos
-  Future<List<DetalleMovimiento>> fetchMovimientosByMonthAndYear(DateTime date) async {
+  Future<List<DetalleMovimiento>> fetchMovimientosByMonthAndYear(
+    DateTime date,
+  ) async {
     final db = await _dbHelper.database;
     final String month = date.month.toString().padLeft(2, '0');
     final int year = date.year;
 
-    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
         SELECT
           m.${MovimientosTable.id} AS id,
           m.${MovimientosTable.title} AS title,
@@ -69,7 +70,7 @@ class MovimientosLocalDataSource {
         WHERE strftime('%Y-%m', ${MovimientosTable.date}) = ?
         ORDER BY ${MovimientosTable.date} DESC, ${MovimientosTable.time} DESC
       ''',
-      ['$year-$month']
+      ['$year-$month'],
     );
 
     return maps.map(DetalleMovimiento.fromMap).toList();
@@ -86,7 +87,7 @@ class MovimientosLocalDataSource {
     if (maps.isNotEmpty) {
       return Movimiento.fromMap(maps.first);
     } else {
-      AppLogger.log(
+      await AppLogger.log(
         'Movimiento con ID $id no encontrado',
         level: LogLevel.warning,
       );
@@ -123,7 +124,7 @@ class MovimientosLocalDataSource {
       );
       return detalleMovimiento;
     } else {
-      AppLogger.log(
+      await AppLogger.log(
         'Detalle del movimiento con ID $id no encontrado',
         level: LogLevel.warning,
       );
@@ -192,7 +193,7 @@ class MovimientosLocalDataSource {
         }
       }
     } on Exception catch (e) {
-      AppLogger.log(
+      await AppLogger.log(
         'Error al calcular totales mensuales: $e',
         level: LogLevel.error,
       );
@@ -216,7 +217,9 @@ class MovimientosLocalDataSource {
     };
   }
 
-  Future<List<DetalleMovimiento>> getMovementsByCategoryID(int categoryID) async {
+  Future<List<DetalleMovimiento>> getMovementsByCategoryID(
+    int categoryID,
+  ) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
       '''

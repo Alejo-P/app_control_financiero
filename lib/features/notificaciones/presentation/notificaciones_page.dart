@@ -21,6 +21,7 @@ class NotificacionesPage extends StatefulWidget {
 
 class _NotificacionesPageState extends State<NotificacionesPage> {
   final ScrollController _scrollController = ScrollController();
+  final Set<int> selectedNotifications = {};
   late final Timer _timer;
 
   @override
@@ -56,18 +57,46 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     }
   }
 
-  Future<void> _verDetallesNotificacion(int id) async {
-    Navigator.pushNamed(
-      context,
-      AppRoutes.notifDetalleRoute,
-      arguments: id,
-    );
+  void _toggleSelection(int id) {
+    setState(() {
+      if (selectedNotifications.contains(id)) {
+        selectedNotifications.remove(id);
+      } else {
+        selectedNotifications.add(id);
+      }
+    });
   }
 
-  Future<void> _marcarTodoLeido() async {
+  void _toggleAll(List<Notificacion> notifications) {
+    final notificationIds = notifications.map((n) => n.id!).toSet();
+    final allSelected =
+        notificationIds.isNotEmpty &&
+        notificationIds.every(selectedNotifications.contains);
+
+    setState(() {
+      if (allSelected) {
+        selectedNotifications.removeAll(notificationIds);
+      } else {
+        selectedNotifications.addAll(notificationIds);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    setState(() => selectedNotifications.clear());
+  }
+
+  Future<void> _verDetallesNotificacion(int id) async {
+    Navigator.pushNamed(context, AppRoutes.notifDetalleRoute, arguments: id);
+  }
+
+  Future<void> _marcarSeleccionadasComoLeidas() async {
+    final selectedIds = selectedNotifications.toList();
     final appState = context.read<AppState>();
 
-    await appState.marcarTodaNotifLeida();
+    for (final id in selectedIds) {
+      await appState.marcarNotifLeida(id);
+    }
   }
 
   Future<void> _eliminarNotificacion(int id) async {
@@ -85,11 +114,33 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     if (!mounted) return;
 
     if (success) {
+      setState(() => selectedNotifications.remove(id));
       AppSnackbar.success(context, 'Notificación eliminada con éxito');
       return;
     }
 
     AppSnackbar.error(context, 'No se pudo eliminar la notificación');
+  }
+
+  Future<void> _eliminarSeleccionadas() async {
+    final appState = context.read<AppState>();
+    final selectedIds = selectedNotifications.toList();
+
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Eliminar Notificaciones',
+      content: 'Esta seguro de eliminar las notificaciones seleccionadas?',
+    );
+
+    if (confirmed != true) return;
+
+    for (final id in selectedIds) {
+      await appState.eliminarNotificacion(id);
+    }
+    if (!mounted) return;
+
+    _clearSelection();
+    AppSnackbar.success(context, 'Notificaciones eliminadas con éxito');
   }
 
   Future<void> _eliminarTodasNotificaciones() async {
@@ -107,7 +158,11 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     if (!mounted) return;
 
     if (success) {
-      AppSnackbar.success(context, 'Todas las notificaciones han sido eliminadas');
+      _clearSelection();
+      AppSnackbar.success(
+        context,
+        'Todas las notificaciones han sido eliminadas',
+      );
       return;
     }
 
@@ -137,6 +192,13 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     final appState = context.watch<AppState>();
     final unReadNotif = appState.notifSinLeer;
     final notifications = appState.notificaciones;
+    final notificationIds = notifications.map((n) => n.id!).toSet();
+    final selectedCount = notificationIds
+        .where(selectedNotifications.contains)
+        .length;
+    final allSelected =
+        notificationIds.isNotEmpty && selectedCount == notificationIds.length;
+    final someSelected = selectedCount > 0 && !allSelected;
     final grouped = agruparNotificaciones(notifications);
     final keys = grouped.keys.toList();
     keys.sort((a, b) {
@@ -180,28 +242,56 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       appBar: AppBar(
         title: Text('Notificaciones'),
         actions: [
-          if (unReadNotif > 0)
+          if (selectedNotifications.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: _clearSelection,
+              tooltip: 'Cancelar selección',
+            ),
+
+          if (unReadNotif > 0 && selectedNotifications.isNotEmpty)
             IconButton(
               icon: Icon(Icons.done_all),
-              onPressed: _marcarTodoLeido,
-              tooltip: 'Marcar todo como leído',
+              onPressed: _marcarSeleccionadasComoLeidas,
+              tooltip: 'Marcar seleccionadas como leídas',
             ),
 
           if (notifications.isNotEmpty)
             IconButton(
               icon: Icon(Icons.delete_forever_outlined),
-              onPressed: _eliminarTodasNotificaciones,
-              tooltip: 'Eliminar todas las notificaciones',
+              onPressed: selectedNotifications.isNotEmpty
+                  ? _eliminarSeleccionadas
+                  : _eliminarTodasNotificaciones,
+              tooltip: selectedNotifications.isNotEmpty
+                  ? 'Eliminar seleccionadas'
+                  : 'Eliminar todas las notificaciones',
             ),
         ],
       ),
       body: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        itemCount: keys.length + 1,
+        itemCount: keys.length + 2,
         itemBuilder: (context, index) {
-          if (index < keys.length) {
-            final key = keys[index];
+          if (index == 0) {
+            return CheckboxListTile(
+              value: someSelected ? null : allSelected,
+              tristate: true,
+              controlAffinity: ListTileControlAffinity.leading,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              title: const Text('Seleccionar todas'),
+              subtitle: selectedCount > 0
+                  ? Text(
+                      '$selectedCount de ${notifications.length} seleccionadas',
+                    )
+                  : null,
+              onChanged: (_) => _toggleAll(notifications),
+            );
+          }
+
+          final groupIndex = index - 1;
+          if (groupIndex < keys.length) {
+            final key = keys[groupIndex];
             final items = grouped[key]!;
 
             return WidgetsContainer(
@@ -238,8 +328,16 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       iconColor: notif.iconColor,
       createdAt: notif.createdAt!,
       isRead: notif.isRead,
-      onTap: () => _verDetallesNotificacion(notif.id!),
+      onTap: () {
+        if (selectedNotifications.isNotEmpty) {
+          _toggleSelection(notif.id!);
+        } else {
+          _verDetallesNotificacion(notif.id!);
+        }
+      },
       onDelete: () => _eliminarNotificacion(notif.id!),
+      onLongPress: () => _toggleSelection(notif.id!),
+      isSelected: selectedNotifications.contains(notif.id!),
     );
   }
 }

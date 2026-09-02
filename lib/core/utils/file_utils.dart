@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 class FileUtils {
   static Future<String?> pickFiles(
@@ -48,7 +47,10 @@ class FileUtils {
       await file.writeAsString(content, mode: mode, flush: true);
       return true;
     } on Exception catch (e) {
-      AppLogger.log('Error al escribir el archivo: $e', level: LogLevel.error);
+      await AppLogger.log(
+        'Error al escribir el archivo: $e',
+        level: LogLevel.error,
+      );
       return false;
     }
   }
@@ -64,7 +66,10 @@ class FileUtils {
       await file.writeAsBytes(content, mode: mode, flush: true);
       return true;
     } on Exception catch (e) {
-      AppLogger.log('Error al escribir el archivo: $e', level: LogLevel.error);
+      await AppLogger.log(
+        'Error al escribir el archivo: $e',
+        level: LogLevel.error,
+      );
       return false;
     }
   }

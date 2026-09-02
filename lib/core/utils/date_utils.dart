@@ -45,11 +45,11 @@ DateTime normalizeDate(DateTime date) {
 }
 
 // Función para formatear una fecha como "dd/MM/yyyy"
-String formatDate(DateTime date) {
+String formatDate(DateTime date, {String separator = '/'}) {
   final day = date.day.toString().padLeft(2, '0');
   final month = date.month.toString().padLeft(2, '0');
   final year = date.year.toString();
-  return '$day/$month/$year';
+  return '$day$separator$month$separator$year';
 }
 
 // Función para formatear una fecha reladiva (Hoy, 29 de Junio, etc.)

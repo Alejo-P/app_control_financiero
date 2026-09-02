@@ -22,7 +22,7 @@ import 'package:provider/provider.dart';
 
 class RecordatorioFormPage extends StatefulWidget {
   const RecordatorioFormPage({super.key});
-  
+
   @override
   State<RecordatorioFormPage> createState() => _RecordatorioFormPageState();
 }
@@ -313,7 +313,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
         _action = '';
       });
 
-      AppLogger.log(
+      await AppLogger.log(
         'Error al guardar recordatorio: ${e.toString()}',
         level: LogLevel.error,
         tag: 'RecordatorioFormPage',
@@ -344,7 +344,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     } on Exception catch (e, stackTrace) {
       if (!mounted) return;
 
-      AppLogger.log(
+      await AppLogger.log(
         'Error al obtener categorías: ${e.toString()}',
         level: LogLevel.error,
         tag: 'RecordatorioFormPage',

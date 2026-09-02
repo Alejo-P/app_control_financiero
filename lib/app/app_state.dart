@@ -283,7 +283,7 @@ class AppState extends ChangeNotifier {
         type: TipoNotificacion.notifDiaria,
       );
     } on Exception catch (e, st) {
-      AppLogger.log(
+      await AppLogger.log(
         'Ocurrio un error al mostrar el recordatorio diario: $e',
         level: LogLevel.error,
         tag: 'Recordatorio diario',
@@ -1172,12 +1172,13 @@ class AppState extends ChangeNotifier {
     await NotificationService.cancelAllNotifications();
   }
 
-  Future<void> marcarNotifLeida(Notificacion notificacion) async {
+  Future<void> marcarNotifLeida(int id) async {
+    final notificacion = notificaciones.firstWhere((n) => n.id == id);
     if (notificacion.isRead == true) return;
 
-    await _notificacionRepository.markAsRead(notificacion.id!);
-    await NotificationService.cancelNotification(notificacion.id!);
-    final index = notificaciones.indexWhere((n) => n.id! == notificacion.id!);
+    await _notificacionRepository.markAsRead(id);
+    await NotificationService.cancelNotification(id);
+    final index = notificaciones.indexWhere((n) => n.id! == id);
     if (index != -1) {
       notificaciones[index] = notificacion.copyWith(isRead: true);
     }

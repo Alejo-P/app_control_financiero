@@ -73,7 +73,7 @@ class PresupuestosLocalDataSource {
     if (maps.isNotEmpty) {
       return Presupuesto.fromMap(maps.first);
     } else {
-      AppLogger.log(
+      await AppLogger.log(
         'No se encontró presupuesto con ID $id',
         level: LogLevel.warning,
       );
@@ -288,6 +288,20 @@ class PresupuestosLocalDataSource {
   // Agregar un nuevo presupuesto
   Future<OperationResult<int>> addPresupuesto(Presupuesto presupuesto) async {
     final db = await _dbHelper.database;
+
+    final existingPresupuesto = await fetchPresupuestoByCategoryAndMonth(
+      presupuesto.categoryId,
+      presupuesto.date,
+    );
+    if (existingPresupuesto != null) {
+      return OperationResult<int>(
+        success: false,
+        data: null,
+        message:
+            'Ya existe un presupuesto para la categoría y mes seleccionados.',
+      );
+    }
+    
     final int id = await db.insert(
       PresupuestosTable.table,
       presupuesto.toMap(),
@@ -306,7 +320,7 @@ class PresupuestosLocalDataSource {
   Future<OperationResult<void>> updatePresupuesto(
     Presupuesto presupuesto,
   ) async {
-    AppLogger.log('Actualizando presupuesto: $presupuesto');
+    await AppLogger.log('Actualizando presupuesto: $presupuesto');
 
     final db = await _dbHelper.database;
     final int count = await db.update(

@@ -38,7 +38,7 @@ class _NotificationDetailState extends State<NotificationDetailPage> {
     final result = await appState.getNotificacionById(id);
 
     if (result != null) {
-      await appState.marcarNotifLeida(result);
+      await appState.marcarNotifLeida(id);
       if (result.isRead != true) {
         await appState.ocultarNotificacion(id);
       }

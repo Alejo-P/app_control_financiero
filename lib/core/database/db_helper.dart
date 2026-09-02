@@ -1,5 +1,6 @@
 import 'package:control_financiero/core/constants/app_strings.dart';
 import 'package:control_financiero/core/database/db_init_data.dart';
+import 'package:control_financiero/core/database/db_seeds.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -24,20 +25,34 @@ class DBHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: appDBVersion,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onCreate: _onCreate,
-      onUpgrade: _onUpdate,
+      //onUpgrade: _onUpdate,
     );
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    await runSeeds(db);
-  }
+    for (var tipo in tipoCategoriasList) {
+      await upsertTipoCategoria(db, tipo);
+    }
 
-  Future<void> _onUpdate(Database db, int oldVersion, int newVersion) async {
-    await runSeeds(db);
+    for (var categoria in categoriasList) {
+      await upsertCategoria(db, categoria);
+    }
+
+    for (var notif in presupuestosNotif) {
+      await upsertBudgetNotification(db, notif);
+    }
+
+    for (var config in movementNotificationConfigs) {
+      await upsertMovementNotificationConfig(db, config);
+    }
+
+    for (var recordatorio in defaultReminders) {
+      await upsertRecordatorios(db, recordatorio);
+    }
   }
 }

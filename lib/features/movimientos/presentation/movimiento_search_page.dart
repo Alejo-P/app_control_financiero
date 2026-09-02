@@ -145,7 +145,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     } on Exception catch (e, stackTrace) {
       if (!mounted) return;
 
-      AppLogger.log(
+      await AppLogger.log(
         'Error al obtener movimientos por categoría: ${e.toString()}',
         level: LogLevel.error,
         tag: 'MovimientoSearchPage',
