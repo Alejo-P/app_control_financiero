@@ -7,6 +7,7 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/notification_card.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class NotificacionesPage extends StatefulWidget {
 class _NotificacionesPageState extends State<NotificacionesPage> {
   final ScrollController _scrollController = ScrollController();
   final Set<int> selectedNotifications = {};
+  bool _isLoading = false;
   late final Timer _timer;
 
   @override
@@ -32,6 +34,10 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (mounted) setState(() {});
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshNotificaciones();
+    });
   }
 
   @override
@@ -39,6 +45,18 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     _timer.cancel();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _refreshNotificaciones() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final appState = context.read<AppState>();
+    await appState.loadNotifications();
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _onScroll() {
@@ -125,11 +143,12 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
   Future<void> _eliminarSeleccionadas() async {
     final appState = context.read<AppState>();
     final selectedIds = selectedNotifications.toList();
+    final count = selectedIds.length;
 
     final confirmed = await showConfirmDialog(
       context,
       title: 'Eliminar Notificaciones',
-      content: 'Esta seguro de eliminar las notificaciones seleccionadas?',
+      content: 'Esta seguro de eliminar $count notificaciones?',
     );
 
     if (confirmed != true) return;
@@ -140,7 +159,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     if (!mounted) return;
 
     _clearSelection();
-    AppSnackbar.success(context, 'Notificaciones eliminadas con éxito');
+    AppSnackbar.success(context, '$count notificaciones eliminadas con éxito');
   }
 
   Future<void> _eliminarTodasNotificaciones() async {
@@ -217,23 +236,28 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     if (notifications.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text('Notificaciones')),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.notifications_off_outlined,
-                size: 80,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'No hay notificaciones nuevas.',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+        body: RefreshIndicator(
+          onRefresh: _refreshNotificaciones,
+          child: _isLoading
+              ? LoadingScreen(message: 'Cargando notificaciones...')
+              : Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.notifications_off_outlined,
+                        size: 80,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'No hay notificaciones nuevas.',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
         ),
       );
     }
@@ -268,54 +292,62 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
             ),
         ],
       ),
-      body: ListView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        itemCount: keys.length + 2,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return CheckboxListTile(
-              value: someSelected ? null : allSelected,
-              tristate: true,
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-              title: const Text('Seleccionar todas'),
-              subtitle: selectedCount > 0
-                  ? Text(
-                      '$selectedCount de ${notifications.length} seleccionadas',
-                    )
-                  : null,
-              onChanged: (_) => _toggleAll(notifications),
-            );
-          }
+      body: RefreshIndicator(
+        onRefresh: _refreshNotificaciones,
+        child: _isLoading
+            ? LoadingScreen(message: 'Cargando notificaciones...')
+            : ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                itemCount: keys.length + 2,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return CheckboxListTile(
+                      value: someSelected ? null : allSelected,
+                      tristate: true,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                      title: const Text('Seleccionar todas'),
+                      subtitle: selectedCount > 0
+                          ? Text(
+                              '$selectedCount de ${notifications.length} seleccionadas',
+                            )
+                          : null,
+                      onChanged: (_) => _toggleAll(notifications),
+                    );
+                  }
 
-          final groupIndex = index - 1;
-          if (groupIndex < keys.length) {
-            final key = keys[groupIndex];
-            final items = grouped[key]!;
+                  final groupIndex = index - 1;
+                  if (groupIndex < keys.length) {
+                    final key = keys[groupIndex];
+                    final items = grouped[key]!;
 
-            return WidgetsContainer(
-              padding: EdgeInsetsGeometry.all(4),
-              title: key,
-              showDivider: false,
-              children: items.map((notif) {
-                return _buildNotifItem(notif);
-              }).toList(),
-            );
-          }
+                    return WidgetsContainer(
+                      padding: EdgeInsetsGeometry.all(4),
+                      title: key,
+                      showDivider: false,
+                      children: items.map((notif) {
+                        return _buildNotifItem(notif);
+                      }).toList(),
+                    );
+                  }
 
-          if (appState.hasMoreNotif) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          } else {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: Text("No hay más notificaciones")),
-            );
-          }
-        },
+                  if (appState.hasMoreNotif) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  } else {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: Text("No hay más notificaciones")),
+                    );
+                  }
+                },
+              ),
       ),
     );
   }
