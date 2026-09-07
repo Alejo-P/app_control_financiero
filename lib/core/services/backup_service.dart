@@ -48,6 +48,117 @@ class BackupService {
     }
   }
 
+  List<String> validarRespaldo(Map<String, dynamic> backup) {
+    final errores = <String>[];
+    final categoriaIds = <int>{};
+
+    final categorias = backup['categorias'];
+    final movimientos = backup['movimientos'];
+    final presupuestos = backup['presupuestos'];
+    final ingresosPresupuestados = backup['ingresos_presupuestados'];
+    final notificaciones = backup['notificaciones'];
+    final recordatorios = backup['recordatorios'];
+
+    if (categorias is! List) {
+      errores.add('categorias: debe ser una lista.');
+    } else {
+      for (var i = 0; i < categorias.length; i++) {
+        final categoria = categorias[i];
+        final ruta = 'categorias[$i]';
+
+        if (categoria is! Map<String, dynamic>) {
+          errores.add('$ruta: debe ser un objeto.');
+          continue;
+        }
+
+        final id = categoria['id'];
+        if (id is! int || id <= 0) {
+          errores.add('$ruta.id: debe ser un entero positivo.');
+        } else if (!categoriaIds.add(id)) {
+          errores.add('$ruta.id: el ID $id está repetido.');
+        }
+
+        final nombre = categoria['name'];
+        if (nombre is! String || nombre.trim().isEmpty) {
+          errores.add('$ruta.name: debe contener un nombre.');
+        }
+      }
+    }
+
+    if (movimientos is! List) {
+      errores.add('movimientos: debe ser una lista.');
+    } else {
+      final movimientoIds = <int>{};
+
+      for (var i = 0; i < movimientos.length; i++) {
+        final movimiento = movimientos[i];
+        final ruta = 'movimientos[$i]';
+
+        if (movimiento is! Map<String, dynamic>) {
+          errores.add('$ruta: debe ser un objeto.');
+          continue;
+        }
+
+        final id = movimiento['id'];
+        if (id is! int || id <= 0) {
+          errores.add('$ruta.id: debe ser un entero positivo.');
+        } else if (!movimientoIds.add(id)) {
+          errores.add('$ruta.id: el ID $id está repetido.');
+        }
+
+        final monto = movimiento['amount'];
+        if (monto is! num || !monto.isFinite) {
+          errores.add('$ruta.amount: debe ser un número finito.');
+        }
+
+        final categoriaId = movimiento['category_id'];
+        if (categoriaId is! int) {
+          errores.add('$ruta.category_id: debe ser un entero.');
+        } else if (categorias is List && !categoriaIds.contains(categoriaId)) {
+          errores.add(
+            '$ruta.category_id: la categoría $categoriaId '
+            'no existe en el respaldo.',
+          );
+        }
+      }
+    }
+
+    if (presupuestos is! List) {
+      errores.add('presupuestos: debe ser una lista.');
+    } else {
+      final presupuestoIds = <int>{};
+
+      for (var i = 0; i < presupuestos.length; i++) {
+        final presupuesto = presupuestos[i];
+        final ruta = 'presupuestos[$i]';
+
+        if (presupuesto is! Map<String, dynamic>) {
+          errores.add('$ruta: debe ser un objeto.');
+          continue;
+        }
+
+        final id = presupuesto['id'];
+        if (id is! int || id <= 0) {
+          errores.add('$ruta.id: debe ser un entero positivo.');
+        } else if (!presupuestoIds.add(id)) {
+          errores.add('$ruta.id: el ID $id está repetido.');
+        }
+
+        final categoriaId = presupuesto['category_id'];
+        if (categoriaId is! int) {
+          errores.add('$ruta.category_id: debe ser un entero.');
+        } else if (categorias is List && !categoriaIds.contains(categoriaId)) {
+          errores.add(
+            '$ruta.category_id: la categoría $categoriaId '
+            'no existe en el respaldo.',
+          );
+        }
+      }
+    }
+
+    return errores;
+  }
+
   Future<Map<String, dynamic>> _collectDataForBackup() async {
     final movimientos = await _movimientosLocalDataSource.fetchAllMovimientos();
     final categorias = await _categoriasLocalDataSource.fetchAllCategorias();
@@ -144,6 +255,18 @@ class BackupService {
   }
 
   Future<OperationResult<void>> backupData(String key) async {
+    final dir = await FileUtils.pickDirectory();
+    if (dir == null) {
+      return OperationResult(
+        success: false,
+        data: null,
+        message: 'No se seleccionó ningún directorio para guardar el respaldo.',
+      );
+    }
+    final fileName =
+        'backup_${currentDateTime.year}_${currentDateTime.month.toString().padLeft(2, '0')}_${currentDateTime.day.toString().padLeft(2, '0')}.json';
+    String outputFile = '$dir/$fileName';
+
     try {
       final backupData = await _collectDataForBackup();
       final jsonString = jsonEncode(backupData);
@@ -154,19 +277,6 @@ class BackupService {
         'iv': encrypted.iv,
         'data': encrypted.data,
       };
-
-      final dir = await FileUtils.pickDirectory();
-      if (dir == null) {
-        return OperationResult(
-          success: false,
-          data: null,
-          message:
-              'No se seleccionó ningún directorio para guardar el respaldo.',
-        );
-      }
-      final fileName =
-          'backup_${currentDateTime.year}_${currentDateTime.month.toString().padLeft(2, '0')}_${currentDateTime.day.toString().padLeft(2, '0')}.json';
-      String? outputFile = '$dir/$fileName';
 
       await FileUtils.writeFile(outputFile, jsonEncode(fileContent));
 
@@ -186,9 +296,17 @@ class BackupService {
   }
 
   Future<OperationResult<void>> restoreData(String key, String filePath) async {
+    final isValidBackup = await checkBackupfile(filePath);
+    if (!isValidBackup) {
+      return OperationResult<void>(
+        success: false,
+        data: null,
+        message: 'El archivo de respaldo no es válido.',
+      );
+    }
+
     try {
       final content = await FileUtils.readFile(filePath);
-
       final Map fileData = jsonDecode(content);
 
       final fileContent = EncryptionHelper.decryptData(

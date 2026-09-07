@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/constants/app_strings.dart';
 import 'package:control_financiero/core/database/db_init_data.dart';
 import 'package:control_financiero/core/database/db_seeds.dart';
+import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -35,6 +36,8 @@ class DBHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    await createTables(db);
+
     for (var tipo in tipoCategoriasList) {
       await upsertTipoCategoria(db, tipo);
     }
