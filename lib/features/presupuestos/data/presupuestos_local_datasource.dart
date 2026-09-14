@@ -323,6 +323,28 @@ class PresupuestosLocalDataSource {
     await AppLogger.log('Actualizando presupuesto: $presupuesto');
 
     final db = await _dbHelper.database;
+    final existingPresupuesto = await fetchPresupuestoById(presupuesto.id!);
+    if (existingPresupuesto == null) {
+      return OperationResult<void>(
+        success: false,
+        message: 'No se encontró el presupuesto para actualizar.',
+      );
+    }
+
+    // Comprobar si ya existe otro presupuesto con el mismo ID
+    final List<Map<String, dynamic>> existing = await db.query(
+      PresupuestosTable.table,
+      where: '${PresupuestosTable.id} = ? AND ${PresupuestosTable.categoryId} != ?',
+      whereArgs: [presupuesto.id, presupuesto.categoryId],
+    );
+
+    if (existing.isNotEmpty) {
+      return OperationResult<void>(
+        success: false,
+        message: 'Ya existe otro presupuesto con el mismo ID.',
+      );
+    }
+
     final int count = await db.update(
       PresupuestosTable.table,
       presupuesto.toMap(),

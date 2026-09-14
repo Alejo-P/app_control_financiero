@@ -1218,18 +1218,6 @@ class AppState extends ChangeNotifier {
     await updateCountersNotif();
   }
 
-  Future<void> marcarTodaNotifLeida() async {
-    if (await allNotificationsRead()) return;
-
-    await _notificacionRepository.markAllRead();
-    await NotificationService.cancelAllNotifications();
-
-    notificaciones = notificaciones
-        .map((n) => n.copyWith(isRead: true))
-        .toList();
-    await updateCountersNotif();
-  }
-
   // ================================ RECORDATORIOS CRUD =================================
   Future<DetalleRecordatorio?> getRecordatorioById(int id) async {
     final result = await _recordatoriosRepository.fetchDetalleRecordatorioById(

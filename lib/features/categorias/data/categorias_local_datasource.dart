@@ -5,6 +5,7 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CategoriasLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
@@ -120,9 +121,35 @@ class CategoriasLocalDataSource {
     );
   }
 
+  Future<int> countMovimientosByCategoria(int categoriaId) async {
+    final db = await _dbHelper.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) AS count FROM ${MovimientosTable.table} WHERE ${MovimientosTable.categoryId} = ?',
+      [categoriaId],
+    );
+
+    final count = Sqflite.firstIntValue(result) ?? 0;
+
+    return count;
+  }
+
   // Actualizar una categoría existente
   Future<OperationResult<void>> updateCategoria(Categoria categoria) async {
     final db = await _dbHelper.database;
+
+    // Comprobar si ya existe otra categoría con el mismo nombre
+    final List<Map<String, dynamic>> existing = await db.query(
+      CategoriasTable.table,
+      where: '${CategoriasTable.name} = ? AND ${CategoriasTable.id} != ?',
+      whereArgs: [categoria.name, categoria.id],
+    );
+
+    if (existing.isNotEmpty) {
+      return OperationResult<void>(
+        success: false,
+        message: 'Ya existe otra categoría con el mismo nombre.',
+      );
+    }
 
     // Comprobar que la categoría no es predeterminada
     final List<Map<String, dynamic>> maps = await db.query(
@@ -136,6 +163,19 @@ class CategoriasLocalDataSource {
       return OperationResult<void>(
         success: false,
         message: 'No se puede actualizar una categoría predeterminada.',
+      );
+    }
+
+    // Si la categoria tiene movimientos asociados, no permitir cambiar el tipo de movimiento
+    final movimientoCount = await countMovimientosByCategoria(categoria.id!);
+    final existingCategoria = await fetchCategoriaById(categoria.id!);
+    if (movimientoCount > 0 &&
+        existingCategoria != null &&
+        existingCategoria.movementType != categoria.movementType) {
+      return OperationResult<void>(
+        success: false,
+        message:
+            'No se puede cambiar el tipo de movimiento de esta categoría. Tiene $movimientoCount${movimientoCount == 1 ? ' movimiento asociado.' : ' movimientos asociados.'}',
       );
     }
 
