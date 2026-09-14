@@ -69,7 +69,6 @@ class ExcelExporter {
 
   static Future<OperationResult> guardarExcel(Excel excel) async {
     try {
-      //Directory directory = Directory('/storage/emulated/0/Download');
       String? directory = await FileUtils.pickDirectory();
 
       final now = currentDateTime;

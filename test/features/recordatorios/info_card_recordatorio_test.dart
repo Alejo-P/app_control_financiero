@@ -25,29 +25,5 @@ void main() {
       expect(result.single.categoryName, 'Recordatorio diario');
       expect(result.single.isEnabled, isTrue);
     });
-
-  //   test('no duplica el recordatorio diario cuando ya existe', () {
-  //     final existing = <InfoCardRecordatorio>[
-  //       InfoCardRecordatorio(
-  //         id: 200000,
-  //         title: 'Registra tus movimientos',
-  //         categoryName: 'Recordatorio diario',
-  //         categoryIcon: Icons.notifications_active_outlined,
-  //         categoryColor: Colors.orange,
-  //         isEnabled: true,
-  //         isDefault: true,
-  //         scheduledAt: DateTime(2024, 1, 10, 20, 30),
-  //         recurrency: 'Diario',
-  //       ),
-  //     ];
-
-  //     final result = mergeDailyMovementReminder(
-  //       existing,
-  //       referenceDateTime: DateTime(2024, 1, 10, 12, 0),
-  //     );
-
-  //     expect(result, hasLength(1));
-  //     expect(result.single.id, 200000);
-  //   });
   });
 }
