@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/models/backup_content.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -15,6 +16,17 @@ import 'dart:convert';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/recordatorios/data/recordatorios_local_datasource.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
+
+enum BackupFileElement {
+  /// The version of the backup file format.
+  version,
+
+  /// The initialization vector used for encryption.
+  iv,
+
+  /// The encrypted backup (content) data.
+  data,
+}
 
 class BackupService {
   final MovimientosLocalDataSource _movimientosLocalDataSource =
@@ -38,128 +50,21 @@ class BackupService {
         return false;
       }
 
-      final int version = decoded['version'] is int
-          ? decoded['version'] as int
+      final int version = decoded[BackupFileElement.version.name] is int
+          ? decoded[BackupFileElement.version.name] as int
           : 0;
 
-      return version == backupVersion;
+      final bool hasData =
+          decoded.containsKey(BackupFileElement.data.name) &&
+          decoded[BackupFileElement.data.name] is String;
+
+      return (version == backupVersion) && hasData;
     } catch (e) {
       return false;
     }
   }
 
-  List<String> validarRespaldo(Map<String, dynamic> backup) {
-    final errores = <String>[];
-    final categoriaIds = <int>{};
-
-    final categorias = backup['categorias'];
-    final movimientos = backup['movimientos'];
-    final presupuestos = backup['presupuestos'];
-    final ingresosPresupuestados = backup['ingresos_presupuestados'];
-    final notificaciones = backup['notificaciones'];
-    final recordatorios = backup['recordatorios'];
-
-    if (categorias is! List) {
-      errores.add('categorias: debe ser una lista.');
-    } else {
-      for (var i = 0; i < categorias.length; i++) {
-        final categoria = categorias[i];
-        final ruta = 'categorias[$i]';
-
-        if (categoria is! Map<String, dynamic>) {
-          errores.add('$ruta: debe ser un objeto.');
-          continue;
-        }
-
-        final id = categoria['id'];
-        if (id is! int || id <= 0) {
-          errores.add('$ruta.id: debe ser un entero positivo.');
-        } else if (!categoriaIds.add(id)) {
-          errores.add('$ruta.id: el ID $id está repetido.');
-        }
-
-        final nombre = categoria['name'];
-        if (nombre is! String || nombre.trim().isEmpty) {
-          errores.add('$ruta.name: debe contener un nombre.');
-        }
-      }
-    }
-
-    if (movimientos is! List) {
-      errores.add('movimientos: debe ser una lista.');
-    } else {
-      final movimientoIds = <int>{};
-
-      for (var i = 0; i < movimientos.length; i++) {
-        final movimiento = movimientos[i];
-        final ruta = 'movimientos[$i]';
-
-        if (movimiento is! Map<String, dynamic>) {
-          errores.add('$ruta: debe ser un objeto.');
-          continue;
-        }
-
-        final id = movimiento['id'];
-        if (id is! int || id <= 0) {
-          errores.add('$ruta.id: debe ser un entero positivo.');
-        } else if (!movimientoIds.add(id)) {
-          errores.add('$ruta.id: el ID $id está repetido.');
-        }
-
-        final monto = movimiento['amount'];
-        if (monto is! num || !monto.isFinite) {
-          errores.add('$ruta.amount: debe ser un número finito.');
-        }
-
-        final categoriaId = movimiento['category_id'];
-        if (categoriaId is! int) {
-          errores.add('$ruta.category_id: debe ser un entero.');
-        } else if (categorias is List && !categoriaIds.contains(categoriaId)) {
-          errores.add(
-            '$ruta.category_id: la categoría $categoriaId '
-            'no existe en el respaldo.',
-          );
-        }
-      }
-    }
-
-    if (presupuestos is! List) {
-      errores.add('presupuestos: debe ser una lista.');
-    } else {
-      final presupuestoIds = <int>{};
-
-      for (var i = 0; i < presupuestos.length; i++) {
-        final presupuesto = presupuestos[i];
-        final ruta = 'presupuestos[$i]';
-
-        if (presupuesto is! Map<String, dynamic>) {
-          errores.add('$ruta: debe ser un objeto.');
-          continue;
-        }
-
-        final id = presupuesto['id'];
-        if (id is! int || id <= 0) {
-          errores.add('$ruta.id: debe ser un entero positivo.');
-        } else if (!presupuestoIds.add(id)) {
-          errores.add('$ruta.id: el ID $id está repetido.');
-        }
-
-        final categoriaId = presupuesto['category_id'];
-        if (categoriaId is! int) {
-          errores.add('$ruta.category_id: debe ser un entero.');
-        } else if (categorias is List && !categoriaIds.contains(categoriaId)) {
-          errores.add(
-            '$ruta.category_id: la categoría $categoriaId '
-            'no existe en el respaldo.',
-          );
-        }
-      }
-    }
-
-    return errores;
-  }
-
-  Future<Map<String, dynamic>> _collectDataForBackup() async {
+  Future<BackupContent> _collectDataForBackup() async {
     final movimientos = await _movimientosLocalDataSource.fetchAllMovimientos();
     final categorias = await _categoriasLocalDataSource.fetchAllCategorias();
     final presupuestos = await _presupuestosLocalDataSource
@@ -171,18 +76,27 @@ class BackupService {
     final recordatorios = await _recordatoriosLocalDataSource
         .fetchAllRecordatorios();
 
-    return {
-      'movimientos': movimientos.map((m) => m.toMap()).toList(),
-      'categorias': categorias.map((c) => c.toMap()).toList(),
-      'presupuestos': presupuestos.map((p) => p.toMap()).toList(),
-      'ingresosPresupuestados': ingresosPresupuestados
-          .map((i) => i.toMap())
-          .toList(),
-      'configPorcentajeNotif': configPorcentajeNotif
-          .map((n) => n.toMap())
-          .toList(),
-      'recordatorios': recordatorios.map((r) => r.toMap()).toList(),
-    };
+    // return {
+    //   'movimientos': movimientos.map((m) => m.toMap()).toList(),
+    //   'categorias': categorias.map((c) => c.toMap()).toList(),
+    //   'presupuestos': presupuestos.map((p) => p.toMap()).toList(),
+    //   'ingresosPresupuestados': ingresosPresupuestados
+    //       .map((i) => i.toMap())
+    //       .toList(),
+    //   'configPorcentajeNotif': configPorcentajeNotif
+    //       .map((n) => n.toMap())
+    //       .toList(),
+    //   'recordatorios': recordatorios.map((r) => r.toMap()).toList(),
+    // };
+
+    return BackupContent(
+      budgetIncomeData: ingresosPresupuestados.map((i) => i.toMap()).toList(),
+      budgetsData: presupuestos.map((p) => p.toMap()).toList(),
+      categoriesData: categorias.map((c) => c.toMap()).toList(),
+      movementsData: movimientos.map((m) => m.toMap()).toList(),
+      notifitionsData: configPorcentajeNotif.map((n) => n.toMap()).toList(),
+      remindersData: recordatorios.map((r) => r.toMap()).toList(),
+    );
   }
 
   Future<void> _clearExistingData() async {
@@ -195,52 +109,48 @@ class BackupService {
     await _categoriasLocalDataSource.deleteAllCategorias();
   }
 
-  Future<bool> _restoreDataFromBackup(Map<String, dynamic> backupData) async {
+  Future<bool> _restoreDataFromBackup(BackupContent backupData) async {
     try {
-      final movimientosData = (backupData['movimientos'] ?? []) as List;
-      final categoriasData = (backupData['categorias'] ?? []) as List;
-      final presupuestosData = (backupData['presupuestos'] ?? []) as List;
-      final recordatoriosData = (backupData['recordatorios'] ?? []) as List;
-      final ingresosPresupuestadosData =
-          (backupData['ingresosPresupuestados'] ?? []) as List;
-      final configPorcentajeNotifData =
-          (backupData['configPorcentajeNotif'] ?? []) as List;
+      final movimientosData = backupData.movementsData;
+      final categoriasData = backupData.categoriesData;
+      final presupuestosData = backupData.budgetsData;
+      final recordatoriosData = backupData.remindersData;
+      final ingresosPresupuestadosData = backupData.budgetIncomeData;
+      final configPorcentajeNotifData = backupData.notifitionsData;
 
       for (final categoriaMap in categoriasData) {
         await _categoriasLocalDataSource.addCategoria(
-          Categoria.fromMap(categoriaMap as Map<String, dynamic>),
+          Categoria.fromMap(categoriaMap),
         );
       }
 
       for (final configMap in configPorcentajeNotifData) {
         await _notificacionLocalDataSource.insertOrUpdateBudgetNotification(
-          BudgetNotification.fromMap(configMap as Map<String, dynamic>),
+          BudgetNotification.fromMap(configMap),
         );
       }
 
       for (final ingresoPresupuestadoMap in ingresosPresupuestadosData) {
         await _presupuestosLocalDataSource.upsertIngresoPresupuestado(
-          IngresoPresupuestado.fromMap(
-            ingresoPresupuestadoMap as Map<String, dynamic>,
-          ),
+          IngresoPresupuestado.fromMap(ingresoPresupuestadoMap),
         );
       }
 
       for (final movimientoMap in movimientosData) {
         await _movimientosLocalDataSource.addMovimiento(
-          Movimiento.fromMap(movimientoMap as Map<String, dynamic>),
+          Movimiento.fromMap(movimientoMap),
         );
       }
 
       for (final presupuestoMap in presupuestosData) {
         await _presupuestosLocalDataSource.addPresupuesto(
-          Presupuesto.fromMap(presupuestoMap as Map<String, dynamic>),
+          Presupuesto.fromMap(presupuestoMap),
         );
       }
 
       for (final recordatorioMap in recordatoriosData) {
         await _recordatoriosLocalDataSource.insertRecordatorio(
-          Recordatorio.fromMap(recordatorioMap as Map<String, dynamic>),
+          Recordatorio.fromMap(recordatorioMap),
         );
       }
 
@@ -269,16 +179,24 @@ class BackupService {
 
     try {
       final backupData = await _collectDataForBackup();
-      final jsonString = jsonEncode(backupData);
+      final jsonString = jsonEncode(backupData.toMap());
       final encrypted = EncryptionHelper.encryptData(jsonString, key);
 
       final fileContent = {
-        'version': backupVersion,
-        'iv': encrypted.iv,
-        'data': encrypted.data,
+        BackupFileElement.version.name: backupVersion,
+        BackupFileElement.iv.name: encrypted.iv,
+        BackupFileElement.data.name: encrypted.data,
       };
 
-      await FileUtils.writeFile(outputFile, jsonEncode(fileContent));
+      final result = await FileUtils.writeFile(
+        outputFile,
+        jsonEncode(fileContent),
+      );
+      if (!result) {
+        throw Exception(
+          'Error al escribir el archivo de respaldo en la ruta: $outputFile',
+        );
+      }
 
       return OperationResult(
         success: true,
@@ -315,9 +233,10 @@ class BackupService {
         ivBase64: fileData['iv'],
       );
       final backupData = jsonDecode(fileContent) as Map<String, dynamic>;
+      final backupContent = BackupContent.fromMap(backupData);
 
       await _clearExistingData();
-      final restoreSuccess = await _restoreDataFromBackup(backupData);
+      final restoreSuccess = await _restoreDataFromBackup(backupContent);
       if (!restoreSuccess) {
         throw Exception('Error al restaurar los datos del respaldo.');
       }

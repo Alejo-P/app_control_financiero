@@ -5,6 +5,7 @@ import 'package:control_financiero/core/services/backup_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/encryption_helper.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
@@ -70,8 +71,14 @@ class AppState extends ChangeNotifier {
   static const _settingsBox = 'settings';
   static const _themeKey = 'dark_mode';
 
+  static const _backupBox = 'backup';
+  static const _backupKey = 'backup_encryption_key';
+
   bool _isDarkMode = false;
   bool get isDarkMode => _isDarkMode;
+
+  String _backupEncryptionKey = '';
+  String get backupEncryptionKey => _backupEncryptionKey;
 
   List<AppBarAction> _appBarActions = [];
   FloatingActionButton? _floatingActionButton;
@@ -299,9 +306,26 @@ class AppState extends ChangeNotifier {
     return Hive.box(_settingsBox);
   }
 
+  Future<Box> _getBackupBox() async {
+    if (!Hive.isBoxOpen(_backupBox)) {
+      return await Hive.openBox(_backupBox);
+    }
+    return Hive.box(_backupBox);
+  }
+
   Future<void> initialize() async {
-    final box = await _getSettingsBox();
-    _isDarkMode = box.get(_themeKey, defaultValue: false);
+    final settingsBox = await _getSettingsBox();
+    final backupBox = await _getBackupBox();
+    final storedKey = backupBox.get(_backupKey, defaultValue: '') as String;
+    if (storedKey.isEmpty) {
+      final newKey = EncryptionHelper.generateRandomKey();
+      await backupBox.put(_backupKey, newKey);
+      _backupEncryptionKey = newKey;
+    } else {
+      _backupEncryptionKey = storedKey;
+    }
+
+    _isDarkMode = settingsBox.get(_themeKey, defaultValue: false);
   }
 
   Future<void> loadPresupuestosByMonthAndYear(
@@ -759,6 +783,15 @@ class AppState extends ChangeNotifier {
 
     final box = await _getSettingsBox();
     await box.put(_themeKey, value);
+
+    notifyListeners();
+  }
+
+  Future<void> setBackupEncryptionKey(String key) async {
+    _backupEncryptionKey = key;
+
+    final box = await _getBackupBox();
+    await box.put(_backupKey, key);
 
     notifyListeners();
   }

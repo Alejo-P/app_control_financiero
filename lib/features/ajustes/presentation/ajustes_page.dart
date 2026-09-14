@@ -6,7 +6,6 @@ import 'package:control_financiero/core/utils/file_utils.dart';
 import 'package:control_financiero/features/ajustes/widgets/setting_option_card.dart';
 import 'package:control_financiero/features/categorias/presentation/categorias_page.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
-import 'package:control_financiero/features/shared/widgets/input_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -72,31 +71,20 @@ class _AjustesPageState extends State<AjustesPage> {
 
   void exportarDatosBackup() async {
     final appState = context.read<AppState>();
+    final encryptKey = _appState.backupEncryptionKey;
 
     final confirmed = await showConfirmDialog(
       context,
       title: 'Exportar datos',
       content:
-          'Se generará un archivo de respaldo en la carpeta que elijas.\nDeberas especificar una clave de encriptación.',
+          'Se generará un archivo de respaldo en la carpeta que elijas.',
     );
 
     if (confirmed != true) return;
     if (!mounted) return;
-    final encryptKey = await showEncryptionKeyInputDialog(
-      context,
-      'Guarda esta clave en un lugar seguro. '
-      'La necesitarás para restaurar tu respaldo. '
-      'Si la pierdes, no podrás recuperar tus datos.',
-    );
+    print('Clave de encriptación: $encryptKey');
 
     if (!mounted) return;
-    if (encryptKey == null) {
-      AppSnackbar.error(
-        context,
-        'Debes especificar una clave para encriptar el archivo',
-      );
-      return;
-    }
 
     // 👇 Loading
     showDialog(
@@ -121,12 +109,13 @@ class _AjustesPageState extends State<AjustesPage> {
 
   void restaurarDatosBackup() async {
     final appState = context.read<AppState>();
+    final encryptKey = _appState.backupEncryptionKey;
 
     final confirmed = await showConfirmDialog(
       context,
       title: 'Restaurar datos',
       content:
-          'Se restaurarán tus datos desde un archivo de respaldo. Esto reemplazará tus datos actuales.\nDeberas especificar la clave de encriptación usada al exportar el archivo.',
+          'Se restaurarán tus datos desde un archivo de respaldo. Esto reemplazará tus datos actuales.',
     );
 
     if (confirmed != true) return;
@@ -149,20 +138,6 @@ class _AjustesPageState extends State<AjustesPage> {
     }
 
     if (!mounted) return;
-    final encryptKey = await showEncryptionKeyInputDialog(
-      context,
-      'Ingresa la clave de encriptación usada al crear el respaldo.\n'
-      'Si es incorrecta, no se podrán restaurar los datos.',
-    );
-
-    if (!mounted) return;
-    if (encryptKey == null) {
-      AppSnackbar.error(
-        context,
-        'Debes especificar una clave para desencriptar el archivo',
-      );
-      return;
-    }
 
     // 👇 Loading
     showDialog(

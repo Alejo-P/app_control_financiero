@@ -9,8 +9,18 @@ class EncryptionResult {
 }
 
 class EncryptionHelper {
+  static encrypt.Key parseKey(String value) {
+    final key = encrypt.Key.fromBase64(value);
+
+    if (key.bytes.length != 32) {
+      throw const FormatException('La clave AES debe tener 32 bytes.');
+    }
+
+    return key;
+  }
+
   static EncryptionResult encryptData(String plainText, String encryptKey) {
-    final key = encrypt.Key.fromUtf8(encryptKey);
+    final key = parseKey(encryptKey);
     final iv = encrypt.IV.fromSecureRandom(16);
     final encrypter = encrypt.Encrypter(encrypt.AES(key));
 
@@ -26,7 +36,7 @@ class EncryptionHelper {
     required String ivBase64,
   }) {
     try {
-      final key = encrypt.Key.fromUtf8(encryptKey);
+      final key = parseKey(encryptKey);
       final iv = encrypt.IV.fromBase64(ivBase64);
 
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
@@ -43,5 +53,10 @@ class EncryptionHelper {
     } catch (e) {
       throw Exception('Clave incorrecta o archivo inválido');
     }
+  }
+
+  static String generateRandomKey() {
+    final random = encrypt.Key.fromSecureRandom(32);
+    return random.base64;
   }
 }
