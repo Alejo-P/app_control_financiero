@@ -18,6 +18,7 @@ class TipoCategoria {
   }
 
   Map<String, dynamic> toMap() => {
+    if (id != null) TipoCategoriasTable.id: id,
     TipoCategoriasTable.name: name,
     TipoCategoriasTable.description: description,
   };

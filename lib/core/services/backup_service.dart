@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/database/backup_local_datasource.dart';
 import 'package:control_financiero/core/models/backup_content.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
@@ -5,17 +6,12 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/encryption_helper.dart';
 import 'package:control_financiero/core/utils/file_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
-import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
-import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/notificaciones/data/notificacion_local_datasource.dart';
-import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
-import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'dart:convert';
-import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/recordatorios/data/recordatorios_local_datasource.dart';
-import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
+import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
 
 enum BackupFileElement {
   /// The version of the backup file format.
@@ -33,6 +29,8 @@ class BackupService {
       MovimientosLocalDataSource();
   final CategoriasLocalDataSource _categoriasLocalDataSource =
       CategoriasLocalDataSource();
+  final TipoCategoriaLocalDataSource _tipoCategoriaLocalDataSource =
+      TipoCategoriaLocalDataSource();
   final PresupuestosLocalDataSource _presupuestosLocalDataSource =
       PresupuestosLocalDataSource();
   final NotificacionLocalDataSource _notificacionLocalDataSource =
@@ -67,6 +65,8 @@ class BackupService {
   Future<BackupContent> _collectDataForBackup() async {
     final movimientos = await _movimientosLocalDataSource.fetchAllMovimientos();
     final categorias = await _categoriasLocalDataSource.fetchAllCategorias();
+    final tipoCategorias = await _tipoCategoriaLocalDataSource
+        .fetchTipoCategorias();
     final presupuestos = await _presupuestosLocalDataSource
         .fetchAllPresupuestos();
     final ingresosPresupuestados = await _presupuestosLocalDataSource
@@ -76,93 +76,81 @@ class BackupService {
     final recordatorios = await _recordatoriosLocalDataSource
         .fetchAllRecordatorios();
 
-    // return {
-    //   'movimientos': movimientos.map((m) => m.toMap()).toList(),
-    //   'categorias': categorias.map((c) => c.toMap()).toList(),
-    //   'presupuestos': presupuestos.map((p) => p.toMap()).toList(),
-    //   'ingresosPresupuestados': ingresosPresupuestados
-    //       .map((i) => i.toMap())
-    //       .toList(),
-    //   'configPorcentajeNotif': configPorcentajeNotif
-    //       .map((n) => n.toMap())
-    //       .toList(),
-    //   'recordatorios': recordatorios.map((r) => r.toMap()).toList(),
-    // };
-
     return BackupContent(
       budgetIncomeData: ingresosPresupuestados.map((i) => i.toMap()).toList(),
       budgetsData: presupuestos.map((p) => p.toMap()).toList(),
       categoriesData: categorias.map((c) => c.toMap()).toList(),
+      categoryTypesData: tipoCategorias.map((ct) => ct.toMap()).toList(),
       movementsData: movimientos.map((m) => m.toMap()).toList(),
       notifitionsData: configPorcentajeNotif.map((n) => n.toMap()).toList(),
       remindersData: recordatorios.map((r) => r.toMap()).toList(),
     );
   }
 
-  Future<void> _clearExistingData() async {
-    await _recordatoriosLocalDataSource.deleteAllRecordatorios();
-    await _movimientosLocalDataSource.deleteAllMovimientos();
-    await _presupuestosLocalDataSource.deleteAllPresupuestos();
-    await _presupuestosLocalDataSource.deleteAllIngresosPresupuestados();
-    await _notificacionLocalDataSource.deleteAllBudgetNotifications();
-    await _notificacionLocalDataSource.deleteAllBudgetNotificationEvent();
-    await _categoriasLocalDataSource.deleteAllCategorias();
-  }
+  // Future<void> _clearExistingData() async {
+  //   await _recordatoriosLocalDataSource.deleteAllRecordatorios();
+  //   await _movimientosLocalDataSource.deleteAllMovimientos();
+  //   await _presupuestosLocalDataSource.deleteAllPresupuestos();
+  //   await _presupuestosLocalDataSource.deleteAllIngresosPresupuestados();
+  //   await _notificacionLocalDataSource.deleteAllBudgetNotifications();
+  //   await _notificacionLocalDataSource.deleteAllBudgetNotificationEvent();
+  //   await _categoriasLocalDataSource.deleteAllCategorias();
+  // }
 
-  Future<bool> _restoreDataFromBackup(BackupContent backupData) async {
-    try {
-      final movimientosData = backupData.movementsData;
-      final categoriasData = backupData.categoriesData;
-      final presupuestosData = backupData.budgetsData;
-      final recordatoriosData = backupData.remindersData;
-      final ingresosPresupuestadosData = backupData.budgetIncomeData;
-      final configPorcentajeNotifData = backupData.notifitionsData;
+  // Future<bool> _restoreDataFromBackup(BackupContent backupData) async {
+  //   try {
+  //     final movimientosData = backupData.movementsData;
+  //     final categoriasData = backupData.categoriesData;
+  //     final presupuestosData = backupData.budgetsData;
+  //     final recordatoriosData = backupData.remindersData;
+  //     final ingresosPresupuestadosData = backupData.budgetIncomeData;
+  //     final configPorcentajeNotifData = backupData.notifitionsData;
 
-      for (final categoriaMap in categoriasData) {
-        await _categoriasLocalDataSource.addCategoria(
-          Categoria.fromMap(categoriaMap),
-        );
-      }
+  //     for (final categoriaMap in categoriasData) {
+  //       await _categoriasLocalDataSource.addCategoria(
+  //         Categoria.fromMap(categoriaMap),
+  //       );
+  //     }
 
-      for (final configMap in configPorcentajeNotifData) {
-        await _notificacionLocalDataSource.insertOrUpdateBudgetNotification(
-          BudgetNotification.fromMap(configMap),
-        );
-      }
+  //     for (final configMap in configPorcentajeNotifData) {
+  //       await _notificacionLocalDataSource.insertOrUpdateBudgetNotification(
+  //         BudgetNotification.fromMap(configMap),
+  //       );
+  //     }
 
-      for (final ingresoPresupuestadoMap in ingresosPresupuestadosData) {
-        await _presupuestosLocalDataSource.upsertIngresoPresupuestado(
-          IngresoPresupuestado.fromMap(ingresoPresupuestadoMap),
-        );
-      }
+  //     for (final ingresoPresupuestadoMap in ingresosPresupuestadosData) {
+  //       await _presupuestosLocalDataSource.upsertIngresoPresupuestado(
+  //         IngresoPresupuestado.fromMap(ingresoPresupuestadoMap),
+  //       );
+  //     }
 
-      for (final movimientoMap in movimientosData) {
-        await _movimientosLocalDataSource.addMovimiento(
-          Movimiento.fromMap(movimientoMap),
-        );
-      }
+  //     for (final movimientoMap in movimientosData) {
+  //       await _movimientosLocalDataSource.addMovimiento(
+  //         Movimiento.fromMap(movimientoMap),
+  //       );
+  //     }
 
-      for (final presupuestoMap in presupuestosData) {
-        await _presupuestosLocalDataSource.addPresupuesto(
-          Presupuesto.fromMap(presupuestoMap),
-        );
-      }
+  //     for (final presupuestoMap in presupuestosData) {
+  //       await _presupuestosLocalDataSource.addPresupuesto(
+  //         Presupuesto.fromMap(presupuestoMap),
+  //       );
+  //     }
 
-      for (final recordatorioMap in recordatoriosData) {
-        await _recordatoriosLocalDataSource.insertRecordatorio(
-          Recordatorio.fromMap(recordatorioMap),
-        );
-      }
+  //     for (final recordatorioMap in recordatoriosData) {
+  //       await _recordatoriosLocalDataSource.insertRecordatorio(
+  //         Recordatorio.fromMap(recordatorioMap),
+  //       );
+  //     }
 
-      return true;
-    } on Exception catch (e) {
-      await AppLogger.log(
-        'Error al restaurar datos: $e',
-        level: LogLevel.error,
-      );
-      return false;
-    }
-  }
+  //     return true;
+  //   } on Exception catch (e) {
+  //     await AppLogger.log(
+  //       'Error al restaurar datos: $e',
+  //       level: LogLevel.error,
+  //     );
+  //     return false;
+  //   }
+  // }
 
   Future<OperationResult<void>> backupData(String key) async {
     final dir = await FileUtils.pickDirectory();
@@ -235,16 +223,14 @@ class BackupService {
       final backupData = jsonDecode(fileContent) as Map<String, dynamic>;
       final backupContent = BackupContent.fromMap(backupData);
 
-      await _clearExistingData();
-      final restoreSuccess = await _restoreDataFromBackup(backupContent);
-      if (!restoreSuccess) {
-        throw Exception('Error al restaurar los datos del respaldo.');
-      }
+      final restoreResult = await BackupLocalDatasource().restoreDataFromBackup(
+        backupContent,
+      );
 
       return OperationResult<void>(
-        success: true,
+        success: restoreResult.success,
         data: null,
-        message: 'Restauración de datos completada exitosamente.',
+        message: restoreResult.message,
       );
     } on Exception catch (e) {
       await AppLogger.log(
