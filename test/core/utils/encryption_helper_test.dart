@@ -76,6 +76,27 @@ void main() {
   });
 
   group('encryptData / decryptData', () {
+    test('descifra un respaldo v1 creado fuera del helper', () {
+      final file = encryptRaw(
+        jsonEncode({
+          'magic': 'CF_BACKUP_v1',
+          'data': 'Respaldo compatible á 🍎',
+        }),
+      );
+      expect(decrypt(file), 'Respaldo compatible á 🍎');
+    });
+
+    test('genera el formato v1 legible por un descifrador independiente', () {
+      final result = EncryptionHelper.encryptData('respaldo', key);
+      final cipher = encrypt.Encrypter(
+        encrypt.AES(encrypt.Key.fromBase64(key)),
+      );
+      final decoded = jsonDecode(
+        cipher.decrypt64(result.data, iv: encrypt.IV.fromBase64(result.iv)),
+      );
+      expect(decoded, {'magic': 'CF_BACKUP_v1', 'data': 'respaldo'});
+    });
+
     final contents = {
       'texto vacío': '',
       'JSON con Unicode': '{"nota":"Alimentación 🍎", "monto":12.50}',
@@ -154,5 +175,31 @@ void main() {
       final file = encryptRaw(jsonEncode({'data': 'respaldo'}));
       expect(() => decrypt(file), invalidBackup);
     });
+
+    for (final invalidData in [
+      null,
+      42,
+      true,
+      <String>[],
+      <String, dynamic>{},
+    ]) {
+      test('rechaza datos del respaldo que no son texto: $invalidData', () {
+        final file = encryptRaw(
+          jsonEncode({'magic': 'CF_BACKUP_v1', 'data': invalidData}),
+        );
+        expect(() => decrypt(file), invalidBackup);
+      });
+    }
+
+    test('rechaza un respaldo v1 sin datos', () {
+      final file = encryptRaw(jsonEncode({'magic': 'CF_BACKUP_v1'}));
+      expect(() => decrypt(file), invalidBackup);
+    });
+
+    for (final content in ['null', '[]', '42', '"texto"']) {
+      test('rechaza una raíz JSON que no es un objeto: $content', () {
+        expect(() => decrypt(encryptRaw(content)), invalidBackup);
+      });
+    }
   });
 }
