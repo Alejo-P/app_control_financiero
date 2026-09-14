@@ -73,6 +73,8 @@ class BackupService {
         .fetchAllIngresosPresupuestados();
     final configPorcentajeNotif = await _notificacionLocalDataSource
         .fetchAllBudgetNotifications();
+    final movementNotificationConfigs = await _notificacionLocalDataSource
+        .fetchAllMovementNotificationConfigs();
     final recordatorios = await _recordatoriosLocalDataSource
         .fetchAllRecordatorios();
 
@@ -83,6 +85,9 @@ class BackupService {
       categoryTypesData: tipoCategorias.map((ct) => ct.toMap()).toList(),
       movementsData: movimientos.map((m) => m.toMap()).toList(),
       notifitionsData: configPorcentajeNotif.map((n) => n.toMap()).toList(),
+      movementNotificationConfigsData: movementNotificationConfigs
+          .map((config) => config.toMap())
+          .toList(),
       remindersData: recordatorios.map((r) => r.toMap()).toList(),
     );
   }

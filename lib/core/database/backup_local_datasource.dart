@@ -12,6 +12,7 @@ class BackupLocalDatasource {
     batch.delete(PresupuestosTable.table);
     batch.delete(IngresoPresupuestadoTable.table);
     batch.delete(BudgetNotificationConfigTable.table);
+    batch.delete(MovementNotificationConfigTable.table);
     batch.delete(BudgetNotificationEventsTable.table);
     batch.delete(CategoriasTable.table);
     batch.delete(TipoCategoriasTable.table);
@@ -67,6 +68,14 @@ class BackupLocalDatasource {
       batch.insert(
         BudgetNotificationConfigTable.table,
         notifConfig.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    for (var config in backupContent.movementNotificationConfigs) {
+      batch.insert(
+        MovementNotificationConfigTable.table,
+        config.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }

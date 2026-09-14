@@ -2,6 +2,7 @@ import 'package:control_financiero/core/database/db_init_data.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/notificaciones/models/budget_notification.dart';
+import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
@@ -14,6 +15,7 @@ enum BackupContentType {
   budgets,
   budgetIncome,
   notifications,
+  movementNotificationConfigs,
   reminders,
 }
 
@@ -24,6 +26,7 @@ class BackupContent {
   List<Map<String, dynamic>> budgetsData;
   List<Map<String, dynamic>> budgetIncomeData;
   List<Map<String, dynamic>> notifitionsData;
+  List<Map<String, dynamic>> movementNotificationConfigsData;
   List<Map<String, dynamic>> remindersData;
 
   BackupContent({
@@ -32,6 +35,7 @@ class BackupContent {
     required this.budgetsData,
     required this.budgetIncomeData,
     required this.notifitionsData,
+    required this.movementNotificationConfigsData,
     required this.remindersData,
     required this.categoryTypesData,
   });
@@ -44,6 +48,8 @@ class BackupContent {
       BackupContentType.budgets.name: budgetsData,
       BackupContentType.budgetIncome.name: budgetIncomeData,
       BackupContentType.notifications.name: notifitionsData,
+      BackupContentType.movementNotificationConfigs.name:
+          movementNotificationConfigsData,
       BackupContentType.reminders.name: remindersData,
     };
   }
@@ -78,6 +84,13 @@ class BackupContent {
               map[BackupContentType.notifications.name],
             )
           : [],
+      movementNotificationConfigsData: map.containsKey(
+        BackupContentType.movementNotificationConfigs.name,
+      )
+          ? List<Map<String, dynamic>>.from(
+              map[BackupContentType.movementNotificationConfigs.name],
+            )
+          : [],
       remindersData: map.containsKey(BackupContentType.reminders.name)
           ? List<Map<String, dynamic>>.from(
               map[BackupContentType.reminders.name],
@@ -110,6 +123,12 @@ class BackupContent {
 
   List<BudgetNotification> get budgetNotifications {
     return notifitionsData.map((n) => BudgetNotification.fromMap(n)).toList();
+  }
+
+  List<MovementNotificationConfig> get movementNotificationConfigs {
+    return movementNotificationConfigsData
+        .map((config) => MovementNotificationConfig.fromMap(config))
+        .toList();
   }
 
   List<Recordatorio> get reminders {
