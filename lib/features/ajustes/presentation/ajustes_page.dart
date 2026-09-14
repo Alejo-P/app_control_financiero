@@ -81,8 +81,6 @@ class _AjustesPageState extends State<AjustesPage> {
     );
 
     if (confirmed != true) return;
-    if (!mounted) return;
-    print('Clave de encriptación: $encryptKey');
 
     if (!mounted) return;
 
