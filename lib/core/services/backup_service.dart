@@ -3,7 +3,8 @@ import 'package:control_financiero/core/models/backup_content.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
-import 'package:control_financiero/core/utils/encryption_helper.dart';
+import 'package:control_financiero/core/utils/backup_cipher.dart';
+import 'package:flutter/foundation.dart';
 import 'package:control_financiero/core/utils/file_utils.dart';
 import 'package:control_financiero/features/categorias/data/categorias_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
@@ -12,17 +13,6 @@ import 'package:control_financiero/features/presupuestos/data/presupuestos_local
 import 'dart:convert';
 import 'package:control_financiero/features/recordatorios/data/recordatorios_local_datasource.dart';
 import 'package:control_financiero/features/tipo_categorias/data/tipo_categoria_local_datasource.dart';
-
-enum BackupFileElement {
-  /// The version of the backup file format.
-  version,
-
-  /// The initialization vector used for encryption.
-  iv,
-
-  /// The encrypted backup (content) data.
-  data,
-}
 
 class BackupService {
   final MovimientosLocalDataSource _movimientosLocalDataSource =
@@ -37,30 +27,19 @@ class BackupService {
       NotificacionLocalDataSource();
   final RecordatoriosLocalDataSource _recordatoriosLocalDataSource =
       RecordatoriosLocalDataSource();
-  final int backupVersion = 1;
-
-  Future<bool> checkBackupfile(String filePath) async {
+  Future<String?> validateBackupFile(String filePath) async {
     try {
-      final content = await FileUtils.readFile(filePath);
-      final decoded = jsonDecode(content);
-
-      if (decoded is! Map<String, dynamic>) {
-        return false;
-      }
-
-      final int version = decoded[BackupFileElement.version.name] is int
-          ? decoded[BackupFileElement.version.name] as int
-          : 0;
-
-      final bool hasData =
-          decoded.containsKey(BackupFileElement.data.name) &&
-          decoded[BackupFileElement.data.name] is String;
-
-      return (version == backupVersion) && hasData;
-    } catch (e) {
-      return false;
+      BackupCipher.validate(jsonDecode(await FileUtils.readFile(filePath)));
+      return null;
+    } on FormatException catch (e) {
+      return e.message;
+    } catch (_) {
+      return 'No se pudo leer el archivo de respaldo.';
     }
   }
+
+  Future<bool> checkBackupfile(String filePath) async =>
+      await validateBackupFile(filePath) == null;
 
   Future<BackupContent> _collectDataForBackup() async {
     final movimientos = await _movimientosLocalDataSource.fetchAllMovimientos();
@@ -92,7 +71,7 @@ class BackupService {
     );
   }
 
-  Future<OperationResult<void>> backupData(String key) async {
+  Future<OperationResult<void>> backupData(String password) async {
     final dir = await FileUtils.pickDirectory();
     if (dir == null) {
       return OperationResult(
@@ -108,13 +87,10 @@ class BackupService {
     try {
       final backupData = await _collectDataForBackup();
       final jsonString = jsonEncode(backupData.toMap());
-      final encrypted = EncryptionHelper.encryptData(jsonString, key);
-
-      final fileContent = {
-        BackupFileElement.version.name: backupVersion,
-        BackupFileElement.iv.name: encrypted.iv,
-        BackupFileElement.data.name: encrypted.data,
-      };
+      final fileContent = await compute(
+        (List<String> args) => BackupCipher.encrypt(args[0], args[1]),
+        [jsonString, password],
+      );
 
       final result = await FileUtils.writeFile(
         outputFile,
@@ -141,24 +117,16 @@ class BackupService {
     }
   }
 
-  Future<OperationResult<void>> restoreData(String key, String filePath) async {
-    final isValidBackup = await checkBackupfile(filePath);
-    if (!isValidBackup) {
-      return OperationResult<void>(
-        success: false,
-        data: null,
-        message: 'El archivo de respaldo no es válido.',
-      );
-    }
-
+  Future<OperationResult<void>> restoreData(
+    String password,
+    String filePath,
+  ) async {
     try {
       final content = await FileUtils.readFile(filePath);
-      final Map fileData = jsonDecode(content);
-
-      final fileContent = EncryptionHelper.decryptData(
-        encryptedText: fileData['data'],
-        encryptKey: key,
-        ivBase64: fileData['iv'],
+      final fileContent = await compute(
+        (List<String> args) =>
+            BackupCipher.decrypt(jsonDecode(args[0]), args[1]),
+        [content, password],
       );
       final backupData = jsonDecode(fileContent) as Map<String, dynamic>;
       final backupContent = BackupContent.fromMap(backupData);
@@ -172,7 +140,13 @@ class BackupService {
         data: null,
         message: restoreResult.message,
       );
-    } on Exception catch (e) {
+    } on FormatException catch (e) {
+      return OperationResult<void>(
+        success: false,
+        data: null,
+        message: e.message,
+      );
+    } catch (e) {
       await AppLogger.log(
         'Error al restaurar datos: $e',
         level: LogLevel.error,

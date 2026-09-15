@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/ajustes/widgets/backup_password_dialog.dart';
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
@@ -71,16 +72,12 @@ class _AjustesPageState extends State<AjustesPage> {
 
   void exportarDatosBackup() async {
     final appState = context.read<AppState>();
-    final encryptKey = _appState.backupEncryptionKey;
 
-    final confirmed = await showConfirmDialog(
-      context,
-      title: 'Exportar datos',
-      content:
-          'Se generará un archivo de respaldo en la carpeta que elijas.',
+    final password = await showDialog<String>(
+      context: context,
+      builder: (_) => const BackupPasswordDialog(creating: true),
     );
-
-    if (confirmed != true) return;
+    if (password == null) return;
 
     if (!mounted) return;
 
@@ -91,7 +88,7 @@ class _AjustesPageState extends State<AjustesPage> {
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    await appState.createBackup(encryptKey);
+    await appState.createBackup(password);
 
     if (!mounted) return;
 
@@ -107,7 +104,6 @@ class _AjustesPageState extends State<AjustesPage> {
 
   void restaurarDatosBackup() async {
     final appState = context.read<AppState>();
-    final encryptKey = _appState.backupEncryptionKey;
 
     final confirmed = await showConfirmDialog(
       context,
@@ -125,17 +121,34 @@ class _AjustesPageState extends State<AjustesPage> {
       return;
     }
 
-    final isValidFile = await BackupService().checkBackupfile(pickedFile);
+    final validationError = await BackupService().validateBackupFile(
+      pickedFile,
+    );
     if (!mounted) return;
-    if (!isValidFile) {
-      AppSnackbar.error(
-        context,
-        'El archivo seleccionado no contiene datos validos a importar',
+    if (validationError != null) {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('No se puede abrir el respaldo'),
+          content: Text(validationError),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Entendido'),
+            ),
+          ],
+        ),
       );
       return;
     }
 
     if (!mounted) return;
+
+    final password = await showDialog<String>(
+      context: context,
+      builder: (_) => const BackupPasswordDialog(creating: false),
+    );
+    if (password == null || !mounted) return;
 
     // 👇 Loading
     showDialog(
@@ -145,7 +158,7 @@ class _AjustesPageState extends State<AjustesPage> {
     );
 
     // Restaurar datos
-    await appState.restoreFromBackup(encryptKey, pickedFile);
+    await appState.restoreFromBackup(password, pickedFile);
 
     if (!mounted) return;
 
@@ -269,10 +282,8 @@ class _AjustesPageState extends State<AjustesPage> {
                             'Información sobre la aplicación y su versión',
                         icon: Icons.info_outline,
                         iconColor: Colors.grey,
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRoutes.aboutRoute,
-                        ),
+                        onTap: () =>
+                            Navigator.pushNamed(context, AppRoutes.aboutRoute),
                       ),
                     ],
                   ),

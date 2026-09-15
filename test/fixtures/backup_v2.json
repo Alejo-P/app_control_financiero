@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "cipher": "AES-256-GCM",
+  "kdf": "PBKDF2-HMAC-SHA256",
+  "iterations": 600000,
+  "keyLength": 32,
+  "salt": "BwcHBwcHBwcHBwcHBwcHBw==",
+  "nonce": "CQkJCQkJCQkJCQkJ",
+  "data": "TVMYB3zcfNMKIcNzKmIIOTx4Ma3AmVnhkAvaBJgOvgOB+V9YMA0WP1U="
+}
