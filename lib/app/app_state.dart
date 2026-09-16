@@ -1200,10 +1200,6 @@ class AppState extends ChangeNotifier {
     await NotificationService.cancelNotification(id);
   }
 
-  Future<void> ocultarTodasNotificaciones() async {
-    await NotificationService.cancelAllNotifications();
-  }
-
   Future<void> marcarNotifLeida(int id) async {
     final notificacion = notificaciones.firstWhere((n) => n.id == id);
     if (notificacion.isRead == true) return;
