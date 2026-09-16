@@ -15,13 +15,13 @@ import 'package:control_financiero/features/notificaciones/models/budget_notific
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/not_found_state.dart';
 import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/ammount_input.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
-import 'package:control_financiero/features/movimientos/widgets/info_tipe_movement_card.dart';
 import 'package:control_financiero/features/movimientos/widgets/tipo_movimiento_selector.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
@@ -535,22 +535,6 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                         await _eliminarMovimiento();
                       },
               ),
-
-            if (!isViewOnly)
-              IconButton(
-                icon: Icon(
-                  Icons.check,
-                  color: (_isLoading || !_enableSaveButton)
-                      ? Colors.grey
-                      : Colors.green,
-                ),
-                tooltip: 'Guardar',
-                onPressed: _isLoading || !_enableSaveButton
-                    ? null
-                    : () async {
-                        await _guardarMovimiento();
-                      },
-              ),
           ],
         ),
         body: Padding(
@@ -692,9 +676,18 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                                     ),
                                   ],
                                 ),
-                              InfoTipeMovementCard(
-                                tipoMovimiento: tipoMovimiento,
-                              ),
+
+                              if (!isViewOnly)
+                                CustomButton(
+                                  text: modo == MovimientoFormMode.create
+                                      ? 'Guardar movimiento'
+                                      : 'Actualizar movimiento',
+                                  icon: Icons.save,
+                                  width: WidgetWidth.fullWidth,
+                                  onTap: (_isLoading || !_enableSaveButton)
+                                      ? null
+                                      : _guardarMovimiento,
+                                ),
                             ],
                           ),
                         ),

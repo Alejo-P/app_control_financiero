@@ -534,8 +534,8 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                               ),
                               CustomButton(
                                 text: formMode == RecordatorioFormMode.create
-                                    ? 'Guardar'
-                                    : 'Actualizar',
+                                    ? 'Guardar recordatorio'
+                                    : 'Actualizar recordatorio',
                                 icon: Icons.save,
                                 width: WidgetWidth.fullWidth,
                                 onTap: (_isLoading || !_enableSaveButton)

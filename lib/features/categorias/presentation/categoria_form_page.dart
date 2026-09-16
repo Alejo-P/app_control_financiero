@@ -459,8 +459,8 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                             if (!isDefault)
                               CustomButton(
                                 text: modo == CategoriaFormMode.create
-                                    ? 'Guardar'
-                                    : 'Actualizar',
+                                    ? 'Guardar categoría'
+                                    : 'Actualizar categoría',
                                 icon: Icons.save,
                                 width: WidgetWidth.fullWidth,
                                 onTap: (_isLoading || !_enableSaveButton)

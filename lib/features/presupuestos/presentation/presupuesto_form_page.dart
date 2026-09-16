@@ -581,8 +581,8 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                             if (!isViewOnly)
                               CustomButton(
                                 text: modo == PresupuestoFormMode.create
-                                    ? 'Guardar'
-                                    : 'Actualizar',
+                                    ? 'Guardar presupuesto'
+                                    : 'Actualizar presupuesto',
                                 icon: Icons.save,
                                 width: WidgetWidth.fullWidth,
                                 onTap: (_isLoading || !_enableSaveButton)
