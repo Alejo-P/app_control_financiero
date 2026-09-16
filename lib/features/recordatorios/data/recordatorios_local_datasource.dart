@@ -27,6 +27,7 @@ class RecordatoriosLocalDataSource {
           r.${RecordatorioTable.isDefault} AS is_default,
           r.${RecordatorioTable.scheduledAt} AS scheduled_at,
           r.${RecordatorioTable.recurrencia} AS recurrency,
+          r.${RecordatorioTable.categoryId} AS category_id,
           c.${CategoriasTable.name} AS category_name,
           c.${CategoriasTable.iconName} AS category_icon,
           c.${CategoriasTable.iconColorValue} AS category_color
@@ -48,6 +49,7 @@ class RecordatoriosLocalDataSource {
           r.${RecordatorioTable.isDefault} AS is_default,
           r.${RecordatorioTable.scheduledAt} AS scheduled_at,
           r.${RecordatorioTable.recurrencia} AS recurrency,
+          r.${RecordatorioTable.categoryId} AS category_id,
           c.${CategoriasTable.name} AS category_name,
           c.${CategoriasTable.iconName} AS category_icon,
           c.${CategoriasTable.iconColorValue} AS category_color

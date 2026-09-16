@@ -11,6 +11,7 @@ void main() {
     'category_color': 0xFF2E7D32,
     'is_enabled': 1,
     'is_default': 1,
+    'category_id': 3,
     'scheduled_at': '2026-09-14T20:30:00',
     'recurrency': 'diario',
   };
@@ -27,6 +28,7 @@ void main() {
       expect(reminder.isDefault, isTrue);
       expect(reminder.scheduledAt, DateTime(2026, 9, 14, 20, 30));
       expect(reminder.recurrency, 'Diario');
+      expect(reminder.categoryId, 3);
     });
 
     test('admite un recordatorio sin categoría ni id y desactivado', () {
@@ -36,6 +38,7 @@ void main() {
         'category_name': null,
         'category_icon': null,
         'category_color': null,
+        'category_id': null,
         'is_enabled': 0,
         'is_default': 0,
       });
@@ -45,6 +48,7 @@ void main() {
       expect(reminder.categoryColor, isNull);
       expect(reminder.isEnabled, isFalse);
       expect(reminder.isDefault, isFalse);
+      expect(reminder.categoryId, isNull);
     });
 
     test('usa ayuda para un icono desconocido', () {

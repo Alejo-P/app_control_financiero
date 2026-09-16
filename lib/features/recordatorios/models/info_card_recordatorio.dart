@@ -7,6 +7,7 @@ class InfoCardRecordatorio {
   final String? categoryName;
   final IconData? categoryIcon;
   final Color? categoryColor;
+  final int? categoryId;
   final bool isEnabled;
   final bool isDefault;
   final DateTime scheduledAt;
@@ -18,6 +19,7 @@ class InfoCardRecordatorio {
     this.categoryName,
     this.categoryIcon,
     this.categoryColor,
+    this.categoryId,
     required this.isEnabled,
     required this.isDefault,
     required this.scheduledAt,
@@ -36,6 +38,7 @@ class InfoCardRecordatorio {
     String? categoryName,
     IconData? categoryIcon,
     Color? categoryColor,
+    int? categoryId,
     bool? isEnabled,
     bool? isDefault,
     DateTime? scheduledAt,
@@ -47,6 +50,7 @@ class InfoCardRecordatorio {
       categoryName: categoryName ?? this.categoryName,
       categoryIcon: categoryIcon ?? this.categoryIcon,
       categoryColor: categoryColor ?? this.categoryColor,
+      categoryId: categoryId ?? this.categoryId,
       isEnabled: isEnabled ?? this.isEnabled,
       isDefault: isDefault ?? this.isDefault,
       scheduledAt: scheduledAt ?? this.scheduledAt,
@@ -67,6 +71,7 @@ class InfoCardRecordatorio {
       categoryColor: map['category_color'] != null
           ? Color((map['category_color'] as num).toInt())
           : null,
+      categoryId: map['category_id'] as int?,
       isEnabled: map['is_enabled'] == 1,
       isDefault: map['is_default'] == 1,
       scheduledAt: DateTime.parse(map['scheduled_at'] as String),

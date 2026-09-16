@@ -1045,7 +1045,6 @@ class AppState extends ChangeNotifier {
     final index = categorias.indexWhere((c) => c.id == updatedCategoria.id);
     if (index == -1) return;
 
-    final previousCategoria = categorias[index];
     categorias[index] = updatedCategoria;
     _ordenarCategorias();
     _uniqueTipeCategoryNames = getUniqueTipeCategoryNames();
@@ -1059,7 +1058,7 @@ class AppState extends ChangeNotifier {
       );
     }).toList();
     recordatorios = recordatorios.map((recordatorio) {
-      if (recordatorio.categoryName != previousCategoria.name) {
+      if (recordatorio.categoryId != updatedCategoria.id) {
         return recordatorio;
       }
       return recordatorio.copyWith(

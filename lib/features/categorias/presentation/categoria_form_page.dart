@@ -323,22 +323,6 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                         await _eliminarCategoria();
                       },
               ),
-
-            if (!isDefault)
-              IconButton(
-                icon: Icon(
-                  Icons.check,
-                  color: (_isLoading || !_enableSaveButton)
-                      ? Colors.grey
-                      : Colors.green,
-                ),
-                tooltip: 'Guardar',
-                onPressed: (_isLoading || !_enableSaveButton)
-                    ? null
-                    : () async {
-                        await _guardarCategoria();
-                      },
-              ),
           ],
         ),
         body: Padding(
@@ -470,6 +454,18 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                                   ),
                                   // Aquí podrías agregar un botón o enlace para ver los movimientos asociados a esta categoría, si lo deseas.
                                 ],
+                              ),
+
+                            if (!isDefault)
+                              CustomButton(
+                                text: modo == CategoriaFormMode.create
+                                    ? 'Guardar'
+                                    : 'Actualizar',
+                                icon: Icons.save,
+                                width: WidgetWidth.fullWidth,
+                                onTap: (_isLoading || !_enableSaveButton)
+                                    ? null
+                                    : _guardarCategoria,
                               ),
 
                             if (modo == CategoriaFormMode.edit && isDefault)
