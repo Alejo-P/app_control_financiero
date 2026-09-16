@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
+import 'package:control_financiero/core/utils/string_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
@@ -96,21 +97,24 @@ class CategoriasLocalDataSource {
   Future<OperationResult<int>> addCategoria(Categoria categoria) async {
     final db = await _dbHelper.database;
 
-    // Comprobar si ya existe una categoría con el mismo nombre
+    // Comprobar si ya existe una categoría con el mismo nombre (ignorando mayúsculas y minúsculas)
+    final categoryName = capitalize(categoria.name.trim());
     final List<Map<String, dynamic>> existing = await db.query(
       CategoriasTable.table,
-      where: '${CategoriasTable.name} = ?',
-      whereArgs: [categoria.name],
+      where: '${CategoriasTable.name} = ? ',
+      whereArgs: [categoryName],
+      limit: 1,
     );
 
     if (existing.isNotEmpty) {
       return OperationResult<int>(
         success: false,
-        message: 'Ya existe una categoría con el mismo nombre.',
+        message: 'Ya existe una categoría con el nombre \'$categoryName\'.',
       );
     }
 
-    final id = await db.insert(CategoriasTable.table, categoria.toMap());
+    final newCategory = categoria.copyWith(name: categoryName);
+    final id = await db.insert(CategoriasTable.table, newCategory.toMap());
 
     return OperationResult<int>(
       success: id > 0,
@@ -137,17 +141,21 @@ class CategoriasLocalDataSource {
   Future<OperationResult<void>> updateCategoria(Categoria categoria) async {
     final db = await _dbHelper.database;
 
-    // Comprobar si ya existe otra categoría con el mismo nombre
+    // Comprobar si ya existe una categoría con el mismo nombre
+    final categoryName = capitalize(categoria.name.trim());
     final List<Map<String, dynamic>> existing = await db.query(
       CategoriasTable.table,
-      where: '${CategoriasTable.name} = ? AND ${CategoriasTable.id} != ?',
-      whereArgs: [categoria.name, categoria.id],
+      where:
+          '${CategoriasTable.name} = ? '
+          'AND ${CategoriasTable.id} != ?',
+      whereArgs: [categoryName, categoria.id],
+      limit: 1,
     );
 
     if (existing.isNotEmpty) {
       return OperationResult<void>(
         success: false,
-        message: 'Ya existe otra categoría con el mismo nombre.',
+        message: 'Ya existe otra categoría con el nombre \'$categoryName\'.',
       );
     }
 
@@ -179,9 +187,10 @@ class CategoriasLocalDataSource {
       );
     }
 
+    final newCategory = categoria.copyWith(name: categoryName);
     final result = await db.update(
       CategoriasTable.table,
-      categoria.toMap(),
+      newCategory.toMap(),
       where: '${CategoriasTable.id} = ?',
       whereArgs: [categoria.id],
     );

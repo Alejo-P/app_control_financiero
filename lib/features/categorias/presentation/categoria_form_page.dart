@@ -4,6 +4,7 @@ import 'package:control_financiero/core/constants/categoria_constants.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
+import 'package:control_financiero/core/utils/string_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/categoria_form_args.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
@@ -161,7 +162,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       context,
       titleModal: 'Confirmar guardar categoría',
       content: [
-        Text('Nombre: $nombre'),
+        Text('Nombre: ${capitalize(nombre)}'),
         if (descripcion.isNotEmpty) Text('Descripción: $descripcion'),
         Text('Tipo de categoría: $categoryTypeName'),
         Text(

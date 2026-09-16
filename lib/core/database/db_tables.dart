@@ -153,7 +153,7 @@ Future<void> createTables(Database db) async {
     await db.execute('''
       CREATE TABLE ${CategoriasTable.table} (
         ${CategoriasTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${CategoriasTable.name} TEXT NOT NULL,
+        ${CategoriasTable.name} TEXT NOT NULL UNIQUE,
         ${CategoriasTable.description} TEXT,
         ${CategoriasTable.movementType} TEXT NOT NULL,
         ${CategoriasTable.categoryTypeId} INTEGER NOT NULL,
