@@ -539,7 +539,7 @@ class AppState extends ChangeNotifier {
       offset += newData.length;
       notificaciones.addAll(newData);
 
-      _hasMoreNotif = newData.isNotEmpty;
+      _hasMoreNotif = newData.length >= 10;
     }
 
     _isLoadingNotif = false;
