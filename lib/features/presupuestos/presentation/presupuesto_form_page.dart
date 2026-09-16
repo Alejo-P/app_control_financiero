@@ -15,6 +15,7 @@ import 'package:control_financiero/features/presupuestos/models/detalle_presupue
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
@@ -431,22 +432,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                         await _eliminarPresupuesto();
                       },
               ),
-
-            if (!isViewOnly)
-              IconButton(
-                icon: Icon(
-                  Icons.check,
-                  color: (_isLoading || !_enableSaveButton)
-                      ? Colors.grey
-                      : Colors.green,
-                ),
-                tooltip: 'Guardar Presupuesto',
-                onPressed: (_isLoading || !_enableSaveButton)
-                    ? null
-                    : () async {
-                        await _guardarPresupuesto();
-                      },
-              ),
           ],
         ),
         body: Padding(
@@ -613,24 +598,17 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                               showLabel: false,
                             ),
 
-                            WidgetsContainer(
-                              title: 'Repetir presupuesto mensualmente',
-                              description:
-                                  'Este presupuesto se repetirá automáticamente cada mes hasta que decidas eliminarlo.',
-                              padding: const EdgeInsets.all(12),
-                              children: [
-                                DetailCategoryCard(
-                                  categoryName:
-                                      'Repetir presupuesto mensualmente',
-                                  categoryIcon: Icons.repeat,
-                                  iconColor: Colors.orange,
-                                  trailing: Switch(
-                                    value: repeatBudget,
-                                    onChanged: _toggleRepeatBudget,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            if (!isViewOnly)
+                              CustomButton(
+                                text: modo == PresupuestoFormMode.create
+                                    ? 'Guardar'
+                                    : 'Actualizar',
+                                icon: Icons.save,
+                                width: WidgetWidth.fullWidth,
+                                onTap: (_isLoading || !_enableSaveButton)
+                                    ? null
+                                    : _guardarPresupuesto,
+                              ),
                           ],
                         ),
                       ),

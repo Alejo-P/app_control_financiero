@@ -331,17 +331,27 @@ class PresupuestosLocalDataSource {
       );
     }
 
-    // Comprobar si ya existe otro presupuesto con el mismo ID
+    // Comprobar si ya existe otro presupuesto para la misma categoría y mes, excluyendo el presupuesto actual
+    final String month = presupuesto.date.month.toString().padLeft(2, '0');
+    final int year = presupuesto.date.year;
     final List<Map<String, dynamic>> existing = await db.query(
       PresupuestosTable.table,
-      where: '${PresupuestosTable.id} = ? AND ${PresupuestosTable.categoryId} != ?',
-      whereArgs: [presupuesto.id, presupuesto.categoryId],
+      where:
+        "${PresupuestosTable.categoryId} = ? "
+        "AND strftime('%Y-%m', ${PresupuestosTable.date}) = ? "
+        "AND ${PresupuestosTable.id} != ?",
+      whereArgs: [
+        presupuesto.categoryId,
+        '$year-$month',
+        presupuesto.id,
+      ],
+      limit: 1,
     );
 
     if (existing.isNotEmpty) {
       return OperationResult<void>(
         success: false,
-        message: 'Ya existe otro presupuesto con el mismo ID.',
+        message: 'Ya existe otro presupuesto para la misma categoría y mes.',
       );
     }
 
