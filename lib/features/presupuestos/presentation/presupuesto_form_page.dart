@@ -17,7 +17,7 @@ import 'package:control_financiero/features/presupuestos/models/presupuesto_form
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
-import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/dialogs.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/not_found_state.dart';
 import 'package:flutter/material.dart';

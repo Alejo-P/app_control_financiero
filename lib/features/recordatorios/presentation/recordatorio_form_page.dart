@@ -7,7 +7,7 @@ import 'package:control_financiero/core/utils/time_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/recordatorios/models/detalle_recordatorio.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
-import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/dialogs.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/custom_dropdown.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';

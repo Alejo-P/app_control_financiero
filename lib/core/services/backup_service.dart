@@ -2,7 +2,7 @@ import 'package:control_financiero/core/database/backup_local_datasource.dart';
 import 'package:control_financiero/core/models/backup_content.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
-import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/backup_file_writer.dart';
 import 'package:control_financiero/core/utils/backup_cipher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:control_financiero/core/utils/file_utils.dart';
@@ -80,10 +80,6 @@ class BackupService {
         message: 'No se seleccionó ningún directorio para guardar el respaldo.',
       );
     }
-    final fileName =
-        'backup_${currentDateTime.year}_${currentDateTime.month.toString().padLeft(2, '0')}_${currentDateTime.day.toString().padLeft(2, '0')}.json';
-    String outputFile = '$dir/$fileName';
-
     try {
       final backupData = await _collectDataForBackup();
       final jsonString = jsonEncode(backupData.toMap());
@@ -92,15 +88,7 @@ class BackupService {
         [jsonString, password],
       );
 
-      final result = await FileUtils.writeFile(
-        outputFile,
-        jsonEncode(fileContent),
-      );
-      if (!result) {
-        throw Exception(
-          'Error al escribir el archivo de respaldo en la ruta: $outputFile',
-        );
-      }
+      await BackupFileWriter.write(dir, jsonEncode(fileContent));
 
       return OperationResult(
         success: true,

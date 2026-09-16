@@ -6,7 +6,7 @@ import 'package:control_financiero/core/services/backup_service.dart';
 import 'package:control_financiero/core/utils/file_utils.dart';
 import 'package:control_financiero/features/ajustes/widgets/setting_option_card.dart';
 import 'package:control_financiero/features/categorias/presentation/categorias_page.dart';
-import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
+import 'package:control_financiero/features/shared/widgets/dialogs.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -50,11 +50,7 @@ class _AjustesPageState extends State<AjustesPage> {
     if (!mounted) return;
 
     // 👇 Loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
+    showLoadingDialog(context, 'Exportando datos a Excel...');
 
     await appState.exportarMovimientos();
 
@@ -82,10 +78,10 @@ class _AjustesPageState extends State<AjustesPage> {
     if (!mounted) return;
 
     // 👇 Loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+    showLoadingDialog(
+      context,
+      'Creando respaldo...\n'
+      'Puede tardar unos segundos dependiendo de la cantidad de datos.',
     );
 
     await appState.createBackup(password);
@@ -151,10 +147,10 @@ class _AjustesPageState extends State<AjustesPage> {
     if (password == null || !mounted) return;
 
     // 👇 Loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+    showLoadingDialog(
+      context,
+      'Restaurando respaldo...\n'
+      'Espere un momento'
     );
 
     // Restaurar datos

@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
 class BackupPasswordDialog extends StatefulWidget {
@@ -86,13 +87,13 @@ class _BackupPasswordDialogState extends State<BackupPasswordDialog> {
         onPressed: () => Navigator.pop(context),
         child: const Text('Cancelar'),
       ),
-      FilledButton(
-        onPressed: () {
+      CustomButton(
+        onTap: () {
           if (_form.currentState!.validate()) {
             Navigator.pop(context, _password.text);
           }
         },
-        child: Text(widget.creating ? 'Crear respaldo' : 'Restaurar'),
+        text: widget.creating ? 'Crear respaldo' : 'Restaurar',
       ),
     ],
   );

@@ -13,10 +13,7 @@ Future<bool?> showConfirmAddDialog(
       return AlertDialog(
         title: Text(
           titleModal,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -24,9 +21,7 @@ Future<bool?> showConfirmAddDialog(
           children: content,
         ),
 
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -66,9 +61,7 @@ Future<bool?> showConfirmDialog(
           ),
         ),
         content: Text(content),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -81,5 +74,39 @@ Future<bool?> showConfirmDialog(
         ],
       );
     },
+  );
+}
+
+Future<void> showLoadingDialog(BuildContext context, [String? message]) async {
+  final theme = Theme.of(context);
+  final textTheme = theme.textTheme;
+  final colorScheme = theme.colorScheme;
+
+  // 👇 Loading
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        CircularProgressIndicator(),
+        SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            message ?? 'Cargando...',
+            style: textTheme.bodyLarge?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 3,
+          ),
+        ),
+      ],
+    ),
   );
 }
