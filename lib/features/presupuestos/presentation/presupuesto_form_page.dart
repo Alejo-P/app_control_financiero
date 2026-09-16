@@ -16,12 +16,10 @@ import 'package:control_financiero/features/presupuestos/models/ingreso_presupue
 import 'package:control_financiero/features/presupuestos/models/presupuesto_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
-import 'package:control_financiero/features/shared/widgets/detail_category_card.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/shared/widgets/confirm_dialog.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/shared/widgets/not_found_state.dart';
-import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -180,24 +178,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   void _onChangeCategoria(int categoriaId) {
     setState(() {
       categoriaSeleccionada = categoriaId;
-    });
-    _checkEnableSaveButton();
-  }
-
-  void _toggleRepeatBudget(bool value) {
-    if (isViewOnly) return;
-    if (modo == PresupuestoFormMode.create &&
-        value &&
-        ingresoDisponible.monto <= 0) {
-      AppSnackbar.error(
-        context,
-        'No puedes activar la opción de repetir mensualmente porque el ingreso disponible es 0.',
-      );
-      return;
-    }
-
-    setState(() {
-      repeatBudget = value;
     });
     _checkEnableSaveButton();
   }
