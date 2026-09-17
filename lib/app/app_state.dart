@@ -55,6 +55,8 @@ class AppState extends ChangeNotifier {
   DateTime selectedHistoryMonth = currentDateTime;
   bool _isLoadingHistory = false;
   bool get isLoadingHistory => _isLoadingHistory;
+  int _historyLoadId = 0;
+  int _historyYearChangeId = 0;
 
   // Estados para las notificaciones
   bool _isLoadingNotif = false;
@@ -142,9 +144,8 @@ class AppState extends ChangeNotifier {
       budgetNotifications.map((n) => n.threshold).toList();
   double? get totalGastos => _totalGastos;
 
-  List<MonthData> get historialAnual => _historialRepository.historial;
-  List<int> get aniosDisponibles => _historialRepository.availableYears;
-
+  List<MonthData> historialAnual = [];
+  List<int> aniosDisponibles = [];
   List<Notificacion> notificaciones = [];
   int notifSinLeer = 0;
   int totalNotif = 0;
@@ -531,8 +532,22 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> updateHistory({bool notify = true}) async {
-    await _historialRepository.fetchAvailableYears();
-    await _historialRepository.fetchYearHistory(selectedHistoryMonth);
+    final requestId = ++_historyLoadId;
+    final selectedDate = selectedHistoryMonth;
+
+    final loadedYears = await _historialRepository.fetchAvailableYears();
+    final loadedHistory = await _historialRepository.fetchYearHistory(
+      selectedDate,
+    );
+
+    if (requestId != _historyLoadId ||
+        selectedDate.year != selectedHistoryMonth.year) {
+      return;
+    }
+
+    aniosDisponibles = loadedYears;
+    historialAnual = loadedHistory;
+
     if (notify) notifyListeners();
   }
 
@@ -847,15 +862,20 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> changeHistoryYear(int year) async {
+    final changeId = ++_historyYearChangeId;
+
     selectedHistoryMonth = DateTime(year);
     _isLoadingHistory = true;
     notifyListeners();
 
-    await updateHistory();
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    _isLoadingHistory = false;
-    notifyListeners();
+    try {
+      await updateHistory();
+    } finally {
+      if (changeId == _historyYearChangeId) {
+        _isLoadingHistory = false;
+        notifyListeners();
+      }
+    }
   }
 
   Future<void> gotoMovements(DateTime dateSelected) async {
