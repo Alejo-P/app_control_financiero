@@ -40,6 +40,8 @@ class AppState extends ChangeNotifier {
   DateTime get getSelectedMovementsMonth => selectedMovementsMonth;
   bool _isLoadingMonth = false;
   bool get isLoadingMonth => _isLoadingMonth;
+  int _movementsLoadId = 0;
+  int _movementsMonthChangeId = 0;
 
   // Estado unico para presupuestos
   DateTime selectedBudgetMonth = currentDateTime;
@@ -229,22 +231,32 @@ class AppState extends ChangeNotifier {
     DateTime date, {
     bool notify = true,
   }) async {
-    movimientos = await _movimientosRepository.fetchMovimientosByMonthAndYear(
+    final requestId = ++_movementsLoadId;
+
+    final loadedMovements = await _movimientosRepository
+        .fetchMovimientosByMonthAndYear(date);
+
+    final loadedTotals = await _movimientosRepository.fetchTotalesMensuales(
       date,
     );
 
-    _totalesMensuales = await _movimientosRepository.fetchTotalesMensuales(
-      selectedMovementsMonth,
-    );
+    final loadedVariation = await calcularVariacionAhorro(date);
 
-    _variacionAhorro = await calcularVariacionAhorro(selectedMovementsMonth);
+    // No publicar una petición reemplazada por otra.
+    if (requestId != _movementsLoadId ||
+        !isSameMonth(date, selectedMovementsMonth)) {
+      return;
+    }
 
+    movimientos = loadedMovements;
+    _totalesMensuales = loadedTotals;
+    _variacionAhorro = loadedVariation;
     _movimientosPorFecha = _fetchMovimientosPorFecha();
-
     _uniqueMovementDates = _fetchUniqueMovementDates();
-    await syncDailyMovementReminder();
 
     if (notify) notifyListeners();
+
+    await syncDailyMovementReminder();
   }
 
   Future<void> syncDailyMovementReminder({DateTime? referenceDateTime}) async {
@@ -808,15 +820,20 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> changeMovementsMonth(DateTime month) async {
+    final changeId = ++_movementsMonthChangeId;
+
     selectedMovementsMonth = month;
     _isLoadingMonth = true;
     notifyListeners();
 
-    await loadMovementsByMonthAndYear(month);
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    _isLoadingMonth = false;
-    notifyListeners();
+    try {
+      await loadMovementsByMonthAndYear(month);
+    } finally {
+      if (changeId == _movementsMonthChangeId) {
+        _isLoadingMonth = false;
+        notifyListeners();
+      }
+    }
   }
 
   Future<void> changeBudgetMonth(DateTime month) async {
