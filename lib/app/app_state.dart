@@ -48,6 +48,8 @@ class AppState extends ChangeNotifier {
   DateTime get getSelectedBudgetMonth => selectedBudgetMonth;
   bool _isLoadingBudget = false;
   bool get isLoadingBudget => _isLoadingBudget;
+  int _budgetLoadId = 0;
+  int _budgetMonthChangeId = 0;
 
   // Estado unico para el historial
   DateTime selectedHistoryMonth = currentDateTime;
@@ -132,14 +134,12 @@ class AppState extends ChangeNotifier {
   List<DetalleMovimiento> movimientos = [];
   List<Categoria> categorias = [];
   List<InfoCardRecordatorio> recordatorios = [];
-
-  List<Presupuesto> get presupuestos => _presupuestosRepository.presupuestos;
+  List<Presupuesto> presupuestos = [];
+  List<DetalleMovimiento> movimientosPresupuestos = [];
   List<BudgetNotification> budgetNotifications = [];
   List<MovementNotificationConfig> movementNotificationConfigs = [];
   List<double> get budgetThresholds =>
       budgetNotifications.map((n) => n.threshold).toList();
-  List<DetalleMovimiento> get movimientosPresupuestos =>
-      _presupuestosRepository.movimientos;
   double? get totalGastos => _totalGastos;
 
   List<MonthData> get historialAnual => _historialRepository.historial;
@@ -344,12 +344,37 @@ class AppState extends ChangeNotifier {
     DateTime date, {
     bool notify = true,
   }) async {
-    await _presupuestosRepository.fetchPresupuestosByMonthAndYear(date);
+    final requestId = ++_budgetLoadId;
 
-    _ingresoPresupuestado = await _presupuestosRepository
+    final loadedBudgets = await _presupuestosRepository
+        .fetchPresupuestosByMonthAndYear(date);
+
+    final loadedMovements = await _presupuestosRepository
+        .fetchGastosByMonthAndYear(date);
+
+    final loadedIncome = await _presupuestosRepository
         .fetchIngresosPresupuestadosByMonthAndYear(date);
-    calculateTotalIngresoPresupuestado();
-    _totalGastos = _presupuestosRepository.getTotalGastosByMonthAndYear(date);
+
+    if (requestId != _budgetLoadId || !isSameMonth(date, selectedBudgetMonth)) {
+      return;
+    }
+
+    presupuestos
+      ..clear()
+      ..addAll(loadedBudgets);
+
+    movimientosPresupuestos
+      ..clear()
+      ..addAll(loadedMovements);
+
+    _ingresoPresupuestado = loadedIncome;
+    _totalGastos = loadedMovements.fold<double>(
+      0.0,
+      (sum, movimiento) => sum + movimiento.amount,
+    );
+
+    await calculateTotalIngresoPresupuestado(notify: false);
+
     if (notify) notifyListeners();
   }
 
@@ -837,15 +862,20 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> changeBudgetMonth(DateTime month) async {
+    final changeId = ++_budgetMonthChangeId;
+
     selectedBudgetMonth = month;
     _isLoadingBudget = true;
     notifyListeners();
 
-    await loadPresupuestosByMonthAndYear(month);
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    _isLoadingBudget = false;
-    notifyListeners();
+    try {
+      await loadPresupuestosByMonthAndYear(month);
+    } finally {
+      if (changeId == _budgetMonthChangeId) {
+        _isLoadingBudget = false;
+        notifyListeners();
+      }
+    }
   }
 
   Future<void> changeHistoryYear(int year) async {
