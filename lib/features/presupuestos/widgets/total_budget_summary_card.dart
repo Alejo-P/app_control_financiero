@@ -64,7 +64,9 @@ class TotalBudgetSummaryCard extends StatelessWidget {
           children: [
             Text('Disponible', style: TextStyle(color: Colors.white70)),
             Text(
-              '\$${available.toStringAsFixed(2)}',
+              available < 0
+                  ? '-\$${available.abs().toStringAsFixed(2)}'
+                  : '\$${available.abs().toStringAsFixed(2)}',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
