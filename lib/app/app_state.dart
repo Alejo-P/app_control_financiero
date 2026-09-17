@@ -583,18 +583,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  int countMovementsByCategory(int categoryId) {
-    int total = 0;
-
-    for (var movimiento in movimientos) {
-      if (movimiento.categoryId == categoryId) {
-        total += 1;
-      }
-    }
-
-    return total;
-  }
-
   Future<IngresoPresupuestado> getIngresoPresupuestadoByMonthAndYear(
     DateTime date,
   ) async {
@@ -652,21 +640,6 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  TipoMovimiento? getTipoMovimientoByCategoriaId(int categoriaId) {
-    final categoria = getCategoriaById(categoriaId);
-    if (categoria == null) return null;
-
-    return categoria.movementType;
-  }
-
-  Presupuesto? getPresupuestoByCategoriaId(int categoriaId) {
-    try {
-      return presupuestos.firstWhere((p) => p.categoryId == categoriaId);
-    } catch (e) {
-      return null;
-    }
-  }
-
   // Obtener todas las fechas únicas de movimientos
   List<DateTime> _fetchUniqueMovementDates() {
     final dates = movimientos
@@ -699,11 +672,6 @@ class AppState extends ChangeNotifier {
 
     dates.sort((a, b) => b.compareTo(a));
     return dates;
-  }
-
-  // Obtener movimientos por categoria (id)
-  List<DetalleMovimiento> getMovimientosByCategoriaId(int categoriaId) {
-    return movimientos.where((m) => m.categoryId == categoriaId).toList();
   }
 
   // Obtener movimientos (para presupuesto) por categoria (id)
