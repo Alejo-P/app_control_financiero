@@ -208,10 +208,7 @@ class PresupuestosLocalDataSource {
       return 0.0; // Evitar división por cero
     }
 
-    return (totalGastado / presupuestoMonto).clamp(
-      0.0,
-      1.0,
-    ); // Retornar un valor entre 0.0 y 1.0
+    return (totalGastado / presupuestoMonto);
   }
 
   // Agregar o actualizar ingreso presupuestado
