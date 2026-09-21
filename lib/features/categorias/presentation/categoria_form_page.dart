@@ -325,157 +325,162 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
               ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-          child: _isLoading
-              ? LoadingScreen(message: '$_action categoría...')
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            Center(
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: 8),
-                                  IconContainer(
-                                    icon: selectedIcon,
-                                    color: selectedColor,
-                                    size: 64,
-                                    onTap: () {
-                                      if (isDefault) return;
-                                      _openIconColorPickerModal(context);
-                                    },
-                                  ),
-                                  if (!isDefault) ...[
+        body: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            child: _isLoading
+                ? LoadingScreen(message: '$_action categoría...')
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              Center(
+                                child: Column(
+                                  children: [
                                     const SizedBox(height: 8),
-                                    Text(
-                                      "Toca el ícono para cambiar",
-                                      style: TextStyle(
-                                        color: selectedColor,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                      ),
+                                    IconContainer(
+                                      icon: selectedIcon,
+                                      color: selectedColor,
+                                      size: 64,
+                                      onTap: () {
+                                        if (isDefault) return;
+                                        _openIconColorPickerModal(context);
+                                      },
                                     ),
+                                    if (!isDefault) ...[
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        "Toca el ícono para cambiar",
+                                        style: TextStyle(
+                                          color: selectedColor,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
                                   ],
-                                ],
+                                ),
                               ),
-                            ),
-                            WidgetsContainer(
-                              title: 'Detalles de la categoría',
-                              showDivider: false,
-                              children: [
-                                TextInputCard(
-                                  textController: _categoryNameController,
-                                  placeholder: 'Nombre de la categoría',
-                                  iconData: Icons.label_outline,
-                                  iconColor: Colors.grey.shade600,
-                                  maxLines: 1,
-                                  maxLength: 40,
-                                  isEditable: !isDefault,
-                                ),
-                                TextInputCard(
-                                  textController: _descriptionController,
-                                  placeholder: 'Descripción (opcional)',
-                                  iconData: Icons.description_outlined,
-                                  iconColor: Colors.grey.shade600,
-                                  maxLines: 3,
-                                  maxLength: 80,
-                                  isEditable: !isDefault,
-                                ),
-                              ],
-                            ),
-                            WidgetsContainer(
-                              title: 'Opciones adicionales',
-                              description: !isEditing
-                                  ? 'Configura opciones adicionales para esta categoría.'
-                                  : 'No puedes cambiar estas opciones para categorías predeterminadas o al editar.',
-                              showDivider: false,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    if (isDefault || isEditing) return;
-                                    _openTipoCategoriasModal(context);
-                                  },
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: DetailCategoryCard(
-                                    categoryName: 'Tipo de categoría',
-                                    categoryIcon: Icons.category,
-                                    iconColor: Colors.blue,
-                                    currentValue: categoryTypeName,
-                                    showArrow: (!isDefault && !isEditing),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    if (isDefault || isEditing) return;
-                                    _onChangeTipoMovimiento(
-                                      selectedTipeMovement == 'gasto'
-                                          ? 'ingreso'
-                                          : 'gasto',
-                                    );
-                                  },
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: DetailCategoryCard(
-                                    categoryName: 'Tipo de movimiento',
-                                    categoryIcon:
-                                        selectedTipeMovement == 'gasto'
-                                        ? Icons.arrow_downward
-                                        : Icons.arrow_upward,
-                                    iconColor: selectedTipeMovement == 'gasto'
-                                        ? Colors.red
-                                        : Colors.green,
-                                    currentValue:
-                                        selectedTipeMovement == 'gasto'
-                                        ? 'Gasto'
-                                        : 'Ingreso',
-                                    showArrow: (!isDefault && !isEditing),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (movementsByCategory > 0)
                               WidgetsContainer(
-                                title: 'Movimientos asociados',
-                                description:
-                                    'Esta categoría tiene movimientos asociados.\nPara eliminarla, primero elimina o reasigna esos movimientos.',
-                                borderColor: Colors.orange,
+                                title: 'Detalles de la categoría',
+                                showDivider: false,
                                 children: [
-                                  DetailCategoryCard(
-                                    categoryName:
-                                        'Cantidad de movimientos asociados',
-                                    categoryIcon: Icons.list_alt,
-                                    iconColor: Colors.purple,
-                                    currentValue:
-                                        '$movementsByCategory movimiento(s)',
-                                    showArrow: false,
+                                  TextInputCard(
+                                    textController: _categoryNameController,
+                                    placeholder: 'Nombre de la categoría',
+                                    iconData: Icons.label_outline,
+                                    iconColor: Colors.grey.shade600,
+                                    maxLines: 1,
+                                    maxLength: 40,
+                                    isEditable: !isDefault,
                                   ),
-                                  // Aquí podrías agregar un botón o enlace para ver los movimientos asociados a esta categoría, si lo deseas.
+                                  TextInputCard(
+                                    textController: _descriptionController,
+                                    placeholder: 'Descripción (opcional)',
+                                    iconData: Icons.description_outlined,
+                                    iconColor: Colors.grey.shade600,
+                                    maxLines: 3,
+                                    maxLength: 80,
+                                    isEditable: !isDefault,
+                                  ),
                                 ],
                               ),
-
-                            if (!isDefault)
-                              CustomButton(
-                                text: modo == CategoriaFormMode.create
-                                    ? 'Guardar categoría'
-                                    : 'Actualizar categoría',
-                                icon: Icons.save,
-                                width: WidgetWidth.fullWidth,
-                                onTap: (_isLoading || !_enableSaveButton)
-                                    ? null
-                                    : _guardarCategoria,
+                              WidgetsContainer(
+                                title: 'Opciones adicionales',
+                                description: !isEditing
+                                    ? 'Configura opciones adicionales para esta categoría.'
+                                    : 'No puedes cambiar estas opciones para categorías predeterminadas o al editar.',
+                                showDivider: false,
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      if (isDefault || isEditing) return;
+                                      _openTipoCategoriasModal(context);
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: DetailCategoryCard(
+                                      categoryName: 'Tipo de categoría',
+                                      categoryIcon: Icons.category,
+                                      iconColor: Colors.blue,
+                                      currentValue: categoryTypeName,
+                                      showArrow: (!isDefault && !isEditing),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      if (isDefault || isEditing) return;
+                                      _onChangeTipoMovimiento(
+                                        selectedTipeMovement == 'gasto'
+                                            ? 'ingreso'
+                                            : 'gasto',
+                                      );
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: DetailCategoryCard(
+                                      categoryName: 'Tipo de movimiento',
+                                      categoryIcon:
+                                          selectedTipeMovement == 'gasto'
+                                          ? Icons.arrow_downward
+                                          : Icons.arrow_upward,
+                                      iconColor: selectedTipeMovement == 'gasto'
+                                          ? Colors.red
+                                          : Colors.green,
+                                      currentValue:
+                                          selectedTipeMovement == 'gasto'
+                                          ? 'Gasto'
+                                          : 'Ingreso',
+                                      showArrow: (!isDefault && !isEditing),
+                                    ),
+                                  ),
+                                ],
                               ),
+                              if (movementsByCategory > 0)
+                                WidgetsContainer(
+                                  title: 'Movimientos asociados',
+                                  description:
+                                      'Esta categoría tiene movimientos asociados.\nPara eliminarla, primero elimina o reasigna esos movimientos.',
+                                  borderColor: Colors.orange,
+                                  children: [
+                                    DetailCategoryCard(
+                                      categoryName:
+                                          'Cantidad de movimientos asociados',
+                                      categoryIcon: Icons.list_alt,
+                                      iconColor: Colors.purple,
+                                      currentValue:
+                                          '$movementsByCategory movimiento(s)',
+                                      showArrow: false,
+                                    ),
+                                    // Aquí podrías agregar un botón o enlace para ver los movimientos asociados a esta categoría, si lo deseas.
+                                  ],
+                                ),
 
-                            if (modo == CategoriaFormMode.edit && isDefault)
-                              InfoCategoriaPredeterminada(isDefault: isDefault),
-                          ],
+                              if (!isDefault)
+                                CustomButton(
+                                  text: modo == CategoriaFormMode.create
+                                      ? 'Guardar categoría'
+                                      : 'Actualizar categoría',
+                                  icon: Icons.save,
+                                  width: WidgetWidth.fullWidth,
+                                  onTap: (_isLoading || !_enableSaveButton)
+                                      ? null
+                                      : _guardarCategoria,
+                                ),
+
+                              if (modo == CategoriaFormMode.edit && isDefault)
+                                InfoCategoriaPredeterminada(
+                                  isDefault: isDefault,
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

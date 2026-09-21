@@ -71,6 +71,8 @@ class WidgetsContainer extends StatelessWidget {
                 ],
               ),
               child: ListView.separated(
+                // El espacio seguro pertenece a la pantalla, no a cada grupo.
+                padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: children!.length,
