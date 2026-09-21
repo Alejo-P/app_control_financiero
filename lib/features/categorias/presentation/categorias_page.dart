@@ -73,62 +73,65 @@ class _CategoriasPageState extends State<CategoriasPage> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              children: [
-                Icon(Icons.lock, color: colorScheme.onSurface.withOpacity(0.6)),
-                Expanded(
-                  child: Text(
-                    'Las categorías con este ícono no se pueden eliminar ni modificar.',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.primary.withOpacity(0.6),
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: loadingInitialData ? false : true,
-                    maxLines: 2,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: loadingInitialData
-                  ? LoadingScreen(message: 'Cargando categorías...')
-                  : nombresTiposCategoria.isEmpty
-                  ? _EmptyCategorias()
-                  : SingleChildScrollView(
-                      controller: _controller,
-                      child: Column(
-                        children: [
-                          ...nombresTiposCategoria.map((tipoCategoria) {
-                            final categorias = appState
-                                .getCategoriasByTipoCategoria(tipoCategoria);
-                            return CategoryContainer(
-                              categoryName: tipoCategoria,
-                              categorias: categorias,
-                            );
-                          }),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Total de categorías: $cantidadCategorias',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.6),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: [
+                  Icon(Icons.lock, color: colorScheme.onSurface.withOpacity(0.6)),
+                  Expanded(
+                    child: Text(
+                      'Las categorías con este ícono no se pueden eliminar ni modificar.',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.primary.withOpacity(0.6),
+                        fontWeight: FontWeight.bold,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: loadingInitialData ? false : true,
+                      maxLines: 2,
                     ),
-            ),
-          ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: loadingInitialData
+                    ? LoadingScreen(message: 'Cargando categorías...')
+                    : nombresTiposCategoria.isEmpty
+                    ? _EmptyCategorias()
+                    : SingleChildScrollView(
+                        controller: _controller,
+                        child: Column(
+                          children: [
+                            ...nombresTiposCategoria.map((tipoCategoria) {
+                              final categorias = appState
+                                  .getCategoriasByTipoCategoria(tipoCategoria);
+                              return CategoryContainer(
+                                categoryName: tipoCategoria,
+                                categorias: categorias,
+                              );
+                            }),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Total de categorías: $cantidadCategorias',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
