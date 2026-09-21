@@ -61,7 +61,6 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
             await _mostrarModalIngresoPresupuestado();
           },
         ),
-
       ]);
 
       if (_appState.ingresoPresupuestado != null &&
@@ -427,12 +426,9 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
           title: Text(
             'Ingreso presupuestado para ${formatMonthYear(fechaPresupuesto)}',
           ),
-          content: SizedBox(
-            height: 120,
-            child: AmountInput(
-              controller: _ingresoPresupuestadoController,
-              fontSize: 40,
-            ),
+          content: AmountInput(
+            controller: _ingresoPresupuestadoController,
+            fontSize: 40,
           ),
           actions: [
             TextButton(

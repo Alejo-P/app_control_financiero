@@ -25,15 +25,19 @@ class AmountInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (showLabel) 
-          ...[
-            // Label
-            Text('Monto', style: Theme.of(context).textTheme.labelMedium),
-            const SizedBox(height: 5),
-          ],
+        if (showLabel) ...[
+          // Label
+          Text('Monto', style: textTheme.labelMedium),
+          const SizedBox(height: 5),
+        ],
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: position,
@@ -42,7 +46,11 @@ class AmountInput extends StatelessWidget {
             // Símbolo $
             Text(
               '\$',
-              style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+              style: textTheme.bodyLarge?.copyWith(
+                fontSize: fontSize,
+                fontWeight: fontWeight,
+                color: colorScheme.primary,
+              ),
             ),
 
             // Input

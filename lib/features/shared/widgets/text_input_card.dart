@@ -67,6 +67,9 @@ class _TextInputCardState extends State<TextInputCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
 
     return InputCard(
       icon: widget.iconData,
@@ -101,12 +104,20 @@ class _TextInputCardState extends State<TextInputCard> {
         },
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintStyle: TextStyle(color: Colors.grey),
+          hintStyle: textTheme.bodySmall?.copyWith(
+            fontSize: 16,
+            color: colorScheme.primary.withOpacity(0.5),
+          ),
           hintText: widget.placeholder,
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
           counterText: '', // Oculta el contador predeterminado
         ),
-        style: const TextStyle(fontSize: 16),
+        style: textTheme.bodySmall?.copyWith(
+          fontSize: 16,
+          color: widget.isEditable
+              ? colorScheme.primary
+              : colorScheme.primary.withOpacity(0.5),
+        ),
         inputFormatters: [NoteInputFormatter()],
         keyboardType: widget.inputKeyboardType,
         expands: false,

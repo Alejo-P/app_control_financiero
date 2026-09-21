@@ -22,23 +22,24 @@ class NumberInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
 
     return TextFormField(
       controller: controller,
       enabled: isEditable,
-      keyboardType: const TextInputType.numberWithOptions(
-        decimal: true,
-      ),
-      style: TextStyle(
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: textTheme.bodyLarge?.copyWith(
         fontSize: fontSize,
         fontWeight: fontWeight,
+        color: colorScheme.primary,
       ),
       decoration: InputDecoration(
         hintText: '0.00',
-        hintStyle: TextStyle(
+        hintStyle: textTheme.bodyLarge?.copyWith(
           fontSize: fontSize,
           fontWeight: fontWeight,
+          color: colorScheme.primary.withOpacity(0.5),
         ),
         border: InputBorder.none,
         isDense: true,
