@@ -199,64 +199,75 @@ class _HistorialPageState extends State<HistorialPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        final theme = Theme.of(context);
-        final textTheme = theme.textTheme;
-        final colorScheme = theme.colorScheme;
-        final years = appState.aniosDisponibles;
+        return SafeArea(
+          top: false,
+          child: Builder(
+            builder: (context) {
+              final theme = Theme.of(context);
+              final textTheme = theme.textTheme;
+              final colorScheme = theme.colorScheme;
+              final years = appState.aniosDisponibles;
 
-        if (years.isEmpty) {
-          return const Center(child: Text("No hay datos disponibles"));
-        }
+              if (years.isEmpty) {
+                return const Center(child: Text("No hay datos disponibles"));
+              }
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[400],
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Seleccionar año",
-              style: textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.primary,
-                fontSize: 16,
-              ),
-            ),
-            Text(
-              "Solo aparecerán aquellos que tengan movimientos registrados",
-              style: textTheme.labelSmall?.copyWith(color: Colors.grey[500]),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: ListView(
-                children: years.map((year) {
-                  final isSelected = year == currentYear;
-
-                  return ListTile(
-                    title: Text(
-                      year.toString(),
-                      style: textTheme.displayMedium?.copyWith(
-                        color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    trailing: isSelected ? const Icon(Icons.check) : null,
-                    onTap: () => Navigator.pop(context, year),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Seleccionar año",
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    "Solo aparecerán aquellos que tengan movimientos registrados",
+                    style: textTheme.labelSmall?.copyWith(
+                      color: Colors.grey[500],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: ListView(
+                      children: years.map((year) {
+                        final isSelected = year == currentYear;
+
+                        return ListTile(
+                          title: Text(
+                            year.toString(),
+                            style: textTheme.displayMedium?.copyWith(
+                              color: isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurface,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                          trailing: isSelected ? const Icon(Icons.check) : null,
+                          onTap: () => Navigator.pop(context, year),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         );
       },
     );

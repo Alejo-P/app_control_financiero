@@ -55,17 +55,24 @@ class _NotificationDetailState extends State<NotificationDetailPage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return LoadingScreen(message: 'Cargando detalles de la notificación...');
+      return SafeArea(
+        child: LoadingScreen(
+          message: 'Cargando detalles de la notificación...',
+        ),
+      );
     }
 
     return Scaffold(
       appBar: AppBar(title: Text(notif?.title ?? 'Detalle de notificación')),
-      body: notif == null
-          ? _EmptyNotificacion()
-          : Padding(
-              padding: const EdgeInsets.all(8),
-              child: NotificacionDetailCard(notif: notif!),
-            ),
+      body: SafeArea(
+        top: false,
+        child: notif == null
+            ? _EmptyNotificacion()
+            : Padding(
+                padding: const EdgeInsets.all(8),
+                child: NotificacionDetailCard(notif: notif!),
+              ),
+      ),
     );
   }
 }

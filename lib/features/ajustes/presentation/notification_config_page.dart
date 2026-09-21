@@ -112,139 +112,142 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configuración de Notificaciones')),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  SectionTitle(
-                    title: 'Movimientos',
-                    icon: Icons.account_balance_wallet_outlined,
-                  ),
-
-                  ItemCard(
-                    title: 'Creación de movimientos',
-                    value:
-                        appState
-                            .getMovementNotificationConfigByType(
-                              MovementNotificationConfig.createMovementKey,
-                            )
-                            ?.isEnabled ??
-                        false,
-                    onChanged: (value) {
-                      appState.updateMovementNotificationConfig(
-                        typeKey: MovementNotificationConfig.createMovementKey,
-                        isEnabled: value!,
-                      );
-                    },
-                  ),
-
-                  ItemCard(
-                    title: 'Edición de movimientos',
-                    value:
-                        appState
-                            .getMovementNotificationConfigByType(
-                              MovementNotificationConfig.editMovementKey,
-                            )
-                            ?.isEnabled ??
-                        false,
-                    onChanged: (value) {
-                      appState.updateMovementNotificationConfig(
-                        typeKey: MovementNotificationConfig.editMovementKey,
-                        isEnabled: value!,
-                      );
-                    },
-                  ),
-
-                  ItemCard(
-                    title: 'Eliminación de movimientos',
-                    value:
-                        appState
-                            .getMovementNotificationConfigByType(
-                              MovementNotificationConfig.deleteMovementKey,
-                            )
-                            ?.isEnabled ??
-                        false,
-                    onChanged: (value) {
-                      appState.updateMovementNotificationConfig(
-                        typeKey: MovementNotificationConfig.deleteMovementKey,
-                        isEnabled: value!,
-                      );
-                    },
-                  ),
-
-                  SectionTitle(
-                    title: 'Presupuestos',
-                    icon: Icons.pie_chart_outline,
-                  ),
-
-                  if (budgetNotifications.isNotEmpty)
-                    ...budgetNotifications.map(
-                      (notification) => ItemCard(
-                        title:
-                            'Notificar al ${int.tryParse((notification.threshold * 100).toStringAsFixed(0)) ?? 0}% del presupuesto',
-                        value: notification.isEnabledNotification,
-                        showDeleteButton: !notification.isDefault,
-                        onChanged: (value) {
-                          _updateCustomThreshold(
-                            id: notification.id ?? -1,
-                            isEnabledNotification: value,
-                          );
-                        },
-                        onDelete: () {
-                          _deleteThreshold(notification.id!);
-                        },
-                      ),
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SectionTitle(
+                      title: 'Movimientos',
+                      icon: Icons.account_balance_wallet_outlined,
                     ),
 
-                  Card(
-                    margin: const EdgeInsets.all(16.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Text('Otro porcentaje'),
-                          NumberInputCard(
-                            textController: _customThresholdController,
-                            placeholder: 'Porcentaje personalizado (0-100)',
-                            iconData: Icons.percent_rounded,
-                            iconColor: Colors.blue,
-                            maxLength: 5,
-                          ),
-                          if (errorText.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                              ),
-                              child: Text(
-                                errorText,
-                                style: const TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
+                    ItemCard(
+                      title: 'Creación de movimientos',
+                      value:
+                          appState
+                              .getMovementNotificationConfigByType(
+                                MovementNotificationConfig.createMovementKey,
+                              )
+                              ?.isEnabled ??
+                          false,
+                      onChanged: (value) {
+                        appState.updateMovementNotificationConfig(
+                          typeKey: MovementNotificationConfig.createMovementKey,
+                          isEnabled: value!,
+                        );
+                      },
+                    ),
+
+                    ItemCard(
+                      title: 'Edición de movimientos',
+                      value:
+                          appState
+                              .getMovementNotificationConfigByType(
+                                MovementNotificationConfig.editMovementKey,
+                              )
+                              ?.isEnabled ??
+                          false,
+                      onChanged: (value) {
+                        appState.updateMovementNotificationConfig(
+                          typeKey: MovementNotificationConfig.editMovementKey,
+                          isEnabled: value!,
+                        );
+                      },
+                    ),
+
+                    ItemCard(
+                      title: 'Eliminación de movimientos',
+                      value:
+                          appState
+                              .getMovementNotificationConfigByType(
+                                MovementNotificationConfig.deleteMovementKey,
+                              )
+                              ?.isEnabled ??
+                          false,
+                      onChanged: (value) {
+                        appState.updateMovementNotificationConfig(
+                          typeKey: MovementNotificationConfig.deleteMovementKey,
+                          isEnabled: value!,
+                        );
+                      },
+                    ),
+
+                    SectionTitle(
+                      title: 'Presupuestos',
+                      icon: Icons.pie_chart_outline,
+                    ),
+
+                    if (budgetNotifications.isNotEmpty)
+                      ...budgetNotifications.map(
+                        (notification) => ItemCard(
+                          title:
+                              'Notificar al ${int.tryParse((notification.threshold * 100).toStringAsFixed(0)) ?? 0}% del presupuesto',
+                          value: notification.isEnabledNotification,
+                          showDeleteButton: !notification.isDefault,
+                          onChanged: (value) {
+                            _updateCustomThreshold(
+                              id: notification.id ?? -1,
+                              isEnabledNotification: value,
+                            );
+                          },
+                          onDelete: () {
+                            _deleteThreshold(notification.id!);
+                          },
+                        ),
+                      ),
+
+                    Card(
+                      margin: const EdgeInsets.all(16.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Text('Otro porcentaje'),
+                            NumberInputCard(
+                              textController: _customThresholdController,
+                              placeholder: 'Porcentaje personalizado (0-100)',
+                              iconData: Icons.percent_rounded,
+                              iconColor: Colors.blue,
+                              maxLength: 5,
+                            ),
+                            if (errorText.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                ),
+                                child: Text(
+                                  errorText,
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
 
-                          CustomButton(
-                            onTap: !_isCustomThresholdValid
-                                ? null
-                                : () {
-                                    _addCustomThreshold();
-                                  },
-                            icon: Icons.add,
-                            text: 'Agregar umbral personalizado',
-                          ),
-                        ],
+                            CustomButton(
+                              onTap: !_isCustomThresholdValid
+                                  ? null
+                                  : () {
+                                      _addCustomThreshold();
+                                    },
+                              icon: Icons.add,
+                              text: 'Agregar umbral personalizado',
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -499,114 +499,124 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// PREVIEW
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Vista previa',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+        return SafeArea(
+          top: false,
+          child: Builder(
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (context, setModalState) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// PREVIEW
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Vista previa',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: IconContainer(
-                      icon: tempIcon,
-                      color: tempColor,
-                      size: 72,
+                        const SizedBox(height: 16),
+                        Center(
+                          child: IconContainer(
+                            icon: tempIcon,
+                            color: tempColor,
+                            size: 72,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            TabChip(
+                              isSelected: selectedTab == 'icons',
+                              tempColor: tempColor,
+                              label: 'Íconos',
+                              onTap: () {
+                                setModalState(() {
+                                  selectedTab = 'icons';
+                                });
+                              },
+                            ),
+                            TabChip(
+                              isSelected: selectedTab == 'colors',
+                              tempColor: tempColor,
+                              label: 'Colores',
+                              onTap: () {
+                                setModalState(() {
+                                  selectedTab = 'colors';
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+
+                        /// ÍCONOS
+                        if (selectedTab == 'icons')
+                          SizedBox(
+                            height: 200,
+                            child: IconsSingleChildScroll(
+                              tempIcon: tempIcon,
+                              tempColor: tempColor,
+                              onTap: (icon) {
+                                setModalState(() {
+                                  tempIcon = icon;
+                                });
+                              },
+                            ),
+                          ),
+
+                        /// COLORES
+                        if (selectedTab == 'colors')
+                          SizedBox(
+                            height: 200,
+                            child: ColorsSingleChildScroll(
+                              tempColor: tempColor,
+                              onTap: (color) {
+                                setModalState(() {
+                                  tempColor = color;
+                                });
+                              },
+                            ),
+                          ),
+
+                        const SizedBox(height: 6),
+
+                        /// BOTÓN CONFIRMAR
+                        SizedBox(
+                          width: double.infinity,
+                          child: CustomButton(
+                            onTap: () {
+                              Navigator.pop(context, {
+                                'icon': tempIcon,
+                                'color': tempColor,
+                              });
+                            },
+                            text: 'Confirmar',
+                            icon: Icons.check,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      TabChip(
-                        isSelected: selectedTab == 'icons',
-                        tempColor: tempColor,
-                        label: 'Íconos',
-                        onTap: () {
-                          setModalState(() {
-                            selectedTab = 'icons';
-                          });
-                        },
-                      ),
-                      TabChip(
-                        isSelected: selectedTab == 'colors',
-                        tempColor: tempColor,
-                        label: 'Colores',
-                        onTap: () {
-                          setModalState(() {
-                            selectedTab = 'colors';
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-
-                  /// ÍCONOS
-                  if (selectedTab == 'icons')
-                    SizedBox(
-                      height: 200,
-                      child: IconsSingleChildScroll(
-                        tempIcon: tempIcon,
-                        tempColor: tempColor,
-                        onTap: (icon) {
-                          setModalState(() {
-                            tempIcon = icon;
-                          });
-                        },
-                      ),
-                    ),
-
-                  /// COLORES
-                  if (selectedTab == 'colors')
-                    SizedBox(
-                      height: 200,
-                      child: ColorsSingleChildScroll(
-                        tempColor: tempColor,
-                        onTap: (color) {
-                          setModalState(() {
-                            tempColor = color;
-                          });
-                        },
-                      ),
-                    ),
-
-                  const SizedBox(height: 6),
-
-                  /// BOTÓN CONFIRMAR
-                  SizedBox(
-                    width: double.infinity,
-                    child: CustomButton(
-                      onTap: () {
-                        Navigator.pop(context, {
-                          'icon': tempIcon,
-                          'color': tempColor,
-                        });
-                      },
-                      text: 'Confirmar',
-                      icon: Icons.check,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     ).then((result) {
@@ -629,46 +639,53 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
       showDragHandle: true, // Muestra el indicador de arrastre
       builder: (_) {
-        final theme = Theme.of(context);
-        final colors = theme.colorScheme;
-        // Si la lista de categorías está vacía, mostrar un mensaje
-        if (tiposCategorias.isEmpty) {
-          return Center(
-            child: Text(
-              'No hay categorías disponibles.',
-              style: TextStyle(fontSize: 18, color: colors.primary),
-            ),
-          );
-        }
+        return SafeArea(
+          top: false,
+          child: Builder(
+            builder: (context) {
+              final theme = Theme.of(context);
+              final colors = theme.colorScheme;
+              // Si la lista de categorías está vacía, mostrar un mensaje
+              if (tiposCategorias.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No hay categorías disponibles.',
+                    style: TextStyle(fontSize: 18, color: colors.primary),
+                  ),
+                );
+              }
 
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: tiposCategorias.length,
-          separatorBuilder: (_, __) => const Divider(),
-          itemBuilder: (context, index) {
-            final theme = Theme.of(context);
-            final colors = theme.colorScheme;
-            final tipoCategoria = tiposCategorias[index];
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: tiposCategorias.length,
+                separatorBuilder: (_, __) => const Divider(),
+                itemBuilder: (context, index) {
+                  final theme = Theme.of(context);
+                  final colors = theme.colorScheme;
+                  final tipoCategoria = tiposCategorias[index];
 
-            return ListTile(
-              leading: IconContainer(
-                icon: Icons.category,
-                color: colors.primary,
-                size: 26,
-              ),
-              title: Text(
-                tipoCategoria.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                tipoCategoria.description,
-                style: const TextStyle(color: Colors.grey),
-              ),
-              onTap: () {
-                Navigator.pop(context, tipoCategoria);
-              },
-            );
-          },
+                  return ListTile(
+                    leading: IconContainer(
+                      icon: Icons.category,
+                      color: colors.primary,
+                      size: 26,
+                    ),
+                    title: Text(
+                      tipoCategoria.name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      tipoCategoria.description,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context, tipoCategoria);
+                    },
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     ).then((tipoCategoriaSeleccionada) {

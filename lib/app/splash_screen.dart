@@ -88,62 +88,64 @@ class _SplashScreenState extends State<SplashScreen>
           ),
 
           /// Contenido central
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedBuilder(
-                  animation: _logoController,
-                  builder: (_, child) {
-                    return Transform.rotate(
-                      angle: _logoRotation.value,
-                      child: Transform.scale(
-                        scale: _logoScale.value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: 128,
-                    height: 128,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 25,
-                          offset: const Offset(0, 10),
+          SafeArea(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedBuilder(
+                    animation: _logoController,
+                    builder: (_, child) {
+                      return Transform.rotate(
+                        angle: _logoRotation.value,
+                        child: Transform.scale(
+                          scale: _logoScale.value,
+                          child: child,
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Image.asset(
-                        'assets/icons/app_prod_icon.png',
-                        fit: BoxFit.contain,
+                      );
+                    },
+                    child: Container(
+                      width: 128,
+                      height: 128,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 25,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Image.asset(
+                          'assets/icons/app_prod_icon.png',
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                SlideTransition(
-                  position: _textOffset,
-                  child: FadeTransition(
-                    opacity: _textOpacity,
-                    child: const Text(
-                      "Mi Presupuesto",
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: primary,
+                  SlideTransition(
+                    position: _textOffset,
+                    child: FadeTransition(
+                      opacity: _textOpacity,
+                      child: const Text(
+                        "Mi Presupuesto",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          color: primary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -152,7 +154,7 @@ class _SplashScreenState extends State<SplashScreen>
             bottom: 60,
             left: 0,
             right: 0,
-            child: _LoadingDots(),
+            child: SafeArea(top: false, child: _LoadingDots()),
           ),
         ],
       ),

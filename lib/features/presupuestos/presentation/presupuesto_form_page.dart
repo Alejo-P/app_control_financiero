@@ -373,11 +373,14 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
                 : 'Editar Presupuesto',
           ),
         ),
-        body: const Center(
-          child: Text(
-            'No hay categorías disponibles. Por favor, crea una categoría primero.',
-            style: TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
+        body: SafeArea(
+          top: false,
+          child: const Center(
+            child: Text(
+              'No hay categorías disponibles. Por favor, crea una categoría primero.',
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       );
@@ -414,187 +417,192 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
               ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-          child: _isLoading
-              ? LoadingScreen(message: '$_action presupuesto...')
-              : detallePresupuesto == null &&
-                    (modo == PresupuestoFormMode.edit || isViewOnly)
-              ? NotFoundState(
-                  title: 'Presupuesto no encontrado',
-                  message:
-                      'El presupuesto que buscas no existe o fue eliminado.',
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Periodo del presupuesto',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+        body: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+            child: _isLoading
+                ? LoadingScreen(message: '$_action presupuesto...')
+                : detallePresupuesto == null &&
+                      (modo == PresupuestoFormMode.edit || isViewOnly)
+                ? NotFoundState(
+                    title: 'Presupuesto no encontrado',
+                    message:
+                        'El presupuesto que buscas no existe o fue eliminado.',
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Periodo del presupuesto',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: const Text(
-                                    'Ajustando el presupuesto para la siguiente fecha:',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
+                              const SizedBox(height: 4),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: const Text(
+                                      'Ajustando el presupuesto para la siguiente fecha:',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    formatMonthYear(fechaPresupuesto),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 0,
+                                  vertical: 12,
+                                ),
+                                child: const Divider(),
+                              ),
+                              Text(
+                                modo == PresupuestoFormMode.create
+                                    ? 'Selecciona una categoría'
+                                    : 'Categoría del presupuesto',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                modo == PresupuestoFormMode.create
+                                    ? 'El presupuesto se asignará a la categoría seleccionada.'
+                                    : 'El presupuesto actual está asignado a esta categoría.',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  CategoryDropdown(
+                                    categorias: categorias,
+                                    selectedValue: categoriaSeleccionada,
+                                    onChangeCategory: _onChangeCategoria,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              if (!isViewOnly)
+                                Card(
+                                  color: primaryColorWithOpacity,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    side: BorderSide.none,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.wallet_rounded,
+                                          size: 40,
+                                          color: colorScheme.primary,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                'Monto disponible para este presupuesto',
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: colorScheme.primary,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: colorScheme.primary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  formatMonthYear(fechaPresupuesto),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 0,
-                                vertical: 12,
-                              ),
-                              child: const Divider(),
-                            ),
-                            Text(
-                              modo == PresupuestoFormMode.create
-                                  ? 'Selecciona una categoría'
-                                  : 'Categoría del presupuesto',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              modo == PresupuestoFormMode.create
-                                  ? 'El presupuesto se asignará a la categoría seleccionada.'
-                                  : 'El presupuesto actual está asignado a esta categoría.',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                CategoryDropdown(
-                                  categorias: categorias,
-                                  selectedValue: categoriaSeleccionada,
-                                  onChangeCategory: _onChangeCategoria,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            if (!isViewOnly)
-                              Card(
-                                color: primaryColorWithOpacity,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  side: BorderSide.none,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.wallet_rounded,
-                                        size: 40,
-                                        color: colorScheme.primary,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              'Monto disponible para este presupuesto',
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: colorScheme.primary,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              '\$${ingresoDisponible.monto.toStringAsFixed(2)}',
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: colorScheme.primary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'Monto del presupuesto',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            const SizedBox(height: 20),
-                            const Text(
-                              'Monto del presupuesto',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                              AmountInput(
+                                controller: _presupuestoAmountController,
+                                fontSize: 40,
+                                isEditable:
+                                    (ingresoDisponible.monto > 0 ||
+                                        modo == PresupuestoFormMode.edit) &&
+                                    !isViewOnly,
+                                showLabel: false,
                               ),
-                            ),
-                            AmountInput(
-                              controller: _presupuestoAmountController,
-                              fontSize: 40,
-                              isEditable:
-                                  (ingresoDisponible.monto > 0 ||
-                                      modo == PresupuestoFormMode.edit) &&
-                                  !isViewOnly,
-                              showLabel: false,
-                            ),
 
-                            if (!isViewOnly)
-                              CustomButton(
-                                text: modo == PresupuestoFormMode.create
-                                    ? 'Guardar presupuesto'
-                                    : 'Actualizar presupuesto',
-                                icon: Icons.save,
-                                width: WidgetWidth.fullWidth,
-                                onTap: (_isLoading || !_enableSaveButton)
-                                    ? null
-                                    : _guardarPresupuesto,
-                              ),
-                          ],
+                              if (!isViewOnly)
+                                CustomButton(
+                                  text: modo == PresupuestoFormMode.create
+                                      ? 'Guardar presupuesto'
+                                      : 'Actualizar presupuesto',
+                                  icon: Icons.save,
+                                  width: WidgetWidth.fullWidth,
+                                  onTap: (_isLoading || !_enableSaveButton)
+                                      ? null
+                                      : _guardarPresupuesto,
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

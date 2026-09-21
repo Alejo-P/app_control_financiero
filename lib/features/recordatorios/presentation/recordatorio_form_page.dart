@@ -427,128 +427,131 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
                 : 'Editar recordatorio',
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-          child: _isLoading
-              ? LoadingScreen(message: _action)
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              WidgetsContainer(
-                                title: 'Detalles del recordatorio',
-                                padding: EdgeInsets.all(12),
-                                showDivider: false,
-                                children: [
-                                  TextInputCard(
-                                    textController: _titleController,
-                                    placeholder: 'Nombre del recordatorio',
-                                    iconData: Icons.title,
-                                    iconColor: Colors.blue,
-                                    maxLength: 50,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Por favor ingrese un nombre';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  LabeledFormField(
-                                    label: "Categoría",
-                                    icon: Icon(
-                                      iconoCategoriaSeleccionada ??
-                                          Icons.category,
-                                      color:
-                                          colorCategoriaSeleccionada ??
-                                          Colors.blue,
-                                    ),
-                                    child: CategoryDropdown(
-                                      categorias: categorias,
-                                      selectedValue: categoriaSeleccionada,
-                                      onChangeCategory: _onChangeCategoria,
-                                    ),
-                                  ),
-                                  TextInputCard(
-                                    textController: _descriptionController,
-                                    placeholder: 'Descripción (opcional)',
-                                    iconData: Icons.description,
-                                    iconColor: Colors.grey,
-                                    maxLength: 200,
-                                  ),
-                                  InkWell(
-                                    onTap: () => isViewOnly
-                                        ? null
-                                        : _selectDate(context),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: DetailCategoryCard(
-                                      categoryName: 'Fecha',
-                                      categoryIcon: Icons.calendar_today,
-                                      iconColor: Colors.purple,
-                                      currentValue: formatDate(
-                                        fechaRecordatorio,
-                                      ),
-                                      showArrow: !isViewOnly,
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () => isViewOnly
-                                        ? null
-                                        : _selectTime(context),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: DetailCategoryCard(
-                                      categoryName: 'Hora',
-                                      categoryIcon: Icons.access_time,
-                                      iconColor: Colors.orange,
-                                      currentValue: formatTimeFromDateTime(
-                                        context,
-                                        fechaRecordatorio,
-                                      ),
-                                      showArrow: !isViewOnly,
-                                    ),
-                                  ),
-                                  LabeledFormField(
-                                    label: "Recurrencia",
-                                    icon: Icon(
-                                      Icons.repeat,
-                                      color: Colors.teal,
-                                    ),
-                                    child: CustomDropdown<Recurrencia>(
-                                      selectedItem: recurrenciaSeleccionada,
-                                      items: Recurrencia.values,
-                                      itemLabelBuilder: (Recurrencia value) =>
-                                          value.name,
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          recurrenciaSeleccionada = newValue!;
-                                        });
-                                        _checkEnableSaveButton();
+        body: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+            child: _isLoading
+                ? LoadingScreen(message: _action)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                WidgetsContainer(
+                                  title: 'Detalles del recordatorio',
+                                  padding: EdgeInsets.all(12),
+                                  showDivider: false,
+                                  children: [
+                                    TextInputCard(
+                                      textController: _titleController,
+                                      placeholder: 'Nombre del recordatorio',
+                                      iconData: Icons.title,
+                                      iconColor: Colors.blue,
+                                      maxLength: 50,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Por favor ingrese un nombre';
+                                        }
+                                        return null;
                                       },
                                     ),
-                                  ),
-                                ],
-                              ),
-                              CustomButton(
-                                text: formMode == RecordatorioFormMode.create
-                                    ? 'Guardar recordatorio'
-                                    : 'Actualizar recordatorio',
-                                icon: Icons.save,
-                                width: WidgetWidth.fullWidth,
-                                onTap: (_isLoading || !_enableSaveButton)
-                                    ? null
-                                    : _saveRecordatorio,
-                              ),
-                            ],
+                                    LabeledFormField(
+                                      label: "Categoría",
+                                      icon: Icon(
+                                        iconoCategoriaSeleccionada ??
+                                            Icons.category,
+                                        color:
+                                            colorCategoriaSeleccionada ??
+                                            Colors.blue,
+                                      ),
+                                      child: CategoryDropdown(
+                                        categorias: categorias,
+                                        selectedValue: categoriaSeleccionada,
+                                        onChangeCategory: _onChangeCategoria,
+                                      ),
+                                    ),
+                                    TextInputCard(
+                                      textController: _descriptionController,
+                                      placeholder: 'Descripción (opcional)',
+                                      iconData: Icons.description,
+                                      iconColor: Colors.grey,
+                                      maxLength: 200,
+                                    ),
+                                    InkWell(
+                                      onTap: () => isViewOnly
+                                          ? null
+                                          : _selectDate(context),
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: DetailCategoryCard(
+                                        categoryName: 'Fecha',
+                                        categoryIcon: Icons.calendar_today,
+                                        iconColor: Colors.purple,
+                                        currentValue: formatDate(
+                                          fechaRecordatorio,
+                                        ),
+                                        showArrow: !isViewOnly,
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () => isViewOnly
+                                          ? null
+                                          : _selectTime(context),
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: DetailCategoryCard(
+                                        categoryName: 'Hora',
+                                        categoryIcon: Icons.access_time,
+                                        iconColor: Colors.orange,
+                                        currentValue: formatTimeFromDateTime(
+                                          context,
+                                          fechaRecordatorio,
+                                        ),
+                                        showArrow: !isViewOnly,
+                                      ),
+                                    ),
+                                    LabeledFormField(
+                                      label: "Recurrencia",
+                                      icon: Icon(
+                                        Icons.repeat,
+                                        color: Colors.teal,
+                                      ),
+                                      child: CustomDropdown<Recurrencia>(
+                                        selectedItem: recurrenciaSeleccionada,
+                                        items: Recurrencia.values,
+                                        itemLabelBuilder: (Recurrencia value) =>
+                                            value.name,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            recurrenciaSeleccionada = newValue!;
+                                          });
+                                          _checkEnableSaveButton();
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                CustomButton(
+                                  text: formMode == RecordatorioFormMode.create
+                                      ? 'Guardar recordatorio'
+                                      : 'Actualizar recordatorio',
+                                  icon: Icons.save,
+                                  width: WidgetWidth.fullWidth,
+                                  onTap: (_isLoading || !_enableSaveButton)
+                                      ? null
+                                      : _saveRecordatorio,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

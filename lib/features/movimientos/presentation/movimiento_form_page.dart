@@ -537,164 +537,171 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
               ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-          child: _isLoading
-              ? LoadingScreen(message: '$_action movimiento...')
-              : detalleMovimiento == null &&
-                    (modo == MovimientoFormMode.edit || isViewOnly)
-              ? NotFoundState(
-                  title: 'Movimiento no encontrado',
-                  message:
-                      'El movimiento que buscas no existe o fue eliminado.',
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TipoMovimientoSelector(
-                      tipoMovimiento: tipoMovimiento,
-                      onChanged: _onChangeTipoMovimiento,
-                      isViewOnly: isViewOnly,
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: AmountInput(
-                                  controller: _amountController,
-                                  isEditable: !isViewOnly,
-                                  fontSize: 40,
-                                  validator: (value) {
-                                    if (value == null || value.trim().isEmpty) {
-                                      return 'El monto es obligatorio';
-                                    }
-                                    final amount = double.tryParse(
-                                      value.trim().replaceAll(',', '.'),
-                                    );
-                                    if (amount == null || amount <= 0) {
-                                      return 'Ingrese un monto válido';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              WidgetsContainer(
-                                title: 'Detalles del movimiento',
-                                padding: const EdgeInsets.all(12),
-                                showDivider: false,
-                                children: [
-                                  TextInputCard(
-                                    textController: _titleController,
-                                    placeholder: 'Titulo del movimiento',
+        body: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+            child: _isLoading
+                ? LoadingScreen(message: '$_action movimiento...')
+                : detalleMovimiento == null &&
+                      (modo == MovimientoFormMode.edit || isViewOnly)
+                ? NotFoundState(
+                    title: 'Movimiento no encontrado',
+                    message:
+                        'El movimiento que buscas no existe o fue eliminado.',
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TipoMovimientoSelector(
+                        tipoMovimiento: tipoMovimiento,
+                        onChanged: _onChangeTipoMovimiento,
+                        isViewOnly: isViewOnly,
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: AmountInput(
+                                    controller: _amountController,
                                     isEditable: !isViewOnly,
-                                    iconData: Icons.title,
-                                    iconColor: Colors.grey.shade600,
-                                    maxLines: 1,
-                                    maxLength: 50,
+                                    fontSize: 40,
                                     validator: (value) {
                                       if (value == null ||
                                           value.trim().isEmpty) {
-                                        return 'El título es obligatorio';
+                                        return 'El monto es obligatorio';
+                                      }
+                                      final amount = double.tryParse(
+                                        value.trim().replaceAll(',', '.'),
+                                      );
+                                      if (amount == null || amount <= 0) {
+                                        return 'Ingrese un monto válido';
                                       }
                                       return null;
                                     },
                                   ),
-                                  InkWell(
-                                    onTap: () async => isViewOnly
-                                        ? null
-                                        : await _openCategoriasModal(context),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: DetailCategoryCard(
-                                      categoryName: 'Categoría',
-                                      categoryIcon: categoryIcon,
-                                      iconColor: categoryColor,
-                                      currentValue: categoryName,
-                                      showArrow: !isViewOnly,
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () => isViewOnly
-                                        ? null
-                                        : _selectDate(context),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: DetailCategoryCard(
-                                      categoryName: 'Fecha',
-                                      categoryIcon: Icons.calendar_today,
-                                      iconColor: Colors.purple,
-                                      currentValue: formatDate(selectedDate),
-                                      showArrow: !isViewOnly,
-                                    ),
-                                  ),
-                                  TextInputCard(
-                                    textController: _noteController,
-                                    placeholder: 'Agregar una nota (opcional)',
-                                    isEditable: !isViewOnly,
-                                    iconData: Icons.edit_note,
-                                    iconColor: Colors.grey.shade600,
-                                    maxLines: 3,
-                                    maxLength: 200,
-                                    validator: (value) {
-                                      if (value != null && value.length > 200) {
-                                        return 'La nota no puede exceder los 200 caracteres';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
-                              ),
-                              if (!isViewOnly)
+                                ),
                                 WidgetsContainer(
-                                  title: 'Programar recordatorio',
-                                  description:
-                                      'Se enviara una notificacion en la fecha y hora seleccionada',
+                                  title: 'Detalles del movimiento',
                                   padding: const EdgeInsets.all(12),
+                                  showDivider: false,
                                   children: [
+                                    TextInputCard(
+                                      textController: _titleController,
+                                      placeholder: 'Titulo del movimiento',
+                                      isEditable: !isViewOnly,
+                                      iconData: Icons.title,
+                                      iconColor: Colors.grey.shade600,
+                                      maxLines: 1,
+                                      maxLength: 50,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'El título es obligatorio';
+                                        }
+                                        return null;
+                                      },
+                                    ),
                                     InkWell(
-                                      onTap: !canScheduleReminder
+                                      onTap: () async => isViewOnly
                                           ? null
-                                          : _openReminderForm,
+                                          : await _openCategoriasModal(context),
+                                      borderRadius: BorderRadius.circular(12),
                                       child: DetailCategoryCard(
-                                        currentValue: !canScheduleReminder
-                                            ? null
-                                            : 'Configurar recordatorio',
-                                        categoryName: !canScheduleReminder
-                                            ? 'No puede configurar un recordatorio hasta completar el formulario'
-                                            : 'Programar un recordatorio para este movimiento',
-                                        categoryIcon: !canScheduleReminder
-                                            ? Icons.notifications_off_outlined
-                                            : Icons.notifications_none_rounded,
-                                        showArrow: canScheduleReminder,
-                                        iconColor: !canScheduleReminder
-                                            ? Colors.red
-                                            : Colors.blue,
+                                        categoryName: 'Categoría',
+                                        categoryIcon: categoryIcon,
+                                        iconColor: categoryColor,
+                                        currentValue: categoryName,
+                                        showArrow: !isViewOnly,
                                       ),
+                                    ),
+                                    InkWell(
+                                      onTap: () => isViewOnly
+                                          ? null
+                                          : _selectDate(context),
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: DetailCategoryCard(
+                                        categoryName: 'Fecha',
+                                        categoryIcon: Icons.calendar_today,
+                                        iconColor: Colors.purple,
+                                        currentValue: formatDate(selectedDate),
+                                        showArrow: !isViewOnly,
+                                      ),
+                                    ),
+                                    TextInputCard(
+                                      textController: _noteController,
+                                      placeholder:
+                                          'Agregar una nota (opcional)',
+                                      isEditable: !isViewOnly,
+                                      iconData: Icons.edit_note,
+                                      iconColor: Colors.grey.shade600,
+                                      maxLines: 3,
+                                      maxLength: 200,
+                                      validator: (value) {
+                                        if (value != null &&
+                                            value.length > 200) {
+                                          return 'La nota no puede exceder los 200 caracteres';
+                                        }
+                                        return null;
+                                      },
                                     ),
                                   ],
                                 ),
+                                if (!isViewOnly)
+                                  WidgetsContainer(
+                                    title: 'Programar recordatorio',
+                                    description:
+                                        'Se enviara una notificacion en la fecha y hora seleccionada',
+                                    padding: const EdgeInsets.all(12),
+                                    children: [
+                                      InkWell(
+                                        onTap: !canScheduleReminder
+                                            ? null
+                                            : _openReminderForm,
+                                        child: DetailCategoryCard(
+                                          currentValue: !canScheduleReminder
+                                              ? null
+                                              : 'Configurar recordatorio',
+                                          categoryName: !canScheduleReminder
+                                              ? 'No puede configurar un recordatorio hasta completar el formulario'
+                                              : 'Programar un recordatorio para este movimiento',
+                                          categoryIcon: !canScheduleReminder
+                                              ? Icons.notifications_off_outlined
+                                              : Icons
+                                                    .notifications_none_rounded,
+                                          showArrow: canScheduleReminder,
+                                          iconColor: !canScheduleReminder
+                                              ? Colors.red
+                                              : Colors.blue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
 
-                              if (!isViewOnly)
-                                CustomButton(
-                                  text: modo == MovimientoFormMode.create
-                                      ? 'Guardar movimiento'
-                                      : 'Actualizar movimiento',
-                                  icon: Icons.save,
-                                  width: WidgetWidth.fullWidth,
-                                  onTap: (_isLoading || !_enableSaveButton)
-                                      ? null
-                                      : _guardarMovimiento,
-                                ),
-                            ],
+                                if (!isViewOnly)
+                                  CustomButton(
+                                    text: modo == MovimientoFormMode.create
+                                        ? 'Guardar movimiento'
+                                        : 'Actualizar movimiento',
+                                    icon: Icons.save,
+                                    width: WidgetWidth.fullWidth,
+                                    onTap: (_isLoading || !_enableSaveButton)
+                                        ? null
+                                        : _guardarMovimiento,
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
@@ -708,50 +715,57 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       ),
       showDragHandle: true, // Muestra el indicador de arrastre
       builder: (_) {
-        // Si la lista de categorías está vacía, mostrar un mensaje
-        if (categoriasFiltradas.isEmpty) {
-          return const Center(
-            child: Text(
-              'No hay categorías disponibles.',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          );
-        }
+        return SafeArea(
+          top: false,
+          child: Builder(
+            builder: (context) {
+              // Si la lista de categorías está vacía, mostrar un mensaje
+              if (categoriasFiltradas.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No hay categorías disponibles.',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                );
+              }
 
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: categoriasFiltradas.length,
-          separatorBuilder: (_, __) => const Divider(),
-          itemBuilder: (context, index) {
-            final categoria = categoriasFiltradas[index];
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: categoriasFiltradas.length,
+                separatorBuilder: (_, __) => const Divider(),
+                itemBuilder: (context, index) {
+                  final categoria = categoriasFiltradas[index];
 
-            return ListTile(
-              selected: categoria.id == categoryId,
-              selectedTileColor: Colors.grey.shade200,
-              selectedColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              leading: IconContainer(
-                icon: categoria.iconData,
-                color: categoria.iconColor,
-                size: 26,
-              ),
-              title: Text(
-                categoria.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                categoria.description.isNotEmpty
-                    ? categoria.description
-                    : '(Sin descripción)',
-                style: const TextStyle(color: Colors.grey),
-              ),
-              onTap: () {
-                Navigator.pop(context, categoria);
-              },
-            );
-          },
+                  return ListTile(
+                    selected: categoria.id == categoryId,
+                    selectedTileColor: Colors.grey.shade200,
+                    selectedColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    leading: IconContainer(
+                      icon: categoria.iconData,
+                      color: categoria.iconColor,
+                      size: 26,
+                    ),
+                    title: Text(
+                      categoria.name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      categoria.description.isNotEmpty
+                          ? categoria.description
+                          : '(Sin descripción)',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context, categoria);
+                    },
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     ).then((categoriaSeleccionada) {

@@ -233,11 +233,14 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
       return Scaffold(
         appBar: AppBar(title: const Text('Buscar Movimientos')),
 
-        body: const Center(
-          child: Text(
-            'No hay categorías para filtrar',
-            style: TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
+        body: SafeArea(
+          top: false,
+          child: const Center(
+            child: Text(
+              'No hay categorías para filtrar',
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       );
@@ -261,59 +264,108 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(
-                  color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
-                  width: 1.5,
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                elevation: 6,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+                    width: 1.5,
+                  ),
                 ),
-              ),
-              color: colors.surface,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    TextInputCard(
-                      textController: _searchController,
-                      placeholder: 'Buscar por nombre o concepto...',
-                      iconData: Icons.search,
-                      iconColor: Colors.grey.shade600,
-                      maxLines: 1,
-                      maxLength: 50,
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    LabeledFormField(
-                      label: "Categoría",
-                      icon: Icon(Icons.category, color: Colors.orange),
-                      child: CategoryDropdown(
-                        categorias: categorias,
-                        selectedValue: categoriaSeleccionada,
-                        onChangeCategory: _onChangeCategoria,
+                color: colors.surface,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      TextInputCard(
+                        textController: _searchController,
+                        placeholder: 'Buscar por nombre o concepto...',
+                        iconData: Icons.search,
+                        iconColor: Colors.grey.shade600,
+                        maxLines: 1,
+                        maxLength: 50,
                       ),
-                    ),
 
-                    const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-                    LabeledFormField(
-                      label: "Por fecha",
-                      icon: Icon(Icons.date_range, color: Colors.grey.shade600),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 8.0,
-                        children: [
-                          if (isSelectedRange)
+                      LabeledFormField(
+                        label: "Categoría",
+                        icon: Icon(Icons.category, color: Colors.orange),
+                        child: CategoryDropdown(
+                          categorias: categorias,
+                          selectedValue: categoriaSeleccionada,
+                          onChangeCategory: _onChangeCategoria,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      LabeledFormField(
+                        label: "Por fecha",
+                        icon: Icon(
+                          Icons.date_range,
+                          color: Colors.grey.shade600,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 8.0,
+                          children: [
+                            if (isSelectedRange)
+                              TextButton(
+                                onPressed: _showDateRangePicker,
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  backgroundColor: colors.primary.withOpacity(
+                                    0.2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: context.isPhone
+                                    ? Icon(
+                                        Icons.edit_calendar,
+                                        color: colors.primary,
+                                      )
+                                    : Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.edit_calendar,
+                                            color: colors.primary,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "Editar rango",
+                                            style: textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  color: colors.primary,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        ],
+                                      ),
+                              ),
+
                             TextButton(
-                              onPressed: _showDateRangePicker,
+                              onPressed: isSelectedRange
+                                  ? _onClearDateRange
+                                  : _showDateRangePicker,
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -328,129 +380,89 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                               ),
                               child: context.isPhone
                                   ? Icon(
-                                      Icons.edit_calendar,
+                                      isSelectedRange
+                                          ? Icons.delete_outline
+                                          : Icons.date_range,
                                       color: colors.primary,
                                     )
                                   : Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                          Icons.edit_calendar,
+                                          isSelectedRange
+                                              ? Icons.delete_outline
+                                              : Icons.date_range,
                                           color: colors.primary,
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          "Editar rango",
+                                          isSelectedRange
+                                              ? 'Eliminar rango'
+                                              : 'Seleccionar rango',
                                           style: textTheme.bodyMedium?.copyWith(
                                             color: colors.primary,
                                             fontWeight: FontWeight.w500,
                                           ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                          textAlign: TextAlign.left,
                                         ),
                                       ],
                                     ),
                             ),
-
-                          TextButton(
-                            onPressed: isSelectedRange
-                                ? _onClearDateRange
-                                : _showDateRangePicker,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              backgroundColor: colors.primary.withOpacity(0.2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: context.isPhone
-                                ? Icon(
-                                    isSelectedRange
-                                        ? Icons.delete_outline
-                                        : Icons.date_range,
-                                    color: colors.primary,
-                                  )
-                                : Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        isSelectedRange
-                                            ? Icons.delete_outline
-                                            : Icons.date_range,
-                                        color: colors.primary,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        isSelectedRange
-                                            ? 'Eliminar rango'
-                                            : 'Seleccionar rango',
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: colors.primary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: _isLoading
-                  ? const _CustomLoading()
-                  : ListView(
-                      padding: EdgeInsets.zero,
-                      children: [
-                        const SizedBox(height: 12),
+              Expanded(
+                child: _isLoading
+                    ? const _CustomLoading()
+                    : ListView(
+                        padding: EdgeInsets.zero,
+                        children: [
+                          const SizedBox(height: 12),
 
-                        Text("Resultados", style: textTheme.labelLarge),
+                          Text("Resultados", style: textTheme.labelLarge),
 
-                        if (isSelectedRange)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              top: 4.0,
-                              bottom: 12,
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Movimientos entre ${formatDate(fechaInicio!)} y ${formatDate(fechaFin!)}",
-                                style: textTheme.bodyMedium?.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.w500,
+                          if (isSelectedRange)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 4.0,
+                                bottom: 12,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "Movimientos entre ${formatDate(fechaInicio!)} y ${formatDate(fechaFin!)}",
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
 
-                        if (movimientosFiltrados.isEmpty)
-                          const _EmptyResults()
-                        else
-                          ...fechasUnicas.map((fecha) {
-                            final movsPorFecha = movimientosFiltrados
-                                .where((mov) => isSameDay(mov.date, fecha))
-                                .toList();
+                          if (movimientosFiltrados.isEmpty)
+                            const _EmptyResults()
+                          else
+                            ...fechasUnicas.map((fecha) {
+                              final movsPorFecha = movimientosFiltrados
+                                  .where((mov) => isSameDay(mov.date, fecha))
+                                  .toList();
 
-                            if (movsPorFecha.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
+                              if (movsPorFecha.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
 
-                            return TransactionsContainer(
-                              date: fecha,
-                              movimientos: movsPorFecha,
-                            );
-                          }),
-                      ],
-                    ),
-            ),
-          ],
+                              return TransactionsContainer(
+                                date: fecha,
+                                movimientos: movsPorFecha,
+                              );
+                            }),
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -115,68 +115,73 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-        child: appState.loadingInitialData
-            ? const LoadingScreen(message: 'Cargando recordatorios...')
-            : RefreshIndicator(
-                onRefresh: _refreshRecordatorios,
-                child: _isLoading
-                    ? LoadingScreen(message: 'Cargando recordatorios...')
-                    : recordatorios.isEmpty
-                    ? ListView(
-                        controller: _controller,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: const [_EmptyRecordatorios()],
-                      )
-                    : ListView.separated(
-                        controller: _controller,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: recordatorios.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final recordatorio = recordatorios[index];
-                          final isDefaultReminder = recordatorio.isDefault;
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: appState.loadingInitialData
+              ? const LoadingScreen(message: 'Cargando recordatorios...')
+              : RefreshIndicator(
+                  onRefresh: _refreshRecordatorios,
+                  child: _isLoading
+                      ? LoadingScreen(message: 'Cargando recordatorios...')
+                      : recordatorios.isEmpty
+                      ? ListView(
+                          controller: _controller,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: const [_EmptyRecordatorios()],
+                        )
+                      : ListView.separated(
+                          controller: _controller,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: recordatorios.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final recordatorio = recordatorios[index];
+                            final isDefaultReminder = recordatorio.isDefault;
 
-                          return RecordatorioCard(
-                            icon: recordatorio.categoryIcon ?? Icons.notifications_active_outlined,
-                            iconColor:
-                                recordatorio.categoryColor ?? Colors.orange,
-                            isEnabled: recordatorio.isEnabled,
-                            categoryName: isDefaultReminder
-                                ? 'Predeterminada'
-                                : recordatorio.categoryName ?? 'Sin definir',
-                            recurrency: recordatorio.recurrency,
-                            createdAt: recordatorio.scheduledAt,
-                            title: recordatorio.title,
-                            isDefault: recordatorio.isDefault,
-                            onTap: isDefaultReminder
-                                ? null
-                                : () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRoutes.recordatorioFormRoute,
-                                      arguments: RecordatorioFormArgs(
-                                        id: recordatorio.id!,
-                                      ),
-                                    );
-                                  },
-                            onChange: isDefaultReminder
-                                ? null
-                                : (enabled) => _onEnabledChanged(
-                                    recordatorio.id!,
-                                    enabled,
-                                  ),
-                            onDelete: isDefaultReminder
-                                ? null
-                                : () => _onDeleteRecordatorio(
-                                    recordatorio.title,
-                                    recordatorio.id!,
-                                  ),
-                          );
-                        },
-                      ),
-              ),
+                            return RecordatorioCard(
+                              icon:
+                                  recordatorio.categoryIcon ??
+                                  Icons.notifications_active_outlined,
+                              iconColor:
+                                  recordatorio.categoryColor ?? Colors.orange,
+                              isEnabled: recordatorio.isEnabled,
+                              categoryName: isDefaultReminder
+                                  ? 'Predeterminada'
+                                  : recordatorio.categoryName ?? 'Sin definir',
+                              recurrency: recordatorio.recurrency,
+                              createdAt: recordatorio.scheduledAt,
+                              title: recordatorio.title,
+                              isDefault: recordatorio.isDefault,
+                              onTap: isDefaultReminder
+                                  ? null
+                                  : () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.recordatorioFormRoute,
+                                        arguments: RecordatorioFormArgs(
+                                          id: recordatorio.id!,
+                                        ),
+                                      );
+                                    },
+                              onChange: isDefaultReminder
+                                  ? null
+                                  : (enabled) => _onEnabledChanged(
+                                      recordatorio.id!,
+                                      enabled,
+                                    ),
+                              onDelete: isDefaultReminder
+                                  ? null
+                                  : () => _onDeleteRecordatorio(
+                                      recordatorio.title,
+                                      recordatorio.id!,
+                                    ),
+                            );
+                          },
+                        ),
+                ),
+        ),
       ),
     );
   }
