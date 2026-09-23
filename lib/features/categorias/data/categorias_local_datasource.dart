@@ -4,16 +4,13 @@ import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/string_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
-import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
-import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
 import 'package:sqflite/sqflite.dart';
 
 class CategoriasLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
-  final MovimientosLocalDataSource _movimientosLocalDataSource =
-      MovimientosLocalDataSource();
-  final PresupuestosLocalDataSource _presupuestosLocalDataSource =
-      PresupuestosLocalDataSource();
+  final Database? _database;
+
+  CategoriasLocalDataSource({Database? database}) : _database = database;
 
   // Obtener todas las categorías
   Future<List<Categoria>> fetchAllCategorias() async {
@@ -205,57 +202,68 @@ class CategoriasLocalDataSource {
 
   // Eliminar una categoría por su ID
   Future<OperationResult<void>> deleteCategoria(int id) async {
-    final db = await _dbHelper.database;
-
-    // Comprobar que la categoría no es predeterminada
-    final List<Map<String, dynamic>> maps = await db.query(
-      CategoriasTable.table,
-      where: '${CategoriasTable.id} = ?',
-      whereArgs: [id],
-    );
-
-    if (maps.isNotEmpty && maps.first[CategoriasTable.isDefault] == 1) {
-      // No eliminar si es predeterminada
+    try {
+      final db = _database ?? await _dbHelper.database;
+      return await db.transaction((txn) async {
+        final categories = await txn.query(
+          CategoriasTable.table,
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+        if (categories.isEmpty) {
+          return OperationResult<void>(
+            success: false,
+            message: 'No se encontró la categoría.',
+          );
+        }
+        if (categories.first[CategoriasTable.isDefault] == 1) {
+          return OperationResult<void>(
+            success: false,
+            message: 'No se puede eliminar una categoría predeterminada.',
+          );
+        }
+        // Check every foreign key inside the same transaction as the delete.
+        const relations = {
+          MovimientosTable.table: 'movimientos',
+          PresupuestosTable.table: 'presupuestos',
+          RecordatorioTable.table: 'recordatorios',
+          BudgetNotificationEventsTable.table:
+              'eventos de alertas de presupuesto',
+        };
+        for (final relation in relations.entries) {
+          final references = await txn.query(
+            relation.key,
+            columns: ['id'],
+            where: 'category_id = ?',
+            whereArgs: [id],
+            limit: 1,
+          );
+          if (references.isNotEmpty) {
+            return OperationResult<void>(
+              success: false,
+              message:
+                  'No se puede eliminar esta categoría. Tiene ${relation.value} asociados.',
+            );
+          }
+        }
+        final count = await txn.delete(
+          CategoriasTable.table,
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+        return OperationResult<void>(
+          success: count > 0,
+          message: count > 0
+              ? 'Categoría eliminada exitosamente.'
+              : 'No se encontró la categoría.',
+        );
+      });
+    } on Exception {
       return OperationResult<void>(
         success: false,
-        message: 'No se puede eliminar una categoría predeterminada.',
+        message: 'No se pudo eliminar la categoría. Inténtalo nuevamente.',
       );
     }
-
-    // Si tiene movimientos asociados, no eliminar
-    final movimientoCount = await _movimientosLocalDataSource
-        .fetchMovimientoCountByCategory(id);
-    if (movimientoCount > 0) {
-      return OperationResult<void>(
-        success: false,
-        message:
-            'No se puede eliminar esta categoría. Tiene $movimientoCount${movimientoCount == 1 ? ' movimiento asociado.' : ' movimientos asociados.'}',
-      );
-    }
-
-    // Si tiene presupuestos asociados, no eliminar
-    final presupuestoCount = await _presupuestosLocalDataSource
-        .fetchPresupuestoCountByCategory(id);
-    if (presupuestoCount > 0) {
-      return OperationResult<void>(
-        success: false,
-        message:
-            'No se puede eliminar esta categoría. Tiene $presupuestoCount${presupuestoCount == 1 ? ' presupuesto asociado.' : ' presupuestos asociados.'}',
-      );
-    }
-
-    final result = await db.delete(
-      CategoriasTable.table,
-      where: '${CategoriasTable.id} = ?',
-      whereArgs: [id],
-    );
-
-    return OperationResult<void>(
-      success: result > 0,
-      message: result > 0
-          ? 'Categoría eliminada exitosamente.'
-          : 'Error al eliminar la categoría.',
-    );
   }
 
   Future<OperationResult<int>> deleteAllCategorias() async {

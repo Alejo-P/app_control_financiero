@@ -287,6 +287,8 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       categoryId: categoriaSeleccionada,
       scheduledAt: fechaRecordatorio,
       recurrencia: recurrenciaSeleccionada,
+      enabled: detalleRecordatorio?.isEnabled ?? true,
+      isDefault: detalleRecordatorio?.isDefault ?? false,
     );
 
     try {

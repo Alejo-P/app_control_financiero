@@ -22,24 +22,48 @@ extension RecurrenciaExtension on Recurrencia {
 DateTime calculateNextOccurrence(DateTime current, Recurrencia recurrencia) {
   switch (recurrencia) {
     case Recurrencia.diario:
-      return current.add(const Duration(days: 1));
-    case Recurrencia.semanal:
-      return current.add(const Duration(days: 7));
-    case Recurrencia.mensual:
       return DateTime(
         current.year,
-        current.month + 1,
+        current.month,
+        current.day + 1,
+        current.hour,
+        current.minute,
+        current.second,
+      );
+    case Recurrencia.semanal:
+      return DateTime(
+        current.year,
+        current.month,
+        current.day + 7,
+        current.hour,
+        current.minute,
+        current.second,
+      );
+    case Recurrencia.mensual:
+      var month = current.month + 1;
+      while (DateTime(current.year, month + 1, 0).day < current.day) {
+        month++;
+      }
+      return DateTime(
+        current.year,
+        month,
         current.day,
         current.hour,
         current.minute,
+        current.second,
       );
     case Recurrencia.anual:
+      var year = current.year + 1;
+      while (DateTime(year, current.month + 1, 0).day < current.day) {
+        year++;
+      }
       return DateTime(
-        current.year + 1,
+        year,
         current.month,
         current.day,
         current.hour,
         current.minute,
+        current.second,
       );
     default:
       return current;

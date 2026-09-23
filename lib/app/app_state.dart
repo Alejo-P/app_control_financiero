@@ -1,5 +1,4 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
-import 'package:control_financiero/core/constants/notificacion_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/services/backup_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
@@ -187,45 +186,56 @@ class AppState extends ChangeNotifier {
     recordatorios = await _recordatoriosRepository
         .fetchAllDetailedRecordatorios();
 
-    final recordatoriosList = await _recordatoriosRepository
-        .fetchAllRecordatorios();
-    await syncRecordatorioNotifications(recordatoriosList);
+    await syncRecordatorioNotifications();
 
     if (notify) notifyListeners();
   }
 
-  Future<void> syncRecordatorioNotifications([
-    List<Recordatorio>? items,
-  ]) async {
-    final list =
-        items ?? await _recordatoriosRepository.fetchAllRecordatorios();
+  // Serialize refreshes and read current data when each refresh starts.
+  Future<void> _reminderSync = Future<void>.value();
 
-    for (final item in list) {
-      if (item.id == null) continue;
+  Future<void> syncRecordatorioNotifications() {
+    final next = _reminderSync.then((_) => _syncReminders());
+    _reminderSync = next.catchError((Object _) {});
+    return next;
+  }
 
-      final notificationId = NotificationService.getRecordatorioNotificationId(
-        item.id!,
-      );
-
-      if (!item.enabled) {
-        await NotificationService.cancelNotification(notificationId);
+  Future<void> _syncReminders({DateTime? referenceDateTime}) async {
+    final now = referenceDateTime ?? currentDateTime;
+    final reminders = await _recordatoriosRepository.fetchAllRecordatorios();
+    for (var i = 0; i < reminders.length; i++) {
+      final reminder = reminders[i];
+      if (!reminder.enabled ||
+          reminder.id == null ||
+          reminder.scheduledAt.isAfter(now)) {
         continue;
       }
-
-      if (currentDateTime.isAfter(item.scheduledAt)) {
-        await reprogramarRecordatorioPorRecurrencia(item);
-        continue;
+      var nextDate = reminder.scheduledAt;
+      final recurring = reminder.recurrencia != Recurrencia.ninguno;
+      if (recurring) {
+        while (!nextDate.isAfter(now)) {
+          nextDate = calculateNextOccurrence(nextDate, reminder.recurrencia);
+        }
       }
-
-      await NotificationService.scheduleRecordatorioNotification(
-        id: item.id!,
-        title: item.title,
-        body: item.description?.trim().isNotEmpty == true
-            ? item.description!
-            : 'Te recordamos: ${item.title}',
-        scheduledDate: item.scheduledAt,
-      );
+      // Derive the displayed next occurrence without overwriting a concurrent
+      // edit/toggle in SQLite. The persisted date remains the recurrence anchor.
+      final index = recordatorios.indexWhere((r) => r.id == reminder.id);
+      if (index != -1) {
+        recordatorios[index] = recordatorios[index].copyWith(
+          scheduledAt: nextDate,
+          isEnabled: recurring,
+        );
+      }
     }
+    final hasEnabledDaily = reminders.any((r) => r.isDefault && r.enabled);
+    final hasMovementsToday =
+        hasEnabledDaily &&
+        (await _movimientosRepository.fetchMovimientosByDate(now)).isNotEmpty;
+    await NotificationService.syncReminders(
+      reminders,
+      now: now,
+      hasMovementsToday: hasMovementsToday,
+    );
   }
 
   Future<void> loadMovementsByMonthAndYear(
@@ -260,56 +270,20 @@ class AppState extends ChangeNotifier {
     await syncDailyMovementReminder();
   }
 
-  Future<void> syncDailyMovementReminder({DateTime? referenceDateTime}) async {
-    final now = referenceDateTime ?? currentDateTime;
-    final remindersList = await _recordatoriosRepository
-        .fetchAllRecordatorios();
-    if (remindersList.isEmpty) return;
-
-    try {
-      final reminder = remindersList.firstWhere(
-        (r) => r.isDefault == true,
-      ); // El unico recordatorio por defecto es el recordatorio diario
-      final reminderNotificationId =
-          NotificationService.getRecordatorioNotificationId(reminder.id!);
-
-      final movimientosHoy = await _movimientosRepository
-          .fetchMovimientosByDate(currentDateTime);
-
-      if (movimientosHoy.isNotEmpty) {
-        await NotificationService.cancelNotification(reminderNotificationId);
-        return;
-      }
-
-      if (now.isBefore(reminder.scheduledAt)) {
-        await NotificationService.scheduleRecordatorioNotification(
-          id: reminder.id!,
-          title: reminder.title,
-          body:
-              reminder.description ??
-              'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
-          scheduledDate: reminder.scheduledAt,
+  Future<void> syncDailyMovementReminder({DateTime? referenceDateTime}) {
+    final next = _reminderSync.then((_) async {
+      try {
+        await _syncReminders(referenceDateTime: referenceDateTime);
+      } on Exception catch (error, stackTrace) {
+        await AppLogger.log(
+          'Error al sincronizar recordatorios: $error',
+          level: LogLevel.error,
+          stackTrace: stackTrace,
         );
-        return;
       }
-
-      await NotificationService.cancelNotification(reminderNotificationId);
-      await NotificationService.showNotification(
-        title: reminder.title,
-        body:
-            reminder.description ??
-            'Recuerda registrar tus movimientos del dia en la app para mantener un control de tus gastos/ingresos',
-        id: reminderNotificationId,
-        type: TipoNotificacion.notifDiaria,
-      );
-    } on Exception catch (e, st) {
-      await AppLogger.log(
-        'Ocurrio un error al mostrar el recordatorio diario: $e',
-        level: LogLevel.error,
-        tag: 'Recordatorio diario',
-        stackTrace: st,
-      );
-    }
+    });
+    _reminderSync = next.catchError((Object _) {});
+    return next;
   }
 
   Future<Box> _getSettingsBox() async {
@@ -1254,7 +1228,21 @@ class AppState extends ChangeNotifier {
       id,
     );
 
-    return result;
+    if (result == null || !result.isEnabled) return result;
+    final now = currentDateTime;
+    if (result.scheduledAt.isAfter(now)) return result;
+    final recurrence = Recurrencia.values.firstWhere(
+      (value) => value.name == result.recurrency,
+      orElse: () => Recurrencia.ninguno,
+    );
+    if (recurrence == Recurrencia.ninguno) {
+      return result.copyWith(isEnabled: false);
+    }
+    var next = result.scheduledAt;
+    while (!next.isAfter(now)) {
+      next = calculateNextOccurrence(next, recurrence);
+    }
+    return result.copyWith(scheduledAt: next);
   }
 
   Future<int> agregarRecordatorio(Recordatorio recordatorio) async {
@@ -1271,15 +1259,7 @@ class AppState extends ChangeNotifier {
     if (detalle != null) {
       recordatorios.add(detalle);
     }
-    if (recordatorio.enabled) {
-      await NotificationService.scheduleRecordatorioNotification(
-        id: savedId,
-        title: recordatorio.title,
-        body:
-            'Tu recordatorio "${recordatorio.title}" está programado para ${formatDate(recordatorio.scheduledAt)}',
-        scheduledDate: recordatorio.scheduledAt,
-      );
-    }
+    await syncRecordatorioNotifications();
     notifyListeners();
     return savedId;
   }
@@ -1307,34 +1287,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> reprogramarRecordatorioPorRecurrencia(
-    Recordatorio recordatorio,
-  ) async {
-    if (recordatorio.id == null) {
-      return;
-    }
-
-    if (recordatorio.recurrencia == Recurrencia.ninguno) {
-      final nuevoRecordatorio = recordatorio.copyWith(enabled: false);
-      await actualizarRecordatorio(nuevoRecordatorio);
-      return;
-    }
-
-    final recurrencia = recordatorio.recurrencia;
-    var siguienteFecha = recordatorio.scheduledAt;
-
-    // Salta las ocurrencias vencidas si la aplicación estuvo cerrada.
-    while (!siguienteFecha.isAfter(currentDateTime)) {
-      siguienteFecha = calculateNextOccurrence(siguienteFecha, recurrencia);
-    }
-
-    final nuevoRecordatorio = recordatorio.copyWith(
-      scheduledAt: siguienteFecha,
-    );
-
-    await actualizarRecordatorio(nuevoRecordatorio);
-  }
-
   Future<void> actualizarEstadoRecordatorio(int id, bool enabled) async {
     final result = await _recordatoriosRepository.updateRecordatorioEnabled(
       id,
@@ -1351,23 +1303,7 @@ class AppState extends ChangeNotifier {
       recordatorios[index] = updated;
     }
 
-    final notificationId = NotificationService.getRecordatorioNotificationId(
-      id,
-    );
-    if (!enabled) {
-      await NotificationService.cancelNotification(notificationId);
-    } else {
-      final detalle = await getRecordatorioById(id);
-      if (detalle != null) {
-        await NotificationService.scheduleRecordatorioNotification(
-          id: detalle.id,
-          title: detalle.title,
-          body:
-              'Tu recordatorio "${detalle.title}" está programado para ${formatDate(detalle.scheduledAt)}',
-          scheduledDate: detalle.scheduledAt,
-        );
-      }
-    }
+    await syncRecordatorioNotifications();
     notifyListeners();
   }
 
@@ -1381,6 +1317,7 @@ class AppState extends ChangeNotifier {
       NotificationService.getRecordatorioNotificationId(id),
     );
     recordatorios.removeWhere((recordatorio) => recordatorio.id == result.data);
+    await syncRecordatorioNotifications();
     notifyListeners();
   }
 }

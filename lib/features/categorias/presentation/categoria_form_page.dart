@@ -170,7 +170,7 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
         ),
       ],
     );
-    if (confirmed != true) return;
+    if (confirmed != true || !mounted) return;
 
     setState(() {
       _action = "Guardando";
@@ -224,12 +224,21 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
       _isLoading = true;
     });
 
-    await appState.eliminarCategoria(detalleCategoria!.id!);
+    try {
+      await appState.eliminarCategoria(detalleCategoria!.id!);
+    } catch (_) {
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'No se pudo eliminar la categoría. Inténtalo nuevamente.',
+        );
+      }
+      return;
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
 
     if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-    });
 
     if (!appState.transactionSuccess) {
       AppSnackbar.error(context, appState.transactionResultMessage);
