@@ -68,7 +68,7 @@ class NotificacionLocalDataSource {
       offset: offset,
     );
 
-    return results.map((e) => Notificacion.fromMap(e)).toList();
+    return results.map(Notificacion.fromMap).toList();
   }
 
   Future<Notificacion?> fetchNotificacionById(int id) async {
@@ -391,14 +391,22 @@ class NotificacionLocalDataSource {
     return OperationResult<int>(success: result > 0, data: result, message: '');
   }
 
-  Future<void> markAsRead(int id) async {
+  Future<OperationResult<int>> markAsRead(int id) async {
     final db = await _dbHelper.database;
 
-    await db.update(
+    final result = await db.update(
       NotificacionTable.table,
       {NotificacionTable.isRead: 1},
-      where: 'id = ?',
+      where: '${NotificacionTable.id} = ?',
       whereArgs: [id],
+    );
+
+    return OperationResult<int>(
+      success: result > 0,
+      data: result,
+      message: result > 0
+          ? 'Marcada como leida'
+          : 'No se pudo marcar como leida',
     );
   }
 

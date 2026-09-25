@@ -1205,21 +1205,18 @@ class AppState extends ChangeNotifier {
     return result.success;
   }
 
-  Future<void> ocultarNotificacion(int id) async {
-    await NotificationService.cancelNotification(id);
-  }
+  Future<bool> marcarNotifLeida(int id) async {
+    final result = await _notificacionRepository.markAsRead(id);
+    if (!result.success) return false;
 
-  Future<void> marcarNotifLeida(int id) async {
-    final notificacion = notificaciones.firstWhere((n) => n.id == id);
-    if (notificacion.isRead == true) return;
-
-    await _notificacionRepository.markAsRead(id);
-    await NotificationService.cancelNotification(id);
     final index = notificaciones.indexWhere((n) => n.id! == id);
     if (index != -1) {
-      notificaciones[index] = notificacion.copyWith(isRead: true);
+      notificaciones[index] = notificaciones[index].copyWith(isRead: true);
     }
+
     await updateCountersNotif();
+    await NotificationService.cancelNotification(id);
+    return true;
   }
 
   // ================================ RECORDATORIOS CRUD =================================

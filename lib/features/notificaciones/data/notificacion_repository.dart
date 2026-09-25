@@ -105,8 +105,8 @@ class NotificacionRepository {
     return count;
   }
 
-  Future<void> markAsRead(int id) async {
-    await localDataSource.markAsRead(id);
+  Future<OperationResult<int>> markAsRead(int id) async {
+    return await localDataSource.markAsRead(id);
   }
 
   Future<void> markAllRead() async {

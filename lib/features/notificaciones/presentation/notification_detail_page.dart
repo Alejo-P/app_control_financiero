@@ -1,3 +1,4 @@
+import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/notificaciones/widgets/notificacion_detail_card.dart';
@@ -29,27 +30,38 @@ class _NotificationDetailState extends State<NotificationDetailPage> {
   }
 
   Future<void> _load(int id) async {
-    final appState = context.read<AppState>();
+    try {
+      final appState = context.read<AppState>();
 
-    setState(() {
-      isLoading = true;
-    });
+      setState(() {
+        isLoading = true;
+      });
 
-    final result = await appState.getNotificacionById(id);
+      final result = await appState.getNotificacionById(id);
+      var isChanged = false;
+      if (result != null) {
+        isChanged = await appState.marcarNotifLeida(id);
+      }
 
-    if (result != null) {
-      await appState.marcarNotifLeida(id);
-      if (result.isRead != true) {
-        await appState.ocultarNotificacion(id);
+      if (!mounted) return;
+
+      setState(() {
+        notif = isChanged ? result?.copyWith(isRead: true) : result;
+      });
+    } on Exception catch (_) {
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'No se pudo completar la carga de la notificación.',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
-
-    if (!mounted) return;
-
-    setState(() {
-      notif = result;
-      isLoading = false;
-    });
   }
 
   @override
