@@ -984,13 +984,13 @@ class AppState extends ChangeNotifier {
     return result.data!;
   }
 
-  Future<int?> actualizarMovimiento(Movimiento movimiento) async {
+  Future<int> actualizarMovimiento(Movimiento movimiento) async {
     final result = await _movimientosRepository.updateMovimiento(movimiento);
 
     // Actualizacion de un movimiento
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (!result.success || result.data == null) return null;
+    if (!result.success || result.data == null) return -1;
 
     final updatedMovimiento = result.data!;
     final index = movimientos.indexWhere((m) => m.id == updatedMovimiento.id);
@@ -1009,19 +1009,21 @@ class AppState extends ChangeNotifier {
 
     await _sincronizarDatosDerivadosMovimientos();
     notifyListeners();
-    return updatedMovimiento.id;
+    return updatedMovimiento.id ?? -1;
   }
 
-  Future<void> eliminarMovimiento(int id, int categoryId) async {
+  Future<int> eliminarMovimiento(int id, int categoryId) async {
     final result = await _movimientosRepository.deleteMovimiento(id);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
-    if (!result.success || result.data == null) return;
+    if (!result.success || result.data == -1) return -1;
 
     movimientos.removeWhere((m) => m.id == result.data);
 
     await _sincronizarDatosDerivadosMovimientos();
     notifyListeners();
+
+    return result.data ?? -1;
   }
 
   // ================================ CATEGORIAS CRUD =================================

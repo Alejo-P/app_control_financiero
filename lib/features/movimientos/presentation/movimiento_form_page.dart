@@ -308,115 +308,146 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
         if (noteText.isNotEmpty) Text('Nota: $noteText'),
       ],
     );
-    if (confirmed != true) return;
-
+    if (!mounted || confirmed != true) return;
     setState(() {
       _action = "Guardando";
       _isLoading = true; // Activar indicador de carga
     });
 
-    // Crear el objeto Movimiento
-    final movimiento = Movimiento(
-      id: modo == MovimientoFormMode.edit ? movementId : null,
-      title: titleText,
-      categoryID: categoryId,
-      amount: amount,
-      date: selectedDate,
-      time: modo == MovimientoFormMode.edit ? movementTime : TimeOfDay.now(),
-      note: noteText,
-    );
+    try {
+      final movimiento = Movimiento(
+        id: modo == MovimientoFormMode.edit ? movementId : null,
+        title: titleText,
+        categoryID: categoryId,
+        amount: amount,
+        date: selectedDate,
+        time: modo == MovimientoFormMode.edit ? movementTime : TimeOfDay.now(),
+        note: noteText,
+      );
 
-    final isUpdateMovement = modo == MovimientoFormMode.edit;
-    final result = isUpdateMovement
-        ? await appState.actualizarMovimiento(movimiento)
-        : await appState.agregarMovimiento(movimiento);
+      final isUpdateMovement = modo == MovimientoFormMode.edit;
+      final result = isUpdateMovement
+          ? await appState.actualizarMovimiento(movimiento)
+          : await appState.agregarMovimiento(movimiento);
 
-    if (!mounted) return;
+      if (!mounted) return;
+      if (result == -1) {
+        AppSnackbar.error(context, appState.transactionResultMessage);
+        return;
+      }
 
-    final showNotification =
-        appState
-            .getMovementNotificationConfigByType(
-              isUpdateMovement
-                  ? MovementNotificationConfig.editMovementKey
-                  : MovementNotificationConfig.createMovementKey,
-            )
-            ?.isEnabled ??
-        false;
+      final mensajeGuardado = appState.transactionResultMessage;
+      var notificacionesCompletadas = true;
 
-    final notificacion = Notificacion(
-      title: '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
-      description:
-          'El movimiento "${movimiento.title}" ha sido ${isUpdateMovement ? 'actualizado' : 'creado'} exitosamente.',
-      type: TipoNotificacion.movimiento,
-      objectId: result ?? movimiento.id!,
-      iconName: IconMapper.toName(Icons.compare_arrows_outlined),
-      iconColorValue: Colors.blue.value,
-      createdAt: currentDateTime,
-      extraData: {
-        "Categoría": categoryName,
-        "Concepto": movimiento.title,
-        'Monto': movimiento.amount,
-        'Nota': movimiento.note.isNotEmpty ? movimiento.note : '(Sin nota)',
-        'Fecha creacion': formatDate(movimiento.date),
-        'Hora creacion': movimiento.time.format(context),
-      },
-    );
-    await appState.insertarNotificacion(
-      notificacion,
-      showNotification: showNotification,
-    );
-
-    final porcentagesPresupuesto = await appState.getThresholdsToNotify(
-      movimiento.categoryID,
-      movimiento.date,
-    );
-
-    if (porcentagesPresupuesto.isNotEmpty) {
-      for (final porcentaje in porcentagesPresupuesto) {
-        final porcentajeInt = (porcentaje * 100).toInt();
-        await appState.insertarNotificacion(
-          Notificacion(
-            title: 'Alerta de presupuesto',
-            description:
-                'Has alcanzado el $porcentajeInt% del presupuesto en $categoryName.',
-            type: TipoNotificacion.presupuesto,
-            iconName: IconMapper.toName(Icons.warning_amber_outlined),
-            iconColorValue: Colors.red.value,
-            createdAt: currentDateTime,
-            extraData: {
-              'Categoría': categoryName,
-              'Porcentaje alcanzado': '$porcentajeInt%',
-              'Fecha': formatDate(movimiento.date),
-            },
-          ),
-          showNotification: true,
+      try {
+        final notificacion = Notificacion(
+          title:
+              '${isUpdateMovement ? 'Actualizacion' : 'Creacion'} de movimiento',
+          description:
+              'El movimiento "${movimiento.title}" ha sido ${isUpdateMovement ? 'actualizado' : 'creado'} exitosamente.',
+          type: TipoNotificacion.movimiento,
+          objectId: result,
+          iconName: IconMapper.toName(Icons.compare_arrows_outlined),
+          iconColorValue: Colors.blue.value,
+          createdAt: currentDateTime,
+          extraData: {
+            "Categoría": categoryName,
+            "Concepto": movimiento.title,
+            'Monto': movimiento.amount,
+            'Nota': movimiento.note.isNotEmpty ? movimiento.note : '(Sin nota)',
+            'Fecha creacion': formatDate(movimiento.date),
+            'Hora creacion': movimiento.time.format(context),
+          },
         );
 
-        await appState.insertarBudgetNotificationEvent(
-          BudgetNotificationEvent(
-            categoryId: movimiento.categoryID,
-            year: movimiento.date.year,
-            month: movimiento.date.month,
-            threshold: porcentaje,
-            createdAt: currentDateTime,
-          ),
+        final showNotification =
+            appState
+                .getMovementNotificationConfigByType(
+                  isUpdateMovement
+                      ? MovementNotificationConfig.editMovementKey
+                      : MovementNotificationConfig.createMovementKey,
+                )
+                ?.isEnabled ??
+            false;
+
+        final insertada = await appState.insertarNotificacion(
+          notificacion,
+          showNotification: showNotification,
+        );
+        if (!insertada) notificacionesCompletadas = false;
+
+        final porcentagesPresupuesto = await appState.getThresholdsToNotify(
+          movimiento.categoryID,
+          movimiento.date,
+        );
+
+        if (porcentagesPresupuesto.isNotEmpty) {
+          for (final porcentaje in porcentagesPresupuesto) {
+            final porcentajeInt = (porcentaje * 100).toInt();
+            final alertaInsertada = await appState.insertarNotificacion(
+              Notificacion(
+                title: 'Alerta de presupuesto',
+                description:
+                    'Has alcanzado el $porcentajeInt% del presupuesto en $categoryName.',
+                type: TipoNotificacion.presupuesto,
+                iconName: IconMapper.toName(Icons.warning_amber_outlined),
+                iconColorValue: Colors.red.value,
+                createdAt: currentDateTime,
+                extraData: {
+                  'Categoría': categoryName,
+                  'Porcentaje alcanzado': '$porcentajeInt%',
+                  'Fecha': formatDate(movimiento.date),
+                },
+              ),
+              showNotification: true,
+            );
+            if (!alertaInsertada) {
+              notificacionesCompletadas = false;
+              continue;
+            }
+
+            final eventoInsertado = await appState
+                .insertarBudgetNotificationEvent(
+                  BudgetNotificationEvent(
+                    categoryId: movimiento.categoryID,
+                    year: movimiento.date.year,
+                    month: movimiento.date.month,
+                    threshold: porcentaje,
+                    createdAt: currentDateTime,
+                  ),
+                );
+            if (!eventoInsertado) notificacionesCompletadas = false;
+          }
+        }
+      } on Exception catch (_) {
+        notificacionesCompletadas = false;
+      }
+
+      if (!mounted) return;
+      if (notificacionesCompletadas) {
+        AppSnackbar.success(context, mensajeGuardado);
+      } else {
+        AppSnackbar.warning(
+          context,
+          'Movimiento guardado, pero no se pudieron completar las notificaciones.',
         );
       }
+
+      Navigator.pop(context, true);
+    } on Exception catch (_) {
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'Ocurrio un error al ${modo == MovimientoFormMode.edit ? 'actualizar' : 'guardar'} el movimiento',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Desactivar indicador de carga
+        });
+      }
     }
-
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false; // Desactivar indicador de carga
-    });
-
-    if (!appState.transactionSuccess) {
-      AppSnackbar.error(context, appState.transactionResultMessage);
-      return;
-    }
-
-    AppSnackbar.success(context, appState.transactionResultMessage);
-
-    Navigator.pop(context, true);
   }
 
   Future<void> _eliminarMovimiento() async {
@@ -426,66 +457,91 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       title: 'Eliminar movimiento',
       content: '¿Estás seguro de que deseas eliminar este movimiento?',
     );
-    if (confirmed != true) return;
+    if (!mounted || confirmed != true) return;
     setState(() {
       _action = "Eliminando";
       _isLoading = true; // Activar indicador de carga
     });
 
-    await appState.eliminarMovimiento(movementId, categoryId);
+    try {
+      final result = await appState.eliminarMovimiento(movementId, categoryId);
 
-    if (!mounted) return;
+      if (!mounted) return;
+      if (result == -1) {
+        AppSnackbar.error(context, appState.transactionResultMessage);
+        return;
+      }
 
-    final showNotification =
-        appState
-            .getMovementNotificationConfigByType(
-              MovementNotificationConfig.deleteMovementKey,
-            )
-            ?.isEnabled ??
-        false;
+      final mensajeGuardado = appState.transactionResultMessage;
+      var notificacionesCompletadas = true;
 
-    final notificacion = Notificacion(
-      title: 'Eliminación de movimiento',
-      description:
-          'El movimiento "${detalleMovimiento?.title}" ha sido eliminado exitosamente.',
-      type: TipoNotificacion.movimiento,
-      iconName: IconMapper.toName(Icons.delete_outline),
-      iconColorValue: Colors.red.value,
-      createdAt: currentDateTime,
-      extraData: {
-        "Categoría": categoryName,
-        "Concepto": detalleMovimiento?.title ?? '',
-        'Monto': detalleMovimiento?.amount ?? 0.0,
-        'Nota': detalleMovimiento?.note.isNotEmpty == true
-            ? detalleMovimiento?.note
-            : '(Sin nota)',
-        'Fecha creacion': detalleMovimiento != null
-            ? formatDate(detalleMovimiento!.date)
-            : '',
-        'Hora creacion': detalleMovimiento != null
-            ? detalleMovimiento!.time!.format(context)
-            : '',
-      },
-    );
+      try {
+        final notificacion = Notificacion(
+          title: 'Eliminación de movimiento',
+          description:
+              'El movimiento "${detalleMovimiento?.title}" ha sido eliminado exitosamente.',
+          type: TipoNotificacion.movimiento,
+          iconName: IconMapper.toName(Icons.delete_outline),
+          iconColorValue: Colors.red.value,
+          createdAt: currentDateTime,
+          extraData: {
+            "Categoría": categoryName,
+            "Concepto": detalleMovimiento?.title ?? '',
+            'Monto': detalleMovimiento?.amount ?? 0.0,
+            'Nota': detalleMovimiento?.note.isNotEmpty == true
+                ? detalleMovimiento?.note
+                : '(Sin nota)',
+            'Fecha creacion': detalleMovimiento != null
+                ? formatDate(detalleMovimiento!.date)
+                : '',
+            'Hora creacion': detalleMovimiento != null
+                ? detalleMovimiento!.time!.format(context)
+                : '',
+          },
+        );
 
-    await appState.insertarNotificacion(
-      notificacion,
-      showNotification: showNotification,
-    );
+        final showNotification =
+            appState
+                .getMovementNotificationConfigByType(
+                  MovementNotificationConfig.deleteMovementKey,
+                )
+                ?.isEnabled ??
+            false;
 
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false; // Desactivar indicador de carga
-    });
+        final insertada = await appState.insertarNotificacion(
+          notificacion,
+          showNotification: showNotification,
+        );
+        if (!insertada) notificacionesCompletadas = false;
+      } on Exception catch (_) {
+        notificacionesCompletadas = false;
+      }
 
-    if (!appState.transactionSuccess) {
-      AppSnackbar.error(context, appState.transactionResultMessage);
-      return;
+      if (!mounted) return;
+      if (notificacionesCompletadas) {
+        AppSnackbar.success(context, mensajeGuardado);
+      } else {
+        AppSnackbar.warning(
+          context,
+          'Movimiento eliminado, pero no se pudieron completar las notificaciones.',
+        );
+      }
+
+      Navigator.pop(context, true);
+    } on Exception catch (_) {
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'Ocurrio un error al eliminar el movimiento',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Desactivar indicador de carga
+        });
+      }
     }
-
-    AppSnackbar.success(context, appState.transactionResultMessage);
-
-    Navigator.pop(context, true);
   }
 
   Future<bool> _onWillPop() async {

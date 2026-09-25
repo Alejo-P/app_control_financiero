@@ -110,12 +110,12 @@ class MovimientosRepository {
   /// Elimina un movimiento financiero por su ID.
   /// @param id El ID del movimiento a eliminar.
   /// @return Un objeto OperationResult que contiene el id del movimiento eliminado si la operación fue exitosa, de lo contrario null.
-  Future<OperationResult<int?>> deleteMovimiento(int id) async {
+  Future<OperationResult<int>> deleteMovimiento(int id) async {
     final result = await localDataSource.deleteMovimiento(id);
-    return OperationResult<int?>(
+    return OperationResult<int>(
       message: result.message,
       success: result.success,
-      data: result.success ? id : null,
+      data: result.success ? id : -1,
     );
   }
 
