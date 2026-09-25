@@ -24,6 +24,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
   final ScrollController _scrollController = ScrollController();
   final Set<int> selectedNotifications = {};
   bool _isLoading = false;
+  bool _isDeleting = false;
   late final Timer _timer;
 
   @override
@@ -60,10 +61,10 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
   }
 
   void _onScroll() {
-    final appState = context.read<AppState>();
-
+    if (_isDeleting) return;
     if (!_scrollController.hasClients) return;
 
+    final appState = context.read<AppState>();
     final threshold = 200;
     final max = _scrollController.position.maxScrollExtent;
     final current = _scrollController.position.pixels;
@@ -126,18 +127,40 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       content: 'Esta seguro de eliminar esta notificación?',
     );
 
-    if (confirmed != true) return;
+    if (!mounted || confirmed != true) return;
+    if (_isDeleting || appState.isLoadingNotif) return;
 
-    final success = await appState.eliminarNotificacion(id);
-    if (!mounted) return;
+    setState(() => _isDeleting = true);
 
-    if (success) {
-      setState(() => selectedNotifications.remove(id));
-      AppSnackbar.success(context, 'Notificación eliminada con éxito');
-      return;
+    try {
+      final limiteRecarga = appState.notificaciones.length < 10
+          ? 10
+          : appState.notificaciones.length;
+
+      final success = await appState.eliminarNotificacion(id);
+      if (!mounted) return;
+
+      if (success) {
+        await appState.loadNotifications(limit: limiteRecarga);
+        if (!mounted) return;
+        setState(() => selectedNotifications.remove(id));
+        AppSnackbar.success(context, 'Notificación eliminada con éxito');
+        return;
+      }
+
+      AppSnackbar.error(context, 'No se pudo eliminar la notificación');
+    } on Exception catch (_) {
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'No se pudo completar la operación. Actualiza la lista.',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isDeleting = false);
+      }
     }
-
-    AppSnackbar.error(context, 'No se pudo eliminar la notificación');
   }
 
   Future<void> _eliminarSeleccionadas() async {
@@ -151,15 +174,49 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       content: 'Esta seguro de eliminar $count notificaciones?',
     );
 
-    if (confirmed != true) return;
+    if (!mounted || confirmed != true) return;
+    if (_isDeleting || appState.isLoadingNotif) return;
 
-    for (final id in selectedIds) {
-      await appState.eliminarNotificacion(id);
+    setState(() => _isDeleting = true);
+
+    try {
+      final limiteRecarga = appState.notificaciones.length < 10
+          ? 10
+          : appState.notificaciones.length;
+
+      var eliminadas = 0;
+      for (final id in selectedIds) {
+        if (await appState.eliminarNotificacion(id)) {
+          eliminadas++;
+        }
+      }
+      await appState.loadNotifications(limit: limiteRecarga);
+      if (!mounted) return;
+
+      if (eliminadas == count) {
+        AppSnackbar.success(
+          context,
+          '$count notificaciones eliminadas con éxito',
+        );
+      } else {
+        AppSnackbar.warning(
+          context,
+          '$eliminadas de $count notificaciones eliminadas con éxito',
+        );
+      }
+    } on Exception catch (_) {
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'No se pudo completar la operación. Actualiza la lista.',
+        );
+      }
+    } finally {
+      if (mounted) {
+        _clearSelection();
+        setState(() => _isDeleting = false);
+      }
     }
-    if (!mounted) return;
-
-    _clearSelection();
-    AppSnackbar.success(context, '$count notificaciones eliminadas con éxito');
   }
 
   Future<void> _eliminarTodasNotificaciones() async {
@@ -240,7 +297,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
           top: false,
           child: RefreshIndicator(
             onRefresh: _refreshNotificaciones,
-            child: _isLoading
+            child: (_isLoading || _isDeleting)
                 ? LoadingScreen(message: 'Cargando notificaciones...')
                 : Center(
                     child: Column(
@@ -269,21 +326,21 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       appBar: AppBar(
         title: Text('Notificaciones'),
         actions: [
-          if (selectedNotifications.isNotEmpty)
+          if (selectedNotifications.isNotEmpty && !(_isLoading || _isDeleting))
             IconButton(
               icon: const Icon(Icons.close),
               onPressed: _clearSelection,
               tooltip: 'Cancelar selección',
             ),
 
-          if (unReadNotif > 0 && selectedNotifications.isNotEmpty)
+          if (unReadNotif > 0 && selectedNotifications.isNotEmpty && !(_isLoading || _isDeleting))
             IconButton(
               icon: Icon(Icons.done_all),
               onPressed: _marcarSeleccionadasComoLeidas,
               tooltip: 'Marcar seleccionadas como leídas',
             ),
 
-          if (notifications.isNotEmpty)
+          if (notifications.isNotEmpty && !(_isLoading || _isDeleting))
             IconButton(
               icon: Icon(Icons.delete_forever_outlined),
               onPressed: selectedNotifications.isNotEmpty
@@ -299,7 +356,7 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
         top: false,
         child: RefreshIndicator(
           onRefresh: _refreshNotificaciones,
-          child: _isLoading
+          child: (_isLoading || _isDeleting)
               ? LoadingScreen(message: 'Cargando notificaciones...')
               : ListView.builder(
                   controller: _scrollController,

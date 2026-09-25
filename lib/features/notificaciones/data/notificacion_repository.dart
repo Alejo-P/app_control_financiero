@@ -10,8 +10,8 @@ class NotificacionRepository {
 
   NotificacionRepository(this.localDataSource);
 
-  Future<List<Notificacion>> fetchNotificaciones({int offset = 0}) async {
-    return await localDataSource.fetchNotificaciones(offset: offset);
+  Future<List<Notificacion>> fetchNotificaciones({int offset = 0, int limit = 10}) async {
+    return await localDataSource.fetchNotificaciones(offset: offset, limit: limit);
   }
 
   Future<List<BudgetNotification>> fetchAllBudgetNotifications() async {

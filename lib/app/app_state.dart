@@ -525,22 +525,25 @@ class AppState extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  Future<void> loadNotifications() async {
-    offset = 0;
-
-    final data = await _notificacionRepository.fetchNotificaciones(
-      offset: offset,
-    );
-
-    notificaciones = data;
-
-    offset += data.length;
-
-    _hasMoreNotif = data.isNotEmpty && data.length >= 10;
-
-    await updateCountersNotif(notify: false);
-
+  Future<void> loadNotifications({int limit = 10}) async {
+    _isLoadingNotif = true;
     notifyListeners();
+
+    try {
+      final data = await _notificacionRepository.fetchNotificaciones(
+        offset: 0,
+        limit: limit,
+      );
+
+      await updateCountersNotif(notify: false);
+
+      notificaciones = data;
+      offset = data.length;
+      _hasMoreNotif = offset < totalNotif;
+    } finally {
+      _isLoadingNotif = false;
+      notifyListeners();
+    }
   }
 
   Future<void> updateCountersNotif({bool notify = true}) async {

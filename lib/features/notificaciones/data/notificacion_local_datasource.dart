@@ -58,13 +58,13 @@ class NotificacionLocalDataSource {
     return count;
   }
 
-  Future<List<Notificacion>> fetchNotificaciones({int offset = 0}) async {
+  Future<List<Notificacion>> fetchNotificaciones({int offset = 0, int limit = 10}) async {
     final db = await _dbHelper.database;
 
     final List<Map<String, dynamic>> results = await db.query(
       NotificacionTable.table,
       orderBy: '${NotificacionTable.createdAt} DESC',
-      limit: 10,
+      limit: limit,
       offset: offset,
     );
 
