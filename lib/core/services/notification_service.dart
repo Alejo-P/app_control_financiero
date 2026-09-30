@@ -292,14 +292,6 @@ class NotificationService {
     await _notifications.cancel(id);
   }
 
-  static Future<void> cancelAllNotifications() async {
-    if (!_isMobile()) {
-      return;
-    }
-
-    await _notifications.cancelAll();
-  }
-
   static Future<NotificationAppLaunchDetails?> getLaunchDetails() async {
     if (!_isMobile()) {
       return null;

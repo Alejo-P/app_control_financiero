@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:control_financiero/core/utils/record_date_limits.dart';
 
 class MonthSelection extends StatefulWidget {
   final DateTime initialDate;
@@ -28,8 +29,10 @@ class _MonthSelectionState extends State<MonthSelection> {
   }
 
   DateTime getMinAllowedDate() {
-    final now = currentDateTime;
-    return DateTime(now.year - 3, now.month);
+    final first = widget.allowFutureMonths
+        ? RecordDateLimits.presupuestos().first
+        : RecordDateLimits.movimientos().first;
+    return DateTime(first.year, first.month);
   }
 
   bool isBeforeLimit(DateTime selectedDate) {
@@ -55,7 +58,11 @@ class _MonthSelectionState extends State<MonthSelection> {
   }
 
   bool isLimitFutureMonth(DateTime selectedDate) {
-    return isCurrentMonth(selectedDate) || isFutureMonth(selectedDate);
+    final last = widget.allowFutureMonths
+        ? RecordDateLimits.presupuestos().last
+        : RecordDateLimits.movimientos().last;
+    final month = DateTime(selectedDate.year, selectedDate.month);
+    return !month.isBefore(DateTime(last.year, last.month));
   }
 
   bool isLimitPastMonth(DateTime selectedDate) {
@@ -73,9 +80,7 @@ class _MonthSelectionState extends State<MonthSelection> {
       return; // No permitir retroceder más allá del límite
     }
 
-    if (offset > 0 &&
-        !widget.allowFutureMonths &&
-        isLimitFutureMonth(selectedDate)) {
+    if (offset > 0 && isLimitFutureMonth(selectedDate)) {
       return; // No permitir avanzar a meses futuros
     }
 
@@ -116,8 +121,7 @@ class _MonthSelectionState extends State<MonthSelection> {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
-    final isFuture =
-        !widget.allowFutureMonths && isLimitFutureMonth(selectedDate);
+    final isFuture = isLimitFutureMonth(selectedDate);
     final isCurrent = isCurrentMonth(selectedDate);
     final isLimitPast = isLimitPastMonth(selectedDate);
     final backgroundThemeColor = colorScheme.surface;
@@ -170,7 +174,9 @@ class _MonthSelectionState extends State<MonthSelection> {
                   spacing: 8,
                   children: [
                     InkWell(
-                      onTap: (isCurrent || widget.isLoading) ? null : returnToday,
+                      onTap: (isCurrent || widget.isLoading)
+                          ? null
+                          : returnToday,
                       borderRadius: BorderRadius.circular(8),
                       child: Container(
                         padding: const EdgeInsets.all(6),

@@ -120,6 +120,10 @@ class _TextInputCardState extends State<TextInputCard> {
         ),
         inputFormatters: [NoteInputFormatter()],
         keyboardType: widget.inputKeyboardType,
+        // Solicita mayúscula solo al empezar; se reactiva al borrar todo.
+        textCapitalization: widget.textController.text.isEmpty
+            ? TextCapitalization.sentences
+            : TextCapitalization.none,
         expands: false,
         textAlignVertical: TextAlignVertical.top,
         minLines: 1,

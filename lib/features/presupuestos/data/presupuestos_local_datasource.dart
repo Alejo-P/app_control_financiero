@@ -5,8 +5,88 @@ import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
+import 'package:sqflite/sqflite.dart';
 
 class PresupuestosLocalDataSource {
+  final Database? _database;
+  PresupuestosLocalDataSource({Database? database}) : _database = database;
+
+  /// Reemplazo y traslado se guardan juntos: un fallo revierte todo.
+  Future<OperationResult<int>> transferPresupuesto(
+    int id,
+    DateTime date, {
+    required bool move,
+    Presupuesto? replacement,
+  }) async {
+    final db = _database ?? await _dbHelper.database;
+    return db.transaction((txn) async {
+      final sourceRows = await txn.query(
+        PresupuestosTable.table,
+        where: '${PresupuestosTable.id} = ?',
+        whereArgs: [id],
+      );
+      if (sourceRows.isEmpty) {
+        return const OperationResult(
+          success: false,
+          message: 'El presupuesto ya no existe.',
+        );
+      }
+      final source = Presupuesto.fromMap(sourceRows.first);
+      final month = '${date.year}-${date.month.toString().padLeft(2, '0')}';
+      final rows = await txn.query(
+        PresupuestosTable.table,
+        where:
+            "${PresupuestosTable.categoryId} = ? AND strftime('%Y-%m', ${PresupuestosTable.date}) = ?",
+        whereArgs: [source.categoryId, month],
+      );
+      final target = rows.isEmpty ? null : Presupuesto.fromMap(rows.first);
+      if (target?.id == id) {
+        return const OperationResult(
+          success: false,
+          message: 'Selecciona un mes diferente al de origen.',
+        );
+      }
+      if (target != null &&
+          (replacement == null ||
+              target.id != replacement.id ||
+              target.amount != replacement.amount ||
+              target.repeatBudget != replacement.repeatBudget)) {
+        return const OperationResult(
+          success: false,
+          message:
+              'El presupuesto de destino cambió. Vuelve a intentarlo y confirma su reemplazo.',
+        );
+      }
+      if (target != null) {
+        await txn.delete(
+          PresupuestosTable.table,
+          where: '${PresupuestosTable.id} = ?',
+          whereArgs: [target.id],
+        );
+      }
+      final updated = source.copyWith(date: DateTime(date.year, date.month));
+      final int savedId;
+      if (move) {
+        await txn.update(
+          PresupuestosTable.table,
+          updated.toMap(),
+          where: '${PresupuestosTable.id} = ?',
+          whereArgs: [id],
+        );
+        savedId = id;
+      } else {
+        savedId = await txn.insert(PresupuestosTable.table, updated.toMap());
+      }
+      return OperationResult(
+        success: true,
+        data: savedId,
+        message: move
+            ? 'Presupuesto movido exitosamente.'
+            : 'Presupuesto copiado exitosamente.',
+      );
+    });
+  }
+
   final DBHelper _dbHelper = DBHelper.instance;
 
   // Obtener el ingreso presupuestado del mes y año dados
@@ -298,7 +378,7 @@ class PresupuestosLocalDataSource {
             'Ya existe un presupuesto para la categoría y mes seleccionados.',
       );
     }
-    
+
     final int id = await db.insert(
       PresupuestosTable.table,
       presupuesto.toMap(),
@@ -334,14 +414,10 @@ class PresupuestosLocalDataSource {
     final List<Map<String, dynamic>> existing = await db.query(
       PresupuestosTable.table,
       where:
-        "${PresupuestosTable.categoryId} = ? "
-        "AND strftime('%Y-%m', ${PresupuestosTable.date}) = ? "
-        "AND ${PresupuestosTable.id} != ?",
-      whereArgs: [
-        presupuesto.categoryId,
-        '$year-$month',
-        presupuesto.id,
-      ],
+          "${PresupuestosTable.categoryId} = ? "
+          "AND strftime('%Y-%m', ${PresupuestosTable.date}) = ? "
+          "AND ${PresupuestosTable.id} != ?",
+      whereArgs: [presupuesto.categoryId, '$year-$month', presupuesto.id],
       limit: 1,
     );
 

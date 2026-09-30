@@ -11,6 +11,7 @@ class TransactionDetailCard extends StatelessWidget {
   final Color iconColor;
   final TimeOfDay time;
   final VoidCallback? onTap;
+  final Widget? actions;
 
   const TransactionDetailCard({
     super.key,
@@ -22,6 +23,7 @@ class TransactionDetailCard extends StatelessWidget {
     required this.iconColor,
     required this.time,
     this.onTap,
+    this.actions,
   });
 
   @override
@@ -47,17 +49,18 @@ class TransactionDetailCard extends StatelessWidget {
                     title,
                     style: textTheme.labelMedium!.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary
+                      color: colorScheme.primary,
                     ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                   ),
-                  Text(category,
-                  style: textTheme.labelSmall!.copyWith(
-                    color: colorScheme.onSurface
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
+                  Text(
+                    category,
+                    style: textTheme.labelSmall!.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ],
               ),
@@ -72,7 +75,9 @@ class TransactionDetailCard extends StatelessWidget {
                   textAlign: TextAlign.right,
                   style: textTheme.labelMedium!.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: type == TipoMovimiento.ingreso.name ? Colors.green : Colors.red,
+                    color: type == TipoMovimiento.ingreso.name
+                        ? Colors.green
+                        : Colors.red,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -80,11 +85,12 @@ class TransactionDetailCard extends StatelessWidget {
                   time.format(context),
                   textAlign: TextAlign.right,
                   style: textTheme.labelSmall!.copyWith(
-                    color: colorScheme.onSurface
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
+            ?actions,
           ],
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:control_financiero/features/movimientos/models/movimiento_form_a
 import 'package:control_financiero/features/movimientos/widgets/transaction_detail_card.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
+import 'package:control_financiero/features/shared/widgets/record_actions_menu.dart';
 
 class TransactionsContainer extends StatelessWidget {
   final DateTime date;
@@ -44,8 +45,8 @@ class TransactionsContainer extends StatelessWidget {
       ),
       showDivider: false,
       children: movimientos.map((movimiento) {
-
         return TransactionDetailCard(
+          actions: RecordActionsMenu(id: movimiento.id!, date: movimiento.date),
           title: movimiento.title,
           category: movimiento.categoryName!,
           type: movimiento.movementType.name,

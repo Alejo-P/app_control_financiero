@@ -4,6 +4,8 @@ import 'package:control_financiero/core/services/backup_service.dart';
 import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/record_date_limits.dart';
+import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/encryption_helper.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -967,6 +969,11 @@ class AppState extends ChangeNotifier {
   }
 
   Future<int> agregarMovimiento(Movimiento movimiento) async {
+    if (!RecordDateLimits.movimientos().contains(movimiento.date)) {
+      transactionSuccess = false;
+      transactionResultMessage = 'La fecha debe estar entre hace 3 años y hoy.';
+      return -1;
+    }
     final result = await _movimientosRepository.addMovimiento(movimiento);
     transactionResultMessage = result.message;
     transactionSuccess = result.success;
@@ -985,6 +992,11 @@ class AppState extends ChangeNotifier {
   }
 
   Future<int> actualizarMovimiento(Movimiento movimiento) async {
+    if (!RecordDateLimits.movimientos().contains(movimiento.date)) {
+      transactionSuccess = false;
+      transactionResultMessage = 'La fecha debe estar entre hace 3 años y hoy.';
+      return -1;
+    }
     final result = await _movimientosRepository.updateMovimiento(movimiento);
 
     // Actualizacion de un movimiento
@@ -1098,6 +1110,91 @@ class AppState extends ChangeNotifier {
   }
 
   // ================================ PRESUPUESTOS CRUD =================================
+  Future<OperationResult<int>> transferirMovimiento(
+    int id,
+    DateTime date, {
+    required bool move,
+  }) async {
+    if (!RecordDateLimits.movimientos().contains(date)) {
+      return const OperationResult(
+        success: false,
+        message: 'La fecha debe estar entre hace 3 años y hoy.',
+      );
+    }
+    final source = await _movimientosRepository.fetchMovimientoById(id);
+    if (source == null) {
+      return const OperationResult(
+        success: false,
+        message: 'El movimiento ya no existe.',
+      );
+    }
+    if (move && isSameDay(source.date, date)) {
+      return const OperationResult(
+        success: false,
+        message: 'Selecciona una fecha diferente a la de origen.',
+      );
+    }
+    final updated = Movimiento(
+      id: move ? source.id : null,
+      title: source.title,
+      categoryID: source.categoryID,
+      amount: source.amount,
+      date: DateTime(date.year, date.month, date.day),
+      time: source.time,
+      note: source.note,
+    );
+    final savedId = move
+        ? await actualizarMovimiento(updated)
+        : await agregarMovimiento(updated);
+    return OperationResult(
+      success: savedId != -1,
+      data: savedId,
+      message: savedId == -1
+          ? transactionResultMessage
+          : 'Movimiento ${move ? 'movido' : 'copiado'} al ${date.day}/${date.month}/${date.year}.',
+    );
+  }
+
+  Future<Presupuesto?> presupuestoEnDestino(int categoryId, DateTime date) =>
+      _presupuestosRepository.fetchPresupuestoByCategoryAndMonth(
+        categoryId,
+        date,
+      );
+
+  Future<OperationResult<int>> transferirPresupuesto(
+    int id,
+    DateTime date, {
+    required bool move,
+    Presupuesto? replacement,
+  }) async {
+    final month = DateTime(date.year, date.month);
+    if (!RecordDateLimits.presupuestos().contains(month)) {
+      return const OperationResult(
+        success: false,
+        message:
+            'El mes debe estar entre un año antes y un año después del mes actual.',
+      );
+    }
+    final result = await _presupuestosRepository.transferPresupuesto(
+      id,
+      month,
+      move: move,
+      replacement: replacement,
+    );
+    transactionSuccess = result.success;
+    transactionResultMessage = result.message;
+    if (result.success) {
+      await loadPresupuestosByMonthAndYear(selectedBudgetMonth);
+    }
+    return OperationResult(
+      success: result.success,
+      data: result.data,
+      message: result.success
+          ? 'Presupuesto ${move ? 'movido' : 'copiado'} a ${formatMonthYear(month)}.'
+          : result.message,
+    );
+  }
+
   Future<int> agregarPresupuesto(Presupuesto presupuesto) async {
     final result = await _presupuestosRepository.addPresupuesto(presupuesto);
     transactionResultMessage = result.message;

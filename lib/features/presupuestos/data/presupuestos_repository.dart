@@ -8,6 +8,23 @@ import 'package:control_financiero/features/presupuestos/models/ingreso_presupue
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 
 class PresupuestosRepository {
+  Future<Presupuesto?> fetchPresupuestoByCategoryAndMonth(
+    int categoryId,
+    DateTime date,
+  ) => localDataSource.fetchPresupuestoByCategoryAndMonth(categoryId, date);
+
+  Future<OperationResult<int>> transferPresupuesto(
+    int id,
+    DateTime date, {
+    required bool move,
+    Presupuesto? replacement,
+  }) => localDataSource.transferPresupuesto(
+    id,
+    date,
+    move: move,
+    replacement: replacement,
+  );
+
   final PresupuestosLocalDataSource localDataSource;
   final MovimientosLocalDataSource movimientosLocalDataSource =
       MovimientosLocalDataSource();

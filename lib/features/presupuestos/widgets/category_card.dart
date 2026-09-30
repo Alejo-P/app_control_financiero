@@ -10,6 +10,7 @@ class CategoryCard extends StatelessWidget {
   final double total;
   final double percentage;
   final Color color;
+  final Widget? actions;
 
   const CategoryCard({
     super.key,
@@ -19,6 +20,7 @@ class CategoryCard extends StatelessWidget {
     required this.total,
     required this.percentage,
     required this.color,
+    this.actions,
   });
 
   @override
@@ -43,7 +45,9 @@ class CategoryCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: !isOverBudget ? Colors.transparent : Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+            color: !isOverBudget
+                ? Colors.transparent
+                : Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
             width: 1.5,
           ),
         ),
@@ -93,6 +97,7 @@ class CategoryCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  ?actions,
                 ],
               ),
               const SizedBox(height: 8),

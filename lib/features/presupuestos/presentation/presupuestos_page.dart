@@ -17,6 +17,7 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/shared/widgets/month_selection.dart';
 import 'package:control_financiero/features/presupuestos/widgets/category_card.dart';
 import 'package:flutter/rendering.dart';
+import 'package:control_financiero/features/shared/widgets/record_actions_menu.dart';
 
 class PresupuestosPage extends StatefulWidget {
   const PresupuestosPage({super.key});
@@ -291,6 +292,11 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                               );
                             },
                             child: CategoryCard(
+                              actions: RecordActionsMenu(
+                                id: presupuesto.id!,
+                                date: presupuesto.date,
+                                presupuesto: presupuesto,
+                              ),
                               icon: categoryDetails['icon'],
                               title: categoryDetails['name'],
                               spent: categoryDetails['spent'],

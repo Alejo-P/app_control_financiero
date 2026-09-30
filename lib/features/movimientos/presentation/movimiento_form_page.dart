@@ -26,6 +26,7 @@ import 'package:control_financiero/features/movimientos/widgets/tipo_movimiento_
 import 'package:control_financiero/features/shared/widgets/dialogs.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
+import 'package:control_financiero/core/utils/record_date_limits.dart';
 import 'package:provider/provider.dart';
 
 class MovimientoFormPage extends StatefulWidget {
@@ -253,12 +254,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final currentDay = currentDateTime;
+    final limits = RecordDateLimits.movimientos();
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(currentDay.year - 3),
-      lastDate: DateTime(currentDay.year, currentDay.month, currentDay.day),
+      initialDate: limits.clamp(selectedDate),
+      firstDate: limits.first,
+      lastDate: limits.last,
     );
 
     if (picked != null && picked != selectedDate) {
