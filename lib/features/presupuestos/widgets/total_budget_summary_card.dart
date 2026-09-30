@@ -19,7 +19,7 @@ class TotalBudgetSummaryCard extends StatelessWidget {
     final total = totalBudget;
     final spent = spentAmount;
     final available = total - spent;
-    final percent = spent / total;
+    final percent = (total > 0) ? spent / total : 0.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
