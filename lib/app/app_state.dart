@@ -1161,6 +1161,14 @@ class AppState extends ChangeNotifier {
         date,
       );
 
+  Future<double> ingresoPresupuestadoTotalEnDestino(DateTime date) async {
+      final result = await _presupuestosRepository.fetchIngresosPresupuestadosByMonthAndYear(date);
+      return result.monto;
+  }
+
+  Future<double> ingresoPresupuestadoAsignadoEnDestino(DateTime date) =>
+    _presupuestosRepository.fetchPresupuestosAmountSumByMonthAndYear(date);
+
   Future<OperationResult<int>> transferirPresupuesto(
     int id,
     DateTime date, {

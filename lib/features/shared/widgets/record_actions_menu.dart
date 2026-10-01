@@ -53,6 +53,8 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
       }
       if (destination == null || !mounted) return;
       Presupuesto? replacement;
+      double budgetAsignadoInDestination;
+      double budgetTotalInDestination;
       if (budget != null) {
         if (isSameMonth(budget.date, destination)) {
           AppSnackbar.error(
@@ -65,7 +67,27 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
           budget.categoryId,
           destination,
         );
+
+        budgetAsignadoInDestination = await appState
+            .ingresoPresupuestadoAsignadoEnDestino(destination);
+
+        budgetTotalInDestination = await appState
+            .ingresoPresupuestadoTotalEnDestino(destination);
+
+        final totalFinal =
+            budgetAsignadoInDestination -
+            (replacement?.amount ?? 0) +
+            budget.amount;
+
         if (!mounted) return;
+        if (totalFinal > budgetTotalInDestination) {
+          AppSnackbar.error(
+            context,
+            'No puedes ${move ? 'mover' : 'copiar'} un presupuesto que supere el ingreso presupuestado disponible en el mes de destino (\$${budgetTotalInDestination.toStringAsFixed(2)}).',
+          );
+          return;
+        }
+
         if (replacement != null) {
           final confirmed = await showConfirmDialog(
             context,

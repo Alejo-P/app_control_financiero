@@ -31,4 +31,9 @@ class IngresoPresupuestado {
       IngresoPresupuestadoTable.date: fecha.toIso8601String(),
     };
   }
+
+  @override
+  String toString() {
+    return 'IngresoPresupuestado(id: $id, monto: $monto, fecha: $fecha)';
+  }
 }
