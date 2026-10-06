@@ -220,7 +220,7 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
                                 placeholder: 'Porcentaje personalizado (1-100)',
                                 iconData: Icons.percent_rounded,
                                 iconColor: Colors.blue,
-                                maxLength: 5,
+                                maxLength: 3,
                                 inputFormatters: [
                                   TextInputFormatter.withFunction((
                                     oldValue,
