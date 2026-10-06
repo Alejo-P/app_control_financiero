@@ -7,6 +7,7 @@ import 'package:control_financiero/features/notificaciones/models/movement_notif
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/number_input_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class NotificationConfigPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
       TextEditingController();
   bool _isCustomThresholdValid = false;
   String errorText = '';
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -39,25 +41,29 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
   void _validateCustomThreshold(String value) {
     final appState = context.read<AppState>();
     final thresholds = appState.budgetThresholds;
-    final numValue = double.tryParse(value) ?? 0;
+    final numValue = int.tryParse(value) ?? 0;
     final errorMessage = value.isEmpty
         ? ''
+        : value.contains('.') || value.contains(',')
+        ? 'El umbral debe ser un número entero, sin decimales'
         : (numValue < 1 || numValue > 100)
         ? 'Ingrese un número válido entre 1 y 100'
         : thresholds.contains(numValue / 100)
         ? 'Este umbral ya existe'
         : '';
     setState(() {
-      _isCustomThresholdValid =
-          (numValue >= 1 && numValue <= 100) &&
-          !thresholds.contains(numValue / 100);
+      _isCustomThresholdValid = value.isNotEmpty && errorMessage.isEmpty;
       errorText = errorMessage;
     });
   }
 
   Future<void> _addCustomThreshold() async {
+    _validateCustomThreshold(_customThresholdController.text);
+    if (!_isCustomThresholdValid || !_formKey.currentState!.validate()) {
+      return;
+    }
     final appState = context.read<AppState>();
-    final numValue = double.tryParse(_customThresholdController.text);
+    final numValue = int.tryParse(_customThresholdController.text);
 
     final budgetNotification = BudgetNotification(
       id: null, // El ID se asignará automáticamente en la base de datos
@@ -67,7 +73,7 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
       createdAt: DateTime.now(),
     );
 
-    if (numValue != null && numValue >= 0 && numValue <= 100) {
+    if (numValue != null && numValue >= 1 && numValue <= 100) {
       await appState.addOrUpdateBudgetNotification(budgetNotification);
       _customThresholdController.clear();
 
@@ -202,43 +208,64 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
 
                     Card(
                       margin: const EdgeInsets.all(16.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Text('Otro porcentaje'),
-                            NumberInputCard(
-                              textController: _customThresholdController,
-                              placeholder: 'Porcentaje personalizado (0-100)',
-                              iconData: Icons.percent_rounded,
-                              iconColor: Colors.blue,
-                              maxLength: 5,
-                            ),
-                            if (errorText.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0,
-                                ),
-                                child: Text(
-                                  errorText,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
+                      child: Form(
+                        key: _formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Text('Otro porcentaje'),
+                              NumberInputCard(
+                                textController: _customThresholdController,
+                                placeholder: 'Porcentaje personalizado (1-100)',
+                                iconData: Icons.percent_rounded,
+                                iconColor: Colors.blue,
+                                maxLength: 5,
+                                inputFormatters: [
+                                  TextInputFormatter.withFunction((
+                                    oldValue,
+                                    newValue,
+                                  ) {
+                                    return RegExp(
+                                          r'^[0-9.,]*$',
+                                        ).hasMatch(newValue.text)
+                                        ? newValue
+                                        : oldValue;
+                                  }),
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Ingrese un número válido entre 1 y 100';
+                                  }
+                                  return errorText.isEmpty ? null : errorText;
+                                },
+                              ),
+                              if (errorText.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                  ),
+                                  child: Text(
+                                    errorText,
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
 
-                            CustomButton(
-                              onTap: !_isCustomThresholdValid
-                                  ? null
-                                  : () {
-                                      _addCustomThreshold();
-                                    },
-                              icon: Icons.add,
-                              text: 'Agregar umbral personalizado',
-                            ),
-                          ],
+                              CustomButton(
+                                onTap: !_isCustomThresholdValid
+                                    ? null
+                                    : () {
+                                        _addCustomThreshold();
+                                      },
+                                icon: Icons.add,
+                                text: 'Agregar umbral personalizado',
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

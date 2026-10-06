@@ -1,6 +1,7 @@
 import 'package:control_financiero/core/formatters/number_input_formatter.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class NumberInputCard extends StatefulWidget {
   final TextEditingController textController;
@@ -11,7 +12,7 @@ class NumberInputCard extends StatefulWidget {
   final int maxLines;
   final int maxLength;
   final String? Function(String?)? validator;
-
+  final List<TextInputFormatter>? inputFormatters;
 
   const NumberInputCard({
     super.key,
@@ -23,6 +24,7 @@ class NumberInputCard extends StatefulWidget {
     this.maxLines = 1,
     this.maxLength = 100,
     this.validator,
+    this.inputFormatters,
   });
 
   @override
@@ -101,7 +103,7 @@ class _NumberInputCardState extends State<NumberInputCard> {
               counterText: '', // Oculta el contador predeterminado
             ),
             style: const TextStyle(fontSize: 16),
-            inputFormatters: [NumberInputFormatter()],
+            inputFormatters: widget.inputFormatters ?? [NumberInputFormatter()],
             keyboardType: TextInputType.number,
             expands: false,
             textAlignVertical: TextAlignVertical.top,
