@@ -2,6 +2,7 @@ import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/record_date_limits.dart';
+import 'package:control_financiero/features/presupuestos/models/category_card_info.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/shared/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ enum RecordAction { copy, move }
 class RecordActionsMenu extends StatefulWidget {
   final int id;
   final DateTime date;
-  final Presupuesto? presupuesto;
+  final CategoryCardInfo? presupuesto;
 
   const RecordActionsMenu({
     super.key,
@@ -77,7 +78,7 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
         final totalFinal =
             budgetAsignadoInDestination -
             (replacement?.amount ?? 0) +
-            budget.amount;
+            budget.total;
 
         if (!mounted) return;
         if (totalFinal > budgetTotalInDestination) {
@@ -95,7 +96,7 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
             content:
                 'Ya existe un presupuesto de esta categoría para ${formatMonthYear(destination)} '
                 'por \$${replacement.amount.toStringAsFixed(2)}. '
-                '¿Deseas reemplazarlo por \$${budget.amount.toStringAsFixed(2)}?'
+                '¿Deseas reemplazarlo por \$${budget.total.toStringAsFixed(2)}?'
                 '${move ? '\nEl presupuesto de origen se trasladará al mes seleccionado.' : '\nEl presupuesto de origen se conservará.'}',
           );
           if (confirmed != true || !mounted) return;

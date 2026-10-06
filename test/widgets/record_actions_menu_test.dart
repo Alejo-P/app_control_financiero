@@ -1,6 +1,7 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/presupuestos/models/category_card_info.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
 import 'package:control_financiero/features/shared/widgets/record_actions_menu.dart';
@@ -131,6 +132,17 @@ void main() {
           date: DateTime(now.year, now.month - 1),
           amount: 120,
         );
+        final sourceCard = CategoryCardInfo(
+          icon: Icons.category,
+          color: Colors.grey,
+          title: 'Categoría de prueba',
+          spent: 0,
+          total: source.amount,
+          date: source.date,
+          percentage: 0,
+          categoryId: source.categoryId,
+          budgetId: source.id,
+        );
         final replacement = scenario.replacement == 0
             ? null
             : Presupuesto(
@@ -169,7 +181,7 @@ void main() {
                 body: RecordActionsMenu(
                   id: 1,
                   date: source.date,
-                  presupuesto: source,
+                  presupuesto: sourceCard,
                 ),
               ),
             ),
@@ -232,6 +244,17 @@ void main() {
             date: DateTime(now.year, now.month - 1),
             amount: 120,
           );
+          final sourceCard = CategoryCardInfo(
+            icon: Icons.category,
+            color: Colors.grey,
+            title: 'Categoría de prueba',
+            spent: 0,
+            total: source.amount,
+            date: source.date,
+            percentage: 0,
+            categoryId: source.categoryId,
+            budgetId: source.id,
+          );
           final destination = Presupuesto(
             id: 2,
             categoryId: 7,
@@ -255,7 +278,7 @@ void main() {
                   body: RecordActionsMenu(
                     id: 1,
                     date: source.date,
-                    presupuesto: source,
+                    presupuesto: sourceCard,
                   ),
                 ),
               ),

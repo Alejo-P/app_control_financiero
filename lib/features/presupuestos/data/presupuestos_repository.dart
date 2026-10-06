@@ -3,6 +3,7 @@ import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_local_datasource.dart';
+import 'package:control_financiero/features/presupuestos/models/category_card_info.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -52,6 +53,12 @@ class PresupuestosRepository {
 
   Future<DetallePresupuesto?> fetchDetallePresupuestoById(int id) async {
     return await localDataSource.fetchDetallePresupuestoById(id);
+  }
+
+  Future<List<CategoryCardInfo>> fetchCategoryCardInfoByMonthAndYear(
+    DateTime date,
+  ) async {
+    return await localDataSource.fetchCategoryCardInfoByMonthAndYear(date);
   }
 
   Future<double> fetchPresupuestosAmountSumByMonthAndYear(DateTime date) async {
@@ -104,23 +111,37 @@ class PresupuestosRepository {
 
   /// Agrega un nuevo presupuesto.
   /// @param presupuesto El objeto Presupuesto a agregar.
-  /// @return Un OperationResult que indica el resultado de la operación y el ID del nuevo presupuesto si fue exitoso.
-  Future<OperationResult<int>> addPresupuesto(Presupuesto presupuesto) async {
-    return await localDataSource.addPresupuesto(presupuesto);
+  /// @return Un OperationResult que indica el resultado de la operación.
+  Future<OperationResult<CategoryCardInfo?>> addPresupuesto(
+    Presupuesto presupuesto,
+  ) async {
+    final result = await localDataSource.addPresupuesto(presupuesto);
+
+    return OperationResult<CategoryCardInfo?>(
+      message: result.message,
+      success: result.success,
+      data: result.success
+          ? await localDataSource.getCategoryCardInfoByBudgetId(
+              result.data as int,
+            )
+          : null,
+    );
   }
 
   /// Actualiza un presupuesto existente.
   /// @param presupuesto El objeto Presupuesto con los datos actualizados.
   /// @return Un OperationResult que indica el resultado de la operación.
-  Future<OperationResult<Presupuesto?>> updatePresupuesto(
+  Future<OperationResult<CategoryCardInfo?>> updatePresupuesto(
     Presupuesto presupuesto,
   ) async {
     final result = await localDataSource.updatePresupuesto(presupuesto);
-    return OperationResult<Presupuesto?>(
+    return OperationResult<CategoryCardInfo?>(
       message: result.message,
       success: result.success,
       data: result.success && presupuesto.id != null
-          ? await localDataSource.fetchPresupuestoById(presupuesto.id!)
+          ? await localDataSource.getCategoryCardInfoByBudgetId(
+              presupuesto.id!
+            )
           : null,
     );
   }

@@ -8,6 +8,8 @@ class CategoryCard extends StatelessWidget {
   final String title;
   final double spent;
   final double total;
+  final double remainingAmount;
+  final bool isOverBudget;
   final double percentage;
   final Color color;
   final Widget? actions;
@@ -20,6 +22,8 @@ class CategoryCard extends StatelessWidget {
     required this.total,
     required this.percentage,
     required this.color,
+    required this.remainingAmount,
+    required this.isOverBudget,
     this.actions,
   });
 
@@ -30,13 +34,11 @@ class CategoryCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final percentageText = '${(percentage * 100).toStringAsFixed(0)}%';
-    final remaining = total - spent;
-    final isOverBudget = spent > total;
     final displayColor = isOverBudget ? Colors.red : colorScheme.onSurface;
     final borderColor = isOverBudget ? Colors.red : Colors.grey.shade600;
     final remainingText = isOverBudget
-        ? 'Sobrepasado: \$${(spent - total).toStringAsFixed(2)}'
-        : 'Restante: \$${remaining.toStringAsFixed(2)}';
+        ? 'Sobrepasado: \$${remainingAmount.abs().toStringAsFixed(2)}'
+        : 'Restante: \$${remainingAmount.toStringAsFixed(2)}';
     final [rBorder, gBorder, bBorder] = getRGBFromColor(borderColor);
 
     return Padding(

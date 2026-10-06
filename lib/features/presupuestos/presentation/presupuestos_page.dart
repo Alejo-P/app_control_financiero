@@ -140,80 +140,6 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     });
   }
 
-  Map<String, dynamic> getCategoryDetailsById(int categoryId) {
-    final categoria = _appState.getCategoriaById(categoryId);
-    final gastosAcumulados = _appState.getGastoAcumuladoPorCategoriaEnMes(
-      categoryId,
-    );
-    final movimientos = _appState.getMovimientosPresupuestoByCategoriaId(
-      categoryId,
-    );
-
-    return {
-      'name': categoria?.name ?? 'Categoría Desconocida',
-      'icon': categoria?.iconData ?? Icons.category,
-      'iconColor': categoria?.iconColor ?? Colors.grey,
-      'spent': gastosAcumulados,
-      'movements': movimientos,
-    };
-  }
-
-  List<Map<String, dynamic>> get sortedBudgets => getSortedPresupuestos();
-
-  List<Map<String, dynamic>> getSortedPresupuestos() {
-    final presupuestos = _appState.presupuestos;
-
-    // Combinar presupuestos con detalles de categoría y gasto acumulado
-    final categoriesWithSpending = presupuestos.map((presupuesto) {
-      final categoryDetails = getCategoryDetailsById(presupuesto.categoryId);
-      return {
-        'presupuesto': presupuesto,
-        'name': categoryDetails['name'],
-        'icon': categoryDetails['icon'],
-        'iconColor': categoryDetails['iconColor'],
-        'spent': categoryDetails['spent'],
-        'percentage': presupuesto.amount == 0
-            ? 0.0
-            : categoryDetails['spent'] / presupuesto.amount,
-      };
-    }).toList();
-
-    // Ordenar por porcentaje gastado (mayor a menor)
-    categoriesWithSpending.sort((a, b) {
-      final percentageA = a['percentage'] as double;
-      final percentageB = b['percentage'] as double;
-      return percentageB.compareTo(percentageA);
-    });
-
-    return categoriesWithSpending;
-  }
-
-  List<Map<String, dynamic>> get categoriasSinPresupuestoConGasto {
-    final categoriasConPresupuesto = _appState.presupuestos
-        .map((presupuesto) => presupuesto.categoryId)
-        .toSet();
-
-    final categoriasConGasto = _appState.movimientosPresupuestos
-        .map((movimiento) => movimiento.categoryId)
-        .toSet();
-
-    return categoriasConGasto
-        .where((categoriaId) => !categoriasConPresupuesto.contains(categoriaId))
-        .map((categoriaId) {
-          final categoria = _appState.getCategoriaById(categoriaId!);
-
-          return {
-            'id': categoriaId,
-            'name': categoria?.name ?? 'Categoría desconocida',
-            'icon': categoria?.iconData ?? Icons.category,
-            'iconColor': categoria?.iconColor ?? Colors.grey,
-            'spent': _appState.getGastoAcumuladoPorCategoriaEnMes(categoriaId),
-          };
-        })
-        .where((categoria) => (categoria['spent'] as double) > 0)
-        .toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
@@ -221,6 +147,12 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     final presupuestos = appState.presupuestos;
+    final presupuestosDefinidos = presupuestos
+        .where((p) => p.budgetId != null)
+        .toList();
+    final presupuestosSinDefinir = presupuestos
+        .where((p) => p.budgetId == null && p.spent > 0)
+        .toList();
     final totalGastos = appState.totalGastos ?? 0.0;
 
     // Indicador de carga para el mes seleccionado
@@ -272,19 +204,14 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        ...sortedBudgets.map((budgetDetails) {
-                          final presupuesto = budgetDetails['presupuesto'];
-                          final categoryDetails = getCategoryDetailsById(
-                            presupuesto.categoryId,
-                          );
-
+                        ...presupuestosDefinidos.map((budgetDetails) {
                           return GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(
                                 context,
                                 AppRoutes.presupuestoFormRoute,
                                 arguments: PresupuestoFormArgs(
-                                  id: presupuesto.id!,
+                                  id: budgetDetails.budgetId!,
                                   budgetedIncome:
                                       appState.ingresoPresupuestado!,
                                   viewOnly: false,
@@ -293,20 +220,22 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             },
                             child: CategoryCard(
                               actions: RecordActionsMenu(
-                                id: presupuesto.id!,
-                                date: presupuesto.date,
-                                presupuesto: presupuesto,
+                                id: budgetDetails.budgetId!,
+                                date: budgetDetails.date,
+                                presupuesto: budgetDetails,
                               ),
-                              icon: categoryDetails['icon'],
-                              title: categoryDetails['name'],
-                              spent: categoryDetails['spent'],
-                              total: presupuesto.amount,
-                              color: categoryDetails['iconColor'],
-                              percentage: budgetDetails['percentage'],
+                              icon: budgetDetails.icon,
+                              title: budgetDetails.title,
+                              spent: budgetDetails.spent,
+                              total: budgetDetails.total,
+                              color: budgetDetails.color,
+                              percentage: budgetDetails.percentage,
+                              remainingAmount: budgetDetails.remainingAmount,
+                              isOverBudget: budgetDetails.isOverBudget,
                             ),
                           );
                         }),
-                        if (categoriasSinPresupuestoConGasto.isNotEmpty) ...[
+                        if (presupuestosSinDefinir.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Row(
                             children: [
@@ -331,18 +260,18 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          ...categoriasSinPresupuestoConGasto.map((categoria) {
+                          ...presupuestosSinDefinir.map((budgetDetails) {
                             return ListTile(
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                               ),
                               leading: IconContainer(
-                                icon: categoria['icon'],
-                                color: categoria['iconColor'],
+                                icon: budgetDetails.icon,
+                                color: budgetDetails.color,
                                 size: 26,
                               ),
                               title: Text(
-                                categoria['name'],
+                                budgetDetails.title,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 2,
                                 style: textTheme.labelMedium!.copyWith(
@@ -357,7 +286,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                 maxLines: 1,
                               ),
                               trailing: Text(
-                                '\$${(categoria['spent'] as double).toStringAsFixed(2)}',
+                                '\$${(budgetDetails.spent).toStringAsFixed(2)}',
                                 style: textTheme.labelMedium!.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.onSurface,

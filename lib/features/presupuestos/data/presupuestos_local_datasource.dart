@@ -2,6 +2,7 @@ import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/features/presupuestos/models/category_card_info.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -184,6 +185,80 @@ class PresupuestosLocalDataSource {
 
     if (maps.isNotEmpty) {
       return DetallePresupuesto.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<List<CategoryCardInfo>> fetchCategoryCardInfoByMonthAndYear(
+    DateTime date,
+  ) async {
+    final db = await _dbHelper.database;
+    final String month = date.month.toString().padLeft(2, '0');
+    final int year = date.year;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+      SELECT
+        c.id AS categoryId,
+        c.name AS categoryName,
+        c.icon_name AS categoryIcon,
+        c.icon_color_value AS categoryColor,
+        p.id AS budgetId,
+        COALESCE(p.date, ?) AS budgetDate,
+        IFNULL(SUM(m.amount), 0) AS spent,
+        IFNULL(p.amount, 0) AS total,
+        CASE
+          WHEN IFNULL(p.amount, 0) = 0 THEN 0
+          ELSE (IFNULL(SUM(m.amount), 0) / IFNULL(p.amount, 0))
+        END AS percentage
+      FROM ${CategoriasTable.table} c
+      LEFT JOIN ${PresupuestosTable.table} p ON c.id = p.category_id AND strftime('%Y-%m', p.date) = ?
+      LEFT JOIN ${MovimientosTable.table} m ON c.id = m.category_id AND strftime('%Y-%m', m.date) = ?
+      WHERE c.movement_type = 'gasto'
+      GROUP BY c.id, c.name, c.icon_name, c.icon_color_value, p.id, p.amount
+      HAVING p.id IS NOT NULL OR IFNULL(SUM(m.amount), 0) > 0
+      ORDER BY percentage DESC
+      ''',
+      [
+        DateTime(date.year, date.month).toIso8601String(),
+        '$year-$month',
+        '$year-$month',
+      ],
+    );
+
+    return maps.map((map) => CategoryCardInfo.fromMap(map)).toList();
+  }
+
+  Future<CategoryCardInfo?> getCategoryCardInfoByBudgetId(int budgetId) async {
+    final db = await _dbHelper.database;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
+      SELECT
+        c.id AS categoryId,
+        c.name AS categoryName,
+        c.icon_name AS categoryIcon,
+        c.icon_color_value AS categoryColor,
+        p.id AS budgetId,
+        p.date AS budgetDate,
+        IFNULL(SUM(m.amount), 0) AS spent,
+        IFNULL(p.amount, 0) AS total,
+        CASE
+          WHEN IFNULL(p.amount, 0) = 0 THEN 0
+          ELSE (IFNULL(SUM(m.amount), 0) / IFNULL(p.amount, 0))
+        END AS percentage
+      FROM ${CategoriasTable.table} c
+      JOIN ${PresupuestosTable.table} p ON c.id = p.category_id
+      LEFT JOIN ${MovimientosTable.table} m ON c.id = m.category_id AND strftime('%Y-%m', m.date) = strftime('%Y-%m', p.date)
+      WHERE p.id = ?
+      GROUP BY c.id, c.name, c.icon_name, c.icon_color_value, p.id, p.amount
+      ''',
+      [budgetId],
+    );
+
+    if (maps.isNotEmpty) {
+      return CategoryCardInfo.fromMap(maps.first);
     } else {
       return null;
     }

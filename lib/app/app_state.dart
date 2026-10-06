@@ -22,6 +22,7 @@ import 'package:control_financiero/features/notificaciones/models/budget_notific
 import 'package:control_financiero/features/notificaciones/models/movement_notification_config.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
 import 'package:control_financiero/features/presupuestos/data/presupuestos_repository.dart';
+import 'package:control_financiero/features/presupuestos/models/category_card_info.dart';
 import 'package:control_financiero/features/presupuestos/models/detalle_presupuesto.dart';
 import 'package:control_financiero/features/presupuestos/models/ingreso_presupuestado.dart';
 import 'package:control_financiero/features/presupuestos/models/presupuesto.dart';
@@ -137,7 +138,7 @@ class AppState extends ChangeNotifier {
   List<DetalleMovimiento> movimientos = [];
   List<Categoria> categorias = [];
   List<InfoCardRecordatorio> recordatorios = [];
-  List<Presupuesto> presupuestos = [];
+  List<CategoryCardInfo> presupuestos = [];
   List<DetalleMovimiento> movimientosPresupuestos = [];
   List<BudgetNotification> budgetNotifications = [];
   List<MovementNotificationConfig> movementNotificationConfigs = [];
@@ -324,7 +325,7 @@ class AppState extends ChangeNotifier {
     final requestId = ++_budgetLoadId;
 
     final loadedBudgets = await _presupuestosRepository
-        .fetchPresupuestosByMonthAndYear(date);
+        .fetchCategoryCardInfoByMonthAndYear(date);
 
     final loadedMovements = await _presupuestosRepository
         .fetchGastosByMonthAndYear(date);
@@ -595,7 +596,7 @@ class AppState extends ChangeNotifier {
 
     for (var presupuesto in presupuestos) {
       _totalIngresoPresupuestado =
-          _totalIngresoPresupuestado! - presupuesto.amount;
+          _totalIngresoPresupuestado! - presupuesto.total;
     }
     if (notify) notifyListeners();
   }
@@ -1162,12 +1163,13 @@ class AppState extends ChangeNotifier {
       );
 
   Future<double> ingresoPresupuestadoTotalEnDestino(DateTime date) async {
-      final result = await _presupuestosRepository.fetchIngresosPresupuestadosByMonthAndYear(date);
-      return result.monto;
+    final result = await _presupuestosRepository
+        .fetchIngresosPresupuestadosByMonthAndYear(date);
+    return result.monto;
   }
 
   Future<double> ingresoPresupuestadoAsignadoEnDestino(DateTime date) =>
-    _presupuestosRepository.fetchPresupuestosAmountSumByMonthAndYear(date);
+      _presupuestosRepository.fetchPresupuestosAmountSumByMonthAndYear(date);
 
   Future<OperationResult<int>> transferirPresupuesto(
     int id,
@@ -1209,13 +1211,10 @@ class AppState extends ChangeNotifier {
     transactionSuccess = result.success;
     if (!result.success || result.data == null) return -1;
 
-    final saved = presupuesto.copyWith(id: result.data!);
-    if (isSameMonth(selectedBudgetMonth, saved.date)) {
-      presupuestos.add(saved);
-      await calculateTotalIngresoPresupuestado(notify: false);
-    }
+    final saved = result.data!;
+    await loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false);
     notifyListeners();
-    return result.data!;
+    return saved.budgetId!;
   }
 
   Future<int?> actualizarPresupuesto(Presupuesto presupuesto) async {
@@ -1225,20 +1224,9 @@ class AppState extends ChangeNotifier {
     if (!result.success || result.data == null) return null;
 
     final updatedPresupuesto = result.data!;
-    final index = presupuestos.indexWhere(
-      (presupuesto) => presupuesto.id == updatedPresupuesto.id,
-    );
-    final sameMonth = isSameMonth(selectedBudgetMonth, updatedPresupuesto.date);
-    if (!sameMonth) {
-      presupuestos.removeWhere((p) => p.id == updatedPresupuesto.id);
-    } else if (index == -1) {
-      presupuestos.add(updatedPresupuesto);
-    } else {
-      presupuestos[index] = updatedPresupuesto;
-    }
-    await calculateTotalIngresoPresupuestado(notify: false);
+    await loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false);
     notifyListeners();
-    return updatedPresupuesto.id;
+    return updatedPresupuesto.budgetId;
   }
 
   Future<void> eliminarPresupuesto(int id) async {
@@ -1247,8 +1235,7 @@ class AppState extends ChangeNotifier {
     transactionSuccess = result.success;
     if (!result.success || result.data == null) return;
 
-    presupuestos.removeWhere((presupuesto) => presupuesto.id == result.data);
-    await calculateTotalIngresoPresupuestado(notify: false);
+    await loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false);
     notifyListeners();
   }
 

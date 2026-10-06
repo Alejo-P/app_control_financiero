@@ -192,6 +192,7 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   List<Categoria> get categoriasSinPresupuesto {
     final appState = context.read<AppState>();
     final categoriasConPresupuesto = appState.presupuestos
+        .where((presupuesto) => presupuesto.budgetId != null)
         .map((presupuesto) => presupuesto.categoryId)
         .toSet();
 
