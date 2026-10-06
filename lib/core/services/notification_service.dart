@@ -158,16 +158,13 @@ class NotificationService {
       iOS: const DarwinNotificationDetails(),
     );
 
-    await _notifications.zonedSchedule(
+    await _scheduleWithFallback(
       id,
       title,
       body,
       tzDate,
       details,
       payload: 'notificacion:$id',
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -215,33 +212,46 @@ class NotificationService {
     );
     final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
-    try {
-      await _notifications.zonedSchedule(
-        notificationId,
+    await _scheduleWithFallback(
+      notificationId,
+      title,
+      body,
+      tzDate,
+      details,
+      payload: 'recordatorio:$id',
+      matchDateTimeComponents: matchDateTimeComponents,
+    );
+  }
+
+  static Future<void> _scheduleWithFallback(
+    int id,
+    String title,
+    String body,
+    tz.TZDateTime tzDate,
+    NotificationDetails details, {
+    required String payload,
+    DateTimeComponents? matchDateTimeComponents,
+  }) async {
+    Future<void> schedule(AndroidScheduleMode mode) {
+      return _notifications.zonedSchedule(
+        id,
         title,
         body,
         tzDate,
         details,
-        payload: 'recordatorio:$id',
+        payload: payload,
         matchDateTimeComponents: matchDateTimeComponents,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: mode,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
+    }
+
+    try {
+      await schedule(AndroidScheduleMode.exactAllowWhileIdle);
     } on PlatformException catch (exception) {
       if (exception.code != 'exact_alarms_not_permitted') rethrow;
-      await _notifications.zonedSchedule(
-        notificationId,
-        title,
-        body,
-        tzDate,
-        details,
-        payload: 'recordatorio:$id',
-        matchDateTimeComponents: matchDateTimeComponents,
-        androidScheduleMode: resolveScheduleMode(exception),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
+      await schedule(resolveScheduleMode(exception));
     }
   }
 

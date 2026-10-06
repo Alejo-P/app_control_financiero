@@ -12,6 +12,7 @@ void main() {
   final calls = <MethodCall>[];
   var denied = false;
   var exactDenied = false;
+  String? scheduleError;
   var pending = <Map<String, Object?>>[];
   setUp(() {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -19,6 +20,7 @@ void main() {
     calls.clear();
     denied = false;
     exactDenied = false;
+    scheduleError = null;
     pending = [];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
@@ -26,6 +28,9 @@ void main() {
           if (call.method == 'initialize') return true;
           if (call.method == 'requestNotificationsPermission') return !denied;
           if (call.method == 'pendingNotificationRequests') return pending;
+          if (call.method == 'zonedSchedule' && scheduleError != null) {
+            throw PlatformException(code: scheduleError!);
+          }
           if (call.method == 'zonedSchedule' && exactDenied) {
             exactDenied = false;
             throw PlatformException(code: 'exact_alarms_not_permitted');
@@ -51,6 +56,61 @@ void main() {
     },
   );
 
+  test('notificación general conserva la solicitud al reintentar', () async {
+    exactDenied = true;
+    await NotificationService.scheduleNotification(
+      id: 42,
+      title: 'Pago',
+      body: 'Aviso',
+      type: 'gasto',
+      scheduledDate: DateTime(2099, 3, 4, 12, 30),
+    );
+    final schedules = calls.where((c) => c.method == 'zonedSchedule').toList();
+    expect(schedules, hasLength(2));
+    expect(schedules.first.arguments['payload'], 'notificacion:42');
+    final first = Map<dynamic, dynamic>.from(schedules.first.arguments as Map);
+    final last = Map<dynamic, dynamic>.from(schedules.last.arguments as Map);
+    final firstDetails = Map<dynamic, dynamic>.from(
+      first.remove('platformSpecifics') as Map,
+    );
+    final lastDetails = Map<dynamic, dynamic>.from(
+      last.remove('platformSpecifics') as Map,
+    );
+    expect(firstDetails.remove('scheduleMode'), 'exactAllowWhileIdle');
+    expect(lastDetails.remove('scheduleMode'), 'inexactAllowWhileIdle');
+    expect(last, first);
+    expect(lastDetails, firstDetails);
+  });
+
+  for (final reminder in [false, true]) {
+    test(
+      'propaga errores sin reintentos ilimitados: reminder=$reminder',
+      () async {
+        Future<void> schedule() => reminder
+            ? NotificationService.scheduleRecordatorioNotification(
+                id: 1,
+                title: 'Pago',
+                body: 'Aviso',
+                scheduledDate: DateTime(2099),
+              )
+            : NotificationService.scheduleNotification(
+                id: 1,
+                title: 'Pago',
+                body: 'Aviso',
+                type: 'gasto',
+                scheduledDate: DateTime(2099),
+              );
+        scheduleError = 'other_error';
+        await expectLater(schedule(), throwsA(isA<PlatformException>()));
+        expect(calls.where((c) => c.method == 'zonedSchedule'), hasLength(1));
+        calls.clear();
+        scheduleError = 'exact_alarms_not_permitted';
+        await expectLater(schedule(), throwsA(isA<PlatformException>()));
+        expect(calls.where((c) => c.method == 'zonedSchedule'), hasLength(2));
+      },
+    );
+  }
+
   test('la alternativa inexacta conserva la recurrencia', () async {
     exactDenied = true;
     await NotificationService.scheduleRecordatorioNotification(
@@ -62,6 +122,11 @@ void main() {
     );
     final schedules = calls.where((c) => c.method == 'zonedSchedule').toList();
     expect(schedules, hasLength(2));
+    expect(schedules.last.arguments['payload'], 'recordatorio:1');
+    expect(
+      schedules.last.arguments['scheduledDateTime'],
+      schedules.first.arguments['scheduledDateTime'],
+    );
     expect(
       schedules.last.arguments['matchDateTimeComponents'],
       DateTimeComponents.dayOfWeekAndTime.index,
