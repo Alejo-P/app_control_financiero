@@ -1,7 +1,7 @@
 name: control_financiero
 description: "Application to manage personal finances"
 publish_to: 'none'
-version: 1.0.0+12
+version: 1.0.0+1
 
 environment:
   sdk: ^3.10.4
