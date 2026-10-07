@@ -2,9 +2,11 @@
 
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/core/utils/responsive_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
@@ -29,6 +31,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
   List<DetalleMovimiento> listaMovimientos = [];
   List<DetalleMovimiento> movimientosFiltrados = [];
   List<DateTime> fechasUnicas = [];
+  List<Categoria> categorias = [];
   DateTime? fechaInicio;
   DateTime? fechaFin;
   AgrupacionBusqueda agrupacion = AgrupacionBusqueda.ninguna;
@@ -44,7 +47,19 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
   void initState() {
     super.initState();
 
-    final categorias = widget.listaCategorias;
+    categorias = [
+      Categoria(
+        id: -1,
+        name: 'Todas',
+        description: '',
+        movementType:
+            TipoMovimiento.gasto, // Asignar un valor predeterminado válido
+        categoryTypeID: 0,
+        iconName: IconMapper.toName(Icons.category),
+        iconColorValue: Colors.grey.value,
+      ),
+      ...widget.listaCategorias,
+    ];
 
     if (categorias.isNotEmpty) {
       categoriaSeleccionada = categorias.first.id!;
@@ -131,7 +146,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     if (categoriaSeleccionada == categoriaId) return;
 
     try {
-      final categoria = widget.listaCategorias.firstWhere(
+      final categoria = categorias.firstWhere(
         (cat) => cat.id == categoriaId,
       );
 
@@ -224,7 +239,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final categorias = widget.listaCategorias;
     final [rBorder, gBorder, bBorder] = getRGBFromColor(Colors.grey.shade600);
     final isSelectedRange = fechaInicio != null && fechaFin != null;
 

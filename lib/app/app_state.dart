@@ -955,6 +955,10 @@ class AppState extends ChangeNotifier {
   Future<List<DetalleMovimiento>> obtenerMovimientosPorCategoria(
     int categoryID,
   ) async {
+    if (categoryID == -1) {
+      return _movimientosRepository.fetchAllDetalleMovimiento();
+    }
+
     final movimientos = _movimientosRepository.getMovementsByCategoryID(
       categoryID,
     );
