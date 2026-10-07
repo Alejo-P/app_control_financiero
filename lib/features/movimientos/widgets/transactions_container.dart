@@ -11,11 +11,13 @@ import 'package:control_financiero/features/shared/widgets/record_actions_menu.d
 class TransactionsContainer extends StatelessWidget {
   final DateTime date;
   final List<DetalleMovimiento> movimientos;
+  final Future<void> Function()? onMovementChanged;
 
   const TransactionsContainer({
     super.key,
     required this.date,
     required this.movimientos,
+    this.onMovementChanged,
   });
 
   bool isCurrentMonth(DateTime date) {
@@ -54,14 +56,20 @@ class TransactionsContainer extends StatelessWidget {
           icon: movimiento.categoryIcon,
           iconColor: movimiento.categoryColor!,
           time: movimiento.time!,
-          onTap: () {
-            Navigator.pushNamed(
+          onTap: () async {
+            final changed = await Navigator.pushNamed(
               context,
               AppRoutes.movimientoFormRoute,
               arguments: MovimientoFormArgs(
                 id: movimiento.id!, // Indica que es un movimiento existente
               ),
             );
+
+            if (!context.mounted) return;
+
+            if (changed == true) {
+              await onMovementChanged?.call();
+            }
           },
         );
       }).toList(),

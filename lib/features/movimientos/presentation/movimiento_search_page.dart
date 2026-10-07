@@ -143,8 +143,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
 
       await _buscarMovimientos();
     } on Exception catch (e, stackTrace) {
-      if (!mounted) return;
-
       await AppLogger.log(
         'Error al obtener movimientos por categoría: ${e.toString()}',
         level: LogLevel.error,
@@ -152,6 +150,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
         stackTrace: stackTrace,
       );
 
+      if (!mounted) return;
       AppSnackbar.error(
         context,
         'Ocurrió un error al obtener los movimientos para la categoría seleccionada. Por favor, intenta nuevamente.',
@@ -456,6 +455,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                               return TransactionsContainer(
                                 date: fecha,
                                 movimientos: movsPorFecha,
+                                onMovementChanged: _buscarMovimientos,
                               );
                             }),
                         ],
