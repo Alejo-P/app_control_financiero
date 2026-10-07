@@ -38,6 +38,7 @@ class TransactionDetailCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          
           children: [
             IconContainer(icon: icon, color: iconColor, size: 26),
             const SizedBox(width: 12),

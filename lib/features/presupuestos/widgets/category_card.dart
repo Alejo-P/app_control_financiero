@@ -71,6 +71,8 @@ class CategoryCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             color: colorScheme.primary,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                         Text(
                           remainingText,
@@ -95,7 +97,9 @@ class CategoryCard extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         'de \$${total.toStringAsFixed(2)}',
-                        style: TextStyle(color: colorScheme.onSurface),
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -119,7 +123,9 @@ class CategoryCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(percentageText, style: textTheme.labelSmall),
+                    Text(percentageText, style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.primary,
+                    )),
                   ],
                 ),
               ),

@@ -47,6 +47,8 @@ class CategoryCardDetail extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                       Text(
                         description.isEmpty ? '(Sin descripción)' : description,
@@ -54,6 +56,8 @@ class CategoryCardDetail extends StatelessWidget {
                           color: colorScheme.onSurface.withOpacity(0.6),
                           fontSize: 14,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                     ],
                   ),

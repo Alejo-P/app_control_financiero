@@ -179,6 +179,14 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
 
   @override
   Widget build(BuildContext context) => PopupMenuButton<RecordAction>(
+    padding: EdgeInsets.zero,
+    style: const ButtonStyle(
+      padding: WidgetStatePropertyAll(EdgeInsets.zero),
+      minimumSize: WidgetStatePropertyAll(Size(32, 48)),
+      maximumSize: WidgetStatePropertyAll(Size(32, 48)),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.standard,
+    ),
     enabled: !_busy,
     tooltip: 'Acciones',
     icon: Icon(_busy ? Icons.hourglass_top : Icons.more_vert),
