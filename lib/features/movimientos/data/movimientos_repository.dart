@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/models/operation_result.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento_search_page_result.dart';
 import 'package:control_financiero/core/utils/excel_exporter.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
@@ -9,6 +10,20 @@ class MovimientosRepository {
   final MovimientosLocalDataSource localDataSource;
 
   MovimientosRepository(this.localDataSource);
+
+  Future<MovimientoSearchPageResult> searchMovimientos({
+    int categoryId = -1,
+    String text = '',
+    DateTime? startDate,
+    DateTime? endDate,
+    int page = 0,
+  }) => localDataSource.searchMovimientos(
+    categoryId: categoryId,
+    text: text,
+    startDate: startDate,
+    endDate: endDate,
+    page: page,
+  );
 
   ///Obtiene la lista de todos los movimientos.
   ///@return Una lista de objetos Movimiento.

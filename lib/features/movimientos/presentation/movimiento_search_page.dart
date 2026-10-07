@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:async';
+
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
@@ -10,7 +12,6 @@ import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/core/utils/responsive_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
-import 'package:control_financiero/features/movimientos/models/movimiento_search_filters.dart';
 import 'package:control_financiero/features/movimientos/widgets/transactions_container.dart';
 import 'package:control_financiero/features/shared/widgets/category_dropdown.dart';
 import 'package:control_financiero/features/shared/widgets/labeled_form_field.dart';
@@ -28,13 +29,17 @@ class MovimientoSearchPage extends StatefulWidget {
 }
 
 class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
-  List<DetalleMovimiento> listaMovimientos = [];
+  Timer? _debounce;
+  final _resultsController = ScrollController();
+  int _page = 0;
+  int _total = 0;
+  String? _loadError;
   List<DetalleMovimiento> movimientosFiltrados = [];
   List<DateTime> fechasUnicas = [];
   List<Categoria> categorias = [];
   DateTime? fechaInicio;
   DateTime? fechaFin;
-  AgrupacionBusqueda agrupacion = AgrupacionBusqueda.ninguna;
+
   bool _isLoading = false;
   int _requestId = 0;
   int categoriaSeleccionada = -1;
@@ -68,7 +73,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await obtenerMovimientosPorcategoria(categoriaSeleccionada);
+      await _buscarMovimientos();
     });
 
     _searchController.addListener(_onSearchTerm);
@@ -77,78 +82,83 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
   @override
   void dispose() {
     // Limpiar los controladores al desechar el widget
+    _debounce?.cancel();
+    _resultsController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   void _onSearchTerm() {
-    final termino = _searchController.text.trim();
-    if (termino.isEmpty) {
-      setState(() {
-        movimientosFiltrados = listaMovimientos;
-      });
-      return;
-    }
-
-    final terminoLower = termino.toLowerCase();
-    final movsResultantes = listaMovimientos
-        .where((mov) => mov.title.toLowerCase().contains(terminoLower))
-        .toList();
-
+    _debounce?.cancel();
+    ++_requestId;
     setState(() {
-      movimientosFiltrados = movsResultantes;
+      _isLoading = true;
+      _page = 0;
+    });
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      _buscarMovimientos();
     });
   }
 
   void _cleanInput() {
-    _searchController.text = '';
-    _buscarMovimientos();
+    _searchController.clear();
   }
 
-  Future<void> _buscarMovimientos() async {
+  Future<void> _buscarMovimientos({int page = 0}) async {
+    _debounce?.cancel();
+    if (!mounted) return;
     final appState = context.read<AppState>();
     final requestId = ++_requestId;
-    setState(() => _isLoading = true);
-
-    List<DetalleMovimiento> movimientos = [];
-
-    movimientos = await appState.obtenerMovimientosPorCategoria(
-      categoriaSeleccionada,
-    );
-
-    if (_searchController.text.trim().isNotEmpty) {
-      final terminoLower = _searchController.text.trim().toLowerCase();
-      movimientos = movimientos
-          .where((mov) => mov.title.toLowerCase().contains(terminoLower))
-          .toList();
-    }
-
-    if (fechaInicio != null && fechaFin != null) {
-      movimientos = movimientos.where((mov) {
-        return !mov.date.isBefore(fechaInicio!) && !mov.date.isAfter(fechaFin!);
-      }).toList();
-    }
-
-    if (!mounted) return;
-    if (requestId != _requestId) return;
-
-    final fechas = appState.fetchUniqueMovementDatesInList(movimientos);
-
     setState(() {
-      listaMovimientos = movimientos;
-      movimientosFiltrados = movimientos;
-      fechasUnicas = fechas;
-      _isLoading = false;
+      _isLoading = true;
+      _loadError = null;
     });
+    try {
+      final result = await appState.buscarMovimientosPaginados(
+        categoryId: categoriaSeleccionada,
+        text: _searchController.text,
+        startDate: fechaInicio,
+        endDate: fechaFin,
+        page: page,
+      );
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        movimientosFiltrados = result.movimientos;
+        fechasUnicas = appState.fetchUniqueMovementDatesInList(
+          result.movimientos,
+        );
+        _total = result.total;
+        _page = result.page;
+        _isLoading = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            requestId == _requestId &&
+            _resultsController.hasClients) {
+          _resultsController.jumpTo(0);
+        }
+      });
+    } catch (e, stackTrace) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _isLoading = false;
+        _loadError =
+            'No se pudieron cargar los movimientos. Intenta nuevamente.';
+      });
+      await AppLogger.log(
+        'Error en búsqueda paginada: $e',
+        level: LogLevel.error,
+        tag: 'MovimientoSearchPage',
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   Future<void> _onChangeCategoria(int categoriaId) async {
     if (categoriaSeleccionada == categoriaId) return;
 
     try {
-      final categoria = categorias.firstWhere(
-        (cat) => cat.id == categoriaId,
-      );
+      final categoria = categorias.firstWhere((cat) => cat.id == categoriaId);
 
       setState(() {
         categoriaSeleccionada = categoriaId;
@@ -171,31 +181,6 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
         'Ocurrió un error al obtener los movimientos para la categoría seleccionada. Por favor, intenta nuevamente.',
       );
     }
-  }
-
-  Future<void> obtenerMovimientosPorcategoria(int categoryID) async {
-    final appState = context.read<AppState>();
-    final requestId = ++_requestId;
-
-    setState(() => _isLoading = true);
-
-    final movimientos = await appState.obtenerMovimientosPorCategoria(
-      categoryID,
-    );
-
-    if (!mounted) return;
-
-    if (requestId != _requestId) return; // ← ignora respuestas viejas
-
-    final fechas = appState.fetchUniqueMovementDatesInList(movimientos);
-
-    setState(() {
-      fechasUnicas = fechas;
-      listaMovimientos = movimientos;
-      _isLoading = false;
-    });
-
-    _onSearchTerm(); // Realizar el filtrado si hay termino a buscar
   }
 
   void _onClearDateRange() {
@@ -225,6 +210,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
           : null,
     );
 
+    if (!mounted) return;
     if (picked != null) {
       setState(() {
         fechaInicio = picked.start;
@@ -430,12 +416,31 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
               Expanded(
                 child: _isLoading
                     ? const _CustomLoading()
+                    : _loadError != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(_loadError!, textAlign: TextAlign.center),
+                            TextButton(
+                              onPressed: () => _buscarMovimientos(page: _page),
+                              child: const Text('Reintentar'),
+                            ),
+                          ],
+                        ),
+                      )
                     : ListView(
+                        controller: _resultsController,
                         padding: EdgeInsets.zero,
                         children: [
                           const SizedBox(height: 12),
 
-                          Text("Resultados", style: textTheme.labelLarge),
+                          Text(
+                            _total == 0
+                                ? 'Resultados: 0'
+                                : '${_page * 20 + 1}–${_page * 20 + movimientosFiltrados.length} de $_total resultados',
+                            style: textTheme.labelLarge,
+                          ),
 
                           if (isSelectedRange)
                             Padding(
@@ -469,9 +474,35 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
                               return TransactionsContainer(
                                 date: fecha,
                                 movimientos: movsPorFecha,
-                                onMovementChanged: _buscarMovimientos,
+                                onMovementChanged: () =>
+                                    _buscarMovimientos(page: _page),
                               );
                             }),
+                          if (_total > 0)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(
+                                  tooltip: 'Anterior',
+                                  onPressed: _page > 0
+                                      ? () =>
+                                            _buscarMovimientos(page: _page - 1)
+                                      : null,
+                                  icon: const Icon(Icons.chevron_left),
+                                ),
+                                Text(
+                                  'Página ${_page + 1} de ${(_total + 19) ~/ 20}',
+                                ),
+                                IconButton(
+                                  tooltip: 'Siguiente',
+                                  onPressed: (_page + 1) * 20 < _total
+                                      ? () =>
+                                            _buscarMovimientos(page: _page + 1)
+                                      : null,
+                                  icon: const Icon(Icons.chevron_right),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
               ),

@@ -7,9 +7,89 @@ import 'package:control_financiero/features/movimientos/models/detalle_movimient
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/totales_mensuales.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:control_financiero/features/movimientos/models/movimiento_search_page_result.dart';
 
 class MovimientosLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
+
+  Future<MovimientoSearchPageResult> searchMovimientos({
+    int categoryId = -1,
+    String text = '',
+    DateTime? startDate,
+    DateTime? endDate,
+    int page = 0,
+  }) async {
+    final db = await _dbHelper.database;
+    return querySearchPage(
+      db,
+      categoryId: categoryId,
+      text: text,
+      startDate: startDate,
+      endDate: endDate,
+      page: page,
+    );
+  }
+
+  // Recibe el ejecutor para poder verificar la consulta sin abrir la BD de la app.
+  static Future<MovimientoSearchPageResult> querySearchPage(
+    Database db, {
+    int categoryId = -1,
+    String text = '',
+    DateTime? startDate,
+    DateTime? endDate,
+    int page = 0,
+  }) async {
+    final conditions = <String>[];
+    final args = <Object?>[];
+    if (categoryId != -1) {
+      conditions.add('m.category_id = ?');
+      args.add(categoryId);
+    }
+    if (text.trim().isNotEmpty) {
+      // SQLite lower() solo convierte ASCII; conservar también las mayúsculas
+      // acentuadas habituales en los títulos en español.
+      conditions.add(
+        "instr(lower(replace(replace(replace(replace(replace(replace(replace(m.title, 'Á', 'á'), 'É', 'é'), 'Í', 'í'), 'Ó', 'ó'), 'Ú', 'ú'), 'Ü', 'ü'), 'Ñ', 'ñ')), ?) > 0",
+      );
+      args.add(text.trim().toLowerCase());
+    }
+    if (startDate != null) {
+      conditions.add('date(m.date) >= ?');
+      args.add(startDate.toIso8601String().substring(0, 10));
+    }
+    if (endDate != null) {
+      conditions.add('date(m.date) <= ?');
+      args.add(endDate.toIso8601String().substring(0, 10));
+    }
+    final from = 'FROM movimientos m JOIN categorias c ON m.category_id = c.id';
+    final where = conditions.isEmpty ? '' : 'WHERE ${conditions.join(' AND ')}';
+    return db.transaction((txn) async {
+      final total =
+          Sqflite.firstIntValue(
+            await txn.rawQuery('SELECT COUNT(*) $from $where', args),
+          ) ??
+          0;
+      final lastPage = total == 0 ? 0 : (total - 1) ~/ 20;
+      final currentPage = page.clamp(0, lastPage);
+      final rows = await txn.rawQuery(
+        '''
+        SELECT m.id, m.title, m.amount, m.date, m.time, m.note,
+          c.name AS category_name, c.icon_name AS category_icon,
+          c.icon_color_value AS category_color,
+          c.movement_type, c.id AS category_id
+        $from $where
+        ORDER BY m.date DESC, m.time DESC, m.id DESC
+        LIMIT 20 OFFSET ?
+      ''',
+        [...args, currentPage * 20],
+      );
+      return MovimientoSearchPageResult(
+        movimientos: rows.map(DetalleMovimiento.fromMap).toList(),
+        total: total,
+        page: currentPage,
+      );
+    });
+  }
 
   Future<List<Movimiento>> fetchAllMovimientos() async {
     final db = await _dbHelper.database;

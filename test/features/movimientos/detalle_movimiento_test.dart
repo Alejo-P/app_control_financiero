@@ -109,7 +109,7 @@ void main() {
         'fecha': '2026-09-01T00:00:00.000',
         'nota': '',
         // Icons.category no está registrado en el mapa inverso actual.
-        'categoriaIcono': 'help_outline',
+        'categoriaIcono': 'category',
         'categoriaColor': null,
         'categoria': null,
         'time': null,

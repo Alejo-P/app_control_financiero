@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/movimientos/models/movimiento_search_page_result.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/services/backup_service.dart';
@@ -951,6 +952,20 @@ class AppState extends ChangeNotifier {
     await syncDailyMovementReminder();
     await loadPresupuestosByMonthAndYear(selectedBudgetMonth, notify: false);
   }
+
+  Future<MovimientoSearchPageResult> buscarMovimientosPaginados({
+    int categoryId = -1,
+    String text = '',
+    DateTime? startDate,
+    DateTime? endDate,
+    int page = 0,
+  }) => _movimientosRepository.searchMovimientos(
+    categoryId: categoryId,
+    text: text,
+    startDate: startDate,
+    endDate: endDate,
+    page: page,
+  );
 
   Future<List<DetalleMovimiento>> obtenerMovimientosPorCategoria(
     int categoryID,
