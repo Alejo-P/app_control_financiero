@@ -275,8 +275,8 @@ class _AjustesPageState extends State<AjustesPage> {
                       SettingOptionCard(
                         title: 'Ver tutoriales',
                         description: 'Repite las guías de las cuatro secciones',
-                        icon: Icons.help_outline,
-                        iconColor: Colors.indigo,
+                        icon: Icons.play_arrow_rounded,
+                        iconColor: Colors.orange,
                         onTap: () async {
                           final reset = context
                               .read<TutorialCoordinator?>()

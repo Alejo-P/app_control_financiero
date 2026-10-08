@@ -27,7 +27,7 @@ enum TutorialStep {
     0,
     'movimientos_inicio',
     'Secciones de la aplicación',
-    'Desde aquí puedes entrar a Movimientos, Presupuestos, Historial y Más acciones. Cada sección tiene su propio tutorial.',
+    'Desde aquí puedes entrar a Movimientos, Presupuestos, Historial y Más acciones.',
   ),
   movementSummary(
     0,
@@ -63,7 +63,7 @@ enum TutorialStep {
     1,
     'presupuestos_agregar',
     'Agregar presupuesto',
-    'Asigna parte del ingreso presupuestado a una categoría. Este botón aparece cuando el mes tiene un ingreso presupuestado mayor que cero.',
+    'Asigna parte del ingreso presupuestado a una categoría.',
   ),
   budgetSummary(
     1,
@@ -105,7 +105,7 @@ enum TutorialStep {
     3,
     'mas_acciones',
     'Exportar movimientos a Excel',
-    'Genera un archivo .xlsx con tus movimientos. Esta opción temporal permite consultarlos fuera de la aplicación.',
+    'Genera un archivo .xlsx con tus movimientos. Puedes abrirlo con Excel, Google Sheets u otra aplicación compatible.',
   ),
   backup(
     3,
