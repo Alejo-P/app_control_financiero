@@ -1,3 +1,5 @@
+import 'package:control_financiero/core/tutorials/tutorial_host.dart';
+import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 import 'package:control_financiero/features/ajustes/widgets/backup_password_dialog.dart';
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
@@ -20,14 +22,18 @@ class AjustesPage extends StatefulWidget {
 
 class _AjustesPageState extends State<AjustesPage> {
   late AppState _appState;
+  bool _controlsConfigured = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     _appState = context.read<AppState>();
+    if (_controlsConfigured) return;
+    _controlsConfigured = true;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _appState.currentTab != 3) return;
       _appState.clearAppBarActions();
       _appState.clearFloatingActionButton();
     });
@@ -150,7 +156,7 @@ class _AjustesPageState extends State<AjustesPage> {
     showLoadingDialog(
       context,
       'Restaurando respaldo...\n'
-      'Espere un momento'
+      'Espere un momento',
     );
 
     // Restaurar datos
@@ -187,28 +193,38 @@ class _AjustesPageState extends State<AjustesPage> {
                     description:
                         'Opciones para respaldar y restaurar tus datos.',
                     children: [
-                      SettingOptionCard(
-                        title: 'Exportar datos a Excel',
-                        description:
-                            'Exporta tus movimientos en un archivo .xlsx',
-                        icon: Icons.table_view_outlined,
-                        iconColor: Colors.orange,
-                        onTap: exportarDatosExcel,
+                      TutorialTarget(
+                        step: TutorialStep.excel,
+                        child: SettingOptionCard(
+                          title: 'Exportar datos a Excel',
+                          description:
+                              'Exporta tus movimientos en un archivo .xlsx',
+                          icon: Icons.table_view_outlined,
+                          iconColor: Colors.orange,
+                          onTap: exportarDatosExcel,
+                        ),
                       ),
-                      SettingOptionCard(
-                        title: 'Respaldar datos',
-                        description: 'Crea una copia de seguridad de tus datos',
-                        icon: Icons.backup_outlined,
-                        iconColor: Colors.green,
-                        onTap: exportarDatosBackup,
+                      TutorialTarget(
+                        step: TutorialStep.backup,
+                        child: SettingOptionCard(
+                          title: 'Respaldar datos',
+                          description:
+                              'Crea una copia de seguridad de tus datos',
+                          icon: Icons.backup_outlined,
+                          iconColor: Colors.green,
+                          onTap: exportarDatosBackup,
+                        ),
                       ),
-                      SettingOptionCard(
-                        title: 'Restaurar datos',
-                        description:
-                            'Restaura tus datos desde una copia de seguridad',
-                        icon: Icons.restore_outlined,
-                        iconColor: Colors.red,
-                        onTap: restaurarDatosBackup,
+                      TutorialTarget(
+                        step: TutorialStep.restore,
+                        child: SettingOptionCard(
+                          title: 'Restaurar datos',
+                          description:
+                              'Restaura tus datos desde una copia de seguridad',
+                          icon: Icons.restore_outlined,
+                          iconColor: Colors.red,
+                          onTap: restaurarDatosBackup,
+                        ),
                       ),
                     ],
                   ),
@@ -216,31 +232,39 @@ class _AjustesPageState extends State<AjustesPage> {
                     title: 'Mas elementos',
                     description: 'Gestiona categorias y otros elementos.',
                     children: [
-                      SettingOptionCard(
-                        title: 'Categorias',
-                        description:
-                            'Gestiona las categorias de tus movimientos',
-                        icon: Icons.category_outlined,
-                        iconColor: Colors.purple,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => CategoriasPage()),
-                          );
-                        },
+                      TutorialTarget(
+                        step: TutorialStep.categories,
+                        child: SettingOptionCard(
+                          title: 'Categorias',
+                          description:
+                              'Gestiona las categorias de tus movimientos',
+                          icon: Icons.category_outlined,
+                          iconColor: Colors.purple,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CategoriasPage(),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                      SettingOptionCard(
-                        title: 'Recordatorios',
-                        description:
-                            'Gestiona los recordatorios de tus movimientos',
-                        icon: Icons.alarm_outlined,
-                        iconColor: Colors.blue,
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.recordatoriosRoute,
-                          );
-                        },
+                      TutorialTarget(
+                        step: TutorialStep.reminders,
+                        child: SettingOptionCard(
+                          title: 'Recordatorios',
+                          description:
+                              'Gestiona los recordatorios de tus movimientos',
+                          icon: Icons.alarm_outlined,
+                          iconColor: Colors.blue,
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.recordatoriosRoute,
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -249,37 +273,60 @@ class _AjustesPageState extends State<AjustesPage> {
                     description: 'Configura las preferencias de la aplicación.',
                     children: [
                       SettingOptionCard(
-                        title: 'Modo oscuro',
-                        description:
-                            '${!isDarkMode ? 'Activa' : 'Desactiva'} el modo oscuro en la aplicación',
-                        icon: isDarkMode
-                            ? Icons.dark_mode_outlined
-                            : Icons.light_mode_outlined,
-                        iconColor: isDarkMode ? Colors.yellow : Colors.blue,
-                        trailing: Switch(
-                          value: isDarkMode,
-                          onChanged: _toggleDarkMode,
+                        title: 'Ver tutoriales',
+                        description: 'Repite las guías de las cuatro secciones',
+                        icon: Icons.help_outline,
+                        iconColor: Colors.indigo,
+                        onTap: () async {
+                          final reset = context
+                              .read<TutorialCoordinator?>()
+                              ?.reset;
+                          if (reset != null) await reset();
+                        },
+                      ),
+                      TutorialTarget(
+                        step: TutorialStep.darkMode,
+                        child: SettingOptionCard(
+                          title: 'Modo oscuro',
+                          description:
+                              '${!isDarkMode ? 'Activa' : 'Desactiva'} el modo oscuro en la aplicación',
+                          icon: isDarkMode
+                              ? Icons.dark_mode_outlined
+                              : Icons.light_mode_outlined,
+                          iconColor: isDarkMode ? Colors.yellow : Colors.blue,
+                          trailing: Switch(
+                            value: isDarkMode,
+                            onChanged: _toggleDarkMode,
+                          ),
                         ),
                       ),
-                      SettingOptionCard(
-                        title: 'Notificaciones',
-                        description:
-                            'Configura las notificaciones de la aplicación',
-                        icon: Icons.notifications_outlined,
-                        iconColor: Colors.teal,
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRoutes.notificationConfigRoute,
+                      TutorialTarget(
+                        step: TutorialStep.notificationSettings,
+                        child: SettingOptionCard(
+                          title: 'Notificaciones',
+                          description:
+                              'Configura las notificaciones de la aplicación',
+                          icon: Icons.notifications_outlined,
+                          iconColor: Colors.teal,
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.notificationConfigRoute,
+                          ),
                         ),
                       ),
-                      SettingOptionCard(
-                        title: 'Sobre la aplicación',
-                        description:
-                            'Información sobre la aplicación y su versión',
-                        icon: Icons.info_outline,
-                        iconColor: Colors.grey,
-                        onTap: () =>
-                            Navigator.pushNamed(context, AppRoutes.aboutRoute),
+                      TutorialTarget(
+                        step: TutorialStep.about,
+                        child: SettingOptionCard(
+                          title: 'Sobre la aplicación',
+                          description:
+                              'Información sobre la aplicación y su versión',
+                          icon: Icons.info_outline,
+                          iconColor: Colors.grey,
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.aboutRoute,
+                          ),
+                        ),
                       ),
                     ],
                   ),

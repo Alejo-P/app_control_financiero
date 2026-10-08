@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 
 class AppBarAction {
   final IconData? icon;
@@ -7,6 +8,7 @@ class AppBarAction {
   final String? tooltip;
   final String? label;
   final int? badgeCount;
+  final TutorialStep? tutorialStep;
 
   AppBarAction({
     this.icon,
@@ -15,6 +17,7 @@ class AppBarAction {
     this.tooltip,
     this.label,
     this.badgeCount,
+    this.tutorialStep,
   });
 
   String get labelValue => label?.trim() ?? '';

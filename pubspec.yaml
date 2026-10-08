@@ -28,6 +28,7 @@ dependencies:
   encrypt: ^5.0.3
   pointycastle: ^3.9.1
   textfield_tags: ^3.0.1
+  showcaseview: ^5.1.0
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,5 @@
+import 'package:control_financiero/core/tutorials/tutorial_host.dart';
+import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -31,6 +33,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
   MovimientoFiltro selectedFilter = MovimientoFiltro.todos;
   int selectedCategoryFilter = -1;
   late AppState _appState;
+  (DateTime, int)? _controlsSignature;
 
   @override
   void initState() {
@@ -50,12 +53,20 @@ class _MovimientosPageState extends State<MovimientosPage> {
     super.didChangeDependencies();
 
     _appState = context.read<AppState>();
+    final signature = (
+      _appState.selectedMovementsMonth,
+      _appState.notifSinLeer,
+    );
+    if (_controlsSignature == signature) return;
+    _controlsSignature = signature;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _appState.currentTab != 0) return;
       final notifSinLeer = _appState.notifSinLeer;
       _appState.setAppBarActions([
         AppBarAction(
           icon: Icons.notifications_active_outlined,
+          tutorialStep: TutorialStep.notifications,
           badgeCount: notifSinLeer,
           tooltip: notifSinLeer > 0
               ? '$notifSinLeer notificaciones no leidas'
@@ -69,6 +80,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
         ),
         AppBarAction(
           icon: Icons.search,
+          tutorialStep: TutorialStep.search,
           tooltip: 'Buscar movimiento',
           onPressed: () {
             Navigator.push(
@@ -118,7 +130,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
       selectedFilter = filtro;
       selectedCategoryFilter = -1;
     });
-    _appState.setShowFloatingActionButton(true); 
+    _appState.setShowFloatingActionButton(true);
   }
 
   void _onSelectCategoryFilter(int categoryID) {
@@ -128,7 +140,6 @@ class _MovimientosPageState extends State<MovimientosPage> {
           : categoryID;
     });
     _appState.setShowFloatingActionButton(true);
-    
   }
 
   List<DetalleMovimiento> _getMovimientosByDateAndFilter(
@@ -214,6 +225,16 @@ class _MovimientosPageState extends State<MovimientosPage> {
           ),
         )
         .toList();
+    final tutorialMovimientos = movimientosFiltradosDelMes
+        .where(
+          (movimiento) =>
+              selectedCategoryFilter == -1 ||
+              movimiento.categoryId == selectedCategoryFilter,
+        )
+        .toList();
+    final tutorialMovementId = tutorialMovimientos.isEmpty
+        ? null
+        : tutorialMovimientos.first.id;
 
     final filterValues = MovimientoFiltro.values;
 
@@ -258,12 +279,15 @@ class _MovimientosPageState extends State<MovimientosPage> {
       child: Column(
         // permite desplazamiento si el contenido es mayor que el espacio.
         children: [
-          MonthSelection(
-            initialDate: selectedMonth,
-            isLoading: isLoading,
-            onMonthChanged: (newMonth) async {
-              await _changeMonth(newMonth);
-            },
+          TutorialTarget(
+            step: TutorialStep.movementMonth,
+            child: MonthSelection(
+              initialDate: selectedMonth,
+              isLoading: isLoading,
+              onMonthChanged: (newMonth) async {
+                await _changeMonth(newMonth);
+              },
+            ),
           ),
           const SizedBox(height: 6),
           Expanded(
@@ -282,71 +306,77 @@ class _MovimientosPageState extends State<MovimientosPage> {
                         SizedBox(
                           width: double.infinity,
                           height: 215,
-                          child: SummaryCard(
-                            title:
-                                'Balance Mensual (${formatMonthYear(selectedMonth)})',
-                            icon: Icons.account_balance,
-                            backgroundColor: Colors.blue,
-                            content: BalanceSummaryCard(
-                              ammountIncome: totalMesActual.ingresos,
-                              ammountExpense: totalMesActual.gastos,
-                              variationPercent: variationPercent ?? 0.0,
+                          child: TutorialTarget(
+                            step: TutorialStep.movementSummary,
+                            child: SummaryCard(
+                              title:
+                                  'Balance Mensual (${formatMonthYear(selectedMonth)})',
+                              icon: Icons.account_balance,
+                              backgroundColor: Colors.blue,
+                              content: BalanceSummaryCard(
+                                ammountIncome: totalMesActual.ingresos,
+                                ammountExpense: totalMesActual.gastos,
+                                variationPercent: variationPercent ?? 0.0,
+                              ),
                             ),
                           ),
                         ),
                         SizedBox(height: 8),
                         SizedBox(
                           height: 35,
-                          child: Center(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              padding:EdgeInsets.symmetric(horizontal: 4),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 8,
-                                children: [
-                                  for (
-                                    var i = 0;
-                                    i < filterValues.length;
-                                    i++
-                                  ) ...[
-                                    CategoryChip(
-                                      label: filterValues[i].label,
-                                      selected:
-                                          filterValues[i] == selectedFilter,
-                                      icon: filterValues[i].icon,
-                                      iconColor: filterValues[i].color,
-                                      onTap: () {
-                                        _onChangeMovimientoFiltro(
-                                          filterValues[i],
-                                        );
-                                      },
+                          child: TutorialTarget(
+                            step: TutorialStep.movementFilters,
+                            child: Center(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                padding: EdgeInsets.symmetric(horizontal: 4),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 8,
+                                  children: [
+                                    for (
+                                      var i = 0;
+                                      i < filterValues.length;
+                                      i++
+                                    ) ...[
+                                      CategoryChip(
+                                        label: filterValues[i].label,
+                                        selected:
+                                            filterValues[i] == selectedFilter,
+                                        icon: filterValues[i].icon,
+                                        iconColor: filterValues[i].color,
+                                        onTap: () {
+                                          _onChangeMovimientoFiltro(
+                                            filterValues[i],
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                    const VerticalDivider(
+                                      width: 3,
+                                      thickness: 2,
+                                      radius: BorderRadius.all(
+                                        Radius.circular(50),
+                                      ),
+                                    ),
+
+                                    ...categoryValues.map(
+                                      (category) => CategoryChip(
+                                        label: category.categoryName,
+                                        icon: category.categoryIcon,
+                                        iconColor: category.categoryColor,
+                                        selected:
+                                            category.categoryID ==
+                                            selectedCategoryFilter,
+                                        onTap: () {
+                                          _onSelectCategoryFilter(
+                                            category.categoryID,
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ],
-                                  const VerticalDivider(
-                                    width: 3,
-                                    thickness: 2,
-                                    radius: BorderRadius.all(
-                                      Radius.circular(50),
-                                    ),
-                                  ),
-
-                                  ...categoryValues.map(
-                                    (category) => CategoryChip(
-                                      label: category.categoryName,
-                                      icon: category.categoryIcon,
-                                      iconColor: category.categoryColor,
-                                      selected:
-                                          category.categoryID ==
-                                          selectedCategoryFilter,
-                                      onTap: () {
-                                        _onSelectCategoryFilter(
-                                          category.categoryID,
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
@@ -376,6 +406,7 @@ class _MovimientosPageState extends State<MovimientosPage> {
 
                             return TransactionsContainer(
                               date: fecha,
+                              tutorialMovementId: tutorialMovementId,
                               movimientos: movimientosFiltrados,
                             );
                           }),

@@ -7,6 +7,8 @@ import 'package:control_financiero/features/presupuestos/models/presupuesto.dart
 import 'package:control_financiero/features/shared/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:control_financiero/core/tutorials/tutorial_host.dart';
+import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 
 enum RecordAction { copy, move }
 
@@ -14,12 +16,14 @@ class RecordActionsMenu extends StatefulWidget {
   final int id;
   final DateTime date;
   final CategoryCardInfo? presupuesto;
+  final TutorialStep? tutorialStep;
 
   const RecordActionsMenu({
     super.key,
     required this.id,
     required this.date,
     this.presupuesto,
+    this.tutorialStep,
   });
 
   @override
@@ -28,6 +32,7 @@ class RecordActionsMenu extends StatefulWidget {
 
 class _RecordActionsMenuState extends State<RecordActionsMenu> {
   bool _busy = false;
+  final _menuKey = GlobalKey<PopupMenuButtonState<RecordAction>>();
 
   Future<void> _execute(RecordAction action) async {
     if (_busy) return;
@@ -178,34 +183,62 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
   }
 
   @override
-  Widget build(BuildContext context) => PopupMenuButton<RecordAction>(
-    padding: EdgeInsets.zero,
-    style: const ButtonStyle(
-      padding: WidgetStatePropertyAll(EdgeInsets.zero),
-      minimumSize: WidgetStatePropertyAll(Size(32, 48)),
-      maximumSize: WidgetStatePropertyAll(Size(32, 48)),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.standard,
-    ),
-    enabled: !_busy,
-    tooltip: 'Acciones',
-    icon: Icon(_busy ? Icons.hourglass_top : Icons.more_vert),
-    onSelected: _execute,
-    itemBuilder: (_) => [
-      const PopupMenuItem(
-        value: RecordAction.copy,
-        child: ListTile(
-          leading: Icon(Icons.copy),
-          title: Text('Copiar a otra fecha'),
-        ),
+  Widget build(BuildContext context) {
+    final coordinator = context.read<TutorialCoordinator?>();
+    Widget option(TutorialStep step, Widget child) {
+      if (widget.tutorialStep == null || coordinator == null) return child;
+      return Provider<TutorialCoordinator>.value(
+        value: coordinator,
+        child: TutorialTarget(step: step, child: child),
+      );
+    }
+
+    final menu = PopupMenuButton<RecordAction>(
+      key: _menuKey,
+      padding: EdgeInsets.zero,
+      style: const ButtonStyle(
+        padding: WidgetStatePropertyAll(EdgeInsets.zero),
+        minimumSize: WidgetStatePropertyAll(Size(32, 48)),
+        maximumSize: WidgetStatePropertyAll(Size(32, 48)),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.standard,
       ),
-      const PopupMenuItem(
-        value: RecordAction.move,
-        child: ListTile(
-          leading: Icon(Icons.event),
-          title: Text('Mover a otra fecha'),
+      enabled: !_busy,
+      tooltip: 'Acciones',
+      icon: Icon(_busy ? Icons.hourglass_top : Icons.more_vert),
+      onSelected: _execute,
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: RecordAction.copy,
+          child: option(
+            widget.presupuesto == null
+                ? TutorialStep.movementCopy
+                : TutorialStep.budgetCopy,
+            const ListTile(
+              leading: Icon(Icons.copy),
+              title: Text('Copiar a otra fecha'),
+            ),
+          ),
         ),
-      ),
-    ],
-  );
+        PopupMenuItem(
+          value: RecordAction.move,
+          child: option(
+            widget.presupuesto == null
+                ? TutorialStep.movementMove
+                : TutorialStep.budgetMove,
+            const ListTile(
+              leading: Icon(Icons.event),
+              title: Text('Mover a otra fecha'),
+            ),
+          ),
+        ),
+      ],
+    );
+    if (widget.tutorialStep == null) return menu;
+    return TutorialTarget(
+      step: widget.tutorialStep!,
+      openMenu: () => _menuKey.currentState?.showButtonMenu(),
+      child: menu,
+    );
+  }
 }

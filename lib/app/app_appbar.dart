@@ -2,6 +2,7 @@ import 'package:control_financiero/features/shared/widgets/badge_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'app_state.dart';
+import 'package:control_financiero/core/tutorials/tutorial_host.dart';
 
 class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
   const AppAppbar({super.key});
@@ -53,6 +54,10 @@ class AppAppbar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
           );
+        }
+
+        if (action.tutorialStep != null) {
+          widget = TutorialTarget(step: action.tutorialStep!, child: widget);
         }
 
         return Padding(

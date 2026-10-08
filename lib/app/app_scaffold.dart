@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/ajustes/presentation/ajustes_page.dart';
+import 'package:control_financiero/core/tutorials/tutorial_host.dart';
+import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({super.key});
@@ -17,6 +19,11 @@ class AppScaffold extends StatelessWidget {
     final currentTab = appState.currentTab;
     final currentFAB = appState.floatingActionButton;
     final showFAB = appState.showFAB;
+    final explainFAB =
+        showFAB &&
+        (currentTab == 0 ||
+            (currentTab == 1 &&
+                (appState.ingresoPresupuestado?.monto ?? 0) > 0));
 
     final pages = [
       MovimientosPage(),
@@ -33,12 +40,26 @@ class AppScaffold extends StatelessWidget {
         child: AnimatedSlide(
           offset: showFAB ? Offset.zero : const Offset(0, 2),
           duration: const Duration(milliseconds: 200),
-          child: currentFAB,
+          child: currentFAB == null
+              ? null
+              : !explainFAB
+              ? currentFAB
+              : TutorialTarget(
+                  step: currentTab == 1
+                      ? TutorialStep.addBudget
+                      : TutorialStep.addMovement,
+                  child: currentFAB,
+                ),
         ),
       ),
       appBar: const AppAppbar(),
       body: pages[currentTab],
-      bottomNavigationBar: const AppBottomNav(),
+      bottomNavigationBar: currentTab == 0
+          ? const TutorialTarget(
+              step: TutorialStep.navigation,
+              child: AppBottomNav(),
+            )
+          : const AppBottomNav(),
     );
   }
 }
