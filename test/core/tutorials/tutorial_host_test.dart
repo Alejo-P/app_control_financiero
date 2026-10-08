@@ -224,7 +224,7 @@ void main() {
     steps.dispose();
   });
 
-  testWidgets('menú explica copiar y mover sin ejecutar operaciones', (
+  testWidgets('abrir el menú manualmente no inicia otro tutorial', (
     tester,
   ) async {
     await box.put(TutorialProgress.storageKey, {
@@ -244,10 +244,10 @@ void main() {
     );
     await tester.tap(find.byType(PopupMenuButton<RecordAction>));
     await ready(tester);
-    expect(find.text('Copiar movimiento'), findsOneWidget);
-    await tester.tap(find.text('Siguiente'));
-    await tester.pumpAndSettle();
-    expect(find.text('Mover movimiento'), findsOneWidget);
+    expect(find.text('Copiar a otra fecha'), findsOneWidget);
+    expect(find.text('Mover a otra fecha'), findsOneWidget);
+    expect(find.text('Siguiente'), findsNothing);
+    expect(ShowcaseView.getNamed('tutoriales').isShowcaseRunning, isFalse);
     expect(find.byType(CalendarDatePicker), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
@@ -318,16 +318,12 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text(step.description), findsOneWidget);
       }
-      await tester.tap(find.text('Abrir menú'));
-      await ready(tester);
-      expect(find.text(TutorialStep.movementCopy.description), findsOneWidget);
+      expect(find.text('Abrir menú'), findsNothing);
+      await tester.tap(find.text('Siguiente'));
+      await tester.pumpAndSettle();
       expect(TutorialProgress(box).states['movimientos_datos'], 'completado');
-      await tester.tap(find.text('Siguiente'));
-      await tester.pumpAndSettle();
-      expect(find.text(TutorialStep.movementMove.description), findsOneWidget);
-      await tester.tap(find.text('Siguiente'));
-      await tester.pumpAndSettle();
-      expect(TutorialProgress(box).states['movimientos_menu'], 'completado');
+      expect(find.text('Copiar a otra fecha'), findsNothing);
+      expect(ShowcaseView.getNamed('tutoriales').isShowcaseRunning, isFalse);
       expect(find.byType(CalendarDatePicker), findsNothing);
       await tester.pumpWidget(const SizedBox());
     },
@@ -427,12 +423,12 @@ void main() {
       await tester.tap(find.text('Siguiente'));
       await tester.pumpAndSettle();
       expect(find.text(TutorialStep.budgetMenu.description), findsOneWidget);
-      await tester.tap(find.text('Abrir menú'));
-      await ready(tester);
-      expect(find.text(TutorialStep.budgetCopy.description), findsOneWidget);
+      expect(find.text('Abrir menú'), findsNothing);
       await tester.tap(find.text('Siguiente'));
       await tester.pumpAndSettle();
-      expect(find.text(TutorialStep.budgetMove.description), findsOneWidget);
+      expect(TutorialProgress(box).states['presupuestos_datos'], 'completado');
+      expect(find.text('Copiar a otra fecha'), findsNothing);
+      expect(ShowcaseView.getNamed('tutoriales').isShowcaseRunning, isFalse);
       await tester.pumpWidget(const SizedBox());
     },
   );

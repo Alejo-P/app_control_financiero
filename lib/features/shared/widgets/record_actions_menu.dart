@@ -32,7 +32,6 @@ class RecordActionsMenu extends StatefulWidget {
 
 class _RecordActionsMenuState extends State<RecordActionsMenu> {
   bool _busy = false;
-  final _menuKey = GlobalKey<PopupMenuButtonState<RecordAction>>();
 
   Future<void> _execute(RecordAction action) async {
     if (_busy) return;
@@ -184,17 +183,7 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final coordinator = context.read<TutorialCoordinator?>();
-    Widget option(TutorialStep step, Widget child) {
-      if (widget.tutorialStep == null || coordinator == null) return child;
-      return Provider<TutorialCoordinator>.value(
-        value: coordinator,
-        child: TutorialTarget(step: step, child: child),
-      );
-    }
-
     final menu = PopupMenuButton<RecordAction>(
-      key: _menuKey,
       padding: EdgeInsets.zero,
       style: const ButtonStyle(
         padding: WidgetStatePropertyAll(EdgeInsets.zero),
@@ -208,37 +197,23 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
       icon: Icon(_busy ? Icons.hourglass_top : Icons.more_vert),
       onSelected: _execute,
       itemBuilder: (_) => [
-        PopupMenuItem(
+        const PopupMenuItem(
           value: RecordAction.copy,
-          child: option(
-            widget.presupuesto == null
-                ? TutorialStep.movementCopy
-                : TutorialStep.budgetCopy,
-            const ListTile(
-              leading: Icon(Icons.copy),
-              title: Text('Copiar a otra fecha'),
-            ),
+          child: ListTile(
+            leading: Icon(Icons.copy),
+            title: Text('Copiar a otra fecha'),
           ),
         ),
-        PopupMenuItem(
+        const PopupMenuItem(
           value: RecordAction.move,
-          child: option(
-            widget.presupuesto == null
-                ? TutorialStep.movementMove
-                : TutorialStep.budgetMove,
-            const ListTile(
-              leading: Icon(Icons.event),
-              title: Text('Mover a otra fecha'),
-            ),
+          child: ListTile(
+            leading: Icon(Icons.event),
+            title: Text('Mover a otra fecha'),
           ),
         ),
       ],
     );
     if (widget.tutorialStep == null) return menu;
-    return TutorialTarget(
-      step: widget.tutorialStep!,
-      openMenu: () => _menuKey.currentState?.showButtonMenu(),
-      child: menu,
-    );
+    return TutorialTarget(step: widget.tutorialStep!, child: menu);
   }
 }

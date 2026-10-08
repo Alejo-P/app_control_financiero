@@ -18,9 +18,8 @@ class TutorialAnchor {
 }
 
 class TutorialCoordinator {
-  TutorialCoordinator(this.changed, this.openMenu);
+  TutorialCoordinator(this.changed);
   final VoidCallback changed;
-  final Future<void> Function(VoidCallback) openMenu;
   final targets = <TutorialStep, TutorialAnchor>{};
   Future<void> Function()? reset;
 
@@ -66,7 +65,7 @@ class _TutorialHostState extends State<TutorialHost>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _coordinator = TutorialCoordinator(_schedule, _openMenu);
+    _coordinator = TutorialCoordinator(_schedule);
     _coordinator.reset = _reset;
     _showcase = ShowcaseView.register(
       scope: 'tutoriales',
@@ -170,7 +169,7 @@ class _TutorialHostState extends State<TutorialHost>
         continue;
       }
       final required = steps.where((step) => step.group == group).toList();
-      if (!required.first.isMenuOption && !(_route?.isCurrent ?? false)) {
+      if (!(_route?.isCurrent ?? false)) {
         continue;
       }
       final anchors = <TutorialAnchor>[];
@@ -229,14 +228,6 @@ class _TutorialHostState extends State<TutorialHost>
     _activeTargets = [];
   }
 
-  Future<void> _openMenu(VoidCallback open) async {
-    _interrupted = true;
-    _showcase.dismiss();
-    _interrupted = false;
-    await _finish(skipped: false);
-    if (!_disposed) open();
-  }
-
   Future<void> _reset() async {
     _pause();
     await _progress?.reset();
@@ -251,7 +242,6 @@ class _TutorialHostState extends State<TutorialHost>
 
   @override
   void didPopNext() {
-    if (_activeGroup?.endsWith('_menu') ?? false) _pause();
     _schedule();
   }
 
@@ -282,15 +272,9 @@ class _TutorialHostState extends State<TutorialHost>
 }
 
 class TutorialTarget extends StatefulWidget {
-  const TutorialTarget({
-    super.key,
-    required this.step,
-    required this.child,
-    this.openMenu,
-  });
+  const TutorialTarget({super.key, required this.step, required this.child});
   final TutorialStep step;
   final Widget child;
-  final VoidCallback? openMenu;
 
   @override
   State<TutorialTarget> createState() => _TutorialTargetState();
@@ -343,10 +327,6 @@ class _TutorialTargetState extends State<TutorialTarget> {
         tooltipBackgroundColor: colors.surface,
         textColor: colors.onSurface,
         disableBarrierInteraction: true,
-        onTargetClick: widget.openMenu == null
-            ? null
-            : () => unawaited(coordinator.openMenu(widget.openMenu!)),
-        disposeOnTap: widget.openMenu == null ? null : false,
         tooltipActions: [
           TooltipActionButton(
             type: TooltipDefaultActionType.skip,
@@ -355,10 +335,7 @@ class _TutorialTargetState extends State<TutorialTarget> {
           ),
           TooltipActionButton(
             type: TooltipDefaultActionType.next,
-            name: widget.openMenu != null ? 'Abrir menú' : 'Siguiente',
-            onTap: widget.openMenu == null
-                ? null
-                : () => unawaited(coordinator.openMenu(widget.openMenu!)),
+            name: 'Siguiente',
           ),
         ],
         child: widget.child,

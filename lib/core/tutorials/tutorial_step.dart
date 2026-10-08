@@ -45,19 +45,7 @@ enum TutorialStep {
     0,
     'movimientos_datos',
     'Acciones del movimiento',
-    'Este menú permite copiar o mover el movimiento a otra fecha. Toca el card para consultar o editar sus datos.',
-  ),
-  movementCopy(
-    0,
-    'movimientos_menu',
-    'Copiar movimiento',
-    'Crea una copia en la fecha que elijas y conserva el movimiento original.',
-  ),
-  movementMove(
-    0,
-    'movimientos_menu',
-    'Mover movimiento',
-    'Cambia la fecha del movimiento original, sin crear una copia.',
+    'Copia el movimiento a otra fecha conservando el original, o muévelo para cambiar su fecha sin duplicarlo. Toca el card para consultar o editar sus datos.',
   ),
   budgetMonth(
     1,
@@ -94,18 +82,6 @@ enum TutorialStep {
     'presupuestos_datos',
     'Acciones del presupuesto',
     'Copia o mueve el presupuesto a otro mes. El destino necesita ingreso disponible; reemplazar uno de la misma categoría requiere confirmación.',
-  ),
-  budgetCopy(
-    1,
-    'presupuestos_menu',
-    'Copiar presupuesto',
-    'Crea el presupuesto en otro mes y conserva el original. Se comprueba el ingreso disponible del destino.',
-  ),
-  budgetMove(
-    1,
-    'presupuestos_menu',
-    'Mover presupuesto',
-    'Traslada el presupuesto a otro mes. Si ya existe uno de la misma categoría, tendrás que confirmar su reemplazo.',
   ),
   historyYear(
     2,
@@ -179,6 +155,4 @@ enum TutorialStep {
   final String group;
   final String title;
   final String description;
-
-  bool get isMenuOption => group.endsWith('_menu');
 }
