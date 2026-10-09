@@ -10,7 +10,6 @@ class DetallePresupuesto extends Equatable {
   final Color iconColor;
   final DateTime fechaPresupuesto;
   final double montoPresupuestado;
-  final bool esRecurrente;
 
   const DetallePresupuesto({
     this.id,
@@ -20,7 +19,6 @@ class DetallePresupuesto extends Equatable {
     required this.iconColor,
     required this.fechaPresupuesto,
     required this.montoPresupuestado,
-    this.esRecurrente = false,
   });
 
   DetallePresupuesto copyWith({
@@ -33,7 +31,6 @@ class DetallePresupuesto extends Equatable {
     DateTime? fechaPresupuesto,
     double? montoPresupuestado,
     double? totalPresupuestado,
-    bool? esRecurrente,
   }) {
     return DetallePresupuesto(
       id: id ?? this.id,
@@ -43,7 +40,6 @@ class DetallePresupuesto extends Equatable {
       iconColor: iconColor ?? this.iconColor,
       fechaPresupuesto: fechaPresupuesto ?? this.fechaPresupuesto,
       montoPresupuestado: montoPresupuestado ?? this.montoPresupuestado,
-      esRecurrente: esRecurrente ?? this.esRecurrente,
     );
   }
 
@@ -56,7 +52,6 @@ class DetallePresupuesto extends Equatable {
     iconColor,
     fechaPresupuesto,
     montoPresupuestado,
-    esRecurrente,
   ];
 
   factory DetallePresupuesto.fromMap(Map<String, dynamic> map) {
@@ -70,12 +65,11 @@ class DetallePresupuesto extends Equatable {
       iconColor: Color(map['categoriaColor'] ?? 0xFF000000),
       fechaPresupuesto: DateTime.parse(map['fechaPresupuesto']),
       montoPresupuestado: map['montoPresupuestado'],
-      esRecurrente: map['esRecurrente'] == 1,
     );
   }
 
   @override
   String toString() {
-    return 'DetallePresupuesto{id: $id, categoria: $categoria, categoriaId: $categoriaId, icon: $icon, iconColor: $iconColor, fechaPresupuesto: $fechaPresupuesto, montoPresupuestado: $montoPresupuestado, esRecurrente: $esRecurrente}';
+    return 'DetallePresupuesto{id: $id, categoria: $categoria, categoriaId: $categoriaId, icon: $icon, iconColor: $iconColor, fechaPresupuesto: $fechaPresupuesto, montoPresupuestado: $montoPresupuestado}';
   }
 }

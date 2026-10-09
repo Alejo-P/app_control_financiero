@@ -102,7 +102,6 @@ void main() {
           'category_id': 9,
           'date': '2026-09-01',
           'amount': 200,
-          'repeat_budget': 1,
         },
       ],
       'budgetIncome': [
@@ -155,7 +154,6 @@ void main() {
       tipoCategoriasList.first.toMap(),
     );
     expect(restored.budgets.single.amount, 200.0);
-    expect(restored.budgets.single.repeatBudget, isTrue);
     expect(restored.budgetIncome.single.monto, 1500.0);
     expect(restored.budgetNotifications.single.threshold, 80.0);
     expect(restored.budgetNotifications.single.isEnabledNotification, isTrue);

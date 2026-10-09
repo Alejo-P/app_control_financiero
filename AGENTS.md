@@ -107,7 +107,7 @@ The source of truth is `lib/core/database/db_tables.dart`.
 | `tipo_categorias` | `id`, `name`, `description` |
 | `categorias` | `id`, `name`, `description`, `movement_type`, `category_type_id`, `icon_name`, `icon_color_value`, `is_default` |
 | `movimientos` | `id`, `title`, `category_id`, `amount`, `date`, `time`, `note` |
-| `presupuestos` | `id`, `category_id`, `date`, `amount`, `repeat_budget` |
+| `presupuestos` | `id`, `category_id`, `date`, `amount` |
 | `ingreso_presupuestado` | `id`, `amount`, `date` |
 | `notificaciones` | `id`, `title`, `description`, `type`, `is_read`, `icon`, `icon_color`, `extra_data`, `object_id`, `created_at` |
 | `budget_notification_config` | `id`, `category_id`, `threshold`, `is_enabled`, `is_default`, `created_at` |
@@ -122,7 +122,7 @@ Foreign keys link categories to category types, and transactions, budgets, budge
 
 - `Movimiento` contains `id`, `title`, `categoryID`, `amount`, `date`, `time`, and `note`. It does not contain `type`: income/expense is obtained from `categorias.movement_type`; `DetalleMovimiento` exposes `movementType`.
 - `Movimiento.toMap()` stores the date as `yyyy-MM-dd` and the time as `HH:mm` separately. Do not assume transactions already use `created_at` because other tables have it.
-- `Presupuesto` contains `id`, `categoryId`, `date`, `amount`, and `repeatBudget`; queries operate by month/year.
+- `Presupuesto` contains `id`, `categoryId`, `date`, and `amount`; queries operate by month/year.
 - `Categoria` stores icon names and integer color values; it converts them through `IconMapper` and `Color`.
 - `Recordatorio` and its detail/form models are in `lib/features/recordatorios/models/`; review recurrence and date when changing its scheduling.
 

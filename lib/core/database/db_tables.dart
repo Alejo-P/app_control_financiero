@@ -29,7 +29,6 @@ class PresupuestosTable {
   static const categoryId = 'category_id';
   static const date = 'date';
   static const amount = 'amount';
-  static const repeatBudget = 'repeat_budget';
 }
 
 class MovimientosTable {
@@ -254,7 +253,6 @@ Future<void> createTables(Database db) async {
         ${PresupuestosTable.categoryId} INTEGER NOT NULL,
         ${PresupuestosTable.date} TEXT NOT NULL,
         ${PresupuestosTable.amount} REAL NOT NULL,
-        ${PresupuestosTable.repeatBudget} INTEGER DEFAULT 0,
         FOREIGN KEY(${PresupuestosTable.categoryId}) REFERENCES ${CategoriasTable.table}(${CategoriasTable.id})
       );
     ''');

@@ -38,7 +38,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
   bool _loaded = false;
   bool _isLoading = false;
   String _action = "Guardando";
-  bool repeatBudget = false;
   DateTime fechaPresupuesto = currentDateTime;
   int categoriaSeleccionada = -1;
   int presupuestoId = 0;
@@ -91,7 +90,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       presupuestoId = result.id ?? 0;
       categoriaSeleccionada = result.categoriaId;
       fechaPresupuesto = result.fechaPresupuesto;
-      repeatBudget = result.esRecurrente;
       _presupuestoAmountController.text = result.montoPresupuestado > 0
           ? result.montoPresupuestado.toStringAsFixed(2)
           : '';
@@ -138,7 +136,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       fechaPresupuesto: fechaPresupuesto,
       montoPresupuestado:
           double.tryParse(_presupuestoAmountController.text.trim()) ?? 0.0,
-      esRecurrente: repeatBudget,
     );
     final original =
         detallePresupuesto ??
@@ -149,7 +146,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
           iconColor: Colors.grey,
           fechaPresupuesto: fechaPresupuesto,
           montoPresupuestado: 0.0,
-          esRecurrente: false,
         );
 
     return original != current;
@@ -270,7 +266,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
       categoryId: categoriaSeleccionada,
       amount: value,
       date: fechaPresupuesto,
-      repeatBudget: repeatBudget,
     );
 
     final result = modo == PresupuestoFormMode.create
@@ -293,7 +288,6 @@ class _PresupuestoFormPageState extends State<PresupuestoFormPage> {
             .firstWhere((cat) => cat.id == categoriaSeleccionada)
             .name,
         'Monto presupuestado': value,
-        'Repetir mensualmente': repeatBudget ? 'Sí' : 'No',
       },
     );
     await appState.insertarNotificacion(notificacion);

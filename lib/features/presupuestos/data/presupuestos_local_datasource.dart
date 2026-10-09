@@ -50,8 +50,7 @@ class PresupuestosLocalDataSource {
       if (target != null &&
           (replacement == null ||
               target.id != replacement.id ||
-              target.amount != replacement.amount ||
-              target.repeatBudget != replacement.repeatBudget)) {
+              target.amount != replacement.amount)) {
         return const OperationResult(
           success: false,
           message:
@@ -173,7 +172,6 @@ class PresupuestosLocalDataSource {
           c.id AS categoriaId,
           c.icon_name AS categoriaIcono,
           c.icon_color_value AS categoriaColor,
-          p.repeat_budget AS esRecurrente,
           p.amount AS montoPresupuestado,
           p.date AS fechaPresupuesto
         FROM ${PresupuestosTable.table} p

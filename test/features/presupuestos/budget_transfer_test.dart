@@ -102,7 +102,6 @@ void main() {
     categoryId: 7,
     date: DateTime(2026, 8),
     amount: 120,
-    repeatBudget: true,
   );
   final target = Presupuesto(
     id: 2,
@@ -147,7 +146,6 @@ void main() {
     final copied = Presupuesto.fromMap(txn.rows[99]!);
     expect(copied.date, target.date);
     expect(copied.amount, source.amount);
-    expect(copied.repeatBudget, isTrue);
   });
   test('mover conserva el ID del origen y reemplaza destino', () async {
     final result = await data.transferPresupuesto(
