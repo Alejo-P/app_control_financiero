@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static final ThemeData light = ThemeData(
+  static ThemeData _withModalStyles(ThemeData theme) {
+    final titleStyle = theme.textTheme.titleLarge?.copyWith(
+      color: theme.colorScheme.primary,
+      fontWeight: FontWeight.bold,
+      fontSize: 18,
+    );
+    return theme.copyWith(
+      dialogTheme: theme.dialogTheme.copyWith(titleTextStyle: titleStyle),
+      datePickerTheme: theme.datePickerTheme.copyWith(
+        headerHelpStyle: titleStyle,
+      ),
+      timePickerTheme: theme.timePickerTheme.copyWith(
+        helpTextStyle: titleStyle,
+      ),
+    );
+  }
+
+  static final ThemeData light = _withModalStyles(_lightBase);
+
+  static final ThemeData _lightBase = ThemeData(
     primarySwatch: Colors.blue,
     primaryColor: Colors.blue,
     colorScheme:
@@ -52,9 +71,21 @@ class AppTheme {
       bodyMedium: TextStyle(fontSize: 16.0),
       bodySmall: TextStyle(fontSize: 14.0),
 
-      labelLarge: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.grey[600]),
-      labelMedium: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600, color: Colors.grey[600]),
-      labelSmall: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w500, color: Colors.grey[600]),
+      labelLarge: TextStyle(
+        fontSize: 18.0,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[600],
+      ),
+      labelMedium: TextStyle(
+        fontSize: 16.0,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey[600],
+      ),
+      labelSmall: TextStyle(
+        fontSize: 12.0,
+        fontWeight: FontWeight.w500,
+        color: Colors.grey[600],
+      ),
 
       headlineLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
       headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
@@ -108,7 +139,9 @@ class AppTheme {
     useMaterial3: true,
   );
 
-  static final ThemeData dark = ThemeData(
+  static final ThemeData dark = _withModalStyles(_darkBase);
+
+  static final ThemeData _darkBase = ThemeData(
     brightness: Brightness.dark,
     primarySwatch: Colors.blue,
     primaryColor: Colors.blue,
@@ -160,9 +193,21 @@ class AppTheme {
       bodyMedium: TextStyle(fontSize: 16.0),
       bodySmall: TextStyle(fontSize: 14.0),
 
-      labelLarge: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.grey[500]),
-      labelMedium: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600, color: Colors.grey[500]),
-      labelSmall: TextStyle(fontSize: 13.0, fontWeight: FontWeight.w500, color: Colors.grey[500]),
+      labelLarge: TextStyle(
+        fontSize: 18.0,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[500],
+      ),
+      labelMedium: TextStyle(
+        fontSize: 16.0,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey[500],
+      ),
+      labelSmall: TextStyle(
+        fontSize: 13.0,
+        fontWeight: FontWeight.w500,
+        color: Colors.grey[500],
+      ),
 
       headlineLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
       headlineMedium: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),

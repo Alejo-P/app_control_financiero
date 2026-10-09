@@ -6,6 +6,10 @@ Future<bool?> showConfirmAddDialog(
   required String titleModal,
   required List<Widget> content,
 }) {
+  final theme = Theme.of(context);
+  final textTheme = theme.textTheme;
+  final colorScheme = theme.colorScheme;
+
   return showDialog<bool>(
     context: context,
     barrierDismissible: false, // obliga a elegir
@@ -13,7 +17,11 @@ Future<bool?> showConfirmAddDialog(
       return AlertDialog(
         title: Text(
           titleModal,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: textTheme.titleLarge?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -54,10 +62,10 @@ Future<bool?> showConfirmDialog(
       return AlertDialog(
         title: Text(
           title,
-          style: textTheme.displayLarge?.copyWith(
+          style: textTheme.titleLarge?.copyWith(
             color: colorScheme.primary,
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: 18,
           ),
         ),
         content: Text(content),
@@ -96,10 +104,10 @@ Future<void> showLoadingDialog(BuildContext context, [String? message]) async {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
             message ?? 'Cargando...',
-            style: textTheme.bodyLarge?.copyWith(
+            style: textTheme.titleLarge?.copyWith(
               color: colorScheme.primary,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 18,
             ),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,

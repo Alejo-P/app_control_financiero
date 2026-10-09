@@ -563,10 +563,14 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
                           children: [
                             Text(
                               'Vista previa',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
                             ),
                           ],
                         ),

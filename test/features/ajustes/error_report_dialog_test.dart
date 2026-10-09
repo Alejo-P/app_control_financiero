@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:control_financiero/core/services/error_report_sender.dart';
 import 'package:control_financiero/features/ajustes/widgets/error_report_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -69,7 +70,7 @@ void main() {
       await tester.tap(find.text('Enviar reporte'));
       await tester.pump();
       expect(
-        tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+        tester.widget<CustomButton>(find.byType(CustomButton)).onTap,
         isNull,
       );
       expect(
@@ -132,7 +133,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      tester.widget<CustomButton>(find.byType(CustomButton)).onTap,
       isNotNull,
     );
   });

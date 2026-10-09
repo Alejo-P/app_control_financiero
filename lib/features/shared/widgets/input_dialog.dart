@@ -21,10 +21,17 @@ Future<String?> showEncryptionKeyInputDialog(
     context: context,
     barrierDismissible: false, // obliga a elegir
     builder: (context) {
+      final theme = Theme.of(context);
+      final textTheme = theme.textTheme;
+      final colorScheme = theme.colorScheme;
       return AlertDialog(
         title: Text(
           'Clave de encriptación',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: textTheme.titleLarge?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,

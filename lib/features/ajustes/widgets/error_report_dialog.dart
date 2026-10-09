@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:control_financiero/core/services/error_report_service.dart';
 import 'package:control_financiero/core/services/error_report_sender.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
 class ErrorReportDialog extends StatefulWidget {
@@ -59,64 +60,85 @@ class _ErrorReportDialogState extends State<ErrorReportDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => PopScope(
-    canPop: !_busy,
-    child: AlertDialog(
-      title: const Text('Enviar reporte de error'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Se adjuntarán registros recientes, la versión de la app y datos técnicos del dispositivo. No se adjuntarán tus movimientos ni respaldos.',
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _description,
-              enabled: !_busy,
-              onChanged: (_) {
-                _report = null;
-              },
-              maxLength: 2000,
-              minLines: 3,
-              maxLines: 5,
-              decoration: const InputDecoration(
-                labelText: '¿Qué ocurrió? (opcional)',
-                hintText: 'Describe los pasos para reproducir el error.',
-                helperText: 'Evita incluir datos personales o financieros.',
-                helperMaxLines: 2,
-              ),
-            ),
-            const Text(
-              'Se enviará al correo de soporte. Necesitas conexión a internet.',
-            ),
-            if (_busy)
-              const Padding(
-                padding: EdgeInsets.only(top: 12),
-                child: Text('Enviando reporte…'),
-              ),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(
-                  _error!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+    return PopScope(
+      canPop: !_busy,
+      child: AlertDialog(
+        title: Text(
+          'Enviar reporte de error',
+          style: textTheme.titleLarge?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Se adjuntarán registros recientes, la versión de la app y datos técnicos del dispositivo. No se adjuntarán tus movimientos ni respaldos.',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
-          ],
+              const SizedBox(height: 8),
+              TextField(
+                controller: _description,
+                enabled: !_busy,
+                onChanged: (_) {
+                  _report = null;
+                },
+                maxLength: 2000,
+                minLines: 1,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  labelText: '¿Qué ocurrió? (opcional)',
+                  hintText: 'Describe los pasos para reproducir el error.',
+                  helperText: 'Evita incluir datos personales o financieros.',
+                  helperMaxLines: 2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Se enviará al correo de soporte. Necesitas conexión a internet.',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (_busy)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text('Enviando reporte…'),
+                ),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    _error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: _busy ? null : () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          CustomButton(
+            onTap: _busy ? null : _send,
+            text: _busy ? 'Enviando…' : 'Enviar reporte',
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: _busy ? null : () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
-        FilledButton(
-          onPressed: _busy ? null : _send,
-          child: Text(_busy ? 'Enviando…' : 'Enviar reporte'),
-        ),
-      ],
-    ),
-  );
+    );
+  }
 }

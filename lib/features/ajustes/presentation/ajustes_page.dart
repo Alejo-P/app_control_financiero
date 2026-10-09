@@ -132,7 +132,14 @@ class _AjustesPageState extends State<AjustesPage> {
       await showDialog<void>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('No se puede abrir el respaldo'),
+          title: Text(
+            'No se puede abrir el respaldo',
+            style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+              color: Theme.of(dialogContext).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
           content: Text(validationError),
           actions: [
             TextButton(

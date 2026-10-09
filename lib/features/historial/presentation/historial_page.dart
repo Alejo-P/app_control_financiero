@@ -244,10 +244,10 @@ class _HistorialPageState extends State<HistorialPage> {
                   const SizedBox(height: 16),
                   Text(
                     "Seleccionar año",
-                    style: textTheme.headlineSmall?.copyWith(
+                    style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary,
-                      fontSize: 16,
+                      fontSize: 18,
                     ),
                   ),
                   Text(

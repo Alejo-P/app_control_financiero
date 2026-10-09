@@ -400,9 +400,17 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     await showDialog<void>(
       context: context,
       builder: (context) {
+        final theme = Theme.of(context);
+        final textTheme = theme.textTheme;
+        final colorScheme = theme.colorScheme;
         return AlertDialog(
           title: Text(
             'Ingreso presupuestado para ${formatMonthYear(fechaPresupuesto)}',
+            style: textTheme.titleLarge?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
           content: AmountInput(
             controller: _ingresoPresupuestadoController,

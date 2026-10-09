@@ -150,7 +150,14 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) => AlertDialog(
-            title: Text(move ? 'Mover presupuesto' : 'Copiar presupuesto'),
+            title: Text(
+              move ? 'Mover presupuesto' : 'Copiar presupuesto',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
             content: DropdownButtonFormField<DateTime>(
               initialValue: selected,
               isExpanded: true,
