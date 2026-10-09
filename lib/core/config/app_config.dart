@@ -1,6 +1,13 @@
 class AppConfig {
-  static const String flavor =
-      String.fromEnvironment('FLAVOR', defaultValue: 'prod');
+  static const String errorReportUrl = String.fromEnvironment(
+    'ERROR_REPORT_URL',
+    defaultValue:
+        'https://mi-presupuesto-reportes.mi-presupuesto-pinzon.workers.dev/reports',
+  );
+  static const String flavor = String.fromEnvironment(
+    'FLAVOR',
+    defaultValue: 'prod',
+  );
 
   static bool get isDev => flavor == 'dev';
   static bool get isProd => flavor == 'prod';

@@ -31,9 +31,11 @@ class BackupService {
     try {
       BackupCipher.validate(jsonDecode(await FileUtils.readFile(filePath)));
       return null;
-    } on FormatException catch (e) {
+    } on FormatException catch (e, stackTrace) {
+      AppLogger.reportError('Validar o descifrar respaldo', e, stackTrace);
       return e.message;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.reportError('Leer archivo de respaldo', error, stackTrace);
       return 'No se pudo leer el archivo de respaldo.';
     }
   }
@@ -95,8 +97,12 @@ class BackupService {
         data: null,
         message: 'Respaldo creado correctamente',
       );
-    } catch (e) {
-      await AppLogger.log('Error al crear respaldo: $e', level: LogLevel.error);
+    } catch (e, stackTrace) {
+      await AppLogger.log(
+        'Error al crear respaldo: ${e.runtimeType}',
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
       return OperationResult(
         success: false,
         data: null,
@@ -128,16 +134,18 @@ class BackupService {
         data: null,
         message: restoreResult.message,
       );
-    } on FormatException catch (e) {
+    } on FormatException catch (e, stackTrace) {
+      AppLogger.reportError('Validar o descifrar respaldo', e, stackTrace);
       return OperationResult<void>(
         success: false,
         data: null,
         message: e.message,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       await AppLogger.log(
-        'Error al restaurar datos: $e',
+        'Error al restaurar datos: ${e.runtimeType}',
         level: LogLevel.error,
+        stackTrace: stackTrace,
       );
       return OperationResult<void>(
         success: false,

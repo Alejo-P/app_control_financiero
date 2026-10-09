@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/features/notificaciones/models/notificacion.dart';
@@ -48,7 +49,12 @@ class _NotificationDetailState extends State<NotificationDetailPage> {
       setState(() {
         notif = isChanged ? result?.copyWith(isRead: true) : result;
       });
-    } on Exception catch (_) {
+    } on Exception catch (error, stackTrace) {
+      AppLogger.reportError(
+        'Cargar detalle de notificación',
+        error,
+        stackTrace,
+      );
       if (mounted) {
         AppSnackbar.error(
           context,

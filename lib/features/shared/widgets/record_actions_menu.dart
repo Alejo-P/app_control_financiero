@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -124,7 +125,8 @@ class _RecordActionsMenuState extends State<RecordActionsMenu> {
       } else {
         AppSnackbar.error(feedbackContext, result.message);
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.reportError('Copiar o mover registro', error, stackTrace);
       if (feedbackContext.mounted) {
         AppSnackbar.error(
           feedbackContext,

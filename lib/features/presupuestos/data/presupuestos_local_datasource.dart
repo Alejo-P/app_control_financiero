@@ -470,7 +470,7 @@ class PresupuestosLocalDataSource {
   Future<OperationResult<void>> updatePresupuesto(
     Presupuesto presupuesto,
   ) async {
-    await AppLogger.log('Actualizando presupuesto: $presupuesto');
+    await AppLogger.log('Actualizando presupuesto');
 
     final db = await _dbHelper.database;
     final existingPresupuesto = await fetchPresupuestoById(presupuesto.id!);

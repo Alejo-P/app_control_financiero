@@ -272,10 +272,11 @@ class MovimientosLocalDataSource {
           gastos += monto;
         }
       }
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
       await AppLogger.log(
-        'Error al calcular totales mensuales: $e',
+        'Error al calcular totales mensuales: ${e.runtimeType}',
         level: LogLevel.error,
+        stackTrace: stackTrace,
       );
     }
 

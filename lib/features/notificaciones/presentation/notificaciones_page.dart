@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/app_logger.dart';
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:control_financiero/app/app_snackbar.dart';
@@ -149,7 +150,12 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       }
 
       AppSnackbar.error(context, 'No se pudo eliminar la notificación');
-    } on Exception catch (_) {
+    } on Exception catch (error, stackTrace) {
+      AppLogger.reportError(
+        'Eliminar notificación desde lista',
+        error,
+        stackTrace,
+      );
       if (mounted) {
         AppSnackbar.error(
           context,
@@ -204,7 +210,12 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
           '$eliminadas de $count notificaciones eliminadas con éxito',
         );
       }
-    } on Exception catch (_) {
+    } on Exception catch (error, stackTrace) {
+      AppLogger.reportError(
+        'Eliminar notificaciones seleccionadas',
+        error,
+        stackTrace,
+      );
       if (mounted) {
         AppSnackbar.error(
           context,
@@ -333,7 +344,9 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
               tooltip: 'Cancelar selección',
             ),
 
-          if (unReadNotif > 0 && selectedNotifications.isNotEmpty && !(_isLoading || _isDeleting))
+          if (unReadNotif > 0 &&
+              selectedNotifications.isNotEmpty &&
+              !(_isLoading || _isDeleting))
             IconButton(
               icon: Icon(Icons.done_all),
               onPressed: _marcarSeleccionadasComoLeidas,

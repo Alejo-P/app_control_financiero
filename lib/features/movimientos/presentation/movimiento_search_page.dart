@@ -139,18 +139,13 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
         }
       });
     } catch (e, stackTrace) {
+      AppLogger.reportError('Buscar movimientos paginados', e, stackTrace);
       if (!mounted || requestId != _requestId) return;
       setState(() {
         _isLoading = false;
         _loadError =
             'No se pudieron cargar los movimientos. Intenta nuevamente.';
       });
-      await AppLogger.log(
-        'Error en búsqueda paginada: $e',
-        level: LogLevel.error,
-        tag: 'MovimientoSearchPage',
-        stackTrace: stackTrace,
-      );
     }
   }
 
@@ -168,12 +163,7 @@ class _MovimientoSearchPageState extends State<MovimientoSearchPage> {
 
       await _buscarMovimientos();
     } on Exception catch (e, stackTrace) {
-      await AppLogger.log(
-        'Error al obtener movimientos por categoría: ${e.toString()}',
-        level: LogLevel.error,
-        tag: 'MovimientoSearchPage',
-        stackTrace: stackTrace,
-      );
+      AppLogger.reportError('Seleccionar categoría de búsqueda', e, stackTrace);
 
       if (!mounted) return;
       AppSnackbar.error(

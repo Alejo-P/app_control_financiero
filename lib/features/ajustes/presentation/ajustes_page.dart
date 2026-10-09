@@ -12,6 +12,7 @@ import 'package:control_financiero/features/shared/widgets/dialogs.dart';
 import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:control_financiero/features/ajustes/widgets/error_report_dialog.dart';
 
 class AjustesPage extends StatefulWidget {
   const AjustesPage({super.key});
@@ -178,6 +179,9 @@ class _AjustesPageState extends State<AjustesPage> {
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
     final isDarkMode = appState.isDarkMode;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
@@ -329,6 +333,46 @@ class _AjustesPageState extends State<AjustesPage> {
                         ),
                       ),
                     ],
+                  ),
+                  Center(
+                    child: TextButton(
+                      onPressed: () async {
+                        final sent = await showDialog<bool>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => const ErrorReportDialog(),
+                        );
+                        if (sent == true && context.mounted) {
+                          AppSnackbar.success(
+                            context,
+                            'Reporte enviado para revisión.',
+                          );
+                        }
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 8,
+                        children: [
+                          Icon(
+                            Icons.bug_report_outlined,
+                            color: colorScheme.primary,
+                          ),
+                          Flexible(
+                            child: Text(
+                              'Notificar un error',
+                              textAlign: TextAlign.center,
+                              style: textTheme.displaySmall?.copyWith(
+                                color: colorScheme.primary,
+                                fontSize: 16,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

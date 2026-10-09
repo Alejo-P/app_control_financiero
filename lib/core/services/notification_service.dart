@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/services/reminder_schedule.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
 import 'package:flutter/services.dart';
@@ -249,7 +250,8 @@ class NotificationService {
 
     try {
       await schedule(AndroidScheduleMode.exactAllowWhileIdle);
-    } on PlatformException catch (exception) {
+    } on PlatformException catch (exception, stackTrace) {
+      AppLogger.reportError('Programar alarma exacta', exception, stackTrace);
       if (exception.code != 'exact_alarms_not_permitted') rethrow;
       await schedule(resolveScheduleMode(exception));
     }

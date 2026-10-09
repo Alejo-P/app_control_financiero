@@ -6,22 +6,46 @@ import 'package:control_financiero/app/app.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:io';
+import 'dart:async';
+import 'package:control_financiero/core/utils/app_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Hive.initFlutter();
-  await NotificationService.init();
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    unawaited(
+      AppLogger.recordError(
+        'Error de Flutter',
+        details.exception,
+        details.stack ?? StackTrace.current,
+      ),
+    );
+  };
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
+    unawaited(AppLogger.recordError('Error no controlado', error, stack));
+    return true;
+  };
 
-  final NotificationAppLaunchDetails? details;
-  tz_data.initializeTimeZones();
-  tz.setLocalLocation(tz.getLocation('America/Guayaquil'));
+  try {
+    await AppLogger.log('Inicio de la aplicación');
 
-  if (Platform.isAndroid || Platform.isIOS) {
-    details = await NotificationService.getLaunchDetails();
-  } else {
-    details = null;
+    await Hive.initFlutter();
+    await NotificationService.init();
+
+    final NotificationAppLaunchDetails? details;
+    tz_data.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('America/Guayaquil'));
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      details = await NotificationService.getLaunchDetails();
+    } else {
+      details = null;
+    }
+
+    runApp(App(notificationLaunchDetails: details));
+  } catch (error, stack) {
+    await AppLogger.recordError('Error al iniciar la aplicación', error, stack);
+    rethrow;
   }
-
-  runApp(App(notificationLaunchDetails: details));
 }

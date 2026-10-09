@@ -4,6 +4,7 @@ import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/constants/notificacion_constants.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
@@ -420,7 +421,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
             if (!eventoInsertado) notificacionesCompletadas = false;
           }
         }
-      } on Exception catch (_) {
+      } on Exception catch (error, stackTrace) {
+        AppLogger.reportError(
+          'Notificar movimiento guardado',
+          error,
+          stackTrace,
+        );
         notificacionesCompletadas = false;
       }
 
@@ -435,7 +441,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       }
 
       Navigator.pop(context, true);
-    } on Exception catch (_) {
+    } on Exception catch (e, stack) {
+      AppLogger.reportError('Error al guardar movimiento', e, stack);
       if (mounted) {
         AppSnackbar.error(
           context,
@@ -514,7 +521,12 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
           showNotification: showNotification,
         );
         if (!insertada) notificacionesCompletadas = false;
-      } on Exception catch (_) {
+      } on Exception catch (error, stackTrace) {
+        AppLogger.reportError(
+          'Notificar movimiento eliminado',
+          error,
+          stackTrace,
+        );
         notificacionesCompletadas = false;
       }
 
@@ -529,7 +541,8 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
       }
 
       Navigator.pop(context, true);
-    } on Exception catch (_) {
+    } on Exception catch (e, stack) {
+      AppLogger.reportError('Error al eliminar movimiento', e, stack);
       if (mounted) {
         AppSnackbar.error(
           context,

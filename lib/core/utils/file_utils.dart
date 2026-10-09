@@ -46,10 +46,11 @@ class FileUtils {
       await file.create(recursive: true);
       await file.writeAsString(content, mode: mode, flush: true);
       return true;
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
       await AppLogger.log(
-        'Error al escribir el archivo: $e',
+        'Error al escribir el archivo: ${e.runtimeType}',
         level: LogLevel.error,
+        stackTrace: stackTrace,
       );
       return false;
     }
@@ -65,10 +66,11 @@ class FileUtils {
       await file.create(recursive: true);
       await file.writeAsBytes(content, mode: mode, flush: true);
       return true;
-    } on Exception catch (e) {
+    } on Exception catch (e, stackTrace) {
       await AppLogger.log(
-        'Error al escribir el archivo: $e',
+        'Error al escribir el archivo: ${e.runtimeType}',
         level: LogLevel.error,
+        stackTrace: stackTrace,
       );
       return false;
     }

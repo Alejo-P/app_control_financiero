@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/backup_content.dart';
@@ -101,12 +102,13 @@ class BackupLocalDatasource {
         await _clearExistingData(tsx);
         await _restoreDataFromBackup(tsx, backupContent);
       });
-      
+
       return OperationResult(
         success: true,
         message: 'Datos restaurados correctamente desde el respaldo',
       );
-    } on Exception catch (_) {
+    } on Exception catch (error, stackTrace) {
+      AppLogger.reportError('Restaurar tablas del respaldo', error, stackTrace);
       return OperationResult(
         success: false,
         message: 'Error al restaurar datos desde el respaldo',

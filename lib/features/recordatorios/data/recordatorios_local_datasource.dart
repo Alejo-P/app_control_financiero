@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/core/models/operation_result.dart';
@@ -105,7 +106,8 @@ class RecordatoriosLocalDataSource {
         data: id,
         success: true,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.reportError('Crear recordatorio', e, stackTrace);
       return OperationResult<int?>(
         message: 'Error al insertar el recordatorio: $e',
         success: false,
@@ -129,7 +131,8 @@ class RecordatoriosLocalDataSource {
         data: count,
         success: true,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.reportError('Actualizar recordatorio', e, stackTrace);
       return OperationResult<int?>(
         message: 'Error al actualizar el recordatorio: $e',
         success: false,
@@ -154,7 +157,8 @@ class RecordatoriosLocalDataSource {
         data: count,
         success: true,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.reportError('Cambiar estado del recordatorio', e, stackTrace);
       return OperationResult<int?>(
         message: 'Error al actualizar el estado del recordatorio: $e',
         success: false,
@@ -175,7 +179,8 @@ class RecordatoriosLocalDataSource {
         data: rowsAffected,
         success: true,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.reportError('Eliminar recordatorio', e, stackTrace);
       return OperationResult<int?>(
         message: 'Error al eliminar el recordatorio: $e',
         success: false,

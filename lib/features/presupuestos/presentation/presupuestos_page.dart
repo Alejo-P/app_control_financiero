@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/tutorials/tutorial_host.dart';
 import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
@@ -333,45 +334,59 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
   }
 
   Future<void> _guardarIngresoPresupuesto() async {
-    // Lógica para guardar el ingreso presupuestado
-    final appState = context.read<AppState>();
-    final amountText = _ingresoPresupuestadoController.text.trim();
-    final fechaPresupuesto = appState.selectedBudgetMonth;
-    final totalGastos = appState.totalGastos ?? 0.0;
-    final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
-    if (value <= 0) {
-      AppSnackbar.error(
-        context,
-        'El ingreso presupuestado debe ser mayor a 0.',
+    try {
+      // Lógica para guardar el ingreso presupuestado
+      final appState = context.read<AppState>();
+      final amountText = _ingresoPresupuestadoController.text.trim();
+      final fechaPresupuesto = appState.selectedBudgetMonth;
+      final totalGastos = appState.totalGastos ?? 0.0;
+      final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
+      if (value <= 0) {
+        AppSnackbar.error(
+          context,
+          'El ingreso presupuestado debe ser mayor a 0.',
+        );
+        return;
+      }
+
+      if (value < totalGastos) {
+        AppSnackbar.error(
+          context,
+          'El ingreso presupuestado no puede ser menor al total de gastos (\$${totalGastos.toStringAsFixed(2)}).',
+        );
+        return;
+      }
+
+      final nuevoIngresoPresupuestado = IngresoPresupuestado(
+        monto: value,
+        fecha: fechaPresupuesto,
       );
-      return;
-    }
 
-    if (value < totalGastos) {
-      AppSnackbar.error(
-        context,
-        'El ingreso presupuestado no puede ser menor al total de gastos (\$${totalGastos.toStringAsFixed(2)}).',
+      await appState.setIngresoPresupuestado(nuevoIngresoPresupuestado);
+
+      if (!mounted) return;
+
+      if (!appState.transactionSuccess) {
+        AppSnackbar.error(context, appState.transactionResultMessage);
+        return;
+      }
+
+      AppSnackbar.success(context, appState.transactionResultMessage);
+
+      Navigator.pop(context, true);
+    } catch (error, stackTrace) {
+      AppLogger.reportError(
+        'presupuestos_page._guardarIngresoPresupuesto',
+        error,
+        stackTrace,
       );
-      return;
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'No se pudo completar la operación. Revisa los datos antes de reintentar.',
+        );
+      }
     }
-
-    final nuevoIngresoPresupuestado = IngresoPresupuestado(
-      monto: value,
-      fecha: fechaPresupuesto,
-    );
-
-    await appState.setIngresoPresupuestado(nuevoIngresoPresupuestado);
-
-    if (!mounted) return;
-
-    if (!appState.transactionSuccess) {
-      AppSnackbar.error(context, appState.transactionResultMessage);
-      return;
-    }
-
-    AppSnackbar.success(context, appState.transactionResultMessage);
-
-    Navigator.pop(context, true);
   }
 
   Future<void> _mostrarModalIngresoPresupuestado() async {

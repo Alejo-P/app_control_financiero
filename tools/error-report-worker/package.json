@@ -1,0 +1,11 @@
+{
+  "name": "mi-presupuesto-error-reports",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": { "wrangler": "^4.0.0" }
+}

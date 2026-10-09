@@ -83,8 +83,12 @@ class ExcelExporter {
         success: true,
         message: "Archivo creado correctamente",
       );
-    } catch (e) {
-      await AppLogger.log("Error al guardar Excel: $e", level: LogLevel.error);
+    } catch (e, stackTrace) {
+      await AppLogger.log(
+        "Error al guardar Excel: ${e.runtimeType}",
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
 
       return OperationResult<void>(
         success: false,

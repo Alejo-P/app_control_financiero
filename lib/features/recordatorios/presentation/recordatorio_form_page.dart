@@ -308,19 +308,17 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       AppSnackbar.success(context, 'Recordatorio guardado exitosamente');
       Navigator.pop(context);
     } catch (e, stackTrace) {
+      AppLogger.reportError(
+        'Guardar recordatorio desde formulario',
+        e,
+        stackTrace,
+      );
       if (!mounted) return;
 
       setState(() {
         _isLoading = false;
         _action = '';
       });
-
-      await AppLogger.log(
-        'Error al guardar recordatorio: ${e.toString()}',
-        level: LogLevel.error,
-        tag: 'RecordatorioFormPage',
-        stackTrace: stackTrace,
-      );
 
       AppSnackbar.error(
         context,
@@ -344,14 +342,12 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
       _checkEnableSaveButton();
     } on Exception catch (e, stackTrace) {
-      if (!mounted) return;
-
-      await AppLogger.log(
-        'Error al obtener categorías: ${e.toString()}',
-        level: LogLevel.error,
-        tag: 'RecordatorioFormPage',
-        stackTrace: stackTrace,
+      AppLogger.reportError(
+        'Seleccionar categoría de recordatorio',
+        e,
+        stackTrace,
       );
+      if (!mounted) return;
 
       AppSnackbar.error(
         context,

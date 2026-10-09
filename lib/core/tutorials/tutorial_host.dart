@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'dart:async';
 
 import 'package:control_financiero/app/app_state.dart';
@@ -93,9 +94,13 @@ class _TutorialHostState extends State<TutorialHost>
       if (_disposed) return;
       _progress = TutorialProgress(box);
       _schedule();
-    } catch (error) {
+    } catch (error, stackTrace) {
+      AppLogger.reportError(
+        'Cargar preferencias de tutoriales',
+        error,
+        stackTrace,
+      );
       // Financial features stay usable if local preferences cannot be read.
-      debugPrint('No se pudieron cargar los tutoriales: $error');
     }
   }
 
@@ -211,8 +216,8 @@ class _TutorialHostState extends State<TutorialHost>
     _activeTargets = [];
     try {
       await _progress?.finish(group, skipped: skipped);
-    } catch (error) {
-      debugPrint('No se pudo guardar el progreso del tutorial: $error');
+    } catch (error, stackTrace) {
+      AppLogger.reportError('Guardar progreso de tutorial', error, stackTrace);
     } finally {
       _saving = false;
       _schedule();

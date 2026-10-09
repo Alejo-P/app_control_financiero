@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/categoria_constants.dart';
@@ -76,40 +77,52 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   }
 
   Future<void> _load(int id) async {
-    final appState = context.read<AppState>();
+    try {
+      final appState = context.read<AppState>();
 
-    setState(() {
-      _isLoading = true;
-      _action = "Cargando";
-    });
+      setState(() {
+        _isLoading = true;
+        _action = "Cargando";
+      });
 
-    final result = await appState.obtenerDetalleCategoriaPorId(id);
-    if (result != null) {
-      _categoryNameController.text = result.name;
-      _descriptionController.text = result.description;
-      selectedIcon = result.icon ?? categoryIcons.first;
-      selectedColor = result.color ?? colors.first;
-      movementsByCategory = result.totalMovements ?? 0;
-      categoryTypeName = result.categoryTypeName;
-      categoryTypeID = result.categoryTypeID;
-      selectedTipeMovement = result.movementType == TipoMovimiento.ingreso
-          ? 'ingreso'
-          : 'gasto';
-      isDefault = result.isDefault;
+      final result = await appState.obtenerDetalleCategoriaPorId(id);
+      if (result != null) {
+        _categoryNameController.text = result.name;
+        _descriptionController.text = result.description;
+        selectedIcon = result.icon ?? categoryIcons.first;
+        selectedColor = result.color ?? colors.first;
+        movementsByCategory = result.totalMovements ?? 0;
+        categoryTypeName = result.categoryTypeName;
+        categoryTypeID = result.categoryTypeID;
+        selectedTipeMovement = result.movementType == TipoMovimiento.ingreso
+            ? 'ingreso'
+            : 'gasto';
+        isDefault = result.isDefault;
+      }
+      if (!mounted) return;
+
+      setState(() {
+        detalleCategoria = result;
+        _isLoading = false;
+
+        modo = result != null && id != -1
+            ? CategoriaFormMode.edit
+            : CategoriaFormMode.create;
+
+        isEditing = modo == CategoriaFormMode.edit;
+      });
+      _checkEnableSaveButton();
+    } catch (error, stackTrace) {
+      AppLogger.reportError('categoria_form_page._load', error, stackTrace);
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'No se pudo completar la operación. Revisa los datos antes de reintentar.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
-    if (!mounted) return;
-
-    setState(() {
-      detalleCategoria = result;
-      _isLoading = false;
-
-      modo = result != null && id != -1
-          ? CategoriaFormMode.edit
-          : CategoriaFormMode.create;
-
-      isEditing = modo == CategoriaFormMode.edit;
-    });
-    _checkEnableSaveButton();
   }
 
   @override
@@ -138,77 +151,93 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
   }
 
   Future<void> _guardarCategoria() async {
-    final appState = context.read<AppState>();
-    final nombre = _categoryNameController.text.trim();
-    final descripcion = _descriptionController.text.trim();
+    try {
+      final appState = context.read<AppState>();
+      final nombre = _categoryNameController.text.trim();
+      final descripcion = _descriptionController.text.trim();
 
-    if (nombre.isEmpty) {
-      AppSnackbar.error(
+      if (nombre.isEmpty) {
+        AppSnackbar.error(
+          context,
+          'El nombre de la categoría no puede estar vacío.',
+        );
+        return;
+      }
+
+      if (categoryTypeID == -1) {
+        AppSnackbar.warning(
+          context,
+          'Por favor, selecciona un tipo de categoría.',
+        );
+        return;
+      }
+
+      final confirmed = await showConfirmAddDialog(
         context,
-        'El nombre de la categoría no puede estar vacío.',
+        titleModal: 'Confirmar guardar categoría',
+        content: [
+          Text('Nombre: ${capitalize(nombre)}'),
+          if (descripcion.isNotEmpty) Text('Descripción: $descripcion'),
+          Text('Tipo de categoría: $categoryTypeName'),
+          Text(
+            'Tipo de movimiento: ${selectedTipeMovement == 'gasto' ? 'Gasto' : 'Ingreso'}',
+          ),
+        ],
       );
-      return;
-    }
+      if (confirmed != true || !mounted) return;
 
-    if (categoryTypeID == -1) {
-      AppSnackbar.warning(
-        context,
-        'Por favor, selecciona un tipo de categoría.',
+      setState(() {
+        _action = "Guardando";
+        _isLoading = true;
+      });
+
+      final categoria = Categoria(
+        id: modo == CategoriaFormMode.edit && detalleCategoria != null
+            ? detalleCategoria!.id
+            : null,
+        name: nombre,
+        description: descripcion,
+        categoryTypeID: categoryTypeID,
+        iconName: IconMapper.toName(selectedIcon),
+        iconColorValue: selectedColor.value,
+        movementType: tipoMovimientoSeleccionado,
+        isDefault: isDefault,
       );
-      return;
+
+      if (modo == CategoriaFormMode.edit && detalleCategoria != null) {
+        await appState.actualizarCategoria(categoria);
+      } else {
+        await appState.agregarCategoria(categoria);
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (!appState.transactionSuccess) {
+        AppSnackbar.error(context, appState.transactionResultMessage);
+        return;
+      }
+
+      AppSnackbar.success(context, appState.transactionResultMessage);
+
+      Navigator.pop(context, true);
+    } catch (error, stackTrace) {
+      AppLogger.reportError(
+        'categoria_form_page._guardarCategoria',
+        error,
+        stackTrace,
+      );
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'No se pudo completar la operación. Revisa los datos antes de reintentar.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
-
-    final confirmed = await showConfirmAddDialog(
-      context,
-      titleModal: 'Confirmar guardar categoría',
-      content: [
-        Text('Nombre: ${capitalize(nombre)}'),
-        if (descripcion.isNotEmpty) Text('Descripción: $descripcion'),
-        Text('Tipo de categoría: $categoryTypeName'),
-        Text(
-          'Tipo de movimiento: ${selectedTipeMovement == 'gasto' ? 'Gasto' : 'Ingreso'}',
-        ),
-      ],
-    );
-    if (confirmed != true || !mounted) return;
-
-    setState(() {
-      _action = "Guardando";
-      _isLoading = true;
-    });
-
-    final categoria = Categoria(
-      id: modo == CategoriaFormMode.edit && detalleCategoria != null
-          ? detalleCategoria!.id
-          : null,
-      name: nombre,
-      description: descripcion,
-      categoryTypeID: categoryTypeID,
-      iconName: IconMapper.toName(selectedIcon),
-      iconColorValue: selectedColor.value,
-      movementType: tipoMovimientoSeleccionado,
-      isDefault: isDefault,
-    );
-
-    if (modo == CategoriaFormMode.edit && detalleCategoria != null) {
-      await appState.actualizarCategoria(categoria);
-    } else {
-      await appState.agregarCategoria(categoria);
-    }
-
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (!appState.transactionSuccess) {
-      AppSnackbar.error(context, appState.transactionResultMessage);
-      return;
-    }
-
-    AppSnackbar.success(context, appState.transactionResultMessage);
-
-    Navigator.pop(context, true);
   }
 
   Future<void> _eliminarCategoria() async {
@@ -226,7 +255,12 @@ class _CategoriaFormPageState extends State<CategoriaFormPage> {
 
     try {
       await appState.eliminarCategoria(detalleCategoria!.id!);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.reportError(
+        'Eliminar categoría desde formulario',
+        error,
+        stackTrace,
+      );
       if (mounted) {
         AppSnackbar.error(
           context,
