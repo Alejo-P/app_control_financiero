@@ -32,6 +32,7 @@ import 'package:control_financiero/core/constants/app_strings.dart';
 import 'package:control_financiero/core/theme/app_theme.dart';
 import 'app_state.dart';
 import 'app_scaffold.dart';
+import 'package:control_financiero/core/tutorials/tutorial_host.dart';
 
 class App extends StatefulWidget {
   final NotificationAppLaunchDetails? notificationLaunchDetails;
@@ -109,14 +110,12 @@ class _AppState extends State<App> {
         builder: (context, appState, _) {
           return MaterialApp(
             navigatorKey: navigatorKey,
+            navigatorObservers: [tutorialRouteObserver],
             debugShowCheckedModeBanner: false,
             title: appName,
             theme: appState.isDarkMode ? AppTheme.dark : AppTheme.light,
             locale: const Locale('es', 'EC'),
-            supportedLocales: const [
-              Locale('es', 'EC'),
-              Locale('es'),
-            ],
+            supportedLocales: const [Locale('es', 'EC'), Locale('es')],
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
@@ -144,7 +143,7 @@ class _AppState extends State<App> {
 
             home: appState.loadingInitialData
                 ? const SplashScreen()
-                : const AppScaffold(),
+                : const TutorialHost(child: AppScaffold()),
           );
         },
       ),

@@ -1,3 +1,5 @@
+import 'package:control_financiero/core/tutorials/tutorial_host.dart';
+import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -21,17 +23,23 @@ class _HistorialPageState extends State<HistorialPage> {
   List<ExpansionTileController> controllers = [];
   final ScrollController scrollController = ScrollController();
   List<GlobalKey> itemKeys = [];
+  int? _controlsYear;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     _appState = context.read<AppState>();
+    final year = _appState.selectedHistoryMonth.year;
+    if (_controlsYear == year) return;
+    _controlsYear = year;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _appState.currentTab != 2) return;
       _appState.setAppBarActions([
         AppBarAction(
           onPressed: () => showYearSelector(context),
+          tutorialStep: TutorialStep.historyYear,
           label: _appState.selectedHistoryMonth.year.toString(),
           icon: Icons.filter_list,
         ),
@@ -155,7 +163,7 @@ class _HistorialPageState extends State<HistorialPage> {
                           appState.selectedMovementsMonth,
                         );
 
-                        return Container(
+                        final card = Container(
                           key: itemKeys[index],
                           child: MonthAccordionCard(
                             controller: controllers[index],
@@ -178,12 +186,21 @@ class _HistorialPageState extends State<HistorialPage> {
                             ),
                           ),
                         );
+                        return index == (expandedIndex ?? 0)
+                            ? TutorialTarget(
+                                step: TutorialStep.historyMonth,
+                                child: card,
+                              )
+                            : card;
                       }),
                     ],
                   ),
           ),
           if (!isLoading && history.isNotEmpty)
-            _YearBalanceCard(balance: yearBalance),
+            TutorialTarget(
+              step: TutorialStep.historyBalance,
+              child: _YearBalanceCard(balance: yearBalance),
+            ),
         ],
       ),
     );

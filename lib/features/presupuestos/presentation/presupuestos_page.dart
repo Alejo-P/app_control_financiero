@@ -1,3 +1,5 @@
+import 'package:control_financiero/core/tutorials/tutorial_host.dart';
+import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
@@ -31,6 +33,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
   final ScrollController _controller = ScrollController();
   final _ingresoPresupuestadoController = TextEditingController();
   bool _isSaveButtonEnabled = false;
+  (DateTime, double?)? _controlsSignature;
 
   @override
   void initState() {
@@ -52,11 +55,19 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     super.didChangeDependencies();
 
     _appState = context.read<AppState>();
+    final signature = (
+      _appState.selectedBudgetMonth,
+      _appState.ingresoPresupuestado?.monto,
+    );
+    if (_controlsSignature == signature) return;
+    _controlsSignature = signature;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _appState.currentTab != 1) return;
       _appState.setAppBarActions([
         AppBarAction(
           iconWidget: const WalletEditIcon(),
+          tutorialStep: TutorialStep.budgetIncome,
           tooltip: 'Editar ingreso presupuestado',
           onPressed: () async {
             await _mostrarModalIngresoPresupuestado();
@@ -170,13 +181,16 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          MonthSelection(
-            initialDate: selectedMonth,
-            isLoading: isLoading,
-            allowFutureMonths: true,
-            onMonthChanged: (newMonth) async {
-              await _changeMonth(newMonth);
-            },
+          TutorialTarget(
+            step: TutorialStep.budgetMonth,
+            child: MonthSelection(
+              initialDate: selectedMonth,
+              isLoading: isLoading,
+              allowFutureMonths: true,
+              onMonthChanged: (newMonth) async {
+                await _changeMonth(newMonth);
+              },
+            ),
           ),
           const SizedBox(height: 6),
           Expanded(
@@ -193,19 +207,24 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                       children: [
                         SizedBox(
                           height: 215,
-                          child: SummaryCard(
-                            title: 'Resumen de Presupuesto',
-                            icon: Icons.calendar_month,
-                            backgroundColor: Colors.teal,
-                            content: TotalBudgetSummaryCard(
-                              totalBudget: ingresoPresupuestado?.monto ?? 0.0,
-                              spentAmount: totalGastos,
+                          child: TutorialTarget(
+                            step: TutorialStep.budgetSummary,
+                            child: SummaryCard(
+                              title: 'Resumen de Presupuesto',
+                              icon: Icons.calendar_month,
+                              backgroundColor: Colors.teal,
+                              content: TotalBudgetSummaryCard(
+                                totalBudget: ingresoPresupuestado?.monto ?? 0.0,
+                                spentAmount: totalGastos,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 8),
                         ...presupuestosDefinidos.map((budgetDetails) {
-                          return GestureDetector(
+                          final first =
+                              budgetDetails == presupuestosDefinidos.first;
+                          final card = GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(
                                 context,
@@ -223,6 +242,9 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                                 id: budgetDetails.budgetId!,
                                 date: budgetDetails.date,
                                 presupuesto: budgetDetails,
+                                tutorialStep: first
+                                    ? TutorialStep.budgetMenu
+                                    : null,
                               ),
                               icon: budgetDetails.icon,
                               title: budgetDetails.title,
@@ -234,6 +256,12 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                               isOverBudget: budgetDetails.isOverBudget,
                             ),
                           );
+                          return first
+                              ? TutorialTarget(
+                                  step: TutorialStep.budgetCard,
+                                  child: card,
+                                )
+                              : card;
                         }),
                         if (presupuestosSinDefinir.isNotEmpty) ...[
                           const SizedBox(height: 8),

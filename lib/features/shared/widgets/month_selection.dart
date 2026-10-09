@@ -155,49 +155,43 @@ class _MonthSelectionState extends State<MonthSelection> {
                     : Colors.blueAccent,
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  monthYearLabel,
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontSize: 16,
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    monthYearLabel,
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontSize: 16,
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 8,
-                  children: [
-                    InkWell(
-                      onTap: (isCurrent || widget.isLoading)
-                          ? null
-                          : returnToday,
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Ir a mes actual',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: (isCurrent || widget.isLoading)
-                                ? colorScheme.onSurface
-                                : Colors.blueAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                  InkWell(
+                    onTap: (isCurrent || widget.isLoading) ? null : returnToday,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Ir a mes actual',
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: (isCurrent || widget.isLoading)
+                              ? colorScheme.onSurface
+                              : Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
             IconButton(
               onPressed: (widget.isLoading || isFuture)

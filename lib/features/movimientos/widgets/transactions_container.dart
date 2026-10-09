@@ -1,3 +1,4 @@
+import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -10,6 +11,7 @@ import 'package:control_financiero/features/shared/widgets/record_actions_menu.d
 
 class TransactionsContainer extends StatelessWidget {
   final DateTime date;
+  final int? tutorialMovementId;
   final List<DetalleMovimiento> movimientos;
   final Future<void> Function()? onMovementChanged;
 
@@ -18,6 +20,7 @@ class TransactionsContainer extends StatelessWidget {
     required this.date,
     required this.movimientos,
     this.onMovementChanged,
+    this.tutorialMovementId,
   });
 
   bool isCurrentMonth(DateTime date) {
@@ -48,7 +51,13 @@ class TransactionsContainer extends StatelessWidget {
       showDivider: false,
       children: movimientos.map((movimiento) {
         return TransactionDetailCard(
-          actions: RecordActionsMenu(id: movimiento.id!, date: movimiento.date),
+          actions: RecordActionsMenu(
+            id: movimiento.id!,
+            date: movimiento.date,
+            tutorialStep: movimiento.id == tutorialMovementId
+                ? TutorialStep.movementMenu
+                : null,
+          ),
           title: movimiento.title,
           category: movimiento.categoryName!,
           type: movimiento.movementType.name,
