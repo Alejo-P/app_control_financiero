@@ -7,6 +7,7 @@ import 'package:control_financiero/core/constants/notificacion_constants.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/icon_mapper.dart';
+import 'package:control_financiero/core/utils/time_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
@@ -358,7 +359,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
             'Monto': movimiento.amount,
             'Nota': movimiento.note.isNotEmpty ? movimiento.note : '(Sin nota)',
             'Fecha creacion': formatDate(movimiento.date),
-            'Hora creacion': movimiento.time.format(context),
+            'Hora creacion': formatDeviceTime(context, movimiento.time),
           },
         );
 
@@ -503,7 +504,7 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                 ? formatDate(detalleMovimiento!.date)
                 : '',
             'Hora creacion': detalleMovimiento != null
-                ? detalleMovimiento!.time!.format(context)
+                ? formatDeviceTime(context, detalleMovimiento!.time!)
                 : '',
           },
         );

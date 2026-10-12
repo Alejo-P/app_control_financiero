@@ -12,6 +12,7 @@ void main() {
   final calls = <MethodCall>[];
   var denied = false;
   var exactDenied = false;
+  var exactAccess = false;
   String? scheduleError;
   var pending = <Map<String, Object?>>[];
   setUp(() {
@@ -20,12 +21,17 @@ void main() {
     calls.clear();
     denied = false;
     exactDenied = false;
+    exactAccess = false;
     scheduleError = null;
     pending = [];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
           calls.add(call);
           if (call.method == 'initialize') return true;
+          if (call.method == 'canScheduleExactNotifications') {
+            return exactAccess;
+          }
+          if (call.method == 'requestExactAlarmsPermission') return !denied;
           if (call.method == 'requestNotificationsPermission') return !denied;
           if (call.method == 'pendingNotificationRequests') return pending;
           if (call.method == 'zonedSchedule' && scheduleError != null) {
@@ -55,6 +61,30 @@ void main() {
       ]);
     },
   );
+
+  test('no solicita acceso exacto cuando ya está concedido', () async {
+    exactAccess = true;
+    expect(await NotificationService.requestExactAlarmAccess(), isTrue);
+    expect(calls.map((c) => c.method), ['canScheduleExactNotifications']);
+  });
+
+  test('solicita acceso exacto y respeta concesión o denegación', () async {
+    expect(await NotificationService.requestExactAlarmAccess(), isTrue);
+    denied = true;
+    expect(await NotificationService.requestExactAlarmAccess(), isFalse);
+    expect(calls.map((c) => c.method), [
+      'canScheduleExactNotifications',
+      'requestExactAlarmsPermission',
+      'canScheduleExactNotifications',
+      'requestExactAlarmsPermission',
+    ]);
+  });
+
+  test('no solicita acceso Android en iOS', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    expect(await NotificationService.requestExactAlarmAccess(), isTrue);
+    expect(calls, isEmpty);
+  });
 
   test('notificación general conserva la solicitud al reintentar', () async {
     exactDenied = true;

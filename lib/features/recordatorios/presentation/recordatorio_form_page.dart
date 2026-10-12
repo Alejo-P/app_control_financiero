@@ -1,6 +1,7 @@
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/recordatorio_constants.dart';
+import 'package:control_financiero/core/services/notification_service.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/time_utils.dart';
@@ -206,8 +207,10 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       initialTime: TimeOfDay.fromDateTime(fechaRecordatorio),
       helpText: 'Selecciona la hora del recordatorio',
       builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+        return Localizations.override(
+          context: context,
+          // Spanish with a 12-hour default; MediaQuery can request 24 hours.
+          locale: const Locale('es', 'US'),
           child: child!,
         );
       },
@@ -248,6 +251,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
   }
 
   Future<void> _saveRecordatorio() async {
+    if (_isLoading) return;
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -292,6 +296,10 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     );
 
     try {
+      final exactAccess =
+          !recordatorio.enabled ||
+          await NotificationService.requestExactAlarmAccess();
+      if (!mounted) return;
       final isUpdateRecordatorio = formMode == RecordatorioFormMode.edit;
       if (isUpdateRecordatorio) {
         await appState.actualizarRecordatorio(recordatorio);
@@ -305,7 +313,14 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
         _action = '';
       });
 
-      AppSnackbar.success(context, 'Recordatorio guardado exitosamente');
+      if (exactAccess) {
+        AppSnackbar.success(context, 'Recordatorio guardado exitosamente');
+      } else {
+        AppSnackbar.warning(
+          context,
+          'Recordatorio guardado. Sin permiso para alarmas exactas, puede llegar con retraso.',
+        );
+      }
       Navigator.pop(context);
     } catch (e, stackTrace) {
       AppLogger.reportError(

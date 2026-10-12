@@ -1,4 +1,5 @@
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/core/utils/time_utils.dart';
 import 'package:control_financiero/features/shared/widgets/icon_container.dart';
 import 'package:flutter/material.dart';
 
@@ -83,7 +84,7 @@ class TransactionDetailCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  time.format(context),
+                  formatDeviceTime(context, time),
                   textAlign: TextAlign.right,
                   style: textTheme.labelSmall!.copyWith(
                     color: colorScheme.onSurface,

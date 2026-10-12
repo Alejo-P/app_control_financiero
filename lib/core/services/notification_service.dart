@@ -57,6 +57,27 @@ class NotificationService {
         ?.requestNotificationsPermission();
   }
 
+  static Future<bool> requestExactAlarmAccess() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return true;
+    final android = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android == null) return false;
+    if (await android.canScheduleExactNotifications() == true) return true;
+    return await android.requestExactAlarmsPermission() == true;
+  }
+
+  static Future<bool> getExactAlarmAccess() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return true;
+    final android = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android == null) return false;
+    return await android.canScheduleExactNotifications() == true;
+  }
+
   static Future<void> showNotification({
     required String title,
     required String body,

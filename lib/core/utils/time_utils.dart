@@ -6,8 +6,18 @@ String formatRelativeTime(DateTime date) {
 }
 
 String formatTimeFromDateTime(BuildContext context, DateTime dateTime) {
-  final formated = TimeOfDay.fromDateTime(dateTime);
-  return formated.format(context);
+  return formatDeviceTime(context, TimeOfDay.fromDateTime(dateTime));
+}
+
+String formatDeviceTime(BuildContext context, TimeOfDay time) {
+  final use24Hours = MediaQuery.alwaysUse24HourFormatOf(context);
+  final minutes = time.minute.toString().padLeft(2, '0');
+  if (use24Hours) {
+    return '${time.hour.toString().padLeft(2, '0')}:$minutes';
+  }
+  final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+  final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+  return '$hour:$minutes $period';
 }
 
 TimeOfDay getTimeFromDateTime(DateTime dateTime) {

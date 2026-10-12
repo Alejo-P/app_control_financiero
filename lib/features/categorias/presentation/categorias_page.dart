@@ -2,6 +2,7 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/features/categorias/models/categoria_form_args.dart';
 import 'package:control_financiero/features/categorias/widgets/category_container.dart';
+import 'package:control_financiero/features/shared/widgets/info_widget.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -31,7 +32,8 @@ class _CategoriasPageState extends State<CategoriasPage> {
   }
 
   void _onScroll() {
-    final shouldShow = _controller.offset <= 0 ||
+    final shouldShow =
+        _controller.offset <= 0 ||
         _controller.position.userScrollDirection == ScrollDirection.forward;
 
     if (_showFAB != shouldShow) {
@@ -50,9 +52,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
     final int cantidadCategorias = appState.getTotalCategoriasCount();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categorías'),
-      ),
+      appBar: AppBar(title: const Text('Categorías')),
       floatingActionButton: AnimatedOpacity(
         opacity: _showFAB ? 1 : 0,
         duration: const Duration(milliseconds: 250),
@@ -79,26 +79,10 @@ class _CategoriasPageState extends State<CategoriasPage> {
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: Column(
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  Icon(Icons.lock, color: colorScheme.onSurface.withOpacity(0.6)),
-                  Expanded(
-                    child: Text(
-                      'Las categorías con este ícono no se pueden eliminar ni modificar.',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.primary.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: loadingInitialData ? false : true,
-                      maxLines: 2,
-                    ),
-                  ),
-                ],
+              InfoWidget(
+                icon: Icons.lock_outline_rounded,
+                loadingInitialData: loadingInitialData,
+                message: 'Las categorías con este ícono no se pueden eliminar ni modificar.',
               ),
               const SizedBox(height: 8),
               Expanded(
