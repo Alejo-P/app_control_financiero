@@ -250,6 +250,12 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     return !time.isBefore(currentTime);
   }
 
+  Future<bool> checkExactAlarmAccess() async {
+    if (detalleRecordatorio?.isEnabled == false) return true;
+    if (!fechaRecordatorio.isAfter(currentDateTime)) return true;
+    return await NotificationService.getExactAlarmAccess();
+  }
+
   Future<void> _saveRecordatorio() async {
     if (_isLoading) return;
     if (!_formKey.currentState!.validate()) {
@@ -277,6 +283,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       return;
     }
 
+    if (!mounted) return;
     final appState = context.read<AppState>();
 
     setState(() {
@@ -296,9 +303,21 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     );
 
     try {
-      final exactAccess =
-          !recordatorio.enabled ||
-          await NotificationService.requestExactAlarmAccess();
+      var exactAccess = await checkExactAlarmAccess();
+      if (!exactAccess && mounted) {
+        final confirm = await showConfirmDialog(
+          context,
+          title: 'Permiso de alarmas exactas',
+          content:
+              '¿Desea otorgar permiso para alarmas exactas? Sin este permiso, el recordatorio puede llegar con retraso.',
+          confirmText: 'Ir a configuración',
+          cancelText: 'Continuar sin permiso',
+        );
+
+        if (confirm == true) {
+          exactAccess = await NotificationService.requestExactAlarmAccess();
+        }
+      }
       if (!mounted) return;
       final isUpdateRecordatorio = formMode == RecordatorioFormMode.edit;
       if (isUpdateRecordatorio) {

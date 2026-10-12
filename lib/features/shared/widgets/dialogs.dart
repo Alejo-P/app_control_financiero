@@ -50,6 +50,8 @@ Future<bool?> showConfirmDialog(
   BuildContext context, {
   required String title,
   required String content,
+  String confirmText = 'Confirmar',
+  String cancelText = 'Cancelar',
 }) {
   final theme = Theme.of(context);
   final textTheme = theme.textTheme;
@@ -73,11 +75,11 @@ Future<bool?> showConfirmDialog(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(cancelText),
           ),
           CustomButton(
             onTap: () => Navigator.pop(context, true),
-            text: 'Confirmar',
+            text: confirmText,
           ),
         ],
       );
