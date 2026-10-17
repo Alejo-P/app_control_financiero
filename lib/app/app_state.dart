@@ -1576,20 +1576,15 @@ class AppState extends ChangeNotifier {
       id,
     );
 
-    if (result == null || !result.isEnabled) return result;
+    if (result == null) return result;
     final now = currentDateTime;
     if (result.scheduledAt.isAfter(now)) return result;
     final recurrence = Recurrencia.values.firstWhere(
       (value) => value.name == result.recurrency,
       orElse: () => Recurrencia.ninguno,
     );
-    if (recurrence == Recurrencia.ninguno) {
-      return result.copyWith(isEnabled: false);
-    }
-    var next = result.scheduledAt;
-    while (!next.isAfter(now)) {
-      next = calculateNextOccurrence(next, recurrence);
-    }
+    final next = resolveReminderDate(result.scheduledAt, recurrence, now);
+    if (next == null) return result;
     return result.copyWith(scheduledAt: next);
   }
 
