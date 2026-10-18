@@ -41,6 +41,26 @@ flutter build apk --release --flavor prod --dart-define=FLAVOR=prod
 
 Typical output: `build/app/outputs/flutter-apk/app-prod-release.apk`. Gradle takes `versionName` and `versionCode` from the Flutter version. Release uses a dedicated PKCS12 keystore with alias `mi-presupuesto`, configured through `RELEASE_KEYSTORE_PATH` / `RELEASE_KEYSTORE_PASSWORD` or ignored `android/key.properties` (`storeFile`, `storePassword`). It does not fall back to debug signing. See README.md for Actions secrets and certificate verification. Debug-signed installations require a backup and reinstall when switching to this key.
 
+### Publishing a new version
+
+The release workflow is `.github/workflows/android-release.yml`. Pushing a new `v*` tag triggers it; a push to `main` alone does not. Do not move or reuse published tags.
+
+1. Update both version sources: `pubspec.yaml` (for example, `1.1.3+17`) and `lib/core/constants/app_strings.dart` (`1.1.3`). Always increase the build number after `+`. Preserve the release keystore, Actions secrets, and certificate variable for update compatibility.
+2. Verify, commit, and push or merge changes into `main`. The tagged commit must be in the history of `main`.
+3. Create and push a new annotated tag matching the version before `+`, from the intended release commit:
+
+   ```powershell
+   git switch main
+   git pull --ff-only origin main
+   git tag -a v1.1.3 -m "Release 1.1.3"
+   git push origin v1.1.3
+   ```
+
+4. Check that `Android Release APK` completes analysis, tests, certificate validation, APK build, signature verification, and draft release creation with the APK attached.
+5. Test the draft APK as an update over an installation signed with the same release key, without uninstalling. Verify the version, affected features, and preserved data. Then publish the draft through **Publish release**; leave prerelease disabled for a stable release.
+
+These versions are examples, not values to reuse for every release. To rebuild an existing tag using a workflow fix, use **Run workflow** on `main` with the existing tag input: the workflow comes from `main`, while application code is checked out from the tag. **Re-run jobs** uses the original workflow revision. The current `gh release create` step does not replace an existing release; inspect that case before rebuilding. Do not change signing keys, publish releases, or move tags without authorization.
+
 ### Verification
 
 ```powershell

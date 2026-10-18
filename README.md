@@ -106,6 +106,26 @@ Obtén la huella pública con `keytool -list -v -keystore "$env:USERPROFILE\.and
 
 El cambio desde las versiones firmadas con debug requiere respaldar los datos, desinstalar, instalar el primer APK con la nueva firma y restaurar el respaldo. Después, conserva esta misma clave para permitir actualizaciones normales.
 
+### Publicar una nueva versión
+
+El workflow `.github/workflows/android-release.yml` se ejecuta al subir un tag `v*`. Subir cambios a `main` por sí solo no inicia una publicación. Para cada versión, crea un tag nuevo; conserva los tags publicados sin moverlos ni reutilizarlos.
+
+1. Actualiza `pubspec.yaml` y `lib/core/constants/app_strings.dart`. Por ejemplo: `version: 1.1.3+17` y `appVersion = '1.1.3'`. Aumenta siempre el número después de `+` y conserva la misma clave de release, sus secrets y la variable del certificado.
+2. Verifica los cambios, crea el commit y súbelo a `main` (o fusiona el PR). El commit del tag debe pertenecer al historial de `main`.
+3. Desde el commit que deseas publicar, crea y sube el tag. Debe coincidir con la versión de `pubspec.yaml` antes del `+`:
+
+   ```powershell
+   git switch main
+   git pull --ff-only origin main
+   git tag -a v1.1.3 -m "Release 1.1.3"
+   git push origin v1.1.3
+   ```
+
+4. En GitHub Actions, comprueba que `Android Release APK` termine correctamente. El workflow ejecuta análisis y pruebas, valida el certificado, compila el APK, verifica su firma y crea una release en borrador con el APK adjunto.
+5. Descarga el APK del borrador y prueba la actualización sin desinstalar la versión anterior firmada con la misma clave. Comprueba versión, funciones afectadas y conservación de datos. Después, abre la release en GitHub y pulsa **Publish release**, dejando desmarcada la opción de prerelease si es una versión estable.
+
+Los valores `1.1.3+17` y `v1.1.3` son un ejemplo; sustitúyelos en publicaciones posteriores. Si necesitas reconstruir un tag existente con una corrección del workflow, usa Actions → **Android Release APK** → **Run workflow**, selecciona `main` y escribe el tag existente. Esa ejecución usa el workflow de `main` y compila el código del tag. **Re-run jobs** usa la revisión original del workflow; no incorpora correcciones posteriores. El paso actual de creación de release no reemplaza una release que ya exista: revisa ese caso antes de reconstruirla.
+
 ## Estructura del proyecto
 
 ```text
