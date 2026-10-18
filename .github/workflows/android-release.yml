@@ -116,9 +116,18 @@ jobs:
           test -n "$APKSIGNER"
           CERTIFICATES=$("$APKSIGNER" verify --print-certs \
             build/app/outputs/flutter-apk/app-prod-release.apk)
+          # Build Tools 37 uses "V2 Signer:" / "V3.0 Signer:" instead of "Signer #1".
+          # Deduplicate the same certificate reported by multiple signature schemes.
           ACTUAL_SHA256=$(printf '%s\n' "$CERTIFICATES" \
-            | sed -n 's/^Signer #[0-9]* certificate SHA-256 digest: //p')
+            | sed -nE 's/^(Signer #[0-9]+|Signer \([^)]*\)|V[0-9.]+ Signer):? certificate SHA-256 digest: ([a-fA-F0-9]{64})[[:space:]]*$/\2/p' \
+            | tr '[:upper:]' '[:lower:]' | sort -u)
+          if [[ -z "$ACTUAL_SHA256" ]]; then
+            echo "::error::No se pudo extraer el certificado de firma del APK"
+            exit 1
+          fi
           if [[ "$ACTUAL_SHA256" != "$EXPECTED_SIGNER_SHA256" ]]; then
+            echo "Certificado esperado: $EXPECTED_SIGNER_SHA256"
+            echo "Certificado(s) obtenido(s): $ACTUAL_SHA256"
             echo "::error::El APK no tiene la firma esperada; se cancela la publicación"
             exit 1
           fi
