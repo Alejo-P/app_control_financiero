@@ -103,6 +103,14 @@ class RecordatoriosLocalDataSource {
   ) async {
     final db = _database ?? await _dbHelper.database;
     try {
+      // Permission settings can remain open until the selected date expires.
+      if (!recordatorio.scheduledAt.isAfter(DateTime.now())) {
+        return OperationResult<int?>(
+          success: false,
+          message:
+              'La fecha del recordatorio está vencida. Seleccione una fecha futura.',
+        );
+      }
       final id = await db.insert(RecordatorioTable.table, recordatorio.toMap());
       return OperationResult<int?>(
         message: 'Recordatorio insertado con éxito',

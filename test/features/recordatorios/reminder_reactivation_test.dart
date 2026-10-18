@@ -10,6 +10,18 @@ class _Store extends Fake implements Database, Transaction {
   _Store(Recordatorio reminder) : row = reminder.toMap();
 
   @override
+  Future<int> insert(
+    String table,
+    Map<String, Object?> values, {
+    String? nullColumnHack,
+    ConflictAlgorithm? conflictAlgorithm,
+  }) async {
+    writes++;
+    row = Map.of(values);
+    return 1;
+  }
+
+  @override
   Future<T> transaction<T>(
     Future<T> Function(Transaction) action, {
     bool? exclusive,
@@ -53,6 +65,35 @@ void main() {
         recurrencia: recurrence,
         enabled: enabled,
       );
+
+  for (final recurrence in Recurrencia.values) {
+    test('crear vencido con $recurrence rechaza sin escribir', () async {
+      final original = reminder(recurrence, enabled: true);
+      final store = _Store(original);
+      final result = await RecordatoriosLocalDataSource(
+        database: store,
+      ).insertRecordatorio(original);
+      expect(result.success, isFalse);
+      expect(result.data, isNull);
+      expect(result.message, contains('Seleccione una fecha futura'));
+      expect(store.writes, 0);
+    });
+  }
+
+  test('crear futuro conserva fecha y estado habilitado', () async {
+    final original = reminder(Recurrencia.ninguno, enabled: true).copyWith(
+      scheduledAt: DateTime.now().add(const Duration(days: 1)),
+    );
+    final store = _Store(original);
+    final result = await RecordatoriosLocalDataSource(
+      database: store,
+    ).insertRecordatorio(original);
+    expect(result.success, isTrue);
+    expect(result.data, 1);
+    expect(store.writes, 1);
+    expect(Recordatorio.fromMap(store.row).scheduledAt, original.scheduledAt);
+    expect(store.row[RecordatorioTable.enabled], 1);
+  });
 
   test('fecha futura se conserva y fecha exacta sin recurrencia vence', () {
     final future = now.add(const Duration(minutes: 1));
