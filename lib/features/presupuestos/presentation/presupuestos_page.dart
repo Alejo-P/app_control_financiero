@@ -162,6 +162,10 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     final presupuestosDefinidos = presupuestos
         .where((p) => p.budgetId != null)
         .toList();
+    final totalPresupuestado = presupuestosDefinidos.fold<double>(
+      0.0,
+      (total, presupuesto) => total + presupuesto.total,
+    );
     final presupuestosSinDefinir = presupuestos
         .where((p) => p.budgetId == null && p.spent > 0)
         .toList();
@@ -207,7 +211,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                     child: Column(
                       children: [
                         SizedBox(
-                          height: 215,
+                          height: 245,
                           child: TutorialTarget(
                             step: TutorialStep.budgetSummary,
                             child: SummaryCard(
@@ -217,6 +221,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
                               content: TotalBudgetSummaryCard(
                                 totalBudget: ingresoPresupuestado?.monto ?? 0.0,
                                 spentAmount: totalGastos,
+                                allocatedAmount: totalPresupuestado,
                               ),
                             ),
                           ),

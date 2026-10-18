@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class TotalBudgetSummaryCard extends StatelessWidget {
   final double totalBudget;
   final double spentAmount;
+  final double allocatedAmount;
 
   const TotalBudgetSummaryCard({
     super.key,
     required this.totalBudget,
     required this.spentAmount,
+    required this.allocatedAmount,
   });
 
   @override
@@ -68,6 +70,23 @@ class TotalBudgetSummaryCard extends StatelessWidget {
                   ? '-\$${available.abs().toStringAsFixed(2)}'
                   : '\$${available.abs().toStringAsFixed(2)}',
               style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Total presupuestado',
+              style: TextStyle(color: Colors.white70),
+            ),
+            Text(
+              '\$${allocatedAmount.toStringAsFixed(2)}',
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
