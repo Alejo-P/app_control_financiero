@@ -39,7 +39,7 @@ flutter run --flavor dev --dart-define=FLAVOR=dev
 flutter build apk --release --flavor prod --dart-define=FLAVOR=prod
 ```
 
-Typical output: `build/app/outputs/flutter-apk/app-prod-release.apk`. Gradle takes `versionName` and `versionCode` from the Flutter version; review signing and configuration in `android/app/build.gradle.kts` before distribution. Release currently uses debug signing.
+Typical output: `build/app/outputs/flutter-apk/app-prod-release.apk`. Gradle takes `versionName` and `versionCode` from the Flutter version. Release uses a dedicated PKCS12 keystore with alias `mi-presupuesto`, configured through `RELEASE_KEYSTORE_PATH` / `RELEASE_KEYSTORE_PASSWORD` or ignored `android/key.properties` (`storeFile`, `storePassword`). It does not fall back to debug signing. See README.md for Actions secrets and certificate verification. Debug-signed installations require a backup and reinstall when switching to this key.
 
 ### Verification
 

@@ -1,8 +1,25 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Local credentials stay in ignored key.properties; CI supplies environment values.
+val signingProperties = Properties().apply {
+    val propertiesFile = rootProject.file("key.properties")
+    if (propertiesFile.isFile) propertiesFile.inputStream().use { load(it) }
+}
+val releaseKeystorePath = providers.environmentVariable("RELEASE_KEYSTORE_PATH").orNull
+    ?: signingProperties.getProperty("storeFile")
+val releaseKeystorePassword = providers.environmentVariable("RELEASE_KEYSTORE_PASSWORD").orNull
+    ?: signingProperties.getProperty("storePassword")
+if (providers.environmentVariable("CI").orNull == "true") {
+    require(!releaseKeystorePath.isNullOrBlank() && !releaseKeystorePassword.isNullOrBlank()) {
+        "CI requires RELEASE_KEYSTORE_PATH and RELEASE_KEYSTORE_PASSWORD."
+    }
 }
 
 android {
@@ -50,14 +67,22 @@ android {
         missingDimensionStrategy("env", "dev")
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = releaseKeystorePath?.let { file(it) }
+            storeType = "PKCS12"
+            storePassword = releaseKeystorePassword
+            keyAlias = "mi-presupuesto"
+            keyPassword = releaseKeystorePassword
+        }
+    }
+
     buildTypes {
         debug {
             // Enable debug-specific options here.
         }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
 
             isMinifyEnabled = true
             isShrinkResources = true

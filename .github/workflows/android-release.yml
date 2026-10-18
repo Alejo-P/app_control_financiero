@@ -19,6 +19,7 @@ jobs:
 
     env:
       TAG: ${{ github.ref_name }}
+      EXPECTED_SIGNER_SHA256: ${{ vars.ANDROID_RELEASE_CERT_SHA256 }}
 
     steps:
       - name: Descargar el código del tag
@@ -67,23 +68,61 @@ jobs:
       - name: Ejecutar pruebas
         run: flutter test
 
-      - name: Restaurar firma de la computadora
+      - name: Restaurar y validar firma de release
         shell: bash
         env:
-            KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+            KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+            RELEASE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_PASSWORD }}
         run: |
             set -euo pipefail
             test -n "$KEYSTORE_BASE64" || {
-            echo "::error::Falta ANDROID_DEBUG_KEYSTORE_BASE64"
+            echo "::error::Falta ANDROID_RELEASE_KEYSTORE_BASE64"
             exit 1
             }
-            mkdir -p "$HOME/.android"
+            test -n "$RELEASE_KEYSTORE_PASSWORD" || {
+              echo "::error::Falta ANDROID_RELEASE_PASSWORD"
+              exit 1
+            }
+            if [[ ! "$EXPECTED_SIGNER_SHA256" =~ ^[a-f0-9]{64}$ ]]; then
+              echo "::error::ANDROID_RELEASE_CERT_SHA256 debe contener 64 caracteres hexadecimales en minúsculas, sin separadores"
+              exit 1
+            fi
+            KEYSTORE_PATH="$RUNNER_TEMP/mi-presupuesto-release.p12"
+            umask 077
             printf '%s' "$KEYSTORE_BASE64" | base64 --decode \
-            > "$HOME/.android/debug.keystore"
-            chmod 600 "$HOME/.android/debug.keystore"
+            > "$KEYSTORE_PATH"
+            ACTUAL_SHA256=$(keytool -exportcert -keystore "$KEYSTORE_PATH" \
+              -storetype PKCS12 -storepass:env RELEASE_KEYSTORE_PASSWORD \
+              -alias mi-presupuesto | sha256sum | cut -d ' ' -f 1)
+            if [[ "$ACTUAL_SHA256" != "$EXPECTED_SIGNER_SHA256" ]]; then
+              echo "::error::El secret no contiene el certificado de release esperado"
+              exit 1
+            fi
+            echo "RELEASE_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
 
       - name: Compilar APK de producción
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_PASSWORD }}
         run: flutter build apk --release --flavor prod --dart-define=FLAVOR=prod
+
+      - name: Verificar firma del APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$SDK_ROOT"
+          APKSIGNER=$(find "$SDK_ROOT/build-tools" -mindepth 2 -maxdepth 2 \
+            -name apksigner -type f | sort -V | tail -n 1)
+          test -n "$APKSIGNER"
+          CERTIFICATES=$("$APKSIGNER" verify --print-certs \
+            build/app/outputs/flutter-apk/app-prod-release.apk)
+          ACTUAL_SHA256=$(printf '%s\n' "$CERTIFICATES" \
+            | sed -n 's/^Signer #[0-9]* certificate SHA-256 digest: //p')
+          if [[ "$ACTUAL_SHA256" != "$EXPECTED_SIGNER_SHA256" ]]; then
+            echo "::error::El APK no tiene la firma esperada; se cancela la publicación"
+            exit 1
+          fi
+          echo "Firma del APK coincide con el certificado de release"
 
       - name: Preparar archivo
         shell: bash

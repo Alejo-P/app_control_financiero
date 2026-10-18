@@ -77,7 +77,34 @@ Archivo generado: `build/app/outputs/flutter-apk/app-prod-release.apk`.
 
 La versión de compilación se define en `pubspec.yaml`; la versión mostrada en la interfaz se define en `lib/core/constants/app_strings.dart`. Mantén ambas sincronizadas. Android toma `versionName` y `versionCode` de la versión de Flutter; para actualizar una instalación, el número después de `+` debe aumentar.
 
-Actualmente, la compilación `release` utiliza la firma de depuración en `android/app/build.gradle.kts`. Configura una firma de distribución antes de publicar y conserva la misma firma para futuras actualizaciones.
+### Firma de release
+
+Release usa una clave PKCS12 propia, con el alias `mi-presupuesto`. Para crearla una sola vez, ejecuta en PowerShell e introduce la contraseña cuando `keytool` la solicite:
+
+```powershell
+keytool -genkeypair -v -keystore "$env:USERPROFILE\.android\mi-presupuesto-release.p12" -storetype PKCS12 -alias mi-presupuesto -keyalg RSA -keysize 3072 -validity 10000
+```
+
+Conserva una copia segura del keystore y su contraseña fuera del repositorio. Para compilar localmente, crea `android/key.properties` (ignorado por Git):
+
+```properties
+storeFile=C:/Users/TU_USUARIO/.android/mi-presupuesto-release.p12
+storePassword=TU_CONTRASENA
+```
+
+`key.properties` usa el formato Java Properties: los caracteres especiales, como las barras invertidas, requieren escape. También puedes proporcionar `RELEASE_KEYSTORE_PATH` y `RELEASE_KEYSTORE_PASSWORD` como variables de entorno; tienen prioridad sobre el archivo local. PKCS12 usa la misma contraseña para el almacén y la clave.
+
+Configura estos valores del repositorio para GitHub Actions:
+
+| Tipo | Nombre | Contenido |
+| --- | --- | --- |
+| Secret | `ANDROID_RELEASE_KEYSTORE_BASE64` | Keystore de release codificado en Base64 |
+| Secret | `ANDROID_RELEASE_PASSWORD` | Contraseña del keystore |
+| Variable | `ANDROID_RELEASE_CERT_SHA256` | SHA-256 del certificado: 64 caracteres hexadecimales en minúsculas, sin `:` |
+
+Obtén la huella pública con `keytool -list -v -keystore "$env:USERPROFILE\.android\mi-presupuesto-release.p12" -alias mi-presupuesto`. El workflow verifica el certificado restaurado y la firma del APK antes de publicarlo. El secret anterior `ANDROID_DEBUG_KEYSTORE_BASE64` ya no se utiliza.
+
+El cambio desde las versiones firmadas con debug requiere respaldar los datos, desinstalar, instalar el primer APK con la nueva firma y restaurar el respaldo. Después, conserva esta misma clave para permitir actualizaciones normales.
 
 ## Estructura del proyecto
 
