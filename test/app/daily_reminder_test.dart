@@ -104,4 +104,26 @@ void main() {
       state.dispose();
     },
   );
+
+  test('editar vencido sin recurrencia conserva su estado', () async {
+    final repo = _Reminders();
+    repo.detail = DetalleRecordatorio(
+      id: 1,
+      title: 'Pago',
+      description: '',
+      isEnabled: true,
+      isDefault: false,
+      scheduledAt: DateTime(2020),
+      recurrency: Recurrencia.ninguno.name,
+      categoryId: 1,
+      categoryName: 'Otros',
+      categoryIcon: Icons.home,
+      categoryColor: Colors.blue,
+    );
+    final state = TestAppState(reminders: repo);
+    final detail = await state.getRecordatorioById(1);
+    expect(detail!.isEnabled, isTrue);
+    expect(detail.scheduledAt, DateTime(2020));
+    state.dispose();
+  });
 }

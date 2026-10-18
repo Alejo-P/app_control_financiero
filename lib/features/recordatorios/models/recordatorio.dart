@@ -2,6 +2,21 @@ import 'package:control_financiero/core/database/db_tables.dart';
 
 enum Recurrencia { diario, semanal, mensual, anual, ninguno }
 
+/// Returns the first future occurrence, or null for an expired one-off reminder.
+DateTime? resolveReminderDate(
+  DateTime date,
+  Recurrencia recurrence,
+  DateTime now,
+) {
+  if (date.isAfter(now)) return date;
+  if (recurrence == Recurrencia.ninguno) return null;
+  var next = date;
+  while (!next.isAfter(now)) {
+    next = calculateNextOccurrence(next, recurrence);
+  }
+  return next;
+}
+
 extension RecurrenciaExtension on Recurrencia {
   String get name {
     switch (this) {

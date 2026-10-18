@@ -1,7 +1,7 @@
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/constants/recordatorio_constants.dart';
-import 'package:control_financiero/core/services/notification_service.dart';
+import 'package:control_financiero/features/recordatorios/presentation/reminder_permission_dialog.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/core/utils/time_utils.dart';
@@ -252,8 +252,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
 
   Future<bool> checkExactAlarmAccess() async {
     if (detalleRecordatorio?.isEnabled == false) return true;
-    if (!fechaRecordatorio.isAfter(currentDateTime)) return true;
-    return await NotificationService.getExactAlarmAccess();
+    return confirmReminderExactAlarmAccess(context);
   }
 
   Future<void> _saveRecordatorio() async {
@@ -262,26 +261,21 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
       return;
     }
 
-    final isValidDate = _checkValidDateTime(fechaRecordatorio);
-    if (!isValidDate) {
+    final nextDate = resolveReminderDate(
+      fechaRecordatorio,
+      formMode == RecordatorioFormMode.edit
+          ? recurrenciaSeleccionada
+          : Recurrencia.ninguno,
+      currentDateTime,
+    );
+    if (nextDate == null) {
       AppSnackbar.error(
-        // ignore: use_build_context_synchronously
         context,
-        'La fecha seleccionada no puede ser anterior a la actual.',
+        'La fecha del recordatorio está vencida. Seleccione una fecha futura.',
       );
       return;
     }
-
-    final timeOfDay = getTimeFromDateTime(fechaRecordatorio);
-    final isValidTime = _checkValidTime(timeOfDay);
-    if (!isValidTime) {
-      AppSnackbar.error(
-        // ignore: use_build_context_synchronously
-        context,
-        'La hora seleccionada no puede ser anterior a la actual.',
-      );
-      return;
-    }
+    setState(() => fechaRecordatorio = nextDate);
 
     if (!mounted) return;
     final appState = context.read<AppState>();
@@ -303,21 +297,7 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
     );
 
     try {
-      var exactAccess = await checkExactAlarmAccess();
-      if (!exactAccess && mounted) {
-        final confirm = await showConfirmDialog(
-          context,
-          title: 'Permiso de alarmas exactas',
-          content:
-              '¿Desea otorgar permiso para alarmas exactas? Sin este permiso, el recordatorio puede llegar con retraso.',
-          confirmText: 'Ir a configuración',
-          cancelText: 'Continuar sin permiso',
-        );
-
-        if (confirm == true) {
-          exactAccess = await NotificationService.requestExactAlarmAccess();
-        }
-      }
+      final exactAccess = await checkExactAlarmAccess();
       if (!mounted) return;
       final isUpdateRecordatorio = formMode == RecordatorioFormMode.edit;
       if (isUpdateRecordatorio) {
@@ -332,6 +312,10 @@ class _RecordatorioFormPageState extends State<RecordatorioFormPage> {
         _action = '';
       });
 
+      if (appState.transactionSuccess != true) {
+        AppSnackbar.error(context, appState.transactionResultMessage);
+        return;
+      }
       if (exactAccess) {
         AppSnackbar.success(context, 'Recordatorio guardado exitosamente');
       } else {

@@ -1,12 +1,16 @@
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/app/app_snackbar.dart';
 import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/features/recordatorios/models/recordatorio.dart';
+import 'package:control_financiero/features/recordatorios/presentation/reminder_permission_dialog.dart';
 import 'package:control_financiero/features/recordatorios/models/recordatorio_form_args.dart';
 import 'package:control_financiero/features/shared/widgets/dialogs.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/recordatorios/widgets/recordatorio_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
 class RecordatoriosPage extends StatefulWidget {
@@ -20,14 +24,41 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
   final ScrollController _controller = ScrollController();
   bool _showFAB = true;
   bool _isLoading = false;
+  bool _changingEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshRecordatorios();
+      _initializeRecordatorios();
     });
+  }
+
+  Future<void> _initializeRecordatorios() async {
+    try {
+      await _refreshRecordatorios();
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      final settings = Hive.isBoxOpen('settings')
+          ? Hive.box<dynamic>('settings')
+          : await Hive.openBox<dynamic>('settings');
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      const key = 'reminder_list_exact_alarm_prompt_shown_v1';
+      if (settings.get(key, defaultValue: false) == true) return;
+      await settings.put(key, true);
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      final exactAccess = await confirmReminderExactAlarmAccess(context);
+      if (!mounted) return;
+      if (exactAccess) {
+        await context.read<AppState>().syncRecordatorioNotifications();
+      }
+    } catch (error, stackTrace) {
+      AppLogger.reportError(
+        'Inicializar permisos del listado de recordatorios',
+        error,
+        stackTrace,
+      );
+    }
   }
 
   @override
@@ -81,11 +112,62 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
   }
 
   Future<void> _onEnabledChanged(int id, bool enabled) async {
+    if (_changingEnabled) return;
     final appState = context.read<AppState>();
-    await appState.actualizarEstadoRecordatorio(id, enabled);
-
-    if (!mounted || appState.transactionSuccess == true) return;
-    AppSnackbar.error(context, appState.transactionResultMessage);
+    setState(() => _changingEnabled = true);
+    try {
+      var exactAccess = true;
+      if (enabled) {
+        final reminder = await appState.getRecordatorioById(id);
+        if (!mounted) return;
+        if (reminder == null) {
+          AppSnackbar.error(context, 'El recordatorio no existe.');
+          return;
+        }
+        final recurrence = Recurrencia.values.firstWhere(
+          (r) => r.name == reminder.recurrency,
+          orElse: () => Recurrencia.ninguno,
+        );
+        if (resolveReminderDate(
+              reminder.scheduledAt,
+              recurrence,
+              DateTime.now(),
+            ) ==
+            null) {
+          AppSnackbar.warning(
+            context,
+            'No se puede reactivar recordatorios vencidos sin recurrencia.',
+          );
+          return;
+        }
+        exactAccess = await confirmReminderExactAlarmAccess(context);
+        if (!mounted) return;
+      }
+      await appState.actualizarEstadoRecordatorio(id, enabled);
+      if (!mounted) return;
+      if (appState.transactionSuccess != true) {
+        AppSnackbar.error(context, appState.transactionResultMessage);
+      } else if (enabled && !exactAccess) {
+        AppSnackbar.warning(
+          context,
+          'Recordatorio activado. Sin permiso para alarmas exactas, puede llegar con retraso.',
+        );
+      }
+    } catch (error, stackTrace) {
+      AppLogger.reportError(
+        'Cambiar estado del recordatorio',
+        error,
+        stackTrace,
+      );
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          'No se pudo cambiar el estado del recordatorio.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _changingEnabled = false);
+    }
   }
 
   @override
@@ -165,7 +247,7 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
                                         ),
                                       );
                                     },
-                              onChange: isDefaultReminder
+                              onChange: isDefaultReminder || _changingEnabled
                                   ? null
                                   : (enabled) => _onEnabledChanged(
                                       recordatorio.id!,
