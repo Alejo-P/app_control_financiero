@@ -10,6 +10,7 @@ import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
 import 'package:control_financiero/features/recordatorios/widgets/recordatorio_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
 class RecordatoriosPage extends StatefulWidget {
@@ -30,8 +31,34 @@ class _RecordatoriosPageState extends State<RecordatoriosPage> {
     super.initState();
     _controller.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshRecordatorios();
+      _initializeRecordatorios();
     });
+  }
+
+  Future<void> _initializeRecordatorios() async {
+    try {
+      await _refreshRecordatorios();
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      final settings = Hive.isBoxOpen('settings')
+          ? Hive.box<dynamic>('settings')
+          : await Hive.openBox<dynamic>('settings');
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      const key = 'reminder_list_exact_alarm_prompt_shown_v1';
+      if (settings.get(key, defaultValue: false) == true) return;
+      await settings.put(key, true);
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+      final exactAccess = await confirmReminderExactAlarmAccess(context);
+      if (!mounted) return;
+      if (exactAccess) {
+        await context.read<AppState>().syncRecordatorioNotifications();
+      }
+    } catch (error, stackTrace) {
+      AppLogger.reportError(
+        'Inicializar permisos del listado de recordatorios',
+        error,
+        stackTrace,
+      );
+    }
   }
 
   @override
