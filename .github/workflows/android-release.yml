@@ -53,6 +53,21 @@ jobs:
             exit 1
           fi
 
+          # Exigir versión estable con número de build.
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$ ]] || {
+            echo "::error::Versión inválida: se requiere X.Y.Z+BUILD"
+            exit 1
+          }
+
+          DISPLAY_VERSION=$(sed -n \
+            "s/^const appVersion = '\([^']*\)';[[:space:]]*$/\1/p" \
+            lib/core/constants/app_strings.dart | tr -d '\r')
+
+          [[ "$DISPLAY_VERSION" == "${VERSION%%+*}" ]] || {
+            echo "::error::appVersion no coincide con pubspec.yaml"
+            exit 1
+          }
+
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
