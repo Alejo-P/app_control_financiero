@@ -8,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/features/actualizaciones/update_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,14 @@ void main() async {
     await AppLogger.log('Inicio de la aplicación');
 
     await Hive.initFlutter();
+    if (Platform.isAndroid) {
+      try {
+        // Eliminar cualquier archivo pendiente (interrupcion de la descarga)
+        await UpdateService().cleanDownloads();
+      } catch (_) {
+        // Continua con la ejecucion normal de la app
+      }
+    }
     await NotificationService.init();
 
     final NotificationAppLaunchDetails? details;

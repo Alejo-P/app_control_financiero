@@ -157,6 +157,26 @@ Interfaz → AppState (Provider) → Repositorio → Data source local → SQLit
 | Esquema SQLite | `lib/core/database/db_tables.dart` |
 | Servicios | `lib/core/services/` |
 
+## Buscar actualizaciones (Android)
+
+En **Sobre la aplicación → Buscar actualizaciones**, la app consulta la última release estable publicada de `Alejo-P/app_control_financiero`. El repositorio debe ser público: no se incluye un token de GitHub en la aplicación. Los borradores y las prereleases no se ofrecen como actualizaciones.
+
+Cada nueva release debe adjuntar `mi-presupuesto-vX.Y.Z.apk` y `update.json`. El workflow genera ambos archivos; el JSON contiene `version`, `buildNumber`, `file`, `size` y `sha256`. Deben coincidir con el APK de producción firmado, y el número de build debe superar al instalado. No adjuntes manualmente un manifiesto de otra compilación. Revisa las notas de la release antes de publicarla: se muestran como novedades dentro de la aplicación.
+
+La descarga muestra progreso, tamaño, velocidad media y tiempo estimado. **Cancelar**, volver atrás, salir de la vista, minimizar, bloquear o cerrar la aplicación cancela la transferencia; no hay un servicio de descarga en segundo plano ni reanudación. Los archivos incompletos se eliminan al cancelar, o al próximo inicio si Android terminó el proceso. El caché de actualizaciones se limpia al iniciar la app.
+
+Antes de habilitar **Instalar**, se comprueban tamaño, SHA-256, identificador de aplicación, versión, build y certificado de firma del APK. Se exige el mismo certificado de la instalación actual; la rotación de claves no está contemplada. Android realiza la validación final al instalar. Las compilaciones `dev` no reciben APKs de producción; una instalación con firma debug tampoco puede actualizarse con la firma de release.
+
+Al pulsar **Instalar**, Android puede solicitar **Permitir desde esta fuente**. Al regresar se comprueba el permiso de nuevo, sin repetir automáticamente la pantalla si se rechazó. Abrir ajustes o el instalador conserva el APK ya verificado. El usuario confirma la instalación en el diálogo del sistema; abrir ese diálogo no se anuncia como instalación completada.
+
+### Comprobación en un dispositivo
+
+1. Instala una versión de producción firmada con la clave de release y conserva datos de prueba. Publica una versión superior con APK y manifiesto correspondientes.
+2. Busca la actualización, comprueba las novedades e inicia la descarga. Cancela y repite; prueba también volver atrás y minimizar. Al regresar no debe continuar descargando.
+3. Completa otra descarga. Prueba rechazar el permiso, volver a intentarlo y concederlo. No debe haber un bucle de ajustes ni perderse el archivo verificado.
+4. Confirma la actualización en Android sin desinstalar. Abre la app y comprueba la versión y los datos conservados.
+5. Comprueba falta de conexión, ausencia de release pública y descarga interrumpida. Debe ofrecer reintentar y nunca anunciar que está actualizada ante un error.
+
 ## Datos y respaldos
 
 Los datos financieros se almacenan localmente en SQLite (`control_financiero.db`), en el directorio de documentos de la aplicación. Hive almacena parte del estado local.

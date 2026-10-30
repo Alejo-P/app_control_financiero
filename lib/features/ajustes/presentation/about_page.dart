@@ -1,6 +1,8 @@
-import 'package:control_financiero/core/constants/app_strings.dart' as app_strings;
+import 'package:control_financiero/core/constants/app_strings.dart'
+    as app_strings;
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:control_financiero/features/actualizaciones/update_dialog.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -25,7 +27,7 @@ class AboutPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 25,
                     offset: const Offset(0, 10),
                   ),
@@ -58,6 +60,14 @@ class AboutPage extends StatelessWidget {
                 fontSize: 16,
               ),
             ),
+            if (supportsAppUpdates) ...[
+              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: () => showUpdateDialog(context),
+                icon: const Icon(Icons.system_update),
+                label: const Text('Buscar actualizaciones'),
+              ),
+            ],
           ],
         ),
       ),
