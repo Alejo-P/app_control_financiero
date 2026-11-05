@@ -1,10 +1,14 @@
 import 'package:control_financiero/features/historial/data/historial_local_datasource.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
+import '../models/monthly_report.dart';
 
 class HistorialRepository {
   final HistorialLocalDataSource localDataSource;
 
   HistorialRepository(this.localDataSource);
+
+  Future<MonthlyReport> fetchMonthlyReport(DateTime month) =>
+      localDataSource.fetchMonthlyReport(month);
 
   /// Obtener la lista de historial por año
   /// @param date Fecha a la cual obtener la informacion

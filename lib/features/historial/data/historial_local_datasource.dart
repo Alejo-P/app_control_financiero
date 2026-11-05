@@ -2,9 +2,14 @@ import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
+import '../models/monthly_report.dart';
+import 'monthly_report_query.dart';
 
 class HistorialLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
+
+  Future<MonthlyReport> fetchMonthlyReport(DateTime month) async =>
+      MonthlyReportQuery.load(await _dbHelper.database, month);
 
   Future<List<MonthData>> fetchYearHistory(DateTime date) async {
     final db = await _dbHelper.database;

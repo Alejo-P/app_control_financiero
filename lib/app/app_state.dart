@@ -13,6 +13,7 @@ import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
+import 'package:control_financiero/features/historial/models/monthly_report.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
@@ -598,6 +599,10 @@ class AppState extends ChangeNotifier {
       rethrow;
     }
   }
+
+  /// Lectura independiente: consultar un informe no cambia los períodos de las pestañas.
+  Future<MonthlyReport> fetchMonthlyReport(DateTime month) =>
+      _historialRepository.fetchMonthlyReport(month);
 
   Future<void> updateHistory({bool notify = true}) async {
     try {

@@ -93,7 +93,7 @@ enum TutorialStep {
     2,
     'historial_datos',
     'Detalle mensual',
-    'Despliega un mes para consultar sus ingresos y gastos. El botón de su detalle permite ir a sus movimientos cuando corresponde.',
+    'Despliega un mes para consultar sus ingresos y gastos. Pulsa Ver informe para abrir sus gráficas, categorías y estado de presupuestos, incluido el mes en curso.',
   ),
   historyBalance(
     2,

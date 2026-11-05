@@ -1,9 +1,11 @@
+import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/core/tutorials/tutorial_host.dart';
 import 'package:control_financiero/core/tutorials/tutorial_step.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/models/app_bar_action.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
+import 'package:control_financiero/features/historial/models/monthly_report_page_args.dart';
 import 'package:control_financiero/features/historial/widgets/accordeon_content.dart';
 import 'package:control_financiero/features/historial/widgets/month_accordeon_card.dart';
 import 'package:control_financiero/features/shared/widgets/loading_screen.dart';
@@ -158,11 +160,6 @@ class _HistorialPageState extends State<HistorialPage> {
                         final index = entry.key;
                         final monthData = entry.value;
 
-                        final sameMonth = isSameMonth(
-                          monthData.month,
-                          appState.selectedMovementsMonth,
-                        );
-
                         final card = Container(
                           key: itemKeys[index],
                           child: MonthAccordionCard(
@@ -178,11 +175,13 @@ class _HistorialPageState extends State<HistorialPage> {
                             content: AccordeonContent(
                               spent: monthData.spent,
                               totalIncome: monthData.income,
-                              onTapButton: sameMonth
-                                  ? null
-                                  : () => {
-                                      appState.gotoMovements(monthData.month),
-                                    },
+                              onTapButton: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.reporteMensualRoute,
+                                arguments: MonthlyReportPageArgs(
+                                  month: monthData.month,
+                                ),
+                              ),
                             ),
                           ),
                         );
