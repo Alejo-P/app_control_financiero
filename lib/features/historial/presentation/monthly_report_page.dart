@@ -427,10 +427,10 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
   String _changeText(MonthlyReport report) {
     final change = report.expenseChange;
     return change > 0
-        ? 'Aumentaron:'
+        ? 'Gastos aumentaron:'
         : change < 0
-        ? 'Disminuyeron:'
-        : 'Sin cambios:';
+        ? 'Gastos disminuyeron:'
+        : 'Gastos sin cambios:';
   }
 
   Widget _comparison(MonthlyReport report) {
@@ -645,9 +645,9 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
     final observations = <MonthObservation>[
       if (categories.isNotEmpty)
         MonthObservation(
-          icon: Icons.category,
+          icon: categories.first.icon,
           message: '${categories.first.name} fue tu categoría con mayor gasto: ${reportMoney(categories.first.spent)}.',
-          iconColor: Colors.green,
+          iconColor: Color(categories.first.colorValue),
         ),
       report.balance > 0
           ? MonthObservation(

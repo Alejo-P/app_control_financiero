@@ -1,3 +1,6 @@
+import 'package:control_financiero/core/utils/icon_mapper.dart';
+import 'package:flutter/material.dart';
+
 /// Importes redondeados a centavos para comparar límites monetarios.
 double reportAmount(num value) => (value * 100).round() / 100;
 
@@ -6,6 +9,7 @@ enum ReportBudgetStatus { none, healthy, inUse, nearLimit, reached, exceeded }
 class ReportCategory {
   final int id;
   final String name;
+  final IconData icon;
   final int colorValue;
   final double spent;
   final int count;
@@ -14,6 +18,7 @@ class ReportCategory {
   const ReportCategory({
     required this.id,
     required this.name,
+    required this.icon,
     required this.colorValue,
     required this.spent,
     required this.count,
@@ -23,6 +28,7 @@ class ReportCategory {
   factory ReportCategory.fromMap(Map<String, Object?> map) => ReportCategory(
     id: (map['id'] as num).toInt(),
     name: map['name'] as String,
+    icon: map['icon'] != null ? IconMapper.fromName(map['icon'] as String) : Icons.category,
     colorValue: (map['color'] as num?)?.toInt() ?? 0xFF607D8B,
     spent: reportAmount(map['spent'] as num? ?? 0),
     count: (map['count'] as num? ?? 0).toInt(),

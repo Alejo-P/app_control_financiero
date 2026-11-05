@@ -29,7 +29,7 @@ class MonthlyReportQuery {
       )).single;
       final rows = await txn.rawQuery(
         '''
-        SELECT c.id, c.name, c.icon_color_value AS color,
+        SELECT c.id, c.name, c.icon_color_value AS color, c.icon_name as icon,
           COALESCE(m.spent, 0) AS spent, COALESCE(m.count, 0) AS count,
           p.budget
         FROM categorias c
