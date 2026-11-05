@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -57,7 +59,6 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    final current = isSameMonth(_args.month, currentDateTime);
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
