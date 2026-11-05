@@ -1,6 +1,7 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/historial/models/month_observation.dart';
 import 'package:control_financiero/features/historial/widgets/labeled_value.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
@@ -637,16 +638,39 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
   }
 
   Widget _observations(MonthlyReport report) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final categories = report.expenseCategories;
-    final observations = <String>[
+    final observations = <MonthObservation>[
       if (categories.isNotEmpty)
-        '${categories.first.name} fue tu categoría con mayor gasto: ${reportMoney(categories.first.spent)}.',
+        MonthObservation(
+          icon: Icons.category,
+          message: '${categories.first.name} fue tu categoría con mayor gasto: ${reportMoney(categories.first.spent)}.',
+          iconColor: Colors.green,
+        ),
       report.balance > 0
-          ? 'Tu balance mensual fue positivo: superávit de ${reportMoney(report.balance)}.'
+          ? MonthObservation(
+              icon: Icons.trending_up,
+              message: 'Tu balance mensual fue positivo: superávit de ${reportMoney(report.balance)}.',
+              iconColor: Colors.green,
+            )
           : report.balance < 0
-          ? 'Tu balance mensual fue negativo: déficit de ${reportMoney(report.balance.abs())}.'
-          : 'Tus ingresos y gastos están equilibrados.',
-      '${_changeText(report)} respecto al mes anterior${report.expenseChangePercent == null ? ' (sin base porcentual)' : ' (${reportPercent(report.expenseChangePercent!.abs())})'}.',
+          ? MonthObservation(
+              icon: Icons.trending_down,
+              message: 'Tu balance mensual fue negativo: déficit de ${reportMoney(report.balance.abs())}.',
+              iconColor: Colors.red,
+            )
+          : MonthObservation(
+              icon: Icons.trending_flat,
+              message: 'Tus ingresos y gastos están equilibrados.',
+              iconColor: Colors.blue,
+            ),
+      MonthObservation(
+        icon: Icons.info_outline,
+        message: '${_changeText(report)} respecto al mes anterior${report.expenseChangePercent == null ? ' (sin base porcentual)' : ' (${reportPercent(report.expenseChangePercent!.abs())})'}.',
+        iconColor: Colors.grey,
+      ),
     ];
     return _section(
       'Observaciones del mes',
@@ -657,15 +681,21 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Icon(
-                    Icons.lightbulb_outline,
-                    color: Theme.of(context).colorScheme.primary,
+                    observation.icon,
+                    color: observation.iconColor,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
-                  Expanded(child: Text(observation)),
+                  Expanded(child: Text(
+                    observation.message,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  )),
                 ],
               ),
             ),
