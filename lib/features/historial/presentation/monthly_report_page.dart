@@ -1,6 +1,7 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/historial/widgets/labeled_value.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/monthly_report.dart';
@@ -409,10 +410,10 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
   String _changeText(MonthlyReport report) {
     final change = report.expenseChange;
     return change > 0
-        ? 'Aumentaron ${reportMoney(change)}'
+        ? 'Aumentaron:'
         : change < 0
-        ? 'Disminuyeron ${reportMoney(change.abs())}'
-        : 'Sin cambios';
+        ? 'Disminuyeron:'
+        : 'Sin cambios:';
   }
 
   Widget _comparison(MonthlyReport report) {
@@ -428,23 +429,17 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                 : '${percent > 0 ? '+' : ''}${reportPercent(percent)}',
       chipColor: percent == null
           ? null
-          : percent < 0
+          : percent > 0
               ? const Color(0xFFE0BD45)
               : const Color(0xFF81C784),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Gasto del mes anterior: ${reportMoney(report.previousSpent)}',
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
+          LabeledValue(label: 'Gasto del mes anterior:', value: reportMoney(report.previousSpent)),
           const SizedBox(height: 8),
-          Text(
-            _changeText(report),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          LabeledValue(label: 'Gasto del mes actual:', value: reportMoney(report.spent)),
+          const SizedBox(height: 8),
+          LabeledValue(label: _changeText(report), value: reportMoney(report.expenseChange.abs())),
           const Divider(height: 24),
           Text(
             percent == null
@@ -467,9 +462,9 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
           ),
           if (isSameMonth(report.month, currentDateTime)) ...[
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Mes en curso: se compara lo acumulado con el mes anterior completo.',
-              style: TextStyle(fontStyle: FontStyle.italic),
+              style: textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
             ),
           ],
         ],
