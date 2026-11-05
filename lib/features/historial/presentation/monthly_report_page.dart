@@ -135,7 +135,14 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
     );
   }
 
-  Widget _section(String title, String? subtitle, Widget child, {IconData? chipIcon, String? chipText, Color? chipColor}) {
+  Widget _section(
+    String title,
+    String? subtitle,
+    Widget child, {
+    IconData? chipIcon,
+    String? chipText,
+    Color? chipColor,
+  }) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
@@ -166,16 +173,23 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      if (subtitle != null) Text(subtitle, style: textTheme.bodySmall),
+                      if (subtitle != null)
+                        Text(subtitle, style: textTheme.bodySmall),
                     ],
                   ),
                 ),
                 if (chipText != null) ...[
                   const SizedBox(height: 8),
                   Chip(
-                    avatar: Icon(chipIcon, size: 20, color: chipColor ?? colorScheme.primary),
+                    avatar: Icon(
+                      chipIcon,
+                      size: 20,
+                      color: chipColor ?? colorScheme.primary,
+                    ),
                     label: Text(chipText),
-                    backgroundColor: chipColor?.withValues(alpha: 0.1) ?? colorScheme.primary.withValues(alpha: 0.1),
+                    backgroundColor:
+                        chipColor?.withValues(alpha: 0.1) ??
+                        colorScheme.primary.withValues(alpha: 0.1),
                     labelStyle: textTheme.labelSmall?.copyWith(
                       color: colorScheme.primary,
                     ),
@@ -428,42 +442,51 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
       chipIcon: percent == null
           ? Icons.info_outline
           : percent > 0
-              ? Icons.trending_up
-              : Icons.trending_down,
+          ? Icons.trending_up
+          : Icons.trending_down,
       chipText: percent == null
-                ? 'Sin base porcentual'
-                : '${percent > 0 ? '+' : ''}${reportPercent(percent)}',
+          ? 'Sin base porcentual'
+          : '${percent > 0 ? '+' : ''}${reportPercent(percent)}',
       chipColor: percent == null
           ? null
           : percent > 0
-              ? const Color(0xFFE0BD45)
-              : const Color(0xFF81C784),
+          ? const Color(0xFFE0BD45)
+          : const Color(0xFF81C784),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LabeledValue(label: 'Gasto del mes anterior:', value: reportMoney(report.previousSpent)),
+          LabeledValue(
+            label: 'Gasto del mes anterior:',
+            value: reportMoney(report.previousSpent),
+          ),
           const SizedBox(height: 8),
-          LabeledValue(label: 'Gasto del mes actual:', value: reportMoney(report.spent)),
+          LabeledValue(
+            label: 'Gasto del mes actual:',
+            value: reportMoney(report.spent),
+          ),
           const SizedBox(height: 8),
-          LabeledValue(label: _changeText(report), value: reportMoney(report.expenseChange.abs())),
+          LabeledValue(
+            label: _changeText(report),
+            value: reportMoney(report.expenseChange.abs()),
+          ),
           const Divider(height: 24),
           Text(
             percent == null
                 ? 'Sin base porcentual'
-                : percent > 0 
-                  ? 'Tus gastos aumentaron un ${reportPercent(percent.abs())} respecto al mes anterior. ¡Revisa tus hábitos de consumo!'
-                  : 'Tus gastos disminuyeron un ${reportPercent(percent.abs())} respecto al mes anterior. ¡Buen control presupuestario!',
+                : percent > 0
+                ? 'Tus gastos aumentaron un ${reportPercent(percent.abs())} respecto al mes anterior. ¡Revisa tus hábitos de consumo!'
+                : 'Tus gastos disminuyeron un ${reportPercent(percent.abs())} respecto al mes anterior. ¡Buen control presupuestario!',
             style: textTheme.bodySmall?.copyWith(
               color: percent == null
                   ? colorScheme.onSurfaceVariant
                   : percent > 0
-                      ? const Color(0xFFE0BD45)
-                      : const Color(0xFF81C784),
+                  ? const Color(0xFFE0BD45)
+                  : const Color(0xFF81C784),
               fontStyle: percent == null
                   ? null
                   : percent > 0
-                      ? FontStyle.italic
-                      : FontStyle.normal,
+                  ? FontStyle.italic
+                  : FontStyle.normal,
             ),
           ),
           if (isSameMonth(report.month, currentDateTime)) ...[
@@ -505,6 +528,9 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
 
   Widget _budgets(MonthlyReport report) {
     final categories = report.budgetCategories;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     return _section(
       'Estado de presupuestos',
       'Ejecución del límite mensual',
@@ -528,14 +554,28 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          category.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          category.budget == null
-                              ? reportMoney(category.spent)
-                              : '${reportMoney(category.spent)} / ${reportMoney(category.budget!)}',
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                category.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              category.budget == null
+                                  ? reportMoney(category.spent)
+                                  : '${reportMoney(category.spent)} / ${reportMoney(category.budget!)}',
+                              style: textTheme.bodySmall,
+                            ),
+                          ],
                         ),
                         if (category.ratio != null) ...[
                           const SizedBox(height: 8),
