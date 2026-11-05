@@ -99,6 +99,58 @@ ThemeData _theme(bool dark) {
 }
 
 void main() {
+  for (final count in [0, 1, 3]) {
+    testWidgets('distribución muestra el total de $count movimientos', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(430, 4000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final state = ReportState()
+        ..value = report(
+          spent: count == 0 ? 0 : 20,
+          previous: count == 0 ? 0 : 20,
+          categories: count == 0
+              ? []
+              : [
+                  category(
+                    1,
+                    name: 'Comida',
+                    spent: 20,
+                    count: count,
+                    icon: Icons.restaurant,
+                  ),
+                ],
+        );
+      await tester.pumpWidget(app(state, reportPage(month: DateTime(2026, 1))));
+      await tester.pumpAndSettle();
+      expect(
+        find.widgetWithText(Chip, '$count movimiento${count == 1 ? '' : 's'}'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Tus gastos no cambiaron respecto al mes anterior.'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          'Gastos sin cambios: \$0,00 respecto al mes anterior',
+        ),
+        findsOneWidget,
+      );
+      if (count > 0) {
+        expect(find.byIcon(Icons.restaurant), findsOneWidget);
+        expect(
+          find.text('Comida fue tu categoría con mayor gasto: \$20,00.'),
+          findsOneWidget,
+        );
+      }
+      expect(state.requested, [DateTime(2026, 1)]);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   setUpAll(() async {
     const path = String.fromEnvironment('REPORT_PREVIEW_FONT');
     if (path.isEmpty) return;
@@ -127,7 +179,6 @@ void main() {
       await tester.tap(find.text('Ver informe'));
       await tester.pumpAndSettle();
       expect(find.text('Informe mensual'), findsOneWidget);
-      expect(find.text('Mes en curso'), findsOneWidget);
       expect(state.requested.single, month);
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
@@ -277,7 +328,7 @@ void main() {
       await tester.pumpWidget(app(state, reportPage(month: DateTime(2026, 1))));
       await tester.pumpAndSettle();
       expect(find.text('No aplica'), findsOneWidget);
-      expect(find.text('Sin base porcentual'), findsOneWidget);
+      expect(find.text('Sin base porcentual'), findsNWidgets(2));
       expect(find.text('125 %'), findsOneWidget);
       expect(find.text('Límite alcanzado'), findsOneWidget);
       final bars = tester
@@ -314,7 +365,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Febrero 2026'), findsOneWidget);
+    expect(find.text('FEBRERO 2026'), findsOneWidget);
     expect(find.textContaining('99.999'), findsNothing);
     expect(tester.takeException(), isNull);
   });

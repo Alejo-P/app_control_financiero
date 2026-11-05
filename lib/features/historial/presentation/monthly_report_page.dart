@@ -480,6 +480,8 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
           Text(
             percent == null
                 ? 'Sin base porcentual'
+                : percent == 0
+                ? 'Tus gastos no cambiaron respecto al mes anterior.'
                 : percent > 0
                 ? 'Tus gastos aumentaron un ${reportPercent(percent.abs())} respecto al mes anterior. ¡Revisa tus hábitos de consumo!'
                 : 'Tus gastos disminuyeron un ${reportPercent(percent.abs())} respecto al mes anterior. ¡Buen control presupuestario!',
@@ -673,7 +675,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
             ),
       MonthObservation(
         icon: Icons.info_outline,
-        message: '${_changeText(report)} respecto al mes anterior${report.expenseChangePercent == null ? ' (sin base porcentual)' : ' (${reportPercent(report.expenseChangePercent!.abs())})'}.',
+        message: '${_changeText(report)} ${reportMoney(report.expenseChange.abs())} respecto al mes anterior${report.expenseChangePercent == null ? ' (sin base porcentual)' : ' (${reportPercent(report.expenseChangePercent!.abs())})'}.',
         iconColor: Colors.grey,
       ),
     ];

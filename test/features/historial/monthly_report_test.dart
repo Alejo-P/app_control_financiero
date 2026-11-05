@@ -9,12 +9,15 @@ ReportCategory category(
   double? budget,
   String? name,
   int color = 0xFF299C68,
+  IconData icon = Icons.category,
+  int? count,
 }) => ReportCategory(
   id: id,
   name: name ?? 'Categoría $id',
+  icon: icon,
   colorValue: color,
   spent: spent,
-  count: spent > 0 ? 1 : 0,
+  count: count ?? (spent > 0 ? 1 : 0),
   budget: budget,
 );
 
@@ -32,6 +35,34 @@ MonthlyReport report({
 );
 
 void main() {
+  test(
+    'categoría conserva icono, conteo y redondea importes de la consulta',
+    () {
+      final value = ReportCategory.fromMap({
+        'id': 1,
+        'name': 'Alimentación',
+        'icon': 'restaurant',
+        'color': 0xFF299C68,
+        'spent': 12.345,
+        'budget': 20.005,
+        'count': 3,
+      });
+      expect(value.icon, Icons.restaurant);
+      expect(value.count, 3);
+      expect(value.colorValue, 0xFF299C68);
+      expect(value.spent, 12.35);
+      expect(value.budget, 20.01);
+      expect(value.remaining, 7.66);
+    },
+  );
+
+  test('categoría sin icono usa el icono predeterminado', () {
+    final value = ReportCategory.fromMap({'id': 1, 'name': 'Otros'});
+    expect(value.icon, Icons.category);
+    expect(value.count, 0);
+    expect(value.budget, isNull);
+  });
+
   test('balance, ahorro y comparación usan las bases acordadas', () {
     final value = report();
     expect(value.balance, 170);

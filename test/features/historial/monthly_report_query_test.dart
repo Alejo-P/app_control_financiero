@@ -1,5 +1,6 @@
 import 'package:control_financiero/features/historial/data/monthly_report_query.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ReportTransaction extends Fake implements Transaction {
@@ -18,6 +19,7 @@ class ReportTransaction extends Fake implements Transaction {
             {
               'id': 1,
               'name': 'Alimentación',
+              'icon': 'restaurant',
               'color': 0xFF299C68,
               'spent': 680,
               'count': 25,
@@ -57,6 +59,8 @@ void main() {
       expect(result.month, DateTime(2026, 1));
       expect(result.balance, 170);
       expect(result.categories.first.count, 25);
+      expect(result.categories.first.icon, Icons.restaurant);
+      expect(transaction.calls.last.sql, contains('c.icon_name as icon'));
       expect(result.categories.last.budget, 100);
       expect(transaction.calls.first.args, [
         '2026-01-01',
