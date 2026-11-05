@@ -183,11 +183,13 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                 if (chipText != null) ...[
                   const SizedBox(height: 8),
                   Chip(
-                    avatar: Icon(
-                      chipIcon,
-                      size: 20,
-                      color: chipColor ?? colorScheme.primary,
-                    ),
+                    avatar: chipIcon != null
+                        ? Icon(
+                            chipIcon,
+                            size: 20,
+                            color: chipColor ?? colorScheme.primary,
+                          )
+                        : null,
                     label: Text(chipText),
                     backgroundColor:
                         chipColor?.withValues(alpha: 0.1) ??
@@ -316,6 +318,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
 
   Widget _distribution(MonthlyReport report) {
     final categories = report.expenseCategories;
+    final totalMovements = categories.fold<int>(0, (sum, c) => sum + c.count);
     final colors = reportCategoryColors(categories);
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
@@ -323,6 +326,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
     return _section(
       'Distribución de gastos',
       'Por categoría · Total: ${reportMoney(report.spent)}',
+      chipText: '$totalMovements movimiento${totalMovements == 1 ? '' : 's'}',
       categories.isEmpty
           ? const Text('Sin gastos registrados')
           : Column(
