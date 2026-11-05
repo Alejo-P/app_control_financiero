@@ -2,6 +2,7 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/historial/widgets/labeled_value.dart';
+import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/monthly_report.dart';
@@ -573,39 +574,59 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                               category.budget == null
                                   ? reportMoney(category.spent)
                                   : '${reportMoney(category.spent)} / ${reportMoney(category.budget!)}',
-                              style: textTheme.bodySmall,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ],
                         ),
                         if (category.ratio != null) ...[
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: category.ratio!.clamp(0, 1).toDouble(),
-                            color: color,
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: .10),
-                            minHeight: 7,
-                            borderRadius: BorderRadius.circular(4),
-                            semanticsLabel:
-                                '${category.name}: ${reportPercent(category.ratio! * 100)} consumido',
+                          const SizedBox(height: 2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: CustomProgressBar(
+                                  currentValue: category.ratio!
+                                      .clamp(0, 1)
+                                      .toDouble(),
+                                  color: color,
+                                  backgroundColor: colorScheme.onSurface
+                                      .withOpacity(0.18),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                reportPercent(category.ratio! * 100),
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 6),
-                          Text(reportPercent(category.ratio! * 100)),
                         ],
-                        Text(
-                          _budgetMessage(category),
-                          style: TextStyle(
-                            color: color,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              _budgetMessage(category),
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (category.remaining != null &&
+                                category.remaining! > 0)
+                              Text(
+                                'Restan ${reportMoney(category.remaining!)}',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                          ],
                         ),
-                        if (category.remaining != null &&
-                            category.remaining! > 0)
-                          Text(
-                            'Restan ${reportMoney(category.remaining!)}',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
                       ],
                     );
                   },
