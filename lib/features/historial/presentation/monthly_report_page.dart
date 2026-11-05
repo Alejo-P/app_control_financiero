@@ -135,7 +135,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
     );
   }
 
-  Widget _section(String title, String? subtitle, Widget child, {String? chipText, Color? chipColor}) {
+  Widget _section(String title, String? subtitle, Widget child, {IconData? chipIcon, String? chipText, Color? chipColor}) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
@@ -173,6 +173,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                 if (chipText != null) ...[
                   const SizedBox(height: 8),
                   Chip(
+                    avatar: Icon(chipIcon, size: 20, color: chipColor ?? colorScheme.primary),
                     label: Text(chipText),
                     backgroundColor: chipColor?.withValues(alpha: 0.1) ?? colorScheme.primary.withValues(alpha: 0.1),
                     labelStyle: textTheme.labelSmall?.copyWith(
@@ -424,6 +425,11 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
     return _section(
       'Variación intermensual',
       'Frente a ${_month(report.previousMonth)}',
+      chipIcon: percent == null
+          ? Icons.info_outline
+          : percent > 0
+              ? Icons.trending_up
+              : Icons.trending_down,
       chipText: percent == null
                 ? 'Sin base porcentual'
                 : '${percent > 0 ? '+' : ''}${reportPercent(percent)}',
