@@ -134,34 +134,63 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
     );
   }
 
-  Widget _section(String title, String? subtitle, Widget child) => Card(
-    margin: const EdgeInsets.only(top: 14),
-    elevation: 0,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-      side: BorderSide(
-        color: Theme.of(context).colorScheme.outline.withValues(alpha: .18),
+  Widget _section(String title, String? subtitle, Widget child, {String? chipText, Color? chipColor}) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+    return Card(
+      margin: const EdgeInsets.only(top: 14),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outline.withValues(alpha: .18)),
       ),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          if (subtitle != null)
-            Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 16),
-          child,
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (subtitle != null) Text(subtitle, style: textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                if (chipText != null) ...[
+                  const SizedBox(height: 8),
+                  Chip(
+                    label: Text(chipText),
+                    backgroundColor: chipColor?.withValues(alpha: 0.1) ?? colorScheme.primary.withValues(alpha: 0.1),
+                    labelStyle: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.primary,
+                    ),
+                    shape: StadiumBorder(
+                      side: BorderSide(color: chipColor ?? colorScheme.primary),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            child,
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _summary(MonthlyReport report) {
     final scheme = Theme.of(context).colorScheme;
@@ -306,7 +335,6 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
-
                             children: [
                               Container(
                                 width: 13,
@@ -347,7 +375,13 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(reportMoney(category.spent)),
+                                    Text(
+                                      reportMoney(category.spent),
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
                                     Text(
                                       reportPercent(
                                         report.spent > 0
@@ -383,27 +417,59 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
 
   Widget _comparison(MonthlyReport report) {
     final percent = report.expenseChangePercent;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     return _section(
       'Variación intermensual',
       'Frente a ${_month(report.previousMonth)}',
+      chipText: percent == null
+                ? 'Sin base porcentual'
+                : '${percent > 0 ? '+' : ''}${reportPercent(percent)}',
+      chipColor: percent == null
+          ? null
+          : percent < 0
+              ? const Color(0xFFE0BD45)
+              : const Color(0xFF81C784),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Gasto del mes anterior: ${reportMoney(report.previousSpent)}'),
+          Text(
+            'Gasto del mes anterior: ${reportMoney(report.previousSpent)}',
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
             _changeText(report),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
+          const Divider(height: 24),
           Text(
             percent == null
                 ? 'Sin base porcentual'
-                : '${percent > 0 ? '+' : ''}${reportPercent(percent)}',
+                : percent > 0 
+                  ? 'Tus gastos aumentaron un ${reportPercent(percent.abs())} respecto al mes anterior. ¡Revisa tus hábitos de consumo!'
+                  : 'Tus gastos disminuyeron un ${reportPercent(percent.abs())} respecto al mes anterior. ¡Buen control presupuestario!',
+            style: textTheme.bodySmall?.copyWith(
+              color: percent == null
+                  ? colorScheme.onSurfaceVariant
+                  : percent > 0
+                      ? const Color(0xFFE0BD45)
+                      : const Color(0xFF81C784),
+              fontStyle: percent == null
+                  ? null
+                  : percent > 0
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+            ),
           ),
           if (isSameMonth(report.month, currentDateTime)) ...[
             const SizedBox(height: 8),
             const Text(
               'Mes en curso: se compara lo acumulado con el mes anterior completo.',
+              style: TextStyle(fontStyle: FontStyle.italic),
             ),
           ],
         ],
