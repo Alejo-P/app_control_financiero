@@ -12,4 +12,5 @@ class AppRoutes {
   static const recordatorioFormRoute = '/recordatorio-form';
 
   static const reporteMensualRoute = '/reporte-mensual';
+  static const reporteCategoriaRoute = '/reporte-categoria';
 }

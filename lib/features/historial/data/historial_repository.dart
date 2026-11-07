@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/historial/data/historial_local_datasource.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
 import '../models/monthly_report.dart';
@@ -6,6 +7,18 @@ class HistorialRepository {
   final HistorialLocalDataSource localDataSource;
 
   HistorialRepository(this.localDataSource);
+
+  Future<List<DetalleMovimiento>> fetchCategoryReportMovements(
+    DateTime month,
+    int categoryId, {
+    int offset = 0,
+    bool oldestFirst = false,
+  }) => localDataSource.fetchCategoryReportMovements(
+    month,
+    categoryId,
+    offset: offset,
+    oldestFirst: oldestFirst,
+  );
 
   Future<MonthlyReport> fetchMonthlyReport(DateTime month) =>
       localDataSource.fetchMonthlyReport(month);

@@ -8,6 +8,7 @@ import 'package:control_financiero/core/theme/app_theme.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
 import 'package:control_financiero/features/historial/models/monthly_report.dart';
 import 'package:control_financiero/features/historial/presentation/historial_page.dart';
+import 'package:control_financiero/features/historial/presentation/category_report_page.dart';
 import 'package:control_financiero/features/historial/presentation/monthly_report_page.dart';
 import 'package:control_financiero/features/historial/widgets/report_charts.dart';
 import 'package:flutter/material.dart';
@@ -80,10 +81,18 @@ Widget app(
 
 Widget reportPage({required DateTime month}) => Navigator(
   key: ValueKey(month),
-  onGenerateRoute: (_) => MaterialPageRoute<void>(
-    settings: RouteSettings(arguments: MonthlyReportPageArgs(month: month)),
-    builder: (_) => const MonthlyReportPage(),
-  ),
+  onGenerateRoute: (settings) {
+    if (settings.name == AppRoutes.reporteCategoriaRoute) {
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const CategoryReportPage(),
+      );
+    }
+    return MaterialPageRoute<void>(
+      settings: RouteSettings(arguments: MonthlyReportPageArgs(month: month)),
+      builder: (_) => const MonthlyReportPage(),
+    );
+  },
 );
 ThemeData _theme(bool dark) {
   final theme = dark ? AppTheme.dark : AppTheme.light;
@@ -259,13 +268,9 @@ void main() {
         tester.widget<ReportDonut>(find.byType(ReportDonut)).selectedId,
         1,
       );
-      await tester.tap(
-        find
-            .ancestor(
-              of: find.text('Alimentación'),
-              matching: find.byType(InkWell),
-            )
-            .first,
+      await tester.tapAt(
+        tester.getTopLeft(find.byKey(const ValueKey('report-category-1'))) +
+            const Offset(20, 20),
       );
       await tester.pumpAndSettle();
       expect(

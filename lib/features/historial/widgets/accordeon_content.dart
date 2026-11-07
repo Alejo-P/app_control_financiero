@@ -75,7 +75,7 @@ class AccordeonContent extends StatelessWidget {
           CustomButton(
             onTap: onTapButton,
             text: "Ver informe",
-            icon: Icons.visibility,
+            icon: Icons.bar_chart,
             width: WidgetWidth.fullWidth,
           ),
       ],

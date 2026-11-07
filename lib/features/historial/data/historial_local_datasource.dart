@@ -1,3 +1,5 @@
+import 'category_report_query.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/core/constants/movimiento_constants.dart';
 import 'package:control_financiero/core/database/db_helper.dart';
 import 'package:control_financiero/core/database/db_tables.dart';
@@ -7,6 +9,19 @@ import 'monthly_report_query.dart';
 
 class HistorialLocalDataSource {
   final DBHelper _dbHelper = DBHelper.instance;
+
+  Future<List<DetalleMovimiento>> fetchCategoryReportMovements(
+    DateTime month,
+    int categoryId, {
+    int offset = 0,
+    bool oldestFirst = false,
+  }) async => CategoryReportQuery.load(
+    await _dbHelper.database,
+    month,
+    categoryId,
+    offset: offset,
+    oldestFirst: oldestFirst,
+  );
 
   Future<MonthlyReport> fetchMonthlyReport(DateTime month) async =>
       MonthlyReportQuery.load(await _dbHelper.database, month);

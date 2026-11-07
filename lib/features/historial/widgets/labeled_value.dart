@@ -4,12 +4,7 @@ class LabeledValue extends StatelessWidget {
   final String label;
   final String value;
 
-  const LabeledValue({
-    super.key,
-    required this.label,
-    required this.value,
-  });
-
+  const LabeledValue({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -21,21 +16,23 @@ class LabeledValue extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       spacing: 8,
       children: [
-        Text(
-          label,
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.primary,
+        Expanded(
+          child: Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
           ),
         ),
         const SizedBox(width: 6),
-        Text(
-          value,
-          textAlign: TextAlign.right,
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurfaceVariant,
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
-        )
+        ),
       ],
     );
   }
