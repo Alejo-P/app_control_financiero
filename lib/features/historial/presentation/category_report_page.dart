@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../../app/app_state.dart';
-import '../../../core/utils/date_utils.dart';
-import '../../movimientos/models/detalle_movimiento.dart';
-import '../../movimientos/widgets/transaction_detail_card.dart';
-import '../models/monthly_report.dart';
-import '../widgets/report_budget_style.dart';
-import '../widgets/report_charts.dart';
+import 'package:control_financiero/app/app_state.dart';
+import 'package:control_financiero/core/utils/date_utils.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
+import 'package:control_financiero/features/movimientos/widgets/transaction_detail_card.dart';
+import 'package:control_financiero/features/historial/models/monthly_report.dart';
+import 'package:control_financiero/features/historial/widgets/report_budget_style.dart';
+import 'package:control_financiero/features/historial/widgets/report_charts.dart';
 
 class CategoryReportPage extends StatefulWidget {
   final DateTime month;

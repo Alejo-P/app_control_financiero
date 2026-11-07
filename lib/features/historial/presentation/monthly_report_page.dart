@@ -1,7 +1,6 @@
-import 'category_report_page.dart';
-import '../widgets/report_budget_style.dart';
 // ignore_for_file: deprecated_member_use
-
+import 'package:control_financiero/features/historial/presentation/category_report_page.dart';
+import 'package:control_financiero/features/historial/widgets/report_budget_style.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
@@ -10,9 +9,9 @@ import 'package:control_financiero/features/historial/widgets/labeled_value.dart
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/monthly_report.dart';
-import '../models/monthly_report_page_args.dart';
-import '../widgets/report_charts.dart';
+import 'package:control_financiero/features/historial/models/monthly_report.dart';
+import 'package:control_financiero/features/historial/models/monthly_report_page_args.dart';
+import 'package:control_financiero/features/historial/widgets/report_charts.dart';
 
 class MonthlyReportPage extends StatefulWidget {
   const MonthlyReportPage({super.key});
@@ -447,7 +446,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                 duration: const Duration(milliseconds: 200),
                                 child: category.id == _selectedCategory
                                     ? Align(
-                                        alignment: Alignment.centerRight,
+                                        alignment: Alignment.center,
                                         child: TextButton.icon(
                                           icon: const Icon(Icons.arrow_forward),
                                           label: const Text('Ver más detalles'),
