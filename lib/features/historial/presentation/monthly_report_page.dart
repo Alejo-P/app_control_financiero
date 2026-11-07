@@ -1,14 +1,12 @@
 // ignore_for_file: deprecated_member_use
 import 'package:control_financiero/app/app_routes.dart';
 import 'package:control_financiero/features/historial/models/category_report_page_args.dart';
-import 'package:control_financiero/features/historial/presentation/category_report_page.dart';
 import 'package:control_financiero/features/historial/widgets/report_budget_style.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/historial/models/month_observation.dart';
 import 'package:control_financiero/features/historial/widgets/labeled_value.dart';
-import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
