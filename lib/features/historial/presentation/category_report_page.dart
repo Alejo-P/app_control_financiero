@@ -1,3 +1,4 @@
+import 'package:control_financiero/features/historial/models/category_report_page_args.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -5,23 +6,11 @@ import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/widgets/transaction_detail_card.dart';
-import 'package:control_financiero/features/historial/models/monthly_report.dart';
 import 'package:control_financiero/features/historial/widgets/report_budget_style.dart';
 import 'package:control_financiero/features/historial/widgets/report_charts.dart';
 
 class CategoryReportPage extends StatefulWidget {
-  final DateTime month;
-  final ReportCategory category;
-  final double totalSpent;
-  final Color color;
-
-  const CategoryReportPage({
-    super.key,
-    required this.month,
-    required this.category,
-    required this.totalSpent,
-    required this.color,
-  });
+  const CategoryReportPage({super.key});
 
   @override
   State<CategoryReportPage> createState() => _CategoryReportPageState();
@@ -31,17 +20,23 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
   final List<DetalleMovimiento> _movements = [];
   bool _oldestFirst = false;
   bool _loading = true;
+  bool _loaded = false;
   bool _exhausted = false;
   String? _error;
   int _loadId = 0;
+  late CategoryReportPageArgs _args;
 
   @override
-  void initState() {
-    super.initState();
-    _load(reset: true);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loaded) return;
+    _args =
+        ModalRoute.of(context)!.settings.arguments as CategoryReportPageArgs;
+    _load(_args);
+    _loaded = true;
   }
 
-  Future<void> _load({bool reset = false}) async {
+  Future<void> _load(CategoryReportPageArgs args, {bool reset = false}) async {
     final id = ++_loadId;
     setState(() {
       _loading = true;
@@ -53,8 +48,8 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
     });
     try {
       final rows = await context.read<AppState>().fetchCategoryReportMovements(
-        widget.month,
-        widget.category.id,
+        args.month,
+        args.category.id,
         offset: _movements.length,
         oldestFirst: _oldestFirst,
       );
@@ -76,36 +71,42 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
   Widget _box(Widget child) => Card(
     margin: const EdgeInsets.only(bottom: 16),
     elevation: 0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     child: Padding(padding: const EdgeInsets.all(20), child: child),
   );
 
-  Widget _metric(String label, String value, {Color? color}) => Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: (color ?? Theme.of(context).colorScheme.primary).withValues(
-        alpha: .06,
+  Widget _metric(String label, String value, {Color? color}) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: (color ?? colorScheme.primary).withValues(
+          alpha: .06,
+        ),
+        borderRadius: BorderRadius.circular(8),
       ),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Column(
-      children: [
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: color,
+            ),
           ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
-    ),
-  );
+          const SizedBox(height: 6),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _metrics(List<Widget> children) => LayoutBuilder(
     builder: (context, constraints) {
@@ -130,7 +131,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
 
   String get _periodState {
     final now = currentDateTime;
-    final month = DateTime(widget.month.year, widget.month.month);
+    final month = DateTime(_args.month.year, _args.month.month);
     final current = DateTime(now.year, now.month);
     if (month.isBefore(current)) return 'Período finalizado';
     if (month.isAfter(current)) return 'Período futuro';
@@ -142,11 +143,13 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    final c = widget.category;
-    final text = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+    final c = _args.category;
     final budgetColor = reportBudgetColor(context, c.status);
-    final monthName = '${getMonthName(widget.month)} ${widget.month.year}';
-    final lastDay = DateTime(widget.month.year, widget.month.month + 1, 0).day;
+    final monthName = '${getMonthName(_args.month)} ${_args.month.year}';
+    final lastDay = DateTime(_args.month.year, _args.month.month + 1, 0).day;
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle de categoría')),
       body: SafeArea(
@@ -163,18 +166,18 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: widget.color.withValues(alpha: .1),
-                        borderRadius: BorderRadius.circular(14),
+                        color: _args.color.withValues(alpha: .1),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(c.icon, color: widget.color, size: 30),
+                      child: Icon(c.icon, color: _args.color, size: 30),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(c.name, style: text.titleLarge),
-                          Text(monthName, style: text.bodySmall),
+                          Text(c.name, style: textTheme.titleLarge),
+                          Text(monthName, style: textTheme.bodySmall),
                         ],
                       ),
                     ),
@@ -187,25 +190,25 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                     Text(
                       'Gasto total en ${c.name}',
                       textAlign: TextAlign.center,
-                      style: text.labelLarge,
+                      style: textTheme.labelLarge,
                     ),
                     const SizedBox(height: 8),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
                         reportMoney(c.spent),
-                        style: text.headlineLarge?.copyWith(
+                        style: textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 36,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: colorScheme.primary,
                         ),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Acumulado del 1 al $lastDay de ${getMonthName(widget.month)}',
+                      'Acumulado del 1 al $lastDay de ${getMonthName(_args.month)}',
                       textAlign: TextAlign.center,
-                      style: text.bodySmall,
+                      style: textTheme.bodySmall,
                     ),
                     const SizedBox(height: 24),
                     _metrics([
@@ -219,8 +222,8 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                       _metric(
                         'Del gasto total',
                         reportPercent(
-                          widget.totalSpent > 0
-                              ? c.spent / widget.totalSpent * 100
+                          _args.totalSpent > 0
+                              ? c.spent / _args.totalSpent * 100
                               : 0,
                         ),
                       ),
@@ -232,11 +235,11 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Estado del presupuesto', style: text.titleMedium),
+                    Text('Estado del presupuesto', style: textTheme.titleMedium),
                     const SizedBox(height: 8),
                     Text(
                       '${reportBudgetMessage(c)}${c.ratio == null ? '' : ' (${reportPercent(c.ratio! * 100)})'}',
-                      style: text.labelLarge?.copyWith(color: budgetColor),
+                      style: textTheme.labelLarge?.copyWith(color: budgetColor),
                     ),
                     if (c.ratio != null) ...[
                       const SizedBox(height: 16),
@@ -271,7 +274,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                     const SizedBox(height: 16),
                     Text(
                       '${c.budget == null ? monthName : 'Límite mensual para $monthName'} · $_periodState',
-                      style: text.bodySmall,
+                      style: textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -283,7 +286,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                 children: [
                   Text(
                     'Movimientos del período (${c.count})',
-                    style: text.titleMedium,
+                    style: textTheme.titleMedium,
                   ),
                   SizedBox(
                     width: MediaQuery.textScalerOf(context).scale(14) > 20
@@ -305,7 +308,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                       onChanged: (value) {
                         if (value == null || value == _oldestFirst) return;
                         _oldestFirst = value;
-                        _load(reset: true);
+                        _load(_args, reset: true);
                       },
                     ),
                   ),
@@ -315,6 +318,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
               if (_movements.isNotEmpty)
                 _box(
                   Column(
+                    spacing: 8,
                     children: [
                       for (final m in _movements)
                         TransactionDetailCard(
@@ -326,7 +330,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                           type: m.movementType.name,
                           spent: m.amount,
                           icon: m.categoryIcon,
-                          iconColor: m.categoryColor ?? widget.color,
+                          iconColor: m.categoryColor ?? _args.color,
                           time: m.time ?? const TimeOfDay(hour: 0, minute: 0),
                         ),
                     ],
@@ -341,7 +345,10 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                 ),
               if (_error != null) ...[
                 Text(_error!, textAlign: TextAlign.center),
-                TextButton(onPressed: _load, child: const Text('Reintentar')),
+                TextButton(
+                  onPressed: () => _load(_args, reset: true),
+                  child: const Text('Reintentar'),
+                ),
               ],
               if (!_loading && _error == null && _movements.isEmpty)
                 _box(
@@ -360,7 +367,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                   !_exhausted &&
                   _movements.length < c.count)
                 TextButton.icon(
-                  onPressed: _load,
+                  onPressed: () => _load(_args, reset: true),
                   icon: const Icon(Icons.expand_more),
                   label: const Text('Cargar más'),
                 ),

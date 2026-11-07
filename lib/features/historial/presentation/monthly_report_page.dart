@@ -1,4 +1,6 @@
 // ignore_for_file: deprecated_member_use
+import 'package:control_financiero/app/app_routes.dart';
+import 'package:control_financiero/features/historial/models/category_report_page_args.dart';
 import 'package:control_financiero/features/historial/presentation/category_report_page.dart';
 import 'package:control_financiero/features/historial/widgets/report_budget_style.dart';
 import 'package:control_financiero/app/app_state.dart';
@@ -6,6 +8,7 @@ import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/historial/models/month_observation.dart';
 import 'package:control_financiero/features/historial/widgets/labeled_value.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -154,7 +157,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
       margin: const EdgeInsets.only(top: 14),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: colorScheme.outline.withValues(alpha: .18)),
       ),
       child: Padding(
@@ -242,7 +245,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
       margin: EdgeInsets.zero,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: scheme.outline.withValues(alpha: .18)),
       ),
       child: Padding(
@@ -364,10 +367,10 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                       color: category.id == _selectedCategory
                           ? colors[category.id]!.withValues(alpha: .14)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                       child: InkWell(
                         key: ValueKey('report-category-${category.id}'),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         onTap: () => _selectCategory(category.id),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -446,25 +449,20 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                 duration: const Duration(milliseconds: 200),
                                 child: category.id == _selectedCategory
                                     ? Align(
-                                        alignment: Alignment.center,
-                                        child: TextButton.icon(
-                                          icon: const Icon(Icons.arrow_forward),
+                                        alignment: Alignment.centerRight,
+                                        child:  TextButton.icon(
+                                          icon: const Icon(Icons.search_rounded),
                                           label: const Text('Ver más detalles'),
-                                          onPressed: () =>
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute<void>(
-                                                  builder: (_) =>
-                                                      CategoryReportPage(
-                                                        month: report.month,
-                                                        category: category,
-                                                        totalSpent:
-                                                            report.spent,
-                                                        color:
-                                                            colors[category
-                                                                .id]!,
-                                                      ),
-                                                ),
-                                              ),
+                                          onPressed: () => Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.reporteCategoriaRoute,
+                                            arguments: CategoryReportPageArgs(
+                                              month: report.month,
+                                              category: category,
+                                              totalSpent: report.spent,
+                                              color: colors[category.id]!,
+                                            ),
+                                          ),
                                         ),
                                       )
                                     : const SizedBox(width: double.infinity),
