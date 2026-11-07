@@ -394,6 +394,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
+                                    flex: 3,
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -415,14 +416,15 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                     ),
                                   ),
                                   const SizedBox(width: 6),
-                                  Flexible(
-                                    flex: 0,
+                                  Expanded(
+                                    flex: 2,
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.end,
                                       children: [
                                         Text(
                                           reportMoney(category.spent),
+                                          textAlign: TextAlign.end,
                                           style: textTheme.bodyMedium?.copyWith(
                                             fontWeight: FontWeight.w600,
                                             color: colorScheme.onSurfaceVariant,
@@ -436,6 +438,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                                       100
                                                 : 0,
                                           ),
+                                          textAlign: TextAlign.end,
                                           style: textTheme.bodySmall,
                                         ),
                                       ],

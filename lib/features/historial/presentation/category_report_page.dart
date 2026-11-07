@@ -346,7 +346,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
               if (_error != null) ...[
                 Text(_error!, textAlign: TextAlign.center),
                 TextButton(
-                  onPressed: () => _load(_args, reset: true),
+                  onPressed: () => _load(_args),
                   child: const Text('Reintentar'),
                 ),
               ],
@@ -367,7 +367,7 @@ class _CategoryReportPageState extends State<CategoryReportPage> {
                   !_exhausted &&
                   _movements.length < c.count)
                 TextButton.icon(
-                  onPressed: () => _load(_args, reset: true),
+                  onPressed: () => _load(_args),
                   icon: const Icon(Icons.expand_more),
                   label: const Text('Cargar más'),
                 ),

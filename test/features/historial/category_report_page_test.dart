@@ -1,14 +1,18 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
+
+import 'package:control_financiero/app/app_routes.dart';
+import 'package:control_financiero/core/constants/movimiento_constants.dart';
+import 'package:control_financiero/features/historial/models/category_report_page_args.dart';
+import 'package:control_financiero/features/historial/presentation/category_report_page.dart';
+import 'package:control_financiero/features/historial/widgets/report_charts.dart';
+import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:control_financiero/features/historial/widgets/report_charts.dart';
-import 'dart:async';
-import 'package:control_financiero/features/historial/presentation/category_report_page.dart';
-import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
-import 'package:control_financiero/core/constants/movimiento_constants.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import 'monthly_report_page_test.dart' as base;
 import 'monthly_report_test.dart' show category;
 
@@ -50,17 +54,25 @@ class DetailState extends base.ReportState {
 Widget detail(DetailState state, {double scale = 1, bool dark = false}) =>
     base.app(
       state,
-      CategoryReportPage(
-        month: DateTime(2026, 10),
-        category: category(
-          1,
-          name: 'Alimentación',
-          spent: 210,
-          count: 14,
-          budget: 250,
+      Navigator(
+        onGenerateRoute: (_) => MaterialPageRoute<void>(
+          settings: RouteSettings(
+            name: AppRoutes.reporteCategoriaRoute,
+            arguments: CategoryReportPageArgs(
+              month: DateTime(2026, 10),
+              category: category(
+                1,
+                name: 'Alimentación',
+                spent: 210,
+                count: 14,
+                budget: 250,
+              ),
+              totalSpent: 680,
+              color: Colors.orange,
+            ),
+          ),
+          builder: (_) => const CategoryReportPage(),
         ),
-        totalSpent: 680,
-        color: Colors.orange,
       ),
       scale: scale,
       dark: dark,
@@ -172,7 +184,14 @@ void main() {
     expect(state.calls.single.month, DateTime(2026, 10));
     expect(state.calls.single.category, 1);
     await tester.ensureVisible(find.text('Cargar más'));
+    state.failMovements = true;
     await tester.tap(find.text('Cargar más'));
+    await tester.pumpAndSettle();
+    expect(state.calls.last.offset, 10);
+    expect(find.text('Mostrando 10 de 14 movimientos'), findsOneWidget);
+    state.failMovements = false;
+    await tester.ensureVisible(find.text('Reintentar'));
+    await tester.tap(find.text('Reintentar'));
     await tester.pumpAndSettle();
     expect(state.calls.last.offset, 10);
     expect(find.text('Mostrando 14 de 14 movimientos'), findsOneWidget);
