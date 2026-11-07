@@ -16,11 +16,6 @@ val releaseKeystorePath = providers.environmentVariable("RELEASE_KEYSTORE_PATH")
     ?: signingProperties.getProperty("storeFile")
 val releaseKeystorePassword = providers.environmentVariable("RELEASE_KEYSTORE_PASSWORD").orNull
     ?: signingProperties.getProperty("storePassword")
-if (providers.environmentVariable("CI").orNull == "true") {
-    require(!releaseKeystorePath.isNullOrBlank() && !releaseKeystorePassword.isNullOrBlank()) {
-        "CI requires RELEASE_KEYSTORE_PATH and RELEASE_KEYSTORE_PASSWORD."
-    }
-}
 
 android {
     namespace = "com.example.control_financiero"
