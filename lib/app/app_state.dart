@@ -601,6 +601,18 @@ class AppState extends ChangeNotifier {
   }
 
   /// Lectura independiente: consultar un informe no cambia los períodos de las pestañas.
+  Future<List<DetalleMovimiento>> fetchCategoryReportMovements(
+    DateTime month,
+    int categoryId, {
+    int offset = 0,
+    bool oldestFirst = false,
+  }) => _historialRepository.fetchCategoryReportMovements(
+    month,
+    categoryId,
+    offset: offset,
+    oldestFirst: oldestFirst,
+  );
+
   Future<MonthlyReport> fetchMonthlyReport(DateTime month) =>
       _historialRepository.fetchMonthlyReport(month);
 
