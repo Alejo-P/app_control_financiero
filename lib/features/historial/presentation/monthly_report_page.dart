@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use
 import 'package:control_financiero/app/app_routes.dart';
-import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/historial/models/category_report_page_args.dart';
 import 'package:control_financiero/features/historial/models/expense_analysis_page_args.dart';
 import 'package:control_financiero/features/historial/widgets/report_budget_style.dart';
@@ -11,8 +10,6 @@ import 'package:control_financiero/features/historial/models/month_observation.d
 import 'package:control_financiero/features/historial/widgets/labeled_value.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
-import 'package:control_financiero/features/shared/widgets/icon_container.dart';
-import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/features/historial/models/monthly_report.dart';
@@ -664,24 +661,28 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                         ],
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 8,
                           children: [
-                            Text(
-                              reportBudgetMessage(category),
-                              style: TextStyle(
-                                color: color,
-                                fontWeight: FontWeight.w600,
+                            Flexible(
+                              child: Text(
+                                reportBudgetMessage(category),
+                                style: TextStyle(
+                                  color: color,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                             if (category.remaining != null &&
                                 category.remaining! > 0)
-                              Text(
-                                'Restan ${reportMoney(category.remaining!)}',
-                                textAlign: TextAlign.end,
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontSize: 14
+                              Flexible(
+                                child: Text(
+                                  'Restan ${reportMoney(category.remaining!)}',
+                                  textAlign: TextAlign.end,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.primary,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
                           ],

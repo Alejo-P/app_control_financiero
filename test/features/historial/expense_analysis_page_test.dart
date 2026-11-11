@@ -112,9 +112,9 @@ void main() {
     await tester.tap(find.text('Análisis de gastos'));
     await tester.pumpAndSettle();
 
-    final getResults = find.widgetWithText(FilledButton, 'Obtener resultados');
+    final getResults = find.widgetWithText(ElevatedButton, 'Obtener resultados');
     await show(tester, getResults);
-    expect(tester.widget<FilledButton>(getResults).onPressed, isNull);
+    expect(tester.widget<ElevatedButton>(getResults).onPressed, isNull);
     final selectCategories = find.text('Seleccionar categorías');
     await tester.ensureVisible(selectCategories);
     await tester.tap(selectCategories);
@@ -195,7 +195,7 @@ void main() {
     expect(tester.widget<ChoiceChip>(allHistory).selected, isTrue);
     expect(find.byType(InputChip), findsNothing);
     expect(tester.widget<TextField>(concept).controller!.text, isEmpty);
-    expect(tester.widget<FilledButton>(getResults).onPressed, isNull);
+    expect(tester.widget<ElevatedButton>(getResults).onPressed, isNull);
     expect(state.queries, hasLength(1));
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
