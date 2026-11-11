@@ -10,6 +10,8 @@ import 'package:control_financiero/features/categorias/presentation/categoria_fo
 import 'package:control_financiero/features/historial/data/historial_local_datasource.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/historial/presentation/category_report_page.dart';
+import 'package:control_financiero/features/historial/presentation/expense_analysis_form_page.dart';
+import 'package:control_financiero/features/historial/presentation/expense_analysis_results_page.dart';
 import 'package:control_financiero/features/historial/presentation/monthly_report_page.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
@@ -145,6 +147,10 @@ class _AppState extends State<App> {
                   const MonthlyReportPage(),
               AppRoutes.reporteCategoriaRoute: (context) =>
                   const CategoryReportPage(),
+              AppRoutes.expenseAnalysisFormRoute: (context) =>
+                  const ExpenseAnalysisFormPage(),
+              AppRoutes.expenseAnalysisResultsRoute: (context) =>
+                  const ExpenseAnalysisResultsPage(),
             },
 
             home: appState.loadingInitialData

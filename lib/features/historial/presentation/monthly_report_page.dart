@@ -1,13 +1,18 @@
 // ignore_for_file: deprecated_member_use
 import 'package:control_financiero/app/app_routes.dart';
+import 'package:control_financiero/core/utils/icon_mapper.dart';
 import 'package:control_financiero/features/historial/models/category_report_page_args.dart';
+import 'package:control_financiero/features/historial/models/expense_analysis_page_args.dart';
 import 'package:control_financiero/features/historial/widgets/report_budget_style.dart';
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/historial/models/month_observation.dart';
 import 'package:control_financiero/features/historial/widgets/labeled_value.dart';
+import 'package:control_financiero/features/shared/widgets/custom_button.dart';
 import 'package:control_financiero/features/shared/widgets/custom_progress_bar.dart';
+import 'package:control_financiero/features/shared/widgets/icon_container.dart';
+import 'package:control_financiero/features/shared/widgets/widgets_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:control_financiero/features/historial/models/monthly_report.dart';
@@ -132,6 +137,18 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                 _comparison(report),
                 _budgets(report),
                 _observations(report),
+                const SizedBox(height: 12),
+                CustomButton(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.expenseAnalysisFormRoute,
+                    arguments: const ExpenseAnalysisFormPageArgs(
+                      initialPeriod: ExpenseAnalysisPeriod.allHistory,
+                    ),
+                  ),
+                  icon: Icons.manage_search,
+                  text: 'Análisis de gastos',
+                ),
               ],
             );
           },
@@ -591,7 +608,13 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 8,
                           children: [
+                            /*IconContainer(
+                              icon: category.icon,
+                              color: Color(category.colorValue),
+                              size: 18,
+                            ),*/
                             Expanded(
                               child: Text(
                                 category.name,
@@ -639,9 +662,9 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                             ],
                           ),
                         ],
-                        Wrap(
-                          alignment: WrapAlignment.spaceBetween,
-                          crossAxisAlignment: WrapCrossAlignment.center,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           spacing: 8,
                           children: [
                             Text(
@@ -655,8 +678,10 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                 category.remaining! > 0)
                               Text(
                                 'Restan ${reportMoney(category.remaining!)}',
+                                textAlign: TextAlign.end,
                                 style: textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
+                                  color: colorScheme.primary,
+                                  fontSize: 14
                                 ),
                               ),
                           ],

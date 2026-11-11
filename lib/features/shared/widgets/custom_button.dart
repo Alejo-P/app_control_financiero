@@ -24,11 +24,11 @@ class CustomButton extends StatelessWidget {
       opacity: onTap == null ? 0.6 : 1.0,
       child: ElevatedButton(
         onPressed: onTap,
-        style: theme.elevatedButtonTheme.style?.copyWith(
+        /*style: theme.elevatedButtonTheme.style?.copyWith(
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-        ),
+        ),*/
         child: icon != null && text != null
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
