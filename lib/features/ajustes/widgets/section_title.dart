@@ -9,6 +9,10 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -19,7 +23,11 @@ class SectionTitle extends StatelessWidget {
           const SizedBox(width: 16.0),
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: textTheme.titleMedium?.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.primary,
+            ),
             textAlign: TextAlign.center,
           ),
         ],

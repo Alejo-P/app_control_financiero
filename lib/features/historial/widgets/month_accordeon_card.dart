@@ -45,7 +45,9 @@ class MonthAccordionCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isHighlighted ? Color.fromRGBO(rBorder, gBorder, bBorder, 0.5) : Colors.transparent,
+          color: isHighlighted
+              ? Color.fromRGBO(rBorder, gBorder, bBorder, 0.5)
+              : Colors.transparent,
           width: 1.5,
         ),
       ),
@@ -64,19 +66,27 @@ class MonthAccordionCard extends StatelessWidget {
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
               fontSize: 20,
+              color: colorScheme.primary,
             ),
           ),
 
           subtitle: Text(
             "$formatedFirstDate - $formatedLastDate",
-            style: theme.textTheme.bodySmall,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.primary,
+            ),
           ),
 
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text("Balance", style: theme.textTheme.bodySmall),
+              Text(
+                "Balance",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.primary,
+                ),
+              ),
               Text(
                 balance >= 0
                     ? "+\$${balance.abs().toStringAsFixed(2)}"

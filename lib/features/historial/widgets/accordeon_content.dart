@@ -49,7 +49,10 @@ class AccordeonContent extends StatelessWidget {
         ),
         Text(
           "Presupuesto mensual:",
-          style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.primary,
+          ),
           textAlign: TextAlign.start,
         ),
         const SizedBox(height: 4),
@@ -68,6 +71,7 @@ class AccordeonContent extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           "Utilizado el ${(percentage * 100).toStringAsFixed(0)}% del total de ingresos",
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
         ),
         const SizedBox(height: 4),
 

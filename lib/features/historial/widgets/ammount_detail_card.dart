@@ -18,6 +18,7 @@ class AmmountDetailCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
 
     return Card(
       elevation: 0,
@@ -37,6 +38,7 @@ class AmmountDetailCard extends StatelessWidget {
                   name,
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
                   ),
                 ),
               ],
@@ -45,7 +47,7 @@ class AmmountDetailCard extends StatelessWidget {
               '\$${amount.toStringAsFixed(2)}',
               style: textTheme.bodyLarge?.copyWith(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
               ),
             ),
           ],
