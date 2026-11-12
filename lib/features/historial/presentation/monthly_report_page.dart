@@ -607,11 +607,6 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           spacing: 8,
                           children: [
-                            /*IconContainer(
-                              icon: category.icon,
-                              color: Color(category.colorValue),
-                              size: 18,
-                            ),*/
                             Expanded(
                               child: Text(
                                 category.name,
