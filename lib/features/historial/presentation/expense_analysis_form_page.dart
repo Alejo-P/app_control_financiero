@@ -131,7 +131,7 @@ class _ExpenseAnalysisFormPageState extends State<ExpenseAnalysisFormPage> {
                         final category = categories[index - 1];
                         return CheckboxListTile(
                           title: Text(
-                              category.name,
+                            category.name,
                             style: textTheme.bodyMedium?.copyWith(
                               color: colorScheme.primary,
                             ),
@@ -239,9 +239,14 @@ class _ExpenseAnalysisFormPageState extends State<ExpenseAnalysisFormPage> {
                     for (final period in ExpenseAnalysisPeriod.values)
                       ChoiceChip(
                         label: Text(period.optionLabel(today)),
+                        labelStyle: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                        checkmarkColor: theme.colorScheme.primary,
+                        side: BorderSide(color: theme.colorScheme.primary),
                         selected: _period == period,
                         onSelected: (_) => _selectPeriod(period),
-                        selectedColor: theme.colorScheme.primary,
+                        selectedColor: Colors.transparent,
                       ),
                   ],
                 ),
@@ -275,10 +280,26 @@ class _ExpenseAnalysisFormPageState extends State<ExpenseAnalysisFormPage> {
                         for (final category in selected)
                           InputChip(
                             key: ValueKey(category.id),
-                            avatar: Icon(category.iconData),
-                            label: Text(category.name, maxLines: 1),
+                            avatar: Icon(
+                              category.iconData,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            label: Text(
+                              category.name,
+                              maxLines: 1,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
+                            side: BorderSide(color: theme.colorScheme.primary),
                             deleteButtonTooltipMessage:
                                 'Quitar ${category.name}',
+                            deleteIconColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             onDeleted: () => setState(() {
                               _selectedIds.remove(category.id);
                             }),
@@ -374,7 +395,12 @@ class _FilterCard extends StatelessWidget {
                   spacing: 8,
                   children: [
                     Icon(icon, color: theme.colorScheme.primary),
-                    Text(title, style: theme.textTheme.titleMedium),
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
                   ],
                 ),
                 Text(
