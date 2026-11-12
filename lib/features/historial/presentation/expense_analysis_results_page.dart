@@ -1,9 +1,11 @@
 import 'package:control_financiero/app/app_state.dart';
 import 'package:control_financiero/core/utils/app_logger.dart';
+import 'package:control_financiero/core/utils/color_utils.dart';
 import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/historial/models/expense_analysis_page_args.dart';
 import 'package:control_financiero/features/historial/widgets/report_charts.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
+import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -99,6 +101,7 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
   late List<DetalleMovimiento> _matches;
   late final double _originalTotal;
   late double _includedTotal;
+  final _term = TextEditingController();
 
   @override
   void initState() {
@@ -109,15 +112,19 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
       (total, expense) => total + expense.amount,
     );
     _includedTotal = _originalTotal;
+
+    _term.addListener(_search);
   }
 
   @override
   void dispose() {
     _scroll.dispose();
+    _term.dispose();
     super.dispose();
   }
 
   int get _totalCount => widget.expenses.length;
+
   int get _includedCount => _includeByDefault
       ? _totalCount - _selectionExceptions.length
       : _selectionExceptions.length;
@@ -147,8 +154,8 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
     });
   }
 
-  void _search(String text) {
-    final term = text.trim().toLowerCase();
+  void _search() {
+    final term = _term.text.trim().toLowerCase();
     setState(() {
       _matches = term.isEmpty
           ? widget.expenses
@@ -181,12 +188,19 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
     ];
     final included = _includedCount;
     final excluded = _totalCount - included;
+    final [rBorder, gBorder, bBorder] = getRGBFromColor(Colors.grey.shade600);
 
     return ListView(
       controller: _scroll,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        Text('Consulta personalizada', style: theme.textTheme.titleLarge),
+        Text(
+          'Consulta personalizada',
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 12),
         Card(
           child: Padding(
@@ -194,14 +208,24 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Suma incluida', style: theme.textTheme.titleMedium),
+                Text(
+                  'Suma incluida',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
                 Text(
                   reportMoney(_includedTotal),
-                  style: theme.textTheme.headlineLarge,
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
                 Text(
                   'Total original: ${reportMoney(_originalTotal)} '
                   '($excluded ${excluded == 1 ? 'excluido' : 'excluidos'})',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Wrap(
@@ -228,7 +252,13 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
           ),
         ),
         const SizedBox(height: 16),
-        Text('Filtros aplicados', style: theme.textTheme.titleMedium),
+        Text(
+          'Filtros aplicados',
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -239,9 +269,27 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Chip(label: Text(filterLabels[index], maxLines: 1)),
+                    Chip(
+                      label: Text(
+                        filterLabels[index],
+                        maxLines: 1,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      side: BorderSide(color: theme.colorScheme.primary),
+                    ),
                     if (index + 1 < filterLabels.length)
-                      Chip(label: Text(filterLabels[index + 1], maxLines: 1)),
+                      Chip(
+                        label: Text(
+                          filterLabels[index + 1],
+                          maxLines: 1,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        side: BorderSide(color: theme.colorScheme.primary),
+                      ),
                   ],
                 ),
             ],
@@ -250,17 +298,35 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
         const SizedBox(height: 16),
         Text(
           'Gastos encontrados ($_totalCount)',
-          style: theme.textTheme.titleLarge,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         if (_totalCount == 0)
           const Text('No se encontraron gastos con estos filtros.')
         else ...[
-          TextField(
-            onChanged: _search,
-            decoration: const InputDecoration(
-              labelText: 'Buscar en resultados',
-              prefixIcon: Icon(Icons.search),
+          Card(
+            elevation: 6,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Color.fromRGBO(rBorder, gBorder, bBorder, 0.5),
+                width: 1.5,
+              ),
+            ),
+            color: theme.colorScheme.surface,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextInputCard(
+                textController: _term,
+                placeholder: 'Buscar en resultados',
+                iconData: Icons.search_rounded,
+                iconColor: Colors.blue,
+                maxLines: 1,
+                maxLength: 50,
+              ),
             ),
           ),
           Align(
@@ -272,14 +338,15 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
                 _oldestFirst = oldestFirst;
                 _page = 0;
               }),
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: false, child: Text('Más recientes')),
-                PopupMenuItem(value: true, child: Text('Más antiguos')),
+              itemBuilder: (context) => [
+                PopupMenuItem(value: false, child: Text('Más recientes', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),)),
+                PopupMenuItem(value: true, child: Text('Más antiguos', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),)),
               ],
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   _oldestFirst ? 'Más antiguos ↑' : 'Más recientes ↓',
+                  style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
                 ),
               ),
             ),
@@ -295,8 +362,9 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
                       ? true
                       : null,
                   title: Text(
-                    'Selección de toda la consulta '
+                    'Selección de toda la consulta\n'
                     '($included de $_totalCount)',
+                    style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
                   ),
                   onChanged: (_) => _toggleAll(),
                 ),
@@ -304,16 +372,18 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
                   onPressed: _toggleAll,
                   child: Text(
                     excluded == 0 ? 'Desmarcar todos' : 'Marcar todos',
+                    style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
                   ),
                 ),
               ],
             ),
           ),
           if (_matches.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Text(
                 'Ningún gasto coincide con la búsqueda en resultados.',
+                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
               ),
             )
           else ...[
@@ -331,16 +401,25 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 alignment: WrapAlignment.spaceBetween,
                 children: [
-                  Text('Mostrando ${first + 1}–$end de ${_matches.length}'),
+                  Text(
+                      'Mostrando ${first + 1}–$end de ${_matches.length}',
+                    style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
+                  ),
                   TextButton(
                     onPressed: _page == 0 ? null : () => _goToPage(_page - 1),
-                    child: const Text('Anterior'),
+                    child: Text(
+                        'Anterior',
+                      style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
+                    ),
                   ),
                   TextButton(
                     onPressed: end == _matches.length
                         ? null
                         : () => _goToPage(_page + 1),
-                    child: const Text('Siguiente'),
+                    child: Text(
+                        'Siguiente',
+                      style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
+                    ),
                   ),
                 ],
               ),
@@ -369,8 +448,18 @@ class _SummaryMetric extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: theme.textTheme.bodySmall),
-        Text(value, style: theme.textTheme.titleMedium),
+        Text(
+          title,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        Text(
+          value,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
+        ),
         if (progress != null)
           SizedBox(width: 96, child: LinearProgressIndicator(value: progress)),
       ],
@@ -402,16 +491,27 @@ class _ExpenseRow extends StatelessWidget {
           spacing: 8,
           alignment: WrapAlignment.spaceBetween,
           children: [
-            Text(expense.title),
+            Text(
+                expense.title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
             Text(
               reportMoney(expense.amount),
               style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
                 decoration: included ? null : TextDecoration.lineThrough,
               ),
             ),
           ],
         ),
-        subtitle: Text('${expense.categoryName} · ${formatDate(expense.date)}'),
+        subtitle: Text(
+            '${expense.categoryName} · ${formatDate(expense.date)}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
+        ),
       ),
     );
   }
