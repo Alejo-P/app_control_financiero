@@ -779,6 +779,9 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
   }
 
   Future<void> _openCategoriasModal(BuildContext context) async {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     await showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -821,13 +824,18 @@ class _MovimientoFormPageState extends State<MovimientoFormPage> {
                     ),
                     title: Text(
                       categoria.name,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.primary,
+                      ),
                     ),
                     subtitle: Text(
                       categoria.description.isNotEmpty
                           ? categoria.description
                           : '(Sin descripción)',
-                      style: const TextStyle(color: Colors.grey),
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     onTap: () {
                       Navigator.pop(context, categoria);
