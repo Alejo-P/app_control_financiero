@@ -5,6 +5,7 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/historial/models/expense_analysis_page_args.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
+import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -300,21 +301,13 @@ class _ExpenseAnalysisFormPageState extends State<ExpenseAnalysisFormPage> {
               children: [
                 ValueListenableBuilder<TextEditingValue>(
                   valueListenable: _concept,
-                  builder: (context, value, child) => TextField(
-                    controller: _concept,
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      labelText: 'Concepto',
-                      hintText: 'Ej. Jorge',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: value.text.isEmpty
-                          ? null
-                          : IconButton(
-                              tooltip: 'Limpiar concepto',
-                              onPressed: _concept.clear,
-                              icon: const Icon(Icons.close),
-                            ),
-                    ),
+                  builder: (context, value, child) => TextInputCard(
+                    textController: _concept,
+                    placeholder: 'Concepto',
+                    iconData: Icons.search,
+                    iconColor: Colors.blue,
+                    maxLines: 1,
+                    maxLength: 50,
                   ),
                 ),
                 const Text('Busca gastos por su concepto.'),
@@ -387,7 +380,7 @@ class _FilterCard extends StatelessWidget {
                 Text(
                   required ? 'Obligatorio' : 'Opcional',
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: required ? Colors.redAccent : Colors.greenAccent,
+                    color: required ? Colors.redAccent : Colors.green,
                   ),
                 ),
               ],
