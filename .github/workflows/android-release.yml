@@ -161,6 +161,32 @@ jobs:
           mkdir -p dist
           cp build/app/outputs/flutter-apk/app-prod-release.apk \
             "dist/mi-presupuesto-${TAG}.apk"
+          # Keep generation inline: workflow_dispatch can build older tags that
+          # do not contain an update-manifest script in their checkout.
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import re
+
+          apk = pathlib.Path(f"dist/mi-presupuesto-{os.environ['TAG']}.apk")
+          pubspec = pathlib.Path("pubspec.yaml").read_text(encoding="utf-8")
+          match = re.search(r"^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$", pubspec, re.MULTILINE)
+          if not match:
+              raise SystemExit("Expected version X.Y.Z+BUILD")
+          version, build = match.groups()
+          if os.environ['TAG'] != f"v{version}":
+              raise SystemExit("Tag does not match pubspec version")
+          digest = hashlib.sha256()
+          with apk.open("rb") as source:
+              for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                  digest.update(chunk)
+          manifest = {"version": version, "buildNumber": int(build), "file": apk.name,
+                      "size": apk.stat().st_size, "sha256": digest.hexdigest()}
+          apk.with_name("update.json").write_text(
+              json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+          PY
 
       - name: Crear Release en borrador con el APK
         env:
@@ -168,6 +194,7 @@ jobs:
         run: |
           gh release create "$TAG" \
             "dist/mi-presupuesto-${TAG}.apk" \
+            dist/update.json \
             --verify-tag \
             --draft \
             --title "Mi Presupuesto $TAG" \
