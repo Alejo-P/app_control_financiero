@@ -309,7 +309,6 @@ class _ExpenseResultsState extends State<_ExpenseResults> {
           const Text('No se encontraron gastos con estos filtros.')
         else ...[
           Card(
-            elevation: 6,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
