@@ -197,7 +197,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                             title,
                             style: textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurfaceVariant,
+                              color: colorScheme.primary,
                             ),
                           ),
                           if (subtitle != null)
@@ -417,7 +417,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                           category.name,
                                           style: textTheme.bodyMedium?.copyWith(
                                             fontWeight: FontWeight.w600,
-                                            color: colorScheme.onSurfaceVariant,
+                                            color: colorScheme.primary,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -441,7 +441,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                           textAlign: TextAlign.end,
                                           style: textTheme.bodyMedium?.copyWith(
                                             fontWeight: FontWeight.w600,
-                                            color: colorScheme.onSurfaceVariant,
+                                            color: colorScheme.primary,
                                           ),
                                         ),
                                         Text(
@@ -614,7 +614,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                 overflow: TextOverflow.ellipsis,
                                 style: textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: colorScheme.onSurfaceVariant,
+                                  color: colorScheme.primary,
                                 ),
                               ),
                             ),
@@ -623,7 +623,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                                   ? reportMoney(category.spent)
                                   : '${reportMoney(category.spent)} / ${reportMoney(category.budget!)}',
                               style: textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
+                                color: colorScheme.primary,
                               ),
                             ),
                           ],
@@ -752,7 +752,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                     child: Text(
                       observation.message,
                       style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),

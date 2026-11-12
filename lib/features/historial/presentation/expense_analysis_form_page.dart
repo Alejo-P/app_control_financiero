@@ -5,6 +5,7 @@ import 'package:control_financiero/core/utils/date_utils.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/historial/models/expense_analysis_page_args.dart';
 import 'package:control_financiero/features/shared/widgets/custom_button.dart';
+import 'package:control_financiero/features/shared/widgets/text_input_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -130,7 +131,7 @@ class _ExpenseAnalysisFormPageState extends State<ExpenseAnalysisFormPage> {
                         final category = categories[index - 1];
                         return CheckboxListTile(
                           title: Text(
-                              category.name,
+                            category.name,
                             style: textTheme.bodyMedium?.copyWith(
                               color: colorScheme.primary,
                             ),
@@ -238,9 +239,14 @@ class _ExpenseAnalysisFormPageState extends State<ExpenseAnalysisFormPage> {
                     for (final period in ExpenseAnalysisPeriod.values)
                       ChoiceChip(
                         label: Text(period.optionLabel(today)),
+                        labelStyle: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                        checkmarkColor: theme.colorScheme.primary,
+                        side: BorderSide(color: theme.colorScheme.primary),
                         selected: _period == period,
                         onSelected: (_) => _selectPeriod(period),
-                        selectedColor: theme.colorScheme.primary,
+                        selectedColor: Colors.transparent,
                       ),
                   ],
                 ),
@@ -274,10 +280,26 @@ class _ExpenseAnalysisFormPageState extends State<ExpenseAnalysisFormPage> {
                         for (final category in selected)
                           InputChip(
                             key: ValueKey(category.id),
-                            avatar: Icon(category.iconData),
-                            label: Text(category.name, maxLines: 1),
+                            avatar: Icon(
+                              category.iconData,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            label: Text(
+                              category.name,
+                              maxLines: 1,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
+                            side: BorderSide(color: theme.colorScheme.primary),
                             deleteButtonTooltipMessage:
                                 'Quitar ${category.name}',
+                            deleteIconColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             onDeleted: () => setState(() {
                               _selectedIds.remove(category.id);
                             }),
@@ -300,21 +322,13 @@ class _ExpenseAnalysisFormPageState extends State<ExpenseAnalysisFormPage> {
               children: [
                 ValueListenableBuilder<TextEditingValue>(
                   valueListenable: _concept,
-                  builder: (context, value, child) => TextField(
-                    controller: _concept,
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      labelText: 'Concepto',
-                      hintText: 'Ej. Jorge',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: value.text.isEmpty
-                          ? null
-                          : IconButton(
-                              tooltip: 'Limpiar concepto',
-                              onPressed: _concept.clear,
-                              icon: const Icon(Icons.close),
-                            ),
-                    ),
+                  builder: (context, value, child) => TextInputCard(
+                    textController: _concept,
+                    placeholder: 'Concepto',
+                    iconData: Icons.search,
+                    iconColor: Colors.blue,
+                    maxLines: 1,
+                    maxLength: 50,
                   ),
                 ),
                 const Text('Busca gastos por su concepto.'),
@@ -381,13 +395,18 @@ class _FilterCard extends StatelessWidget {
                   spacing: 8,
                   children: [
                     Icon(icon, color: theme.colorScheme.primary),
-                    Text(title, style: theme.textTheme.titleMedium),
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
                   ],
                 ),
                 Text(
                   required ? 'Obligatorio' : 'Opcional',
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: required ? Colors.redAccent : Colors.greenAccent,
+                    color: required ? Colors.redAccent : Colors.green,
                   ),
                 ),
               ],

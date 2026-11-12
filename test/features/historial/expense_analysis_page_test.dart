@@ -129,7 +129,13 @@ void main() {
     final foodChip = find.widgetWithText(InputChip, 'Alimentación');
     final transportChip = find.widgetWithText(InputChip, 'Transporte');
     final lastChip = find.widgetWithText(InputChip, 'Categoría de prueba 8');
-    expect(tester.widget<InputChip>(foodChip).avatar, isA<Icon>());
+    final primary = Theme.of(tester.element(foodChip)).colorScheme.primary;
+    final categoryChip = tester.widget<InputChip>(foodChip);
+    expect(categoryChip.avatar, isA<Icon>());
+    expect((categoryChip.avatar! as Icon).color, primary);
+    expect((categoryChip.label as Text).style?.color, primary);
+    expect(categoryChip.side, BorderSide(color: primary));
+    expect(categoryChip.deleteIconColor, primary);
     expect(tester.getTopLeft(foodChip).dy, tester.getTopLeft(lastChip).dy);
     final chipRow = find.ancestor(
       of: foodChip,
@@ -169,9 +175,18 @@ void main() {
     await tester.ensureVisible(concept);
     await tester.enterText(concept, 'Compra');
     final lastMonth = find.widgetWithText(ChoiceChip, 'Mes pasado');
+    final allHistory = find.widgetWithText(ChoiceChip, 'Todo el historial');
     await tester.ensureVisible(lastMonth);
+    expect(tester.widget<ChoiceChip>(lastMonth).selected, isFalse);
     await tester.tap(lastMonth);
     await tester.pumpAndSettle();
+    final selectedChip = tester.widget<ChoiceChip>(lastMonth);
+    expect(selectedChip.selected, isTrue);
+    expect(selectedChip.labelStyle?.color, primary);
+    expect(selectedChip.checkmarkColor, primary);
+    expect(selectedChip.side, BorderSide(color: primary));
+    expect(selectedChip.selectedColor, Colors.transparent);
+    expect(tester.widget<ChoiceChip>(allHistory).selected, isFalse);
     expect(state.queries, isEmpty);
     await show(tester, getResults);
     await tester.tap(getResults);
@@ -191,7 +206,6 @@ void main() {
 
     await tester.tap(find.byTooltip('Limpiar filtros'));
     await tester.pumpAndSettle();
-    final allHistory = find.widgetWithText(ChoiceChip, 'Todo el historial');
     expect(tester.widget<ChoiceChip>(allHistory).selected, isTrue);
     expect(find.byType(InputChip), findsNothing);
     expect(tester.widget<TextField>(concept).controller!.text, isEmpty);
