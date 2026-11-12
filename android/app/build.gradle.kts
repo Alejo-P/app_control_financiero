@@ -16,6 +16,8 @@ val releaseKeystorePath = providers.environmentVariable("RELEASE_KEYSTORE_PATH")
     ?: signingProperties.getProperty("storeFile")
 val releaseKeystorePassword = providers.environmentVariable("RELEASE_KEYSTORE_PASSWORD").orNull
     ?: signingProperties.getProperty("storePassword")
+val devKeystorePath = providers.environmentVariable("DEV_KEYSTORE_PATH").orNull
+val devKeystorePassword = providers.environmentVariable("DEV_KEYSTORE_PASSWORD").orNull
 
 android {
     namespace = "com.example.control_financiero"
@@ -63,6 +65,15 @@ android {
     }
 
     signingConfigs {
+        if (devKeystorePath != null) {
+            named("debug") {
+                storeFile = file(devKeystorePath)
+                storeType = "PKCS12"
+                storePassword = requireNotNull(devKeystorePassword)
+                keyAlias = "mi-presupuesto-dev"
+                keyPassword = devKeystorePassword
+            }
+        }
         create("release") {
             storeFile = releaseKeystorePath?.let { file(it) }
             storeType = "PKCS12"
