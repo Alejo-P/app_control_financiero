@@ -52,6 +52,9 @@ class ReportBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final maxAmount = math.max(income, spent);
     Widget bar(String label, double value, Color color) => Expanded(
       child: Column(
@@ -63,7 +66,10 @@ class ReportBarChart extends StatelessWidget {
               children: [
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(reportMoney(value)),
+                  child: Text(
+                      reportMoney(value),
+                    style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -81,13 +87,16 @@ class ReportBarChart extends StatelessWidget {
               ],
             ),
           ),
-          Divider(color: Theme.of(context).dividerColor),
+          Divider(color: Theme.of(context).colorScheme.primary),
           Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Icon(Icons.circle, size: 9, color: color),
               const SizedBox(width: 5),
-              Text(label),
+              Text(
+                  label,
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
+              ),
             ],
           ),
         ],
