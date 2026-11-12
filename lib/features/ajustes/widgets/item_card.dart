@@ -21,6 +21,10 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
@@ -29,7 +33,10 @@ class ItemCard extends StatelessWidget {
           title,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: textTheme.titleMedium?.copyWith(
+            fontSize: 16,
+            color: colorScheme.primary,
+          ),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

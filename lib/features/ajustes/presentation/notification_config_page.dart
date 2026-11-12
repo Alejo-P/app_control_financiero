@@ -113,6 +113,9 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final appState = context.watch<AppState>();
     final budgetNotifications = appState.budgetNotifications;
 
@@ -214,7 +217,13 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
-                              Text('Otro porcentaje'),
+                              Text(
+                                'Otro porcentaje',
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontSize: 16,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
                               NumberInputCard(
                                 textController: _customThresholdController,
                                 placeholder: 'Porcentaje personalizado (1-100)',
@@ -247,7 +256,7 @@ class _NotificationConfigPageState extends State<NotificationConfigPage> {
                                   ),
                                   child: Text(
                                     errorText,
-                                    style: const TextStyle(
+                                    style: textTheme.bodySmall?.copyWith(
                                       color: Colors.red,
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
