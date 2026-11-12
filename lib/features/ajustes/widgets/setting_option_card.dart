@@ -21,6 +21,9 @@ class SettingOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -40,15 +43,19 @@ class SettingOptionCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: colorScheme.primary,
                     ),
                   ),
                   if (description != null)
                     Text(
                       description!,
-                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontSize: 14,
+                      ),
                     ),
                 ],
               ),
