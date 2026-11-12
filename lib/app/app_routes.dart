@@ -10,4 +10,9 @@ class AppRoutes {
 
   static const recordatoriosRoute = '/recordatorios';
   static const recordatorioFormRoute = '/recordatorio-form';
+
+  static const reporteMensualRoute = '/reporte-mensual';
+  static const reporteCategoriaRoute = '/reporte-categoria';
+  static const expenseAnalysisFormRoute = '/analisis-gastos';
+  static const expenseAnalysisResultsRoute = '/analisis-gastos/resultados';
 }

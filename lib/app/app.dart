@@ -9,6 +9,10 @@ import 'package:control_financiero/features/categorias/data/categorias_repositor
 import 'package:control_financiero/features/categorias/presentation/categoria_form_page.dart';
 import 'package:control_financiero/features/historial/data/historial_local_datasource.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
+import 'package:control_financiero/features/historial/presentation/category_report_page.dart';
+import 'package:control_financiero/features/historial/presentation/expense_analysis_form_page.dart';
+import 'package:control_financiero/features/historial/presentation/expense_analysis_results_page.dart';
+import 'package:control_financiero/features/historial/presentation/monthly_report_page.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_local_datasource.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/presentation/movimiento_form_page.dart';
@@ -139,6 +143,14 @@ class _AppState extends State<App> {
                   const RecordatoriosPage(),
               AppRoutes.recordatorioFormRoute: (context) =>
                   const RecordatorioFormPage(),
+              AppRoutes.reporteMensualRoute: (context) =>
+                  const MonthlyReportPage(),
+              AppRoutes.reporteCategoriaRoute: (context) =>
+                  const CategoryReportPage(),
+              AppRoutes.expenseAnalysisFormRoute: (context) =>
+                  const ExpenseAnalysisFormPage(),
+              AppRoutes.expenseAnalysisResultsRoute: (context) =>
+                  const ExpenseAnalysisResultsPage(),
             },
 
             home: appState.loadingInitialData

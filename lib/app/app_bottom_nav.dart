@@ -29,27 +29,27 @@ class AppBottomNav extends StatelessWidget {
         );
       }),
       animationDuration: const Duration(milliseconds: 250),
-      destinations: const [
+      destinations: [
         NavigationDestination(
-          icon: Icon(Icons.compare_arrows_outlined),
+          icon: Icon(Icons.compare_arrows_outlined, color: colorScheme.primary,),
           selectedIcon: Icon(Icons.compare_arrows),
           label: 'Movimientos',
           tooltip: 'Movimientos',
         ),
         NavigationDestination(
-          icon: Icon(Icons.donut_large_outlined),
+          icon: Icon(Icons.donut_large_outlined, color: colorScheme.primary,),
           selectedIcon: Icon(Icons.donut_large),
           label: 'Presupuestos',
           tooltip: 'Presupuesto',
         ),
         NavigationDestination(
-          icon: Icon(Icons.history_outlined),
+          icon: Icon(Icons.history_outlined, color: colorScheme.primary,),
           selectedIcon: Icon(Icons.history),
           label: 'Historial',
           tooltip: 'Historial',
         ),
         NavigationDestination(
-          icon: Icon(Icons.more_horiz_outlined),
+          icon: Icon(Icons.more_horiz_outlined, color: colorScheme.primary,),
           selectedIcon: Icon(Icons.more_horiz),
           label: 'Más acciones',
           tooltip: 'Más acciones',

@@ -11,8 +11,10 @@ import 'package:control_financiero/core/utils/encryption_helper.dart';
 import 'package:control_financiero/features/categorias/data/categorias_repository.dart';
 import 'package:control_financiero/features/categorias/models/categoria.dart';
 import 'package:control_financiero/features/categorias/models/detalle_categoria.dart';
+import 'package:control_financiero/features/historial/models/expense_analysis_page_args.dart';
 import 'package:control_financiero/features/historial/data/historial_repository.dart';
 import 'package:control_financiero/features/historial/models/month_data.dart';
+import 'package:control_financiero/features/historial/models/monthly_report.dart';
 import 'package:control_financiero/features/movimientos/data/movimientos_repository.dart';
 import 'package:control_financiero/features/movimientos/models/detalle_movimiento.dart';
 import 'package:control_financiero/features/movimientos/models/movimiento.dart';
@@ -598,6 +600,26 @@ class AppState extends ChangeNotifier {
       rethrow;
     }
   }
+
+  /// Lectura independiente: consultar un informe no cambia los períodos de las pestañas.
+  Future<List<DetalleMovimiento>> fetchCategoryReportMovements(
+    DateTime month,
+    int categoryId, {
+    int offset = 0,
+    bool oldestFirst = false,
+  }) => _historialRepository.fetchCategoryReportMovements(
+    month,
+    categoryId,
+    offset: offset,
+    oldestFirst: oldestFirst,
+  );
+
+  Future<MonthlyReport> fetchMonthlyReport(DateTime month) =>
+      _historialRepository.fetchMonthlyReport(month);
+
+  Future<List<DetalleMovimiento>> fetchExpenseAnalysis(
+    ExpenseAnalysisResultsPageArgs filters,
+  ) => _historialRepository.fetchExpenseAnalysis(filters);
 
   Future<void> updateHistory({bool notify = true}) async {
     try {

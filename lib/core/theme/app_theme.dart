@@ -36,6 +36,7 @@ class AppTheme {
           onPrimary: Colors.white,
           onSurface: Colors.black54,
           tertiary: Colors.grey[600],
+          onSurfaceVariant: Colors.grey[500],
         ),
     scaffoldBackgroundColor: Color.fromARGB(255, 239, 239, 239),
     appBarTheme: const AppBarTheme(
@@ -56,6 +57,37 @@ class AppTheme {
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors
+              .white; // Color del track cuando el switch está desactivado
+        }),
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors
+              .black; // Color del track cuando el switch está desactivado
+        }),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors.black;
+        }),
+        side: WidgetStateProperty.resolveWith<BorderSide>((states) {
+          return BorderSide(
+            color: Colors.black,
+            width: 1.0,
+          );
+        }),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        )
+      ),
     ),
     dividerTheme: DividerThemeData(
       thickness: 1,
@@ -119,18 +151,6 @@ class AppTheme {
         ); // Color del track cuando el switch está desactivado
       }),
     ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ButtonStyle(
-        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-          return Colors
-              .white; // Color del track cuando el switch está desactivado
-        }),
-        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-          return Colors
-              .black; // Color del track cuando el switch está desactivado
-        }),
-      ),
-    ),
     navigationBarTheme: NavigationBarThemeData(
       height: 70,
       elevation: 4,
@@ -158,6 +178,7 @@ class AppTheme {
           onPrimary: Colors.black,
           onSurface: Colors.white70,
           tertiary: Colors.grey[400],
+          onSurfaceVariant: Colors.grey[500]
         ),
     scaffoldBackgroundColor: Color.fromARGB(255, 34, 34, 34),
     appBarTheme: const AppBarTheme(
@@ -174,6 +195,36 @@ class AppTheme {
     buttonTheme: const ButtonThemeData(
       buttonColor: Colors.blue,
       textTheme: ButtonTextTheme.primary,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors
+              .black; // Color del track cuando el switch está desactivado
+        }),
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          return Colors.white;
+        }),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+            return Colors.white;
+          }),
+          side: WidgetStateProperty.resolveWith<BorderSide>((states) {
+            return BorderSide(
+              color: Colors.white,
+              width: 1.0,
+            );
+          }),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          )
+      ),
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: Colors.white,
@@ -240,17 +291,6 @@ class AppTheme {
           alpha: 0.6,
         ); // Color del track cuando el switch está desactivado
       }),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ButtonStyle(
-        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-          return Colors
-              .black; // Color del track cuando el switch está desactivado
-        }),
-        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-          return Colors.white;
-        }),
-      ),
     ),
     navigationBarTheme: NavigationBarThemeData(
       height: 70,
