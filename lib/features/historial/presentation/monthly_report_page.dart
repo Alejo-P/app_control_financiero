@@ -118,7 +118,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                       _month(report.month).toUpperCase(),
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurfaceVariant,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ],
