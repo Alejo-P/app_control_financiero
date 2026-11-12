@@ -52,15 +52,28 @@ class _TextInputCardState extends State<TextInputCard> {
     currentLength = widget.textController.text.length;
 
     // Escucha cambios en el texto para actualizar el contador
-    widget.textController.addListener(() {
-      setState(() {
-        currentLength = widget.textController.text.length;
-      });
+    widget.textController.addListener(_updateLength);
+  }
+
+  void _updateLength() {
+    setState(() {
+      currentLength = widget.textController.text.length;
     });
   }
 
   @override
+  void didUpdateWidget(covariant TextInputCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.textController != widget.textController) {
+      oldWidget.textController.removeListener(_updateLength);
+      currentLength = widget.textController.text.length;
+      widget.textController.addListener(_updateLength);
+    }
+  }
+
+  @override
   void dispose() {
+    widget.textController.removeListener(_updateLength);
     _focusNode.dispose(); // Limpia el FocusNode
     super.dispose();
   }
