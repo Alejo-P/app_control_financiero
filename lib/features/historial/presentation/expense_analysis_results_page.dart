@@ -495,7 +495,7 @@ class _SummaryMetric extends StatelessWidget {
             width: 96,
             child: CustomProgressBar(
               currentValue: progress ?? 0,
-              color: theme.colorScheme.primary,
+              color: Colors.blueAccent,
               minHeight: 5,
             ),
           ),
