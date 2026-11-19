@@ -33,7 +33,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
   late AppState _appState;
   final ScrollController _controller = ScrollController();
   final _ingresoPresupuestadoController = TextEditingController();
-  bool _isSaveButtonEnabled = false;
+  final _isSaveButtonEnabled = ValueNotifier<bool>(false);
   (DateTime, double?)? _controlsSignature;
 
   @override
@@ -47,6 +47,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
   void dispose() {
     _ingresoPresupuestadoController.removeListener(_checkEnableSaveButton);
     _ingresoPresupuestadoController.dispose();
+    _isSaveButtonEnabled.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -147,9 +148,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
     final value = double.tryParse(amountText.replaceAll(',', '.')) ?? 0.0;
     final totalGastos = _appState.totalGastos ?? 0.0;
 
-    setState(() {
-      _isSaveButtonEnabled = value > 0 && value >= totalGastos;
-    });
+    _isSaveButtonEnabled.value = value > 0 && value >= totalGastos;
   }
 
   @override
@@ -402,6 +401,7 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
         ? ingresoPresupuestado.monto.toStringAsFixed(2)
         : '';
     final fechaPresupuesto = appState.selectedBudgetMonth;
+    _checkEnableSaveButton();
     await showDialog<void>(
       context: context,
       builder: (context) {
@@ -426,9 +426,12 @@ class _PresupuestosPageState extends State<PresupuestosPage> {
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar'),
             ),
-            CustomButton(
-              onTap: _isSaveButtonEnabled ? _guardarIngresoPresupuesto : null,
-              text: 'Guardar',
+            ValueListenableBuilder<bool>(
+              valueListenable: _isSaveButtonEnabled,
+              builder: (context, isEnabled, child) => CustomButton(
+                onTap: isEnabled ? _guardarIngresoPresupuesto : null,
+                text: 'Guardar',
+              ),
             ),
           ],
         );
